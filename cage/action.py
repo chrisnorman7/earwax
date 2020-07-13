@@ -37,9 +37,9 @@ class Action:
     # A function to determine whether or not this action can be used at the
     # current time.
     #
-    # This function should return either True or False, and should take a
-    # single Game argument.
-    can_run = attrib(default=lambda g: True)
+    # This function should return either True or False, and should take no
+    # arguments.
+    can_run = attrib(default=lambda: True)
 
     # The game this action is bound to.
     game = attrib(default=Factory(NoneType))
@@ -58,7 +58,7 @@ class Action:
         None), or it is being called as soon as it is triggered
         (schedule_interval doesn't allow a function to be run and
         scheduled)."""
-        if not self.can_run(self.game):
+        if not self.can_run():
             return
         now = time()
         if self.interval is not None:

@@ -5,8 +5,9 @@ that's great.
 
 You start with the `Game` class."""
 
-from .game import Game
-from .speech import tts
 from .action import Action
+from .game import Game
+from .menu import Menu, MenuItem
+from .speech import tts
 
-__all__ = ['Game', 'tts', 'Action']
+__all__ = ['Game', 'tts', 'Action', 'Menu', 'MenuItem']
