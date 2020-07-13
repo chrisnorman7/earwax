@@ -1,8 +1,9 @@
 """A quick example program."""
 
-from winsound import Beep
+import sys
 
 from pyglet.window import key
+
 from cage import Game
 
 if __name__ == '__main__':
@@ -16,5 +17,6 @@ if __name__ == '__main__':
     @g.action('Beep', symbol=key.B, interval=0.75)
     def do_beep():
         """Speak something."""
-        Beep(5000, 20)
+        sys.stdout.write('\a')
+        sys.stdout.flush()
     g.run()
