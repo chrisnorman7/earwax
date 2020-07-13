@@ -29,24 +29,33 @@ class Game:
     # The current menu.
     menus = attrib(default=Factory(list), init=False)
 
+    def start_action(self, a):
+        """Start an action. If the action has no interval, it will be ran
+        straight away. Otherwise, it will be added to triggered_actions."""
+        if a.interval is None:
+            a.run(None)
+        else:
+            self.triggered_actions.append(a)
+            a.run(None)
+            clock.schedule_interval(a.run, a.interval)
+
+    def stop_action(self, a):
+        """Unschedule an action, and remove it from triggered_actions."""
+        self.triggered_actions.remove(a)
+        clock.unschedule(a.run)
+
     def on_key_press(self, symbol, modifiers):
         """A key has been pressed down."""
         for a in self.actions:
             if a.symbol == symbol and a.modifiers == modifiers:
-                if a.interval is None:
-                    a.run(None)
-                else:
-                    self.triggered_actions.append(a)
-                    a.run(None)
-                    clock.schedule_interval(a.run, a.interval)
+                self.start_action(a)
         return True
 
     def on_key_release(self, symbol, modifiers):
         """A key has been released."""
         for a in self.triggered_actions:
             if a.symbol == symbol:
-                self.triggered_actions.remove(a)
-                clock.unschedule(a.run)
+                self.stop_action(a)
 
     def run(self):
         """Run the game."""

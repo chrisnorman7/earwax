@@ -6,7 +6,7 @@ import sys
 from pyglet.window import key
 
 from cage import Game, tts
-from cage.menu import FileMenu
+from cage.menu import ActionMenu, FileMenu
 
 if __name__ == '__main__':
     g = Game('Example')
@@ -44,6 +44,14 @@ if __name__ == '__main__':
             g, 'Select a file', os.getcwd(), file_selected
         )
         g.push_menu(menu)
+
+    @g.action(
+        'Show actions', symbol=key.SLASH, modifiers=key.MOD_SHIFT,
+        can_run=g.no_menu
+    )
+    def show_actions():
+        """Show all game actions."""
+        g.push_menu(ActionMenu(g))
 
     g.add_menu_actions()
     g.run()

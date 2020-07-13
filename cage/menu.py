@@ -107,3 +107,18 @@ class FileMenu(Menu):
                         )
                     )
                 )
+
+
+class ActionMenu(Menu):
+    """A menu to show a list of actions, and their associated triggers."""
+    def __init__(self, game):
+        super().__init__('Actions')
+        for a in game.actions:
+            self.add_item(
+                str(a), lambda action=a: self.handle_action(game, action)
+            )
+
+    def handle_action(self, game, action):
+        """Handle an action."""
+        game.clear_menus()
+        action.run(None)

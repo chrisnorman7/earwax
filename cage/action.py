@@ -3,6 +3,7 @@
 from time import time
 
 from attr import Factory, attrib, attrs
+from pyglet.window import key
 
 NoneType = type(None)
 
@@ -67,3 +68,18 @@ class Action:
         if self.interval is None or dt >= self.interval:
             self.last_run = now
             self.func()
+
+    def __str__(self):
+        """Return a string representing this action."""
+        s = self.title
+        triggers = []
+        if self.symbol:
+            key_string = key.symbol_string(self.symbol)
+            if self.modifiers:
+                modifiers_string = key.modifiers_string(self.modifiers)
+                modifiers_string = modifiers_string.replace('|', '+').replace('MOD_', '')
+                key_string = f'{modifiers_string} + {key_string}'
+            triggers.append(key_string)
+        if triggers:
+            s += f' [{" | ".join(triggers)}]'
+        return s
