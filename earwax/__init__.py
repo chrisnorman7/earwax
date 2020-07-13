@@ -8,6 +8,10 @@ You start with the `Game` class."""
 from .action import Action
 from .game import Game
 from .menu import ActionMenu, FileMenu, Menu, MenuItem
+from .sound import get_buffer
 from .speech import tts
 
-__all__ = ['Game', 'tts', 'Action', 'Menu', 'MenuItem']
+__all__ = [
+    'Game', 'tts', 'Action', 'Menu', 'MenuItem', 'FileMenu', 'ActionMenu',
+    'get_buffer'
+]

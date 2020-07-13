@@ -4,17 +4,37 @@ import os
 import sys
 
 from pyglet.window import key
-
-from earwax import ActionMenu, FileMenu, Game, tts
+from synthizer import BufferGenerator, Context, DirectSource, SynthizerError
+from earwax import ActionMenu, FileMenu, Game, get_buffer, tts
 
 if __name__ == '__main__':
     g = Game('Example')
     g.can_beep = True
+    g.ctx = None
+    g.source = None
+    g.generator = None
 
     def file_selected(name):
         """A file has been chosen."""
         g.clear_menus()
-        tts.speak(f'You chose {name}.')
+        if g.ctx is None:
+            g.ctx = Context()
+        if g.source is None:
+            g.source = DirectSource(g.ctx)
+        if g.generator is None:
+            g.generator = BufferGenerator(g.ctx)
+            g.generator.looping = True
+        try:
+            g.source.remove_generator(g.generator)
+        except SynthizerError:
+            pass  # No worries.
+        if name is not None:
+            try:
+                buffer = get_buffer(g.ctx, 'file', name)
+                g.generator.buffer = buffer
+                g.source.add_generator(g.generator)
+            except SynthizerError as e:
+                tts.speak(str(e))
 
     @g.action('Quit', symbol=key.ESCAPE, can_run=g.no_menu)
     def do_quit():

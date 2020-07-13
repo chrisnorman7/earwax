@@ -4,6 +4,8 @@ from attr import Factory, attrib, attrs
 from pyglet import app, clock, options
 from pyglet.window import Window, key
 
+from synthizer import initialized
+
 from .action import Action, NoneType
 
 
@@ -63,7 +65,8 @@ class Game:
         self.window = Window(caption=self.title)
         self.window.event(self.on_key_press)
         self.window.event(self.on_key_release)
-        app.run()
+        with initialized():
+            app.run()
 
     def action(self, name, **kwargs):
         """A decorator to add an action to this game."""
