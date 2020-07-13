@@ -1,12 +1,11 @@
-"""A quick example program."""
+"""A quick example game."""
 
 import os
 import sys
 
 from pyglet.window import key
 
-from cage import Game, tts
-from cage.menu import ActionMenu, FileMenu
+from earwax import ActionMenu, FileMenu, Game, tts
 
 if __name__ == '__main__':
     g = Game('Example')
