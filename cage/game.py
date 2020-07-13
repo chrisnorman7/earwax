@@ -31,7 +31,7 @@ class Game:
         for a in self.actions:
             if a.symbol == symbol and a.modifiers == modifiers:
                 if a.interval is None:
-                    a.func()
+                    a.run(None)
                 else:
                     self.triggered_actions.append(a)
                     a.run(None)

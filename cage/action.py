@@ -34,18 +34,36 @@ class Action:
     # runs.
     interval = attrib(default=Factory(NoneType))
 
-    # The time this action was last run.
-    last_run = attrib(default=Factory(float))
+    # A function to determine whether or not this action can be used at the
+    # current time.
+    #
+    # This function should return either True or False, and should take a
+    # single Game argument.
+    can_run = attrib(default=lambda g: True)
 
     # The game this action is bound to.
     game = attrib(default=Factory(NoneType))
 
+    # The time this action was last run.
+    last_run = attrib(default=Factory(float), init=False)
+
     def run(self, dt):
-        """Run this action. Will be called by
-        pyglet.clock.schedule_interval."""
+        """Run this action. May be called by
+        pyglet.clock.schedule_interval.
+
+        If you need to know how this action has been called, you can check dt.
+        It will be None if it wasn't called by schedule_interval.
+
+        This will happen either if this is a one-time action (interval is
+        None), or it is being called as soon as it is triggered
+        (schedule_interval doesn't allow a function to be run and
+        scheduled)."""
+        if not self.can_run(self.game):
+            return
         now = time()
-        if dt is None:
-            dt = now - self.last_run
-        if dt >= self.interval:
+        if self.interval is not None:
+            if dt is None:
+                dt = now - self.last_run
+        if self.interval is None or dt >= self.interval:
             self.last_run = now
             self.func()
