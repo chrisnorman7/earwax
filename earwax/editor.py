@@ -33,6 +33,8 @@ class Editor:
         self.motion(key.MOTION_RIGHT)(self.motion_right)
         self.motion(key.MOTION_BEGINNING_OF_LINE)(self.beginning_of_line)
         self.motion(key.MOTION_END_OF_LINE)(self.end_of_line)
+        self.motion(key.MOTION_UP)(self.motion_up)
+        self.motion(key.MOTION_DOWN)(self.motion_down)
 
     def submit(self):
         """Submit the text in this control to self.func."""
@@ -135,3 +137,17 @@ class Editor:
     def end_of_line(self):
         """Move to the end of the line."""
         self.set_cursor_position(None)
+
+    def motion_up(self):
+        """Since we're not bothering with multiline text fields at this stage,
+        just move the cursor to the start of the line, and read the whole
+        thing."""
+        self.cursor_position = 0
+        self.echo(self.text)
+
+    def motion_down(self):
+        """Since we're not bothering with multiline text fields at this stage,
+        just move the cursor to the end of the line, and read the whole
+        thing."""
+        self.cursor_position = None
+        self.echo(self.text)

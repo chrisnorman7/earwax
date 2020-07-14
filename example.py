@@ -42,7 +42,7 @@ if __name__ == '__main__':
         """Set the window title to the given text."""
         g.editor = None
         g.window.set_caption(text)
-        print(repr(text))
+        tts.speak('Title set.')
 
     @g.action('Quit', symbol=key.ESCAPE)
     def do_quit():
