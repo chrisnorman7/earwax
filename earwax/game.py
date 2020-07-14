@@ -73,12 +73,20 @@ class Game:
                 self.stop_action(a)
         if symbol in self.on_key_release_generators:
             generator = self.on_key_release_generators.pop(symbol)
-            next(generator)
+            try:
+                next(generator)
+            except StopIteration:
+                pass
 
     def on_text(self, text):
         """Enter text into the current editor."""
         if self.editor is not None:
-            self.editor.on_text(text)
+            return self.editor.on_text(text)
+
+    def on_text_motion(self, motion):
+        """Pass the motion onto any attached editor."""
+        if self.editor is not None:
+            return self.editor.on_text_motion(motion)
 
     def run(self):
         """Run the game."""
