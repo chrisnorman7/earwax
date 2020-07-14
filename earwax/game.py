@@ -95,6 +95,7 @@ class Game:
         self.window.event(self.on_key_press)
         self.window.event(self.on_key_release)
         self.window.event(self.on_text)
+        self.window.event(self.on_text_motion)
         with initialized():
             app.run()
 
@@ -165,7 +166,9 @@ class Game:
             self.pop_menu()
         elif self.editor is not None and self.editor.dismissible:
             self.editor = None
-            tts.speak('Cancel.')
+        else:
+            return
+        tts.speak('Cancel.')
 
     def add_menu_actions(self):
         """Add actions relating to menus."""
@@ -178,7 +181,7 @@ class Game:
                 ),
                 Action(
                     self, 'Exit from a menu or editor', self.dismiss,
-                    symbol=key.ESCAPE
+                    symbol=key.ESCAPE, can_run=lambda: True
                 ),
                 Action(
                     self, 'Move down in a menu', self.menu_down,
