@@ -148,14 +148,6 @@ class Game:
         if len(self.menus):
             return self.menus[-1]
 
-    def menu_up(self):
-        """Move up in a menu."""
-        self.menu.move_up()
-
-    def menu_down(self):
-        """Move down in a menu."""
-        self.menu.move_down()
-
     def menu_activate(self):
         """Activate a menu item."""
         self.menu.activate()
@@ -170,7 +162,19 @@ class Game:
             return
         tts.speak('Cancel.')
 
-    def add_menu_actions(self):
+    def menu_up(self):
+        """Move up in a menu."""
+        self.menu.move_up()
+
+    def menu_down(self):
+        """Move down in a menu."""
+        self.menu.move_down()
+
+    def submit_text(self):
+        """Submit the text in an editor."""
+        self.editor.submit()
+
+    def add_default_actions(self):
         """Add actions relating to menus."""
         self.actions.extend(
             [
@@ -184,12 +188,16 @@ class Game:
                     symbol=key.ESCAPE, can_run=lambda: True
                 ),
                 Action(
+                    self, 'Move up in a menu', self.menu_up, symbol=key.UP,
+                    can_run=lambda: not self.no_menu()
+                ),
+                Action(
                     self, 'Move down in a menu', self.menu_down,
                     symbol=key.DOWN, can_run=lambda: not self.no_menu()
                 ),
                 Action(
-                    self, 'Move up in a menu', self.menu_up, symbol=key.UP,
-                    can_run=lambda: not self.no_menu()
+                    self, 'Submit text', self.submit_text, symbol=key.RETURN,
+                    can_run=lambda: not self.no_editor()
                 )
             ]
         )

@@ -38,6 +38,12 @@ if __name__ == '__main__':
             except SynthizerError as e:
                 tts.speak(str(e))
 
+    def _set_title(text):
+        """Set the window title to the given text."""
+        g.editor = None
+        g.window.set_caption(text)
+        print(repr(text))
+
     @g.action('Quit', symbol=key.ESCAPE)
     def do_quit():
         """Quit the game."""
@@ -74,11 +80,11 @@ if __name__ == '__main__':
         g.push_menu(ActionMenu(g))
 
     @g.action('Set window title', symbol=key.T)
-    def set_title():
+    def set_title(text=None):
         """Change the window title."""
         yield
-        g.editor = Editor(text=g.window.caption)
+        g.editor = Editor(_set_title, text=g.window.caption)
         tts.speak(f'Window title: {g.editor.text}')
 
-    g.add_menu_actions()
+    g.add_default_actions()
     g.run()
