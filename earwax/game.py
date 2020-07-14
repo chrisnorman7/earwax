@@ -1,9 +1,12 @@
 """Provides the Game class."""
 
+from inspect import isgenerator
+
 from attr import Factory, attrib, attrs
 from pyglet import app, clock, options
 from pyglet.window import Window, key
 
+from earwax.speech import tts
 from synthizer import initialized
 
 from .action import Action, NoneType
@@ -25,17 +28,24 @@ class Game:
     # The currently triggered actions.
     triggered_actions = attrib(default=Factory(list))
 
+    # The actions which returned generators, and need to do something on key
+    # release.
+    on_key_release_generators = attrib(default=Factory(dict))
+
     # The window to display the game.
     window = attrib(default=Factory(NoneType), init=False)
 
-    # The current menu.
+    # The current menus (if any).
     menus = attrib(default=Factory(list), init=False)
+
+    # The current editor.
+    editor = attrib(default=Factory(NoneType))
 
     def start_action(self, a):
         """Start an action. If the action has no interval, it will be ran
         straight away. Otherwise, it will be added to triggered_actions."""
         if a.interval is None:
-            a.run(None)
+            return a.run(None)
         else:
             self.triggered_actions.append(a)
             a.run(None)
@@ -50,7 +60,10 @@ class Game:
         """A key has been pressed down."""
         for a in self.actions:
             if a.symbol == symbol and a.modifiers == modifiers:
-                self.start_action(a)
+                res = self.start_action(a)
+                if isgenerator(res):
+                    next(res)
+                    self.on_key_release_generators[symbol] = res
         return True
 
     def on_key_release(self, symbol, modifiers):
@@ -58,6 +71,14 @@ class Game:
         for a in self.triggered_actions:
             if a.symbol == symbol:
                 self.stop_action(a)
+        if symbol in self.on_key_release_generators:
+            generator = self.on_key_release_generators.pop(symbol)
+            next(generator)
+
+    def on_text(self, text):
+        """Enter text into the current editor."""
+        if self.editor is not None:
+            self.editor.on_text(text)
 
     def run(self):
         """Run the game."""
@@ -65,6 +86,7 @@ class Game:
         self.window = Window(caption=self.title)
         self.window.event(self.on_key_press)
         self.window.event(self.on_key_release)
+        self.window.event(self.on_text)
         with initialized():
             app.run()
 
@@ -83,6 +105,14 @@ class Game:
     def no_menu(self):
         """Returns True if there are no menus."""
         return len(self.menus) == 0
+
+    def no_editor(self):
+        """Returns true if there is no editor."""
+        return self.editor is None
+
+    def normal(self):
+        """Returns True if both no_menu and no_editor are True."""
+        return all([self.no_menu(), self.no_editor()])
 
     def push_menu(self, menu):
         """Push a menu onto self.menus."""
@@ -122,9 +152,13 @@ class Game:
         """Activate a menu item."""
         self.menu.activate()
 
-    def menu_dismiss(self):
+    def dismiss(self):
         """Dismiss the currently active menu."""
-        self.pop_menu()
+        if self.menu is not None and self.menu.dismissible:
+            self.pop_menu()
+        elif self.editor is not None and self.editor.dismissible:
+            self.editor = None
+            tts.speak('Cancel.')
 
     def add_menu_actions(self):
         """Add actions relating to menus."""
@@ -136,9 +170,8 @@ class Game:
                     self.menu.position != -1
                 ),
                 Action(
-                    'Exit from a menu', self.menu_dismiss, symbol=key.ESCAPE,
-                    can_run=lambda: not self.no_menu() and
-                    self.menu.dismissible
+                    'Exit from a menu or editor', self.dismiss,
+                    symbol=key.ESCAPE
                 ),
                 Action(
                     'Move down in a menu', self.menu_down, symbol=key.DOWN,

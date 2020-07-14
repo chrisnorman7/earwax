@@ -67,7 +67,7 @@ class Action:
                 dt = now - self.last_run
         if self.interval is None or dt >= self.interval:
             self.last_run = now
-            self.func()
+            return self.func()
 
     def __str__(self):
         """Return a string representing this action."""
@@ -77,7 +77,8 @@ class Action:
             key_string = key.symbol_string(self.symbol)
             if self.modifiers:
                 modifiers_string = key.modifiers_string(self.modifiers)
-                modifiers_string = modifiers_string.replace('|', '+').replace('MOD_', '')
+                modifiers_string = modifiers_string.replace('|', '+')\
+                    .replace('MOD_', '')
                 key_string = f'{modifiers_string} + {key_string}'
             triggers.append(key_string)
         if triggers:
