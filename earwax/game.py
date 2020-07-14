@@ -92,11 +92,10 @@ class Game:
 
     def action(self, name, **kwargs):
         """A decorator to add an action to this game."""
-        kwargs['game'] = self
 
         def inner(func):
             """Actually add the action."""
-            a = Action(name, func, **kwargs)
+            a = Action(self, name, func, **kwargs)
             self.actions.append(a)
             return a
 
@@ -165,20 +164,20 @@ class Game:
         self.actions.extend(
             [
                 Action(
-                    'Activate menu item', self.menu_activate,
+                    self, 'Activate menu item', self.menu_activate,
                     symbol=key.RETURN, can_run=lambda: not self.no_menu() and
                     self.menu.position != -1
                 ),
                 Action(
-                    'Exit from a menu or editor', self.dismiss,
+                    self, 'Exit from a menu or editor', self.dismiss,
                     symbol=key.ESCAPE
                 ),
                 Action(
-                    'Move down in a menu', self.menu_down, symbol=key.DOWN,
-                    can_run=lambda: not self.no_menu()
+                    self, 'Move down in a menu', self.menu_down,
+                    symbol=key.DOWN, can_run=lambda: not self.no_menu()
                 ),
                 Action(
-                    'Move up in a menu', self.menu_up, symbol=key.UP,
+                    self, 'Move up in a menu', self.menu_up, symbol=key.UP,
                     can_run=lambda: not self.no_menu()
                 )
             ]

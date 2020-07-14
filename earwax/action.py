@@ -12,6 +12,9 @@ NoneType = type(None)
 class Action:
     """An action that can be called from within a game."""
 
+    # The game this action is bound to.
+    game = attrib()
+
     # The title of this action.
     title = attrib()
 
@@ -40,13 +43,14 @@ class Action:
     #
     # This function should return either True or False, and should take no
     # arguments.
-    can_run = attrib(default=lambda: True)
-
-    # The game this action is bound to.
-    game = attrib(default=Factory(NoneType))
+    can_run = attrib(default=Factory(NoneType))
 
     # The time this action was last run.
     last_run = attrib(default=Factory(float), init=False)
+
+    def __attrs_post_init__(self):
+        if self.can_run is None:
+            self.can_run = self.game.normal
 
     def run(self, dt):
         """Run this action. May be called by

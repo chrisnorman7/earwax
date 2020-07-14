@@ -12,6 +12,16 @@
             "group": "build",
             "label": "Run Example Script",
             "problemMatcher": []
+        },
+        {
+            "command": "env\\Scripts\\py.test.exe",
+            "label": "py.test",
+            "type": "shell",
+            "problemMatcher": [],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
         }
     ]
 }
