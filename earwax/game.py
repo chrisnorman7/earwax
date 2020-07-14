@@ -170,9 +170,14 @@ class Game:
         """Move down in a menu."""
         self.menu.move_down()
 
-    def submit_text(self):
+    def submit_editor(self):
         """Submit the text in an editor."""
         self.editor.submit()
+
+    def clear_editor(self):
+        """Clear the text in an editor."""
+        self.editor.text = ''
+        self.editor.echo_current_character()
 
     def add_default_actions(self):
         """Add actions relating to menus."""
@@ -196,7 +201,12 @@ class Game:
                     symbol=key.DOWN, can_run=lambda: not self.no_menu()
                 ),
                 Action(
-                    self, 'Submit text', self.submit_text, symbol=key.RETURN,
+                    self, 'Submit editor', self.submit_editor,
+                    symbol=key.RETURN, can_run=lambda: not self.no_editor()
+                ),
+                Action(
+                    self, 'Clear editor', self.clear_editor, symbol=key.U,
+                    modifiers=key.MOD_CTRL,
                     can_run=lambda: not self.no_editor()
                 )
             ]
