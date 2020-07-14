@@ -144,9 +144,9 @@ def test_menu(game, menu):
     assert game.menu is menu
 
 
-def test_add_menu_actions(game):
-    game.add_menu_actions()
+def test_add_default_actions(game):
+    game.add_default_actions()
     assert game.actions[0].func == game.menu_activate
     assert game.actions[1].func == game.dismiss
-    assert game.actions[2].func == game.menu_down
-    assert game.actions[3].func == game.menu_up
+    assert game.actions[2].func == game.menu_up
+    assert game.actions[3].func == game.menu_down

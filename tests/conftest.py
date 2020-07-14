@@ -15,4 +15,4 @@ def get_menu():
 
 @fixture(name='editor')
 def get_editor():
-    return Editor(text='test')
+    return Editor(print, text='test')
