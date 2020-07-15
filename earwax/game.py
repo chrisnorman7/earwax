@@ -88,6 +88,15 @@ class Game:
         if self.editor is not None:
             return self.editor.on_text_motion(motion)
 
+    def before_run(self):
+        """This hook is called by the run method, just before pyglet.app.run is
+        called.
+
+        By this point, default events have been decorated, such as
+        on_key_press, and on_text. Also, we are inside a synthizer.initialized
+        context manager, so feel free to play sounds."""
+        pass
+
     def run(self):
         """Run the game."""
         options['shadow_window'] = False
@@ -97,6 +106,7 @@ class Game:
         self.window.event(self.on_text)
         self.window.event(self.on_text_motion)
         with initialized():
+            self.before_run()
             app.run()
 
     def action(self, name, **kwargs):
