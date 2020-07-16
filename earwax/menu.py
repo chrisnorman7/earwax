@@ -7,13 +7,21 @@ from attr import Factory, attrib, attrs
 
 from .speech import tts
 
+NoneType = type(None)
+
 
 @attrs
 class MenuItem:
     """An item in a menu."""
 
+    # The title of this menu item.
     title = attrib()
+
+    # The function which will be called when this item is activated.
     func = attrib()
+
+    # The function which will be called when this item is selected.
+    on_selected = attrib(default=Factory(NoneType))
 
 
 @attrs
@@ -40,9 +48,12 @@ class Menu:
         if self.position != -1:
             return self.items[self.position]
 
-    def add_item(self, title, func):
-        """Add an item to this menu."""
-        self.items.append(MenuItem(title, func))
+    def add_item(self, title, func, **kwargs):
+        """Add an item to this menu. All arguments are passed to the
+        constructor of MenuItem."""
+        mi = MenuItem(title, func, **kwargs)
+        self.items.append(mi)
+        return mi
 
     def show_selection(self):
         """Speak the menu item at the current position, or the title of this
@@ -53,7 +64,10 @@ class Menu:
         if self.position == -1:
             tts.speak(self.title)
         else:
-            tts.speak(self.current_item.title)
+            item = self.current_item
+            tts.speak(item.title)
+            if item.on_selected is not None:
+                item.on_selected()
 
     def move_up(self):
         """Move up in this menu."""
@@ -74,8 +88,9 @@ class Menu:
 class FileMenu(Menu):
     """A menu for slecting a file."""
     def __init__(
-        self, game, title, path, func, root=None, empty_ok=None,
-        directory_ok=False
+        self, game, title, path, func, *, root=None, empty_ok=None,
+        directory_ok=False, on_directory_item=None, on_file_item=None,
+        on_selected=None
     ):
         """Add menu items."""
         super().__init__(title)
@@ -89,33 +104,45 @@ class FileMenu(Menu):
             self.add_item(
                 '..', lambda: game.replace_menu(
                     FileMenu(
-                        game, title, os.path.dirname(path), func, root,
-                        empty_ok, directory_ok
+                        game, title, os.path.dirname(path), func, root=root,
+                        empty_ok=empty_ok, directory_ok=directory_ok,
+                        on_directory_item=on_directory_item,
+                        on_file_item=on_file_item, on_selected=on_selected
                     )
                 )
             )
         for name in os.listdir(path):
             full_path = os.path.join(path, name)
             if os.path.isfile(full_path):
-                self.add_item(name, lambda p=full_path: func(p))
+                item = self.add_item(
+                    name, lambda p=full_path: func(p),
+                    on_selected=lambda p=full_path: on_selected(p)
+                )
+                if on_file_item is not None:
+                    on_file_item(full_path, item)
             elif os.path.isdir(full_path):
-                self.add_item(
+                item = self.add_item(
                     name, lambda p=full_path: game.replace_menu(
                         FileMenu(
                             game, title, p, func, root=root, empty_ok=empty_ok,
-                            directory_ok=directory_ok
+                            directory_ok=directory_ok,
+                            on_directory_item=on_directory_item,
+                            on_file_item=on_file_item, on_selected=on_selected
                         )
-                    )
+                    ), on_selected=lambda p=full_path: on_selected(p)
                 )
+                if on_directory_item is not None:
+                    on_directory_item(full_path, item)
 
 
 class ActionMenu(Menu):
     """A menu to show a list of actions, and their associated triggers."""
-    def __init__(self, game):
+    def __init__(self, game, on_selected=None):
         super().__init__('Actions')
         for a in game.actions:
             self.add_item(
-                str(a), lambda action=a: self.handle_action(game, action)
+                str(a), lambda action=a: self.handle_action(game, action),
+                on_selected=on_selected
             )
 
     def handle_action(self, game, action):

@@ -1,6 +1,7 @@
 from pytest import fixture
 
 from earwax import Editor, Game, Menu
+from synthizer import Context, initialize, shutdown
 
 
 @fixture(name='game')
@@ -16,3 +17,14 @@ def get_menu():
 @fixture(name='editor')
 def get_editor():
     return Editor(print, text='test')
+
+
+@fixture(scope='session')
+def initialise_tests():
+    initialize()
+    yield shutdown()
+
+
+@fixture(name='context', scope='session')
+def get_context():
+    return Context()
