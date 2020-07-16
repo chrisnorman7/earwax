@@ -69,10 +69,13 @@ class AdvancedInterfaceSoundPlayer(SimpleInterfaceSoundPlayer):
         path."""
         if self.generator is not None:
             self.generator.destroy()
+            self.generator = None
         if os.path.isdir(path):
             if not self.play_directories:
                 return
             path = os.path.join(path, choice(os.listdir(path)))
+            if not os.path.isfile(path):
+                return  # Don't go through more directories.
         elif os.path.isfile(path):
             if not self.play_files:
                 return
