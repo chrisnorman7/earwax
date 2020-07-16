@@ -4,10 +4,15 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "command": "env\\scripts\\python.exe",
-            "args": [
-                "example.py"
-            ],
+            "command": "${workspaceFolder}\\env\\scripts\\python.exe example.py",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
             "type": "shell",
             "group": {
                 "kind": "build",
@@ -17,14 +22,22 @@
             "problemMatcher": []
         },
         {
-            "command": "env\\Scripts\\py.test.exe",
+            "command": "${workspaceFolder}\\env\\Scripts\\py.test.exe",
             "label": "py.test",
             "type": "shell",
             "problemMatcher": [],
             "group": {
                 "kind": "test",
                 "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
             }
-        }
+        },
     ]
 }
