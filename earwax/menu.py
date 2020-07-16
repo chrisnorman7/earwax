@@ -88,46 +88,52 @@ class Menu:
 class FileMenu(Menu):
     """A menu for slecting a file."""
     def __init__(
-        self, game, title, path, func, *, root=None, empty_ok=None,
-        directory_ok=False, on_directory_item=None, on_file_item=None,
-        on_selected=None
+        self, game, title, path, func, *, root=None, empty_label=None,
+        directory_label=None, on_directory_item=None, on_file_item=None,
+        on_selected=None, show_directories=True, show_files=True, up_label='..'
     ):
         """Add menu items."""
         super().__init__(title)
-        if (empty_ok):
-            self.add_item('Clear', lambda: func(None))
-        if directory_ok:
+        if empty_label is not None:
+            self.add_item(empty_label, lambda: func(None))
+        if directory_label is not None:
             self.add_item(
-                'Use Directory', lambda p=path: func(p)
+                directory_label, lambda p=path: func(p)
             )
         if path != root:
             self.add_item(
-                '..', lambda: game.replace_menu(
+                up_label, lambda: game.replace_menu(
                     FileMenu(
                         game, title, os.path.dirname(path), func, root=root,
-                        empty_ok=empty_ok, directory_ok=directory_ok,
+                        empty_label=empty_label,
+                        directory_label=directory_label,
                         on_directory_item=on_directory_item,
-                        on_file_item=on_file_item, on_selected=on_selected
+                        on_file_item=on_file_item, on_selected=on_selected,
+                        show_directories=show_directories,
+                        show_files=show_files, up_label=up_label
                     )
                 )
             )
         for name in os.listdir(path):
             full_path = os.path.join(path, name)
-            if os.path.isfile(full_path):
+            if os.path.isfile(full_path) and show_files:
                 item = self.add_item(
                     name, lambda p=full_path: func(p),
                     on_selected=lambda p=full_path: on_selected(p)
                 )
                 if on_file_item is not None:
                     on_file_item(full_path, item)
-            elif os.path.isdir(full_path):
+            elif os.path.isdir(full_path) and show_directories:
                 item = self.add_item(
                     name, lambda p=full_path: game.replace_menu(
                         FileMenu(
-                            game, title, p, func, root=root, empty_ok=empty_ok,
-                            directory_ok=directory_ok,
+                            game, title, p, func, root=root,
+                            empty_label=empty_label,
+                            directory_label=directory_label,
                             on_directory_item=on_directory_item,
-                            on_file_item=on_file_item, on_selected=on_selected
+                            on_file_item=on_file_item, on_selected=on_selected,
+                            show_directories=show_directories,
+                            show_files=show_files, up_label=up_label
                         )
                     ), on_selected=lambda p=full_path: on_selected(p)
                 )
