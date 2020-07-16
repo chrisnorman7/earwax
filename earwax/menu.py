@@ -82,7 +82,7 @@ class Menu:
     def activate(self):
         """Activate the currently focused menu item."""
         if self.position != -1:
-            self.current_item.func()
+            return self.current_item.func()
 
 
 class FileMenu(Menu):

@@ -160,7 +160,7 @@ class Game:
 
     def menu_activate(self):
         """Activate a menu item."""
-        self.menu.activate()
+        return self.menu.activate()
 
     def dismiss(self):
         """Dismiss the currently active menu."""
