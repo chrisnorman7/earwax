@@ -196,7 +196,7 @@ class Game:
                 Action(
                     self, 'Activate menu item', self.menu_activate,
                     symbol=key.RETURN, can_run=lambda: not self.no_menu() and
-                    self.menu.position != -1
+                    self.menu.position != -1 and self.editor is None
                 ),
                 Action(
                     self, 'Exit from a menu or editor', self.dismiss,
@@ -204,11 +204,12 @@ class Game:
                 ),
                 Action(
                     self, 'Move up in a menu', self.menu_up, symbol=key.UP,
-                    can_run=lambda: not self.no_menu()
+                    can_run=lambda: not self.no_menu() and self.editor is None
                 ),
                 Action(
                     self, 'Move down in a menu', self.menu_down,
                     symbol=key.DOWN, can_run=lambda: not self.no_menu()
+                    and self.editor is None
                 ),
                 Action(
                     self, 'Submit editor', self.submit_editor,
