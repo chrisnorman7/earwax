@@ -9,7 +9,10 @@
                 "example.py"
             ],
             "type": "shell",
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "label": "Run Example Script",
             "problemMatcher": []
         },
