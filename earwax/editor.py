@@ -38,7 +38,7 @@ class Editor:
 
     def submit(self):
         """Submit the text in this control to self.func."""
-        self.func(self.text)
+        return self.func(self.text)
 
     def on_text(self, text):
         """Text has been entered.

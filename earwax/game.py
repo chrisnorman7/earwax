@@ -182,7 +182,7 @@ class Game:
 
     def submit_editor(self):
         """Submit the text in an editor."""
-        self.editor.submit()
+        return self.editor.submit()
 
     def clear_editor(self):
         """Clear the text in an editor."""
