@@ -81,6 +81,11 @@ class Editor:
             return self.echo('')
         self.echo_current_character()
 
+    def clear(self):
+        """Clear this editor."""
+        self.text = ''
+        self.set_cursor_position(None)
+
     def motion(self, motion):
         """A decorator to add a handler to self.motions."""
 

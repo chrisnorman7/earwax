@@ -186,8 +186,7 @@ class Game:
 
     def clear_editor(self):
         """Clear the text in an editor."""
-        self.editor.text = ''
-        self.editor.echo_current_character()
+        self.editor.clear()
 
     def add_default_actions(self):
         """Add actions relating to menus."""
