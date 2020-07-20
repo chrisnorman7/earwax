@@ -20,7 +20,7 @@ def get_buffer(protocol, path):
     the dictionary."""
     url = f'{protocol}://{path}'
     if url not in buffers:
-        buffers[url] = Buffer.from_stream(context, protocol, path)
+        buffers[url] = Buffer.from_stream(protocol, path)
     return buffers[url]
 
 
@@ -81,7 +81,7 @@ class AdvancedInterfaceSoundPlayer(SimpleInterfaceSoundPlayer):
                 return
         else:
             raise NotImplementedError(f'No clue how to play {path}.')
-        buffer = get_buffer(self.context, 'file', path)
+        buffer = get_buffer('file', path)
         self.generator = BufferGenerator(self.context)
         self.generator.buffer = buffer
         if self.source is None:

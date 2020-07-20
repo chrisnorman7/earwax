@@ -23,7 +23,7 @@ class ExampleGame(Game):
             self.ctx, BufferGenerator(self.ctx)
         )
         self.menu_sound_player.generator.buffer = get_buffer(
-            self.ctx, 'file', 'move.wav'
+            'file', 'move.wav'
         )
 
 

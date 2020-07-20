@@ -22,7 +22,8 @@ def get_editor():
 @fixture(scope='session')
 def initialise_tests():
     initialize()
-    yield shutdown()
+    yield
+    shutdown()
 
 
 @fixture(name='context', scope='session')
