@@ -1,110 +1,127 @@
 """Provides menu-related classes."""
 
-import os
-import os.path
+from pathlib import Path
+from typing import Callable, Generator, List, Optional, TYPE_CHECKING
 
 from attr import Factory, attrib, attrs
 
+if TYPE_CHECKING:
+    from .action import ActionFunctionType
+    from .game import Game
 from .speech import tts
 
-NoneType = type(None)
+OptionalGenerator = Optional[Generator[None, None, None]]
 
 
-@attrs
+@attrs(auto_attribs=True)
 class MenuItem:
     """An item in a menu."""
 
     # The title of this menu item.
-    title = attrib()
+    title: str
 
     # The function which will be called when this item is activated.
-    func = attrib()
+    func: 'ActionFunctionType'
 
     # The function which will be called when this item is selected.
-    on_selected = attrib(default=Factory(NoneType))
+    on_selected: Optional[Callable[[], None]] = Factory(lambda: None)
 
 
-@attrs
+@attrs(auto_attribs=True)
 class Menu:
     """A menu which holds multiple menu items which can be activated using
     actions."""
 
     # The title of this menu.
-    title = attrib()
+    title: str
 
     # Whether or not it should be possible to dismiss this menu.
-    dismissible = attrib(default=Factory(lambda: True))
+    dismissible: bool = Factory(lambda: True)
 
     # The player's position in this menu.
-    position = attrib(default=Factory(lambda: -1))
+    position: int = Factory(lambda: -1)
 
     # The list of MenuItem instances for this menu.
-    items = attrib(default=Factory(list), init=False)
+    items: List[MenuItem] = attrib(default=Factory(list), init=False)
 
     @property
-    def current_item(self):
+    def current_item(self) -> Optional[MenuItem]:
         """Return the currently selected menu item. If position is -1, return
         None."""
         if self.position != -1:
             return self.items[self.position]
+        return None
 
-    def add_item(self, title, func, **kwargs):
+    def add_item(
+        self, title: str, func: 'ActionFunctionType', **kwargs
+    ) -> MenuItem:
         """Add an item to this menu. All arguments are passed to the
         constructor of MenuItem."""
-        mi = MenuItem(title, func, **kwargs)
+        mi: MenuItem = MenuItem(title, func, **kwargs)
         self.items.append(mi)
         return mi
 
-    def show_selection(self):
+    def show_selection(self) -> None:
         """Speak the menu item at the current position, or the title of this
         menu, if position is -1.
 
         This function performs no error checking, so it will happily throw
         errors if self.position is something stupid."""
-        if self.position == -1:
+        item: Optional[MenuItem] = self.current_item
+        if item is None:
             tts.speak(self.title)
         else:
-            item = self.current_item
             tts.speak(item.title)
             if item.on_selected is not None:
                 item.on_selected()
 
-    def move_up(self):
+    def move_up(self) -> None:
         """Move up in this menu."""
         self.position = max(-1, self.position - 1)
         self.show_selection()
 
-    def move_down(self):
+    def move_down(self) -> None:
         """Move down in this menu."""
         self.position = min(len(self.items) - 1, self.position + 1)
         self.show_selection()
 
-    def activate(self):
+    def activate(self) -> OptionalGenerator:
         """Activate the currently focused menu item."""
-        if self.position != -1:
-            return self.current_item.func()
+        if self.current_item is None:
+            return None
+        return self.current_item.func()
 
 
 class FileMenu(Menu):
     """A menu for slecting a file."""
     def __init__(
-        self, game, title, path, func, *, root=None, empty_label=None,
-        directory_label=None, on_directory_item=None, on_file_item=None,
-        on_selected=None, show_directories=True, show_files=True, up_label='..'
+        self, game: 'Game', title: str, path: Path,
+        func: Callable[[Optional[Path]], OptionalGenerator], *,
+        root: Path = None, empty_label: str = None,
+        directory_label: str = None, on_directory_item: Callable[
+            [Path, MenuItem], None
+        ] = None, on_file_item: Callable[[Path, MenuItem], None] = None,
+        on_selected: Callable[[Path], None] = None,
+        show_directories: bool = True, show_files: bool = True,
+        up_label: str = '..'
     ):
         """Add menu items."""
         super().__init__(title)
         if empty_label is not None:
             self.add_item(empty_label, lambda: func(None))
         if directory_label is not None:
-            self.add_item(
-                directory_label, lambda p=path: func(p)
-            )
+
+            def use_current_directory(p: Path = path) -> Optional[
+                Generator[None, None, None]
+            ]:
+                return func(p)
+
+            self.add_item(directory_label, use_current_directory)
         if path != root:
             self.add_item(
                 up_label, lambda: game.replace_menu(
                     FileMenu(
-                        game, title, os.path.dirname(path), func, root=root,
+                        game, title, path.parent, func, root=root,
                         empty_label=empty_label,
                         directory_label=directory_label,
                         on_directory_item=on_directory_item,
@@ -114,18 +131,25 @@ class FileMenu(Menu):
                     )
                 )
             )
-        for name in os.listdir(path):
-            full_path = os.path.join(path, name)
-            if os.path.isfile(full_path) and show_files:
+        for child in path.iterdir():
+            def _on_selected(p: Path = child) -> None:
+                if on_selected is not None:
+                    on_selected(p)
+
+            if child.is_file() and show_files:
+
+                def select_file(p: Path = child) -> OptionalGenerator:
+                    return func(p)
+
                 item = self.add_item(
-                    name, lambda p=full_path: func(p),
-                    on_selected=lambda p=full_path: on_selected(p)
+                    child.name, select_file, on_selected=_on_selected
                 )
                 if on_file_item is not None:
-                    on_file_item(full_path, item)
-            elif os.path.isdir(full_path) and show_directories:
-                item = self.add_item(
-                    name, lambda p=full_path: game.replace_menu(
+                    on_file_item(child, item)
+            elif child.is_dir() and show_directories:
+
+                def select_directory(p: Path = child) -> None:
+                    game.replace_menu(
                         FileMenu(
                             game, title, p, func, root=root,
                             empty_label=empty_label,
@@ -135,10 +159,13 @@ class FileMenu(Menu):
                             show_directories=show_directories,
                             show_files=show_files, up_label=up_label
                         )
-                    ), on_selected=lambda p=full_path: on_selected(p)
+                    )
+
+                item = self.add_item(
+                    child.name, select_directory, on_selected=_on_selected
                 )
                 if on_directory_item is not None:
-                    on_directory_item(full_path, item)
+                    on_directory_item(child, item)
 
 
 class ActionMenu(Menu):

@@ -1,18 +1,27 @@
 """Provides the Game class."""
 
 from inspect import isgenerator
+from typing import (TYPE_CHECKING, Callable, Dict, Generator, Iterator, List,
+                    Optional, cast)
 
 from attr import Factory, attrib, attrs
 from pyglet import app, clock, options
 from pyglet.window import Window, key
 
-from earwax.speech import tts
 from synthizer import initialized
 
-from .action import Action, NoneType
+from .action import ActionFunctionType, Action
+if TYPE_CHECKING:
+    from .editor import Editor
+    from .menu import Menu
+from .speech import tts
+
+ActionListType = List[Action]
+ReleaseGeneratorListType = Dict[int, Generator[None, None, None]]
+MenuListType = List['Menu']
 
 
-@attrs
+@attrs(auto_attribs=True)
 class Game:
     """The main game object.
 
@@ -20,28 +29,38 @@ class Game:
     is central to pretty much everything else."""
 
     # The title of the window that will be created.
-    title = attrib()
+    title: str
 
     # A list of actions which can be called from within the game.
-    actions = attrib(default=Factory(list), init=False)
+    actions: ActionListType = attrib(default=Factory(list), init=False)
 
     # The currently triggered actions.
-    triggered_actions = attrib(default=Factory(list))
+    triggered_actions: 'ActionListType' = attrib(
+        default=Factory(list), init=False
+    )
 
     # The actions which returned generators, and need to do something on key
     # release.
-    on_key_release_generators = attrib(default=Factory(dict))
+    on_key_release_generators: ReleaseGeneratorListType = attrib(
+        default=Factory(dict), init=False
+    )
 
     # The window to display the game.
-    window = attrib(default=Factory(NoneType), init=False)
+    window: Optional[Window] = attrib(
+        default=Factory(lambda: None), init=False
+    )
 
     # The current menus (if any).
-    menus = attrib(default=Factory(list), init=False)
+    menus: MenuListType = attrib(default=Factory(list), init=False)
 
     # The current editor.
-    editor = attrib(default=Factory(NoneType))
+    editor: Optional['Editor'] = attrib(
+        default=Factory(lambda: None), init=False
+    )
 
-    def start_action(self, a):
+    def start_action(self, a: Action) -> Optional[
+        Generator[None, None, None]
+    ]:
         """Start an action. If the action has no interval, it will be ran
         straight away. Otherwise, it will be added to triggered_actions."""
         if a.interval is None:
@@ -50,45 +69,55 @@ class Game:
             self.triggered_actions.append(a)
             a.run(None)
             clock.schedule_interval(a.run, a.interval)
+            return None
 
-    def stop_action(self, a):
+    def stop_action(self, a: Action) -> None:
         """Unschedule an action, and remove it from triggered_actions."""
         self.triggered_actions.remove(a)
         clock.unschedule(a.run)
 
-    def on_key_press(self, symbol, modifiers):
+    def on_key_press(self, symbol: int, modifiers: int) -> bool:
         """A key has been pressed down."""
+        a: Action
         for a in self.actions:
             if a.symbol == symbol and a.modifiers == modifiers:
-                res = self.start_action(a)
+                res: Optional[
+                    Generator[None, None, None]
+                ] = self.start_action(a)
                 if isgenerator(res):
-                    next(res)
-                    self.on_key_release_generators[symbol] = res
+                    next(cast(Iterator[None], res))
+                    self.on_key_release_generators[symbol] = cast(
+                        Generator[None, None, None], res
+                    )
         return True
 
-    def on_key_release(self, symbol, modifiers):
+    def on_key_release(self, symbol: int, modifiers: int) -> bool:
         """A key has been released."""
+        a: Action
         for a in self.triggered_actions:
             if a.symbol == symbol:
                 self.stop_action(a)
         if symbol in self.on_key_release_generators:
-            generator = self.on_key_release_generators.pop(symbol)
+            generator: Generator[
+                None, None, None
+            ] = self.on_key_release_generators.pop(symbol)
             try:
                 next(generator)
             except StopIteration:
                 pass
+        return True
 
-    def on_text(self, text):
+    def on_text(self, text: str) -> None:
         """Enter text into the current editor."""
         if self.editor is not None:
             return self.editor.on_text(text)
 
-    def on_text_motion(self, motion):
+    def on_text_motion(self, motion: int) -> None:
         """Pass the motion onto any attached editor."""
         if self.editor is not None:
             return self.editor.on_text_motion(motion)
 
-    def before_run(self):
+    def before_run(self) -> None:
         """This hook is called by the run method, just before pyglet.app.run is
         called.
 
@@ -97,7 +126,7 @@ class Game:
         context manager, so feel free to play sounds."""
         pass
 
-    def run(self):
+    def run(self) -> None:
         """Run the game."""
         options['shadow_window'] = False
         self.window = Window(caption=self.title)
@@ -109,60 +138,65 @@ class Game:
             self.before_run()
             app.run()
 
-    def action(self, name, **kwargs):
+    def action(self, name: str, **kwargs) -> Callable[
+        [ActionFunctionType], Action
+    ]:
         """A decorator to add an action to this game."""
 
-        def inner(func):
+        def inner(func: ActionFunctionType) -> Action:
             """Actually add the action."""
-            a = Action(self, name, func, **kwargs)
+            a: Action = Action(self, name, func, **kwargs)
             self.actions.append(a)
             return a
 
         return inner
 
-    def no_menu(self):
+    def no_menu(self) -> bool:
         """Returns True if there are no menus."""
         return len(self.menus) == 0
 
-    def no_editor(self):
+    def no_editor(self) -> bool:
         """Returns true if there is no editor."""
         return self.editor is None
 
-    def normal(self):
+    def normal(self) -> bool:
         """Returns True if both no_menu and no_editor are True."""
         return all([self.no_menu(), self.no_editor()])
 
-    def push_menu(self, menu):
+    def push_menu(self, menu: 'Menu') -> None:
         """Push a menu onto self.menus."""
         self.menus.append(menu)
         menu.show_selection()
 
-    def replace_menu(self, menu):
+    def replace_menu(self, menu: 'Menu') -> None:
         """Pop the current menu, then push the new one."""
         self.pop_menu()
         self.push_menu(menu)
 
-    def pop_menu(self):
+    def pop_menu(self) -> None:
         """Pop the most recent menu from the stack."""
         self.menus.pop()
         if not self.no_menu:
             self.menus[-1].show_selection()
 
-    def clear_menus(self):
+    def clear_menus(self) -> None:
         """Pop all menus."""
         self.menus.clear()
 
     @property
-    def menu(self):
+    def menu(self) -> Optional['Menu']:
         """Get the most recently added menu."""
         if len(self.menus):
             return self.menus[-1]
+        return None
 
-    def menu_activate(self):
+    def menu_activate(self) -> Optional[Generator[None, None, None]]:
         """Activate a menu item."""
-        return self.menu.activate()
+        if self.menu is not None:
+            return self.menu.activate()
+        return None
 
-    def dismiss(self):
+    def dismiss(self) -> None:
         """Dismiss the currently active menu."""
         if self.menu is not None and self.menu.dismissible:
             self.pop_menu()
@@ -172,30 +206,35 @@ class Game:
             return
         tts.speak('Cancel.')
 
-    def menu_up(self):
+    def menu_up(self) -> None:
         """Move up in a menu."""
-        self.menu.move_up()
+        if self.menu is not None:
+            self.menu.move_up()
 
-    def menu_down(self):
+    def menu_down(self) -> None:
         """Move down in a menu."""
-        self.menu.move_down()
+        if self.menu is not None:
+            self.menu.move_down()
 
-    def submit_editor(self):
+    def submit_editor(self) -> None:
         """Submit the text in an editor."""
-        return self.editor.submit()
+        if self.editor is not None:
+            self.editor.submit()
 
-    def clear_editor(self):
+    def clear_editor(self) -> None:
         """Clear the text in an editor."""
-        self.editor.clear()
+        if self.editor is not None:
+            self.editor.clear()
 
-    def add_default_actions(self):
+    def add_default_actions(self) -> None:
         """Add actions relating to menus."""
         self.actions.extend(
             [
                 Action(
                     self, 'Activate menu item', self.menu_activate,
-                    symbol=key.RETURN, can_run=lambda: not self.no_menu() and
-                    self.menu.position != -1 and self.editor is None
+                    symbol=key.RETURN, can_run=lambda: getattr(
+                        self.menu, 'position', -1
+                    ) != -1 and self.editor is None
                 ),
                 Action(
                     self, 'Exit from a menu or editor', self.dismiss,

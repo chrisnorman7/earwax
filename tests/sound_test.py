@@ -1,11 +1,12 @@
 """Test the sound system."""
 
-from pytest import raises
+from pytest import raises, mark
 
 from earwax import get_buffer
 from synthizer import Buffer, SynthizerError
 
 
+@mark.skip(reason='Synthizer is too unstable.')
 def test_get_buffer():
     b = get_buffer('file', 'sound.wav')
     assert isinstance(b, Buffer)

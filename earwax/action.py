@@ -1,33 +1,37 @@
 """Provides the Action class."""
 
 from time import time
+from typing import Callable, Generator, Optional, List, TYPE_CHECKING
 
 from attr import Factory, attrib, attrs
 from pyglet.window import key
 
-NoneType = type(None)
+if TYPE_CHECKING:
+    from .game import Game
+
+ActionFunctionType = Callable[[], Optional[Generator[None, None, None]]]
 
 
-@attrs
+@attrs(auto_attribs=True)
 class Action:
     """An action that can be called from within a game."""
 
     # The game this action is bound to.
-    game = attrib()
+    game: 'Game'
 
     # The title of this action.
-    title = attrib()
+    title: str
 
     # The function to run.
-    func = attrib()
+    func: ActionFunctionType
 
     # The keyboard symbol to be used (should be one of the symbols from
     # pyglet.window.key).
-    symbol = attrib(default=Factory(NoneType))
+    symbol: Optional[int] = None
 
     # Keyboard modifiers. Should be made up of modifiers from
     # pyglet.window.key.
-    modifiers = attrib(default=Factory(int))
+    modifiers: int = 0
 
     # How often this action can run.
     #
@@ -36,23 +40,25 @@ class Action:
     # multiple uses in a short space of time would be undesireable.
     # Otherwise, this will be the number of seconds which must elapse between
     # runs.
-    interval = attrib(default=Factory(NoneType))
+    interval: Optional[int] = Factory(lambda: None)
 
     # A function to determine whether or not this action can be used at the
     # current time.
     #
     # This function should return either True or False, and should take no
     # arguments.
-    can_run = attrib(default=Factory(NoneType))
+    can_run: Optional[Callable[[], bool]] = None
 
     # The time this action was last run.
-    last_run = attrib(default=Factory(float), init=False)
+    last_run: float = attrib(default=Factory(float), init=False)
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         if self.can_run is None:
             self.can_run = self.game.normal
 
-    def run(self, dt):
+    def run(
+        self, dt: Optional[float]
+    ) -> Optional[Generator[None, None, None]]:
         """Run this action. May be called by
         pyglet.clock.schedule_interval.
 
@@ -63,24 +69,25 @@ class Action:
         None), or it is being called as soon as it is triggered
         (schedule_interval doesn't allow a function to be run and
         scheduled)."""
-        if not self.can_run():
-            return
-        now = time()
+        if self.can_run is not None and not self.can_run():
+            return None
+        now: float = time()
         if self.interval is not None:
             if dt is None:
                 dt = now - self.last_run
-        if self.interval is None or dt >= self.interval:
-            self.last_run = now
-            return self.func()
+            if dt < self.interval:
+                return None
+        self.last_run = now
+        return self.func()
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a string representing this action."""
-        s = self.title
-        triggers = []
+        s: str = self.title
+        triggers: List[str] = []
         if self.symbol:
-            key_string = key.symbol_string(self.symbol)
+            key_string: str = key.symbol_string(self.symbol)
             if self.modifiers:
-                modifiers_string = key.modifiers_string(self.modifiers)
+                modifiers_string: str = key.modifiers_string(self.modifiers)
                 modifiers_string = modifiers_string.replace('|', '+')\
                     .replace('MOD_', '')
                 key_string = f'{modifiers_string} + {key_string}'
