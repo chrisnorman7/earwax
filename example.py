@@ -79,7 +79,7 @@ def main():
         tts.speak(f'Beeping {"enabled" if g.can_beep else "disabled"}.')
 
     @g.action('Menu', symbol=key.M)
-    def menu() -> None:
+    def menu() -> Generator[None, None, None]:
         """Select a file."""
         player: AdvancedInterfaceSoundPlayer = AdvancedInterfaceSoundPlayer(
             g.ctx, play_directories=False
@@ -92,6 +92,7 @@ def main():
             except SynthizerError:
                 pass  # Not a sound file.
 
+        yield
         menu: FileMenu = FileMenu(
             g, 'Select a file', Path.cwd(), file_selected,
             on_selected=play_sound

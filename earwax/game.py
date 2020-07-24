@@ -1,6 +1,7 @@
 """Provides the Game class."""
 
 from inspect import isgenerator
+from time import time
 from typing import (TYPE_CHECKING, Callable, Dict, Generator, Iterator, List,
                     Optional, cast)
 
@@ -13,7 +14,7 @@ from synthizer import initialized
 from .action import ActionFunctionType, Action
 if TYPE_CHECKING:
     from .editor import Editor
-    from .menu import Menu
+    from .menu import Menu, MenuItem
 from .speech import tts
 
 ActionListType = List[Action]
@@ -52,6 +53,15 @@ class Game:
 
     # The current menus (if any).
     menus: MenuListType = attrib(default=Factory(list), init=False)
+
+    # The time the last menu search was performed.
+    menu_search_time: float = attrib(Factory(float), init=False)
+
+    # The timeout for menu searches.
+    menu_search_timeout: float = Factory(lambda: 0.5)
+
+    # The current menu search search string.
+    menu_search_string: str = attrib(Factory(str), init=False)
 
     # The current editor.
     editor: Optional['Editor'] = attrib(
@@ -111,6 +121,20 @@ class Game:
         """Enter text into the current editor."""
         if self.editor is not None:
             return self.editor.on_text(text)
+        elif self.menu is not None:
+            now: float = time()
+            if (now - self.menu_search_time) > self.menu_search_timeout:
+                self.menu_search_string = text.lower()
+            else:
+                self.menu_search_string += text.lower()
+            self.menu_search_time = now
+            index: int
+            item: 'MenuItem'
+            for index, item in enumerate(self.menu.items):
+                if item.title.lower().startswith(self.menu_search_string):
+                    self.menu.position = index
+                    self.menu.show_selection()
+                    break
 
     def on_text_motion(self, motion: int) -> None:
         """Pass the motion onto any attached editor."""
@@ -216,6 +240,18 @@ class Game:
         if self.menu is not None:
             self.menu.move_down()
 
+    def menu_home(self) -> None:
+        """Move to the start of a menu."""
+        if self.menu is not None:
+            self.menu.position = 0
+            self.menu.show_selection()
+
+    def menu_end(self) -> None:
+        """Move to the end of a menu."""
+        if self.menu is not None:
+            self.menu.position = len(self.menu.items) - 1
+            self.menu.show_selection()
+
     def submit_editor(self) -> None:
         """Submit the text in an editor."""
         if self.editor is not None:
@@ -227,7 +263,7 @@ class Game:
             self.editor.clear()
 
     def add_default_actions(self) -> None:
-        """Add actions relating to menus."""
+        """Add actions relating to menus and editors."""
         self.actions.extend(
             [
                 Action(
@@ -248,6 +284,14 @@ class Game:
                     self, 'Move down in a menu', self.menu_down,
                     symbol=key.DOWN, can_run=lambda: not self.no_menu()
                     and self.editor is None
+                ),
+                Action(
+                    self, 'Move to the start of a menu', self.menu_home,
+                    symbol=key.HOME, can_run=lambda: not self.no_menu()
+                ),
+                Action(
+                    self, 'Move to the end of a menu', self.menu_end,
+                    symbol=key.END, can_run=lambda: not self.no_menu()
                 ),
                 Action(
                     self, 'Submit editor', self.submit_editor,
