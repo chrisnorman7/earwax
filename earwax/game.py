@@ -190,8 +190,7 @@ class Game:
 
     def push_menu(self, menu: 'Menu') -> None:
         """Push a menu onto self.menus."""
-        self.menu_search_string = ''
-        self.menu_search_time = 0
+        self.menu_search_time = 0.0
         self.menus.append(menu)
         menu.show_selection()
 
