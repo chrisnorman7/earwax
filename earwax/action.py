@@ -1,7 +1,7 @@
 """Provides the Action class."""
 
 from time import time
-from typing import Callable, Generator, Optional, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
 from pyglet.window import key

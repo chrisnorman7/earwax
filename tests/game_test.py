@@ -76,9 +76,13 @@ def test_on_key_release(game):
 
 def test_push_menu(game, menu):
     game.push_menu(menu)
+    game.menu_search_string == 'hello'
+    game.menu_search_time = 1234
     assert game.menus == [menu]
     m = Menu('Second Menu')
     game.push_menu(m)
+    assert game.menu_search_string == ''
+    assert game.menu_search_time == 0
     assert game.menus == [menu, m]
 
 

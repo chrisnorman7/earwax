@@ -1,13 +1,14 @@
 """Provides menu-related classes."""
 
 from pathlib import Path
-from typing import Callable, Generator, List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
 
 if TYPE_CHECKING:
     from .action import ActionFunctionType
     from .game import Game
+
 from .speech import tts
 
 OptionalGenerator = Optional[Generator[None, None, None]]

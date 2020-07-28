@@ -8,13 +8,14 @@ from typing import (TYPE_CHECKING, Callable, Dict, Generator, Iterator, List,
 from attr import Factory, attrib, attrs
 from pyglet import app, clock, options
 from pyglet.window import Window, key
-
 from synthizer import initialized
 
-from .action import ActionFunctionType, Action
+from .action import Action, ActionFunctionType
+
 if TYPE_CHECKING:
     from .editor import Editor
     from .menu import Menu, MenuItem
+
 from .speech import tts
 
 ActionListType = List[Action]
@@ -189,6 +190,8 @@ class Game:
 
     def push_menu(self, menu: 'Menu') -> None:
         """Push a menu onto self.menus."""
+        self.menu_search_string = ''
+        self.menu_search_time = 0
         self.menus.append(menu)
         menu.show_selection()
 

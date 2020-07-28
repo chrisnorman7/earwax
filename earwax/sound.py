@@ -5,7 +5,6 @@ from random import choice
 from typing import Dict
 
 from attr import attrs
-
 from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
                        Generator, Source, SynthizerError)
 
