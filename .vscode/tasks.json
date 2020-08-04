@@ -14,10 +14,7 @@
                 "clear": false
             },
             "type": "shell",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "label": "Run Example Script",
             "problemMatcher": []
         },
@@ -38,6 +35,6 @@
                 "showReuseMessage": true,
                 "clear": false
             }
-        },
+        }
     ]
 }
