@@ -106,7 +106,7 @@ class Level:
     def action(self, name: str, **kwargs) -> Callable[
         [ActionFunctionType], Action
     ]:
-        """A decorator to add an action to this game."""
+        """A decorator to add an action to this level."""
 
         def inner(func: ActionFunctionType) -> Action:
             """Actually add the action."""
@@ -128,8 +128,7 @@ class Level:
         return inner
 
     def on_push(self) -> None:
-        """This level has been pushed onto the level stack of the provided
-        game."""
+        """This level has been pushed onto the level stack of the game."""
         pass
 
     def on_pop(self) -> None:

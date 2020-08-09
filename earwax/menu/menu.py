@@ -44,6 +44,12 @@ class Menu(DismissibleLevel):
         self.position = position
         self.search_timeout = search_timeout
         self.items = []
+        self.action('Activate item', symbol=key.RETURN)(self.activate)
+        self.action('Dismiss', symbol=key.ESCAPE)(self.dismiss)
+        self.action('Move down', symbol=key.DOWN)(self.move_down)
+        self.action('Move up', symbol=key.UP)(self.move_up)
+        self.motion(key.MOTION_BEGINNING_OF_LINE)(self.home)
+        self.motion(key.MOTION_END_OF_LINE)(self.end)
 
     @property
     def current_item(self) -> Optional[MenuItem]:
@@ -52,15 +58,6 @@ class Menu(DismissibleLevel):
         if self.position != -1:
             return self.items[self.position]
         return None
-
-    def __attrs_post_init__(self) -> None:
-        """Add menu actions."""
-        self.action('Activate item', symbol=key.RETURN)(self.activate)
-        self.action('Dismiss', symbol=key.ESCAPE)(self.dismiss)
-        self.action('Move down', symbol=key.DOWN)(self.move_down)
-        self.action('Move up', symbol=key.UP)(self.move_up)
-        self.motion(key.MOTION_BEGINNING_OF_LINE)(self.home)
-        self.motion(key.MOTION_END_OF_LINE)(self.end)
 
     def item(self, title: str) -> Callable[[ActionFunctionType], MenuItem]:
         """Decorate a function to be used as a menu item."""
@@ -89,8 +86,7 @@ class Menu(DismissibleLevel):
             tts.speak(self.title)
         else:
             tts.speak(item.title)
-            if item.on_selected is not None:
-                item.on_selected()
+            item.on_selected()
 
     def move_up(self) -> None:
         """Move up in this menu."""
