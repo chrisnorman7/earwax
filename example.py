@@ -1,22 +1,28 @@
 """A quick example game."""
 
+from earwax.action import OptionalGenerator
 import sys
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Optional
 
-from pyglet.window import key
+from pyglet.window import Window, key
+from synthizer import BufferGenerator, Context, DirectSource, SynthizerError
 
 from earwax import (
-    ActionMenu, AdvancedInterfaceSoundPlayer, Editor, FileMenu, Game,
+    ActionMenu, AdvancedInterfaceSoundPlayer, Editor, FileMenu, Game, Level,
     SimpleInterfaceSoundPlayer, get_buffer, tts)
-from synthizer import BufferGenerator, Context, DirectSource, SynthizerError
 
 
 class ExampleGame(Game):
     """A game with some extra stuff."""
 
+    can_beep: bool = True
+    menu_sound_player: SimpleInterfaceSoundPlayer
+    ctx: Context
+    source: DirectSource
+    generator: BufferGenerator
+
     def before_run(self) -> None:
-        self.can_beep = True
         self.ctx = Context()
         self.source = DirectSource(self.ctx)
         self.generator = BufferGenerator(self.ctx)
@@ -30,13 +36,13 @@ class ExampleGame(Game):
 
 
 def main():
-    g: ExampleGame = ExampleGame('Example')
+    g: ExampleGame = ExampleGame()
+    level: Level = Level(g)
+    g.push_level(level)
 
-    def file_selected(name: Optional[Path]) -> Optional[Generator[
-        None, None, None]
-    ]:
+    def file_selected(name: Optional[Path]) -> OptionalGenerator:
         """A file has been chosen."""
-        g.clear_menus()
+        g.pop_level()
         try:
             g.source.remove_generator(g.generator)
         except SynthizerError:
@@ -50,36 +56,42 @@ def main():
                 tts.speak(str(e))
         return None
 
-    def _set_title(text: str) -> None:
+    @level.action('Change window title', symbol=key.T)
+    def set_title() -> OptionalGenerator:
         """Set the window title to the given text."""
-        g.editor = None
-        if g.window is not None:
-            g.window.set_caption(text)
-        tts.speak('Title set.')
 
-    @g.action('Quit', symbol=key.ESCAPE)
+        def inner(text: str):
+            if g.window is not None:
+                g.window.set_caption(text)
+            tts.speak('Title set.')
+            g.pop_level()
+
+        if g.window is not None:
+            tts.speak(f'Window title: {g.window.caption}')
+            yield
+            g.push_level(Editor(g, inner, text=g.window.caption))
+
+    @level.action('Quit', symbol=key.ESCAPE)
     def do_quit() -> None:
         """Quit the game."""
         if g.window is not None:
             g.window.close()
 
-    @g.action(
-        'Beep', symbol=key.B, interval=0.75,
-        can_run=lambda: g.can_beep and g.normal()
-    )
+    @level.action('Beep', symbol=key.B, interval=0.75)
     def do_beep() -> None:
         """Speak something."""
-        sys.stdout.write('\a')
-        sys.stdout.flush()
+        if g.can_beep:
+            sys.stdout.write('\a')
+            sys.stdout.flush()
 
-    @g.action('Toggle beeping', symbol=key.P)
+    @level.action('Toggle beeping', symbol=key.P)
     def toggle_beep() -> None:
         """Toggle beeping."""
         g.can_beep = not g.can_beep
         tts.speak(f'Beeping {"enabled" if g.can_beep else "disabled"}.')
 
-    @g.action('Menu', symbol=key.M)
-    def menu() -> Generator[None, None, None]:
+    @level.action('Menu', symbol=key.M)
+    def menu() -> OptionalGenerator:
         """Select a file."""
         player: AdvancedInterfaceSoundPlayer = AdvancedInterfaceSoundPlayer(
             g.ctx, play_directories=False
@@ -94,30 +106,18 @@ def main():
 
         yield
         menu: FileMenu = FileMenu(
-            g, 'Select a file', Path.cwd(), file_selected,
-            on_selected=play_sound
+            g, 'Select A File', Path.cwd(), file_selected
         )
-        g.push_menu(menu)
+        g.push_level(menu)
 
-    @g.action(
+    @level.action(
         'Show actions', symbol=key.SLASH, modifiers=key.MOD_SHIFT
     )
     def show_actions() -> None:
         """Show all game actions."""
-        g.push_menu(ActionMenu(g, on_selected=g.menu_sound_player.play))
+        g.push_level(ActionMenu(g, 'Actions'))
 
-    @g.action('Set window title', symbol=key.T)
-    def set_title(text: Optional[str] = None) -> Generator[
-        None, None, None
-    ]:
-        """Change the window title."""
-        yield
-        if g.window is not None:
-            g.editor = Editor(_set_title, text=g.window.caption)
-            tts.speak(f'Window title: {g.editor.text}')
-
-    g.add_default_actions()
-    g.run()
+    g.run(Window(caption='Example Game'))
 
 
 if __name__ == '__main__':
