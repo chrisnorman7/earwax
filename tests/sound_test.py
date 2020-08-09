@@ -1,9 +1,9 @@
 """Test the sound system."""
 
 from pytest import raises
+from synthizer import Buffer, SynthizerError
 
 from earwax import get_buffer
-from synthizer import Buffer, SynthizerError
 
 
 def test_get_buffer():

@@ -1,6 +1,5 @@
 """A quick example game."""
 
-from earwax.action import OptionalGenerator
 import sys
 from pathlib import Path
 from typing import Optional
@@ -11,6 +10,7 @@ from synthizer import BufferGenerator, Context, DirectSource, SynthizerError
 from earwax import (
     ActionMenu, AdvancedInterfaceSoundPlayer, Editor, FileMenu, Game, Level,
     SimpleInterfaceSoundPlayer, get_buffer, tts)
+from earwax.action import OptionalGenerator
 
 
 class ExampleGame(Game):

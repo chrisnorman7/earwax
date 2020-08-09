@@ -1,6 +1,6 @@
 """Test level instances."""
 
-from earwax import Action, Level, Game
+from earwax import Action, Game, Level
 
 
 def test_init(level: Level, game: Game) -> None:

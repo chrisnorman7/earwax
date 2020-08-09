@@ -3,7 +3,7 @@
 from pyglet.window import key
 from pytest import raises
 
-from earwax import Game, Menu, Level
+from earwax import Game, Level, Menu
 
 
 class WorksWithoutYield(Exception):

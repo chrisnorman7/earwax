@@ -1,6 +1,6 @@
 """Test menus."""
 
-from earwax import Menu, Game, MenuItem
+from earwax import Game, Menu, MenuItem
 
 
 def test_init(game: Game, menu: Menu) -> None:

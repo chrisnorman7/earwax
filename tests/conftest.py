@@ -1,7 +1,7 @@
 from pytest import fixture
-
-from earwax import Editor, Game, Menu, Level
 from synthizer import Context, initialize, shutdown
+
+from earwax import Editor, Game, Level, Menu
 
 
 @fixture(name='level')

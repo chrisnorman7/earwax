@@ -1,10 +1,9 @@
 """Test editors."""
 
-from earwax import Game
-from pytest import raises
 from pyglet.window import key
+from pytest import raises
 
-from earwax import Editor
+from earwax import Editor, Game
 
 
 class Works(Exception):
