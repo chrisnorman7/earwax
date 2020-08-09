@@ -6,7 +6,6 @@ from typing import (TYPE_CHECKING, Callable, Dict, Generator, Iterator, List,
 
 from attr import Factory, attrib, attrs
 from pyglet import clock
-from pyglet.window import key
 
 from .action import Action, ActionFunctionType, OptionalGenerator
 
@@ -101,7 +100,7 @@ class Level:
         if motion in self.motions:
             self.motions[motion]()
             return True
-        raise NotImplementedError(key.motion_string(motion))
+        return False
 
     def action(self, name: str, **kwargs) -> Callable[
         [ActionFunctionType], Action
