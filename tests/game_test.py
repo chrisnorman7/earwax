@@ -3,7 +3,7 @@
 from pyglet.window import key
 from pytest import raises
 
-from earwax import Action, Game, Menu
+from earwax import Game, Menu, Level
 
 
 class WorksWithoutYield(Exception):
@@ -18,33 +18,16 @@ class WorksSecondYield(Exception):
     pass
 
 
-def test_init(game):
+def test_init(game: Game) -> None:
     assert isinstance(game, Game)
-    assert game.title == 'Test'
-    assert game.actions == []
-    assert game.triggered_actions == []
-    assert game.on_key_release_generators == {}
+    assert game.levels == []
     assert game.window is None
-    assert game.menus == []
-    assert game.editor is None
 
 
-def test_action(game):
-    a = game.action('Print')(print)
-    assert isinstance(a, Action)
-    assert a.title == 'Print'
-    assert a.game is game
-    assert a.func is print
-    assert a.symbol is None
-    assert a.modifiers == 0
-    assert a.interval is None
-    assert a.can_run == game.normal
-    assert a.last_run == 0.0
-    assert game.actions == [a]
+def test_on_key_press(game: Game, level: Level) -> None:
+    game.push_level(level)
 
-
-def test_on_key_press(game):
-    @game.action('Test without yield', symbol=key.T)
+    @level.action('Test without yield', symbol=key.T)
     def test_without_yield():
         raise WorksWithoutYield()
 
@@ -54,7 +37,7 @@ def test_on_key_press(game):
     game.on_key_press(key.P, 0)
     game.on_key_press(key.P, key.MOD_SHIFT)
 
-    @game.action('First yield', symbol=key._1)
+    @level.action('First yield', symbol=key._1)
     def first_yield():
         raise WorksFirstYield()
         yield
@@ -63,8 +46,10 @@ def test_on_key_press(game):
         game.on_key_press(key._1, 0)
 
 
-def test_on_key_release(game):
-    @game.action('Second yield', symbol=key._2)
+def test_on_key_release(game: Game, level: Level) -> None:
+    game.push_level(level)
+
+    @level.action('Second yield', symbol=key._2)
     def second_yield():
         yield
         raise WorksSecondYield()
@@ -74,83 +59,58 @@ def test_on_key_release(game):
         game.on_key_release(key._2, 0)
 
 
-def test_push_menu(game, menu):
-    game.push_menu(menu)
-    game.menu_search_string == 'hello'
-    game.menu_search_time = 1234
-    assert game.menus == [menu]
-    m = Menu('Second Menu')
-    game.push_menu(m)
-    assert game.menu_search_string == ''
-    assert game.menu_search_time == 0
-    assert game.menus == [menu, m]
+def test_push_level(game: Game, level: Level) -> None:
+    game.push_level(level)
+    assert game.levels == [level]
+    level_2 = Level(game)
+    game.push_level(level_2)
+    assert game.levels == [level, level_2]
 
 
-def test_replace_menu(game, menu):
-    game.push_menu(menu)
-    m = Menu('Second Menu')
-    game.replace_menu(m)
-    assert game.menus == [m]
-    game.push_menu(menu)
-    m2 = Menu('Third Menu')
-    game.replace_menu(m2)
-    assert game.menus == [m, m2]
+def test_replace_level(game: Game, level: Level, menu: Menu) -> None:
+    game.push_level(level)
+    assert game.levels == [level]
+    game.replace_level(menu)
+    assert game.levels == [menu]
+    game.push_level(level)
+    assert game.levels == [menu, level]
+    m2 = Menu(game, 'Second Menu')
+    game.replace_level(m2)
+    assert game.levels == [menu, m2]
 
 
-def test_pop_menu(game, menu):
-    game.push_menu(menu)
-    game.pop_menu()
-    assert game.menus == []
-    game.push_menu(menu)
-    m = Menu('Second Menu')
-    game.push_menu(m)
-    assert game.menus == [menu, m]
-    game.pop_menu()
-    assert game.menus == [menu]
-    game.push_menu(m)
-    game.push_menu(menu)
-    game.clear_menus()
-    assert game.menus == []
+def test_pop_level(game: Game, level: Level, menu: Menu) -> None:
+    game.push_level(level)
+    assert game.levels == [level]
+    game.pop_level()
+    assert game.levels == []
+    game.push_level(level)
+    assert game.levels == [level]
+    game.push_level(menu)
+    assert game.levels == [level, menu]
+    game.pop_level()
+    assert game.levels == [level]
 
 
-def test_no_menu(game, menu):
-    assert game.no_menu() is True
-    game.push_menu(menu)
-    assert game.no_menu() is False
+def test_clear_levels(game: Game, level: Level, menu: Menu) -> None:
+    assert game.levels == []
+    game.clear_levels()
+    assert game.levels == []
+    game.push_level(level)
+    game.push_level(menu)
+    assert game.levels == [level, menu]
+    game.clear_levels()
+    assert game.levels == []
 
 
-def test_no_editor(game, editor):
-    assert game.no_editor() is True
-    game.editor = editor
-    assert game.no_editor() is False
-
-
-def test_normal(game, editor, menu):
-    assert game.normal() is True
-    game.editor = editor
-    assert game.normal() is False
-    game.editor = None
-    assert game.normal() is True
-    game.push_menu(menu)
-    assert game.normal() is False
-    game.pop_menu()
-    assert game.normal() is True
-
-
-def test_menu(game, menu):
-    assert game.menu is None
-    game.push_menu(menu)
-    assert game.menu is menu
-    m = Menu('Second Menu')
-    game.push_menu(m)
-    assert game.menu is m
-    game.replace_menu(menu)
-    assert game.menu is menu
-
-
-def test_add_default_actions(game):
-    game.add_default_actions()
-    assert game.actions[0].func == game.menu_activate
-    assert game.actions[1].func == game.dismiss
-    assert game.actions[2].func == game.menu_up
-    assert game.actions[3].func == game.menu_down
+def test_level(game: Game, level: Level, menu: Menu) -> None:
+    assert game.level is None
+    game.push_level(level)
+    assert game.level is level
+    game.push_level(menu)
+    assert game.level is menu
+    game.pop_level()
+    assert game.level is level
+    game.clear_levels()
+    game.push_level(menu)
+    assert game.level is menu

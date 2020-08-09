@@ -2,4 +2,4 @@
 
 from accessible_output2.outputs.auto import Auto
 
-tts = Auto()
+tts: Auto = Auto()

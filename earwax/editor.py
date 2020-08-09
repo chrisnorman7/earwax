@@ -1,37 +1,30 @@
 """Provides the Editor class."""
 
-from typing import Callable, Dict, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 
-from attr import Factory, attrib, attrs
 from pyglet.window import key
 
+if TYPE_CHECKING:
+    from .game import Game
+
+from .level import DismissibleLevel
 from .speech import tts
 
-MotionFunctionType = Callable[[], None]
-MotionsType = Dict[int, MotionFunctionType]
 
-
-@attrs(auto_attribs=True)
-class Editor:
+class Editor(DismissibleLevel):
     """A basic text editor."""
 
-    # The function to be called with the text in this editor when the enter key
-    # is pressed.
-    func: Callable[[str], None]
+    # The position of the cursor.
+    cursor_position: Optional[int] = None
 
-    # The contents of this editor.
-    text: str = Factory(str)
-
-    # The position of the cursor (None means text should be appended).
-    cursor_position: Optional[int] = Factory(type(None))
-
-    # Whether or not it should be possible to dismiss this editor.
-    dismissible: bool = Factory(lambda: True)
-
-    # The defined motion events. To define more, use the motion decorator.
-    motions: MotionsType = attrib(Factory(dict), init=False)
-
-    def __attrs_post_init__(self) -> None:
+    def __init__(
+        self, game: 'Game', func: Callable[[str], None], text: str = '',
+        **kwargs
+    ) -> None:
+        """Initialise the editor."""
+        super().__init__(game, **kwargs)
+        self.func = func
+        self.text = text
         self.motion(key.MOTION_BACKSPACE)(self.motion_backspace)
         self.motion(key.MOTION_DELETE)(self.motion_delete)
         self.motion(key.MOTION_LEFT)(self.motion_left)
@@ -40,12 +33,15 @@ class Editor:
         self.motion(key.MOTION_END_OF_LINE)(self.end_of_line)
         self.motion(key.MOTION_UP)(self.motion_up)
         self.motion(key.MOTION_DOWN)(self.motion_down)
+        self.action('Submit text', symbol=key.RETURN)(self.submit)
+        self.action('Dismiss', symbol=key.ESCAPE)(self.dismiss)
+        self.action('Clear', symbol=key.U, modifiers=key.MOD_CTRL)(self.clear)
 
     def submit(self) -> None:
         """Submit the text in this control to self.func."""
         return self.func(self.text)
 
-    def on_text(self, text: str) -> None:
+    def on_text(self, text: str) -> bool:
         """Text has been entered.
 
         If the cursor is at the end of the line, append the text. Otherwise,
@@ -56,14 +52,9 @@ class Editor:
             self.text = self.text[:self.cursor_position] + text +\
                 self.text[self.cursor_position:]
         self.echo(text)
+        return super().on_text(text)
 
-    def on_text_motion(self, motion: int) -> None:
-        """Handle a motion event."""
-        if motion in self.motions:
-            return self.motions[motion]()
-        raise NotImplementedError(key.motion_string(motion))
-
-    def echo(self, text: str):
+    def echo(self, text: str) -> None:
         """Output entered text. Overridden by PasswordEditor, to speak "*"."""
         if text == ' ':
             text = 'space'
@@ -90,17 +81,6 @@ class Editor:
         """Clear this editor."""
         self.text = ''
         self.set_cursor_position(None)
-
-    def motion(
-        self, motion: int
-    ) -> Callable[[MotionFunctionType], MotionFunctionType]:
-        """A decorator to add a handler to self.motions."""
-
-        def inner(func: MotionFunctionType) -> MotionFunctionType:
-            self.motions[motion] = func
-            return func
-
-        return inner
 
     def motion_backspace(self) -> None:
         """Delete the previous character."""

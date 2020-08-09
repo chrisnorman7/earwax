@@ -7,17 +7,18 @@ from attr import Factory, attrib, attrs
 from pyglet.window import key
 
 if TYPE_CHECKING:
-    from .game import Game
+    from .level import Level
 
-ActionFunctionType = Callable[[], Optional[Generator[None, None, None]]]
+OptionalGenerator = Optional[Generator[None, None, None]]
+ActionFunctionType = Callable[[], OptionalGenerator]
 
 
 @attrs(auto_attribs=True)
 class Action:
     """An action that can be called from within a game."""
 
-    # The game this action is bound to.
-    game: 'Game'
+    # The level this action is bound to.
+    level: 'Level'
 
     # The title of this action.
     title: str
@@ -42,23 +43,10 @@ class Action:
     # runs.
     interval: Optional[int] = Factory(lambda: None)
 
-    # A function to determine whether or not this action can be used at the
-    # current time.
-    #
-    # This function should return either True or False, and should take no
-    # arguments.
-    can_run: Optional[Callable[[], bool]] = None
-
     # The time this action was last run.
     last_run: float = attrib(default=Factory(float), init=False)
 
-    def __attrs_post_init__(self) -> None:
-        if self.can_run is None:
-            self.can_run = self.game.normal
-
-    def run(
-        self, dt: Optional[float]
-    ) -> Optional[Generator[None, None, None]]:
+    def run(self, dt: Optional[float]) -> OptionalGenerator:
         """Run this action. May be called by
         pyglet.clock.schedule_interval.
 
@@ -68,9 +56,7 @@ class Action:
         This will happen either if this is a one-time action (interval is
         None), or it is being called as soon as it is triggered
         (schedule_interval doesn't allow a function to be run and
-        scheduled)."""
-        if self.can_run is not None and not self.can_run():
-            return None
+        scheduled in one call)."""
         now: float = time()
         if self.interval is not None:
             if dt is None:

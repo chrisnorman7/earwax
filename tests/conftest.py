@@ -1,22 +1,28 @@
 from pytest import fixture
 
-from earwax import Editor, Game, Menu
+from earwax import Editor, Game, Menu, Level
 from synthizer import Context, initialize, shutdown
 
 
+@fixture(name='level')
+def get_level(game: Game) -> Level:
+    """Get a new Level instance."""
+    return Level(game)
+
+
 @fixture(name='game')
-def get_game():
-    return Game('Test')
+def get_game() -> Game:
+    return Game()
 
 
 @fixture(name='menu')
-def get_menu():
-    return Menu('Test Menu')
+def get_menu(game: Game) -> Menu:
+    return Menu(game, 'Test Menu')
 
 
 @fixture(name='editor')
-def get_editor():
-    return Editor(print, text='test')
+def get_editor(game: Game) -> Editor:
+    return Editor(game, print)
 
 
 @fixture(scope='session')
@@ -27,5 +33,5 @@ def initialise_tests():
 
 
 @fixture(name='context', scope='session')
-def get_context():
+def get_context() -> Context:
     return Context()
