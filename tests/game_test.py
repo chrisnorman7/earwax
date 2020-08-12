@@ -22,6 +22,8 @@ def test_init(game: Game) -> None:
     assert isinstance(game, Game)
     assert game.levels == []
     assert game.window is None
+    assert game.triggered_actions == []
+    assert game.on_key_release_generators == {}
 
 
 def test_on_key_press(game: Game, level: Level) -> None:

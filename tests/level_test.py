@@ -7,8 +7,6 @@ def test_init(level: Level, game: Game) -> None:
     assert isinstance(level, Level)
     assert level.actions == []
     assert level.motions == {}
-    assert level.triggered_actions == []
-    assert level.on_key_release_generators == {}
 
 
 def test_action(game: Game, level: Level) -> None:

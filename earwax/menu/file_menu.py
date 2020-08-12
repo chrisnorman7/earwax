@@ -5,7 +5,7 @@ from typing import Callable, Optional
 
 from attr import attrs
 
-from ..level import OptionalGenerator
+from ..action import OptionalGenerator
 from .menu import Menu
 
 
