@@ -35,9 +35,9 @@ class ExampleGame(Game):
         )
 
 
-def main():
+def main() -> None:
     g: ExampleGame = ExampleGame()
-    level: Level = Level(g)
+    level: Level = Level()
     g.push_level(level)
 
     def file_selected(name: Optional[Path]) -> OptionalGenerator:
@@ -60,7 +60,7 @@ def main():
     def set_title() -> OptionalGenerator:
         """Set the window title to the given text."""
 
-        def inner(text: str):
+        def inner(text: str) -> None:
             if g.window is not None:
                 g.window.set_caption(text)
             tts.speak('Title set.')
@@ -69,7 +69,7 @@ def main():
         if g.window is not None:
             tts.speak(f'Window title: {g.window.caption}')
             yield
-            g.push_level(Editor(g, inner, text=g.window.caption))
+            g.push_level(Editor(inner, g, text=g.window.caption))
 
     @level.action('Quit', symbol=key.ESCAPE)
     def do_quit() -> None:
@@ -106,7 +106,7 @@ def main():
 
         yield
         menu: FileMenu = FileMenu(
-            g, 'Select A File', Path.cwd(), file_selected
+            Path.cwd(), file_selected, 'Select A File', g
         )
         g.push_level(menu)
 
@@ -115,7 +115,7 @@ def main():
     )
     def show_actions() -> None:
         """Show all game actions."""
-        g.push_level(ActionMenu(g, 'Actions'))
+        g.push_level(ActionMenu('Actions', g))
 
     g.run(Window(caption='Example Game'))
 
