@@ -26,11 +26,15 @@ class ActionMenu(Menu):
 
         def inner() -> OptionalGenerator:
             """Pop the menu, and run the action."""
-            yield
             self.game.pop_level()
+            yield
             res = action.run(None)
             if isgenerator(res):
                 next(cast(Iterator[None], res))
+                try:
+                    next(cast(Iterator[None], res))
+                except StopIteration:
+                    pass  # It's done.
             return res
 
         return inner

@@ -113,8 +113,9 @@ def main() -> None:
     @level.action(
         'Show actions', symbol=key.SLASH, modifiers=key.MOD_SHIFT
     )
-    def show_actions() -> None:
+    def show_actions() -> OptionalGenerator:
         """Show all game actions."""
+        yield
         g.push_level(ActionMenu('Actions', g))
 
     g.run(Window(caption='Example Game'))

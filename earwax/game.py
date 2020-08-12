@@ -89,6 +89,22 @@ class Game:
                 pass
         return True
 
+    def press_key(
+        self, symbol: int, modifiers: int, string: Optional[str] = None,
+        motion: Optional[int] = None
+    ) -> None:
+        """A method for use in tests. First presses the given key combination,
+        then releases them.
+
+        If string and motion are not None, then on_text, and on_text_motion
+        events will also be fired."""
+        self.on_key_press(symbol, modifiers)
+        if string is not None:
+            self.on_text(string)
+        if motion is not None:
+            self.on_text_motion(motion)
+        self.on_key_release(symbol, modifiers)
+
     def before_run(self) -> None:
         """This hook is called by the run method, just before pyglet.app.run is
         called.

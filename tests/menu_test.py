@@ -1,8 +1,12 @@
 """Test menus."""
 
-from earwax import Game, Menu, MenuItem, Level, Editor
+from earwax import Game, Menu, MenuItem, Level, Editor, ActionMenu
 from earwax.game import OptionalGenerator
 from pyglet.window import key
+
+
+class Works(Exception):
+    pass
 
 
 def test_init(game: Game, menu: Menu) -> None:
@@ -29,8 +33,7 @@ def test_yield(game: Game, menu: Menu, level: Level) -> None:
         game.pop_level()
         yield
         menu.title = new_title
-    game.on_key_press(key.BACKSPACE, 0)
-    game.on_key_release(key.BACKSPACE, 0)
+    game.press_key(key.BACKSPACE, 0, motion=key.MOTION_BACKSPACE)
     assert game.level is menu
     assert menu.title == new_title
 
@@ -46,8 +49,39 @@ def test_yield_replaces_menu(
         yield
         game.replace_level(editor)
 
-    game.on_key_press(key.E, 0)
-    game.on_text('e')
-    game.on_key_release(key.E, 0)
+    game.press_key(key.E, 0, string='e')
     assert game.level is editor
     assert editor.text == ''
+
+
+def test_action_menu(game: Game, level: Level, menu: Menu) -> None:
+    game.push_level(level)
+    a: ActionMenu = ActionMenu('Actions', game)
+    assert a.items == []
+    assert a.position == -1
+
+    @level.action('Menu', symbol=key.M)
+    def get_menu() -> OptionalGenerator:
+        yield
+        game.push_level(menu)
+
+    @level.action('Actions', symbol=key.A)
+    def actions():
+        yield  # So that the a key doesn't change focus in the actions menu.
+        game.push_level(ActionMenu('Actions', game))
+
+    game.press_key(key.A, 0, string='a')
+    assert isinstance(game.level, ActionMenu)
+    a = game.level
+    assert a.title == 'Actions'
+    assert len(a.items) == 2
+    assert a.items[0].title == 'Menu [M]'
+    assert a.items[1].title == 'Actions [A]'
+    assert a.position == -1
+    assert game.level is a
+    assert game.levels == [level, a]
+    game.press_key(key.DOWN, 0, motion=key.MOTION_DOWN)
+    assert a.position == 0
+    game.press_key(key.RETURN, 0, string='\n')
+    assert game.levels == [level, menu]
+    assert game.level is menu

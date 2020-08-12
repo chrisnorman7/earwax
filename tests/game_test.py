@@ -34,10 +34,10 @@ def test_on_key_press(game: Game, level: Level) -> None:
         raise WorksWithoutYield()
 
     with raises(WorksWithoutYield):
-        game.on_key_press(key.T, 0)
-    game.on_key_press(key.T, key.MOD_SHIFT)
-    game.on_key_press(key.P, 0)
-    game.on_key_press(key.P, key.MOD_SHIFT)
+        game.press_key(key.T, 0, string='t')
+    game.press_key(key.T, key.MOD_SHIFT, string='T')
+    game.press_key(key.P, 0, string='p')
+    game.press_key(key.P, key.MOD_SHIFT, string='P')
 
     @level.action('First yield', symbol=key._1)
     def first_yield():
@@ -45,7 +45,7 @@ def test_on_key_press(game: Game, level: Level) -> None:
         yield
 
     with raises(WorksFirstYield):
-        game.on_key_press(key._1, 0)
+        game.press_key(key._1, 0, string='1')
 
 
 def test_on_key_release(game: Game, level: Level) -> None:

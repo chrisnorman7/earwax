@@ -24,7 +24,7 @@ def test_submit(game: Game) -> None:
     e = Editor(on_submit, game, text='test')
     game.push_level(e)
     with raises(Works) as exc:
-        game.on_key_press(key.RETURN, 0)
+        game.press_key(key.RETURN, 0, string='\n')
     assert exc.value.args == (e.text,)
 
 
