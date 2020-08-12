@@ -1,4 +1,4 @@
-"""Provides the Level class."""
+"""Provides classes for working with levels."""
 
 from inspect import isgenerator
 from typing import (TYPE_CHECKING, Callable, Dict, Generator, Iterator, List,
@@ -25,9 +25,6 @@ MotionsType = Dict[int, MotionFunctionType]
 class Level:
     """A thing that contains event handlers. Can be pushed and pulled from
     within a Game instance."""
-
-    # The game this level will be pushed onto.
-    game: 'Game'
 
     # A list of actions which can be called on this object.
     actions: ActionListType = attrib(default=Factory(list), init=False)
@@ -141,10 +138,18 @@ class Level:
 
 
 @attrs(auto_attribs=True)
-class DismissibleLevel(Level):
+class GameMixin:
+    """Add a game attribute to any level."""
+
+    # The game this level is bound to.
+    game: 'Game'
+
+
+@attrs(auto_attribs=True)
+class DismissibleMixin(GameMixin):
     """Make something dismissible."""
 
-    # Whether or not it should be possible to dismiss this editor.
+    # Whether or not it should be possible to dismiss this level.
     dismissible: bool = Factory(lambda: True)
 
     def dismiss(self) -> None:
@@ -152,3 +157,11 @@ class DismissibleLevel(Level):
         if self.dismissible:
             self.game.pop_level()
             tts.speak('Cancel.')
+
+
+@attrs(auto_attribs=True)
+class TitleMixin:
+    "Add a title to any level."""
+
+    # The title of this menu.
+    title: str

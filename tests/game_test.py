@@ -62,7 +62,7 @@ def test_on_key_release(game: Game, level: Level) -> None:
 def test_push_level(game: Game, level: Level) -> None:
     game.push_level(level)
     assert game.levels == [level]
-    level_2 = Level(game)
+    level_2 = Level()
     game.push_level(level_2)
     assert game.levels == [level, level_2]
 
@@ -74,7 +74,7 @@ def test_replace_level(game: Game, level: Level, menu: Menu) -> None:
     assert game.levels == [menu]
     game.push_level(level)
     assert game.levels == [menu, level]
-    m2 = Menu(game, 'Second Menu')
+    m2 = Menu('Second Menu', game, )
     game.replace_level(m2)
     assert game.levels == [menu, m2]
 

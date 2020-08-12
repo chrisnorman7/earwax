@@ -5,9 +5,9 @@ from earwax import Editor, Game, Level, Menu
 
 
 @fixture(name='level')
-def get_level(game: Game) -> Level:
+def get_level() -> Level:
     """Get a new Level instance."""
-    return Level(game)
+    return Level()
 
 
 @fixture(name='game')
@@ -17,12 +17,12 @@ def get_game() -> Game:
 
 @fixture(name='menu')
 def get_menu(game: Game) -> Menu:
-    return Menu(game, 'Test Menu')
+    return Menu('Test Menu', game)
 
 
 @fixture(name='editor')
 def get_editor(game: Game) -> Editor:
-    return Editor(game, print)
+    return Editor(print, game)
 
 
 @fixture(scope='session')

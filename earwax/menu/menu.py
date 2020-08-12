@@ -1,32 +1,30 @@
 """Provides the Menu class."""
 
 from time import time
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import Callable, List, Optional
 
+from attr import Factory, attrs
 from pyglet.window import key
 
 from ..action import ActionFunctionType, OptionalGenerator
-
-if TYPE_CHECKING:
-    from ..game import Game
-
-from ..level import DismissibleLevel
+from ..level import DismissibleMixin, Level, TitleMixin
 from ..speech import tts
 from .menu_item import MenuItem
 
 
-class Menu(DismissibleLevel):
+@attrs(auto_attribs=True)
+class Menu(TitleMixin, DismissibleMixin, Level):
     """A menu which holds multiple menu items which can be activated using
     actions."""
 
-    # The user's position in this menu.
-    position: int
-
     # The list of MenuItem instances for this menu.
-    items: List[MenuItem]
+    items: List[MenuItem] = Factory(list)
 
-    # The timeout for menu searches.
-    search_timeout: float
+    # The user's position in this menu.
+    position: int = -1
+
+    # The maximum time between menu searches.
+    search_timeout: float = 0.5
 
     # The time the last menu search was performed.
     search_time: float = 0.0
@@ -34,15 +32,8 @@ class Menu(DismissibleLevel):
     # The current menu search search string.
     search_string: str = ''
 
-    def __init__(
-        self, game: 'Game', title: str, position: int = -1,
-        search_timeout: float = 0.5, **kwargs
-    ) -> None:
+    def __attrs_post_init__(self) -> None:
         """Initialise the menu."""
-        super().__init__(game, **kwargs)
-        self.title = title
-        self.position = position
-        self.search_timeout = search_timeout
         self.items = []
         self.action('Activate item', symbol=key.RETURN)(self.activate)
         self.action('Dismiss', symbol=key.ESCAPE)(self.dismiss)

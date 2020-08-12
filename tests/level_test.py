@@ -5,7 +5,6 @@ from earwax import Action, Game, Level
 
 def test_init(level: Level, game: Game) -> None:
     assert isinstance(level, Level)
-    assert level.game is game
     assert level.actions == []
     assert level.motions == {}
     assert level.triggered_actions == []

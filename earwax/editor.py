@@ -1,30 +1,35 @@
 """Provides the Editor class."""
 
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import Callable, Optional
 
+from attr import attrs
 from pyglet.window import key
 
-if TYPE_CHECKING:
-    from .game import Game
-
-from .level import DismissibleLevel
+from .action import OptionalGenerator
+from .level import DismissibleMixin, Level
 from .speech import tts
 
 
-class Editor(DismissibleLevel):
+@attrs(auto_attribs=True)
+class EditorBase:
+    """Add a func attribute."""
+
+    # The function which should be called when pressing enter in an edit field.
+    func: Callable[[str], OptionalGenerator]
+
+
+@attrs(auto_attribs=True)
+class Editor(EditorBase, DismissibleMixin, Level):
     """A basic text editor."""
+
+    # The text which can be edited by this object.
+    text: str = ''
 
     # The position of the cursor.
     cursor_position: Optional[int] = None
 
-    def __init__(
-        self, game: 'Game', func: Callable[[str], None], text: str = '',
-        **kwargs
-    ) -> None:
+    def __attrs_post_init__(self) -> None:
         """Initialise the editor."""
-        super().__init__(game, **kwargs)
-        self.func = func
-        self.text = text
         self.motion(key.MOTION_BACKSPACE)(self.motion_backspace)
         self.motion(key.MOTION_DELETE)(self.motion_delete)
         self.motion(key.MOTION_LEFT)(self.motion_left)
@@ -37,7 +42,7 @@ class Editor(DismissibleLevel):
         self.action('Dismiss', symbol=key.ESCAPE)(self.dismiss)
         self.action('Clear', symbol=key.U, modifiers=key.MOD_CTRL)(self.clear)
 
-    def submit(self) -> None:
+    def submit(self) -> OptionalGenerator:
         """Submit the text in this control to self.func."""
         return self.func(self.text)
 
