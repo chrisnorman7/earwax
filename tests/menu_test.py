@@ -1,8 +1,9 @@
 """Test menus."""
 
-from earwax import Game, Menu, MenuItem, Level, Editor, ActionMenu
-from earwax.game import OptionalGenerator
 from pyglet.window import key
+
+from earwax import ActionMenu, Editor, Game, Level, Menu, MenuItem
+from earwax.game import OptionalGenerator
 
 
 class Works(Exception):

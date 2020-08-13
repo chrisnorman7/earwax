@@ -148,7 +148,7 @@ class Game:
                 pass
         return True
 
-    def press_mouse(self, button: int, modifiers: int) -> None:
+    def click_mouse(self, button: int, modifiers: int) -> None:
         """Used for testing, to simulate pressing and releasing a mouse
         button."""
         self.on_mouse_press(0, 0, button, modifiers)
