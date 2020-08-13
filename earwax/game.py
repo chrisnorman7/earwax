@@ -47,6 +47,12 @@ class Game:
         default=Factory(dict), init=False
     )
 
+    # The actions which returned generators, and need to do something on mouse
+    # release.
+    mouse_release_generators: ReleaseGeneratorListType = attrib(
+        default=Factory(dict), init=False
+    )
+
     def start_action(self, a: Action) -> OptionalGenerator:
         """Start an action. If the action has no interval, it will be ran
         straight away. Otherwise, it will be added to triggered_actions."""
@@ -96,7 +102,7 @@ class Game:
         motion: Optional[int] = None
     ) -> None:
         """A method for use in tests. First presses the given key combination,
-        then releases them.
+        then releases it.
 
         If string and motion are not None, then on_text, and on_text_motion
         events will also be fired."""
@@ -107,6 +113,47 @@ class Game:
             getattr(self, 'on_text_motion', lambda m: None)(motion)
         self.on_key_release(symbol, modifiers)
 
+    def on_mouse_press(
+        self, x: int, y: int, button: int, modifiers: int
+    ) -> bool:
+        """A mouse button has been pressed down."""
+        if self.level is not None:
+            a: Action
+            for a in self.level.actions:
+                if a.mouse_button == button and a.modifiers == modifiers:
+                    res: OptionalGenerator = self.start_action(a)
+                    if isgenerator(res):
+                        next(cast(Iterator[None], res))
+                        self.mouse_release_generators[button] = cast(
+                            Generator[None, None, None], res
+                        )
+            return True
+        return False
+
+    def on_mouse_release(
+        self, x: int, y: int, button: int, modifiers: int
+    ) -> bool:
+        """A mouse button has been released."""
+        a: Action
+        for a in self.triggered_actions:
+            if a.mouse_button == button:
+                self.stop_action(a)
+        if button in self.mouse_release_generators:
+            generator: Generator[
+                None, None, None
+            ] = self.key_release_generators.pop(button)
+            try:
+                next(generator)
+            except StopIteration:
+                pass
+        return True
+
+    def press_mouse(self, button: int, modifiers: int) -> None:
+        """Used for testing, to simulate pressing and releasing a mouse
+        button."""
+        self.on_mouse_press(0, 0, button, modifiers)
+        self.on_mouse_release(0, 0, button, modifiers)
+
     def before_run(self) -> None:
         """This hook is called by the run method, just before pyglet.app.run is
         called.
@@ -116,10 +163,11 @@ class Game:
         context manager, so feel free to play sounds."""
         pass
 
-    def run(self, window: Window) -> None:
+    def run(self, window: Window, mouse_exclusive: bool = True) -> None:
         """Run the game."""
         pyglet.options['shadow_window'] = False
         window.push_handlers(self)
+        window.set_exclusive_mouse(mouse_exclusive)
         self.window = window
         with initialized():
             self.before_run()

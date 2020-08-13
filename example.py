@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from pyglet.window import Window, key
+from pyglet.window import Window, key, mouse
 from synthizer import BufferGenerator, Context, DirectSource, SynthizerError
 
 from earwax import (
@@ -78,14 +78,14 @@ def main() -> None:
         if g.window is not None:
             g.window.dispatch_event('on_close')
 
-    @level.action('Beep', symbol=key.B, interval=0.75)
+    @level.action('Beep', symbol=key.B, interval=0.75, mouse_button=mouse.LEFT)
     def do_beep() -> None:
         """Speak something."""
         if g.can_beep:
             sys.stdout.write('\a')
             sys.stdout.flush()
 
-    @level.action('Toggle beeping', symbol=key.P)
+    @level.action('Toggle beeping', symbol=key.P, mouse_button=mouse.RIGHT)
     def toggle_beep() -> None:
         """Toggle beeping."""
         g.can_beep = not g.can_beep

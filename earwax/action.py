@@ -30,6 +30,10 @@ class Action:
     # pyglet.window.key).
     symbol: Optional[int] = None
 
+    # The mouse button to be used (should be one of the symbols from
+    # pyglet.window.key).
+    mouse_button: Optional[int] = None
+
     # Keyboard modifiers. Should be made up of modifiers from
     # pyglet.window.key.
     modifiers: int = 0
