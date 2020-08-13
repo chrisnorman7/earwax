@@ -6,6 +6,7 @@ from typing import Callable, Dict, Generator, Iterator, List, Optional, cast
 import pyglet
 from attr import Factory, attrib, attrs
 from pyglet import app, clock
+from .event_matcher import EventMatcher
 from pyglet.window import Window
 from synthizer import initialized
 
@@ -51,6 +52,11 @@ class Game:
     # release.
     mouse_release_generators: ReleaseGeneratorListType = attrib(
         default=Factory(dict), init=False
+    )
+
+    # The event matchers used by this game.
+    event_matchers: Dict[str, EventMatcher] = attrib(
+        default=Factory(dict), init=False, repr=False
     )
 
     def start_action(self, a: Action) -> OptionalGenerator:
@@ -166,7 +172,11 @@ class Game:
     def run(self, window: Window, mouse_exclusive: bool = True) -> None:
         """Run the game."""
         pyglet.options['shadow_window'] = False
-        window.push_handlers(self)
+        name: str
+        for name in window.event_types:
+            em: EventMatcher = EventMatcher(self, name)
+            self.event_matchers[name] = em
+            window.event(name)(em.dispatch)
         window.set_exclusive_mouse(mouse_exclusive)
         self.window = window
         with initialized():
@@ -176,8 +186,6 @@ class Game:
     def push_level(self, level: Level) -> None:
         """Push a level onto self.levels."""
         self.levels.append(level)
-        if self.window is not None:
-            self.window.push_handlers(level)
         level.on_push()
 
     def replace_level(self, level: Level) -> None:
@@ -188,8 +196,6 @@ class Game:
     def pop_level(self) -> None:
         """Pop the most recent level from the stack."""
         level: Level = self.levels.pop()
-        if self.window is not None:
-            self.window.pop_handlers()
         level.on_pop()
         if self.levels:
             self.levels[-1].on_reveal()
