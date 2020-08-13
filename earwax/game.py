@@ -141,7 +141,7 @@ class Game:
         if button in self.mouse_release_generators:
             generator: Generator[
                 None, None, None
-            ] = self.key_release_generators.pop(button)
+            ] = self.mouse_release_generators.pop(button)
             try:
                 next(generator)
             except StopIteration:

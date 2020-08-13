@@ -1,9 +1,15 @@
 """Test the Action class, and all related functions."""
 
-from pytest import raises
+from inspect import isgenerator
+
 from pyglet.window import key, mouse
+from pytest import raises
 
 from earwax import Action, Game, Level
+
+
+class Works(Exception):
+    pass
 
 
 class LeftMouseButton(Exception):
@@ -42,3 +48,17 @@ def test_mouse(game: Game, level: Level) -> None:
         game.click_mouse(mouse.LEFT, 0)
     with raises(RightMouseButton):
         game.click_mouse(mouse.RIGHT, 0)
+
+
+def test_mouse_generator(game: Game, level: Level) -> None:
+    game.push_level(level)
+
+    @level.action('Mouse button', mouse_button=mouse.LEFT)
+    def mouse_button():
+        yield
+        raise Works()
+
+    game.on_mouse_press(0, 0, mouse.LEFT, 0)
+    assert isgenerator(game.mouse_release_generators[mouse.LEFT])
+    with raises(Works):
+        game.on_mouse_release(0, 0, mouse.LEFT, 0)

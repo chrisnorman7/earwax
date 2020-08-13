@@ -78,12 +78,18 @@ def main() -> None:
         if g.window is not None:
             g.window.dispatch_event('on_close')
 
-    @level.action('Beep', symbol=key.B, interval=0.75, mouse_button=mouse.LEFT)
+    @level.action('Beep', symbol=key.B, interval=0.75)
     def do_beep() -> None:
         """Speak something."""
         if g.can_beep:
             sys.stdout.write('\a')
             sys.stdout.flush()
+
+    @level.action('Mouse thing', mouse_button=mouse.LEFT)
+    def mouse_thing():
+        tts.speak('Mouse down.')
+        yield
+        tts.speak('Mouse up.')
 
     @level.action('Toggle beeping', symbol=key.P, mouse_button=mouse.RIGHT)
     def toggle_beep() -> None:
