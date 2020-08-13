@@ -30,23 +30,23 @@ def test_submit(game: Game) -> None:
 
 def test_on_text(game: Game, editor: Editor) -> None:
     game.push_level(editor)
-    game.on_text('hello')
+    editor.on_text('hello')
     assert editor.text == 'hello'
-    game.on_text('world')
+    editor.on_text('world')
     assert editor.text == 'helloworld'
     editor.set_cursor_position(5)
-    game.on_text(' ')
+    editor.on_text(' ')
     assert editor.text == 'hello world'
 
 
 def test_on_text_motion(game, editor: Editor) -> None:
     editor.text = 'hello world'
     game.push_level(editor)
-    game.on_text_motion(key.MOTION_BACKSPACE)
+    editor.on_text_motion(key.MOTION_BACKSPACE)
     assert editor.text == 'hello worl'
-    game.on_text_motion(key.MOTION_BEGINNING_OF_LINE)
+    editor.on_text_motion(key.MOTION_BEGINNING_OF_LINE)
     assert editor.cursor_position == 0
-    game.on_text_motion(key.MOTION_DELETE)
+    editor.on_text_motion(key.MOTION_DELETE)
     assert editor.text == 'ello worl'
-    game.on_text_motion(key.MOTION_END_OF_LINE)
+    editor.on_text_motion(key.MOTION_END_OF_LINE)
     assert editor.cursor_position is None

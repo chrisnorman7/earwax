@@ -23,9 +23,10 @@ class Level:
     # The defined motion events. To define more, use the motion decorator.
     motions: 'MotionsType' = attrib(Factory(dict), init=False)
 
-    def on_text(self, text: str) -> bool:
-        """Enter text into the current editor."""
-        return True
+    def on_text_motion(self, motion: int) -> None:
+        """Call the appropriate motion."""
+        if motion in self.motions:
+            self.motions[motion]()
 
     def action(self, name: str, **kwargs) -> Callable[
         [ActionFunctionType], Action
@@ -57,7 +58,7 @@ class Level:
 
     def on_pop(self) -> None:
         """This level has been popped from the stack."""
-    pass
+        pass
 
     def on_reveal(self) -> None:
         """A level which had been previously pushed over this one has now been

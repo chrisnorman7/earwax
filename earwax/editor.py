@@ -46,7 +46,7 @@ class Editor(EditorBase, DismissibleMixin, Level):
         """Submit the text in this control to self.func."""
         return self.func(self.text)
 
-    def on_text(self, text: str) -> bool:
+    def on_text(self, text: str) -> None:
         """Text has been entered.
 
         If the cursor is at the end of the line, append the text. Otherwise,
@@ -57,7 +57,6 @@ class Editor(EditorBase, DismissibleMixin, Level):
             self.text = self.text[:self.cursor_position] + text +\
                 self.text[self.cursor_position:]
         self.echo(text)
-        return super().on_text(text)
 
     def echo(self, text: str) -> None:
         """Output entered text. Overridden by PasswordEditor, to speak "*"."""

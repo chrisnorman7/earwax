@@ -3,8 +3,9 @@
 from inspect import isgenerator
 from typing import Callable, Dict, Generator, Iterator, List, Optional, cast
 
+import pyglet
 from attr import Factory, attrib, attrs
-from pyglet import app, clock, options
+from pyglet import app, clock
 from pyglet.window import Window
 from synthizer import initialized
 
@@ -42,7 +43,7 @@ class Game:
 
     # The actions which returned generators, and need to do something on key
     # release.
-    on_key_release_generators: ReleaseGeneratorListType = attrib(
+    key_release_generators: ReleaseGeneratorListType = attrib(
         default=Factory(dict), init=False
     )
 
@@ -68,10 +69,11 @@ class Game:
                     res: OptionalGenerator = self.start_action(a)
                     if isgenerator(res):
                         next(cast(Iterator[None], res))
-                        self.on_key_release_generators[symbol] = cast(
+                        self.key_release_generators[symbol] = cast(
                             Generator[None, None, None], res
                         )
-        return True
+            return True
+        return False
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool:
         """A key has been released."""
@@ -79,10 +81,10 @@ class Game:
         for a in self.triggered_actions:
             if a.symbol == symbol:
                 self.stop_action(a)
-        if symbol in self.on_key_release_generators:
+        if symbol in self.key_release_generators:
             generator: Generator[
                 None, None, None
-            ] = self.on_key_release_generators.pop(symbol)
+            ] = self.key_release_generators.pop(symbol)
             try:
                 next(generator)
             except StopIteration:
@@ -100,9 +102,9 @@ class Game:
         events will also be fired."""
         self.on_key_press(symbol, modifiers)
         if string is not None:
-            self.on_text(string)
+            getattr(self, 'on_text', lambda s: None)(string)
         if motion is not None:
-            self.on_text_motion(motion)
+            getattr(self, 'on_text_motion', lambda m: None)(motion)
         self.on_key_release(symbol, modifiers)
 
     def before_run(self) -> None:
@@ -116,12 +118,10 @@ class Game:
 
     def run(self, window: Window) -> None:
         """Run the game."""
-        options['shadow_window'] = False
+        pyglet.options['shadow_window'] = False
+        for func in (self.on_close, self.on_key_press, self.on_key_release):
+            window.event(func)
         self.window = window
-        self.window.event(self.on_key_press)
-        self.window.event(self.on_key_release)
-        self.window.event(self.on_text)
-        self.window.event(self.on_text_motion)
         with initialized():
             self.before_run()
             app.run()
@@ -129,6 +129,8 @@ class Game:
     def push_level(self, level: Level) -> None:
         """Push a level onto self.levels."""
         self.levels.append(level)
+        if self.window is not None:
+            self.window.push_handlers(level)
         level.on_push()
 
     def replace_level(self, level: Level) -> None:
@@ -139,6 +141,8 @@ class Game:
     def pop_level(self) -> None:
         """Pop the most recent level from the stack."""
         level: Level = self.levels.pop()
+        if self.window is not None:
+            self.window.pop_handlers()
         level.on_pop()
         if self.levels:
             self.levels[-1].on_reveal()
@@ -155,16 +159,6 @@ class Game:
             return self.levels[-1]
         return None
 
-    def on_text(self, text: str) -> bool:
-        """If we have a level, call its on_text method. Otherwise, do
-        nothing."""
-        if self.level is not None:
-            return self.level.on_text(text)
-        return False
-
-    def on_text_motion(self, motion: int) -> bool:
-        """Handle a motion event."""
-        if self.level is not None and motion in self.level.motions:
-            self.level.motions[motion]()
-            return True
-        return False
+    def on_close(self) -> None:
+        """The window is closing."""
+        self.clear_levels()

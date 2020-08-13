@@ -23,6 +23,7 @@ class ExampleGame(Game):
     generator: BufferGenerator
 
     def before_run(self) -> None:
+        """Set up some things."""
         self.ctx = Context()
         self.source = DirectSource(self.ctx)
         self.generator = BufferGenerator(self.ctx)
@@ -75,7 +76,7 @@ def main() -> None:
     def do_quit() -> None:
         """Quit the game."""
         if g.window is not None:
-            g.window.close()
+            g.window.dispatch_event('on_close')
 
     @level.action('Beep', symbol=key.B, interval=0.75)
     def do_beep() -> None:

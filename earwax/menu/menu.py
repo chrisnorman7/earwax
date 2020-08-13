@@ -104,7 +104,7 @@ class Menu(TitleMixin, DismissibleMixin, Level):
         self.position = len(self.items) - 1
         self.show_selection()
 
-    def on_text(self, text: str) -> bool:
+    def on_text(self, text: str) -> None:
         """Search this menu."""
         now: float = time()
         if (now - self.search_time) > self.search_timeout:
@@ -119,7 +119,6 @@ class Menu(TitleMixin, DismissibleMixin, Level):
                 self.position = index
                 self.show_selection()
                 break
-        return super().on_text(text)
 
     def on_push(self) -> None:
         """Show the current selection. That will be the same as speaking the

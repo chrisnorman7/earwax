@@ -23,7 +23,7 @@ def test_init(game: Game) -> None:
     assert game.levels == []
     assert game.window is None
     assert game.triggered_actions == []
-    assert game.on_key_release_generators == {}
+    assert game.key_release_generators == {}
 
 
 def test_on_key_press(game: Game, level: Level) -> None:
