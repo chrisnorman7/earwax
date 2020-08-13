@@ -76,13 +76,20 @@ def test_action_menu(game: Game, level: Level, menu: Menu) -> None:
     a = game.level
     assert a.title == 'Actions'
     assert len(a.items) == 2
-    assert a.items[0].title == 'Menu [M]'
-    assert a.items[1].title == 'Actions [A]'
+    assert a.items[0].title == get_menu.title
+    assert a.items[1].title == actions.title
     assert a.position == -1
     assert game.level is a
     assert game.levels == [level, a]
     game.press_key(key.DOWN, 0, motion=key.MOTION_DOWN)
+    # We should now be focussed on the first item in the menu.
     assert a.position == 0
+    # When we activate the menu item, we are put into a further menu, which is
+    # the list of triggers for the selected action.
+    game.press_key(key.RETURN, 0, string='\n')
+    assert len(game.levels) == 3
+    assert game.level is not menu
+    game.press_key(key.DOWN, 0, motion=key.MOTION_DOWN)
     game.press_key(key.RETURN, 0, string='\n')
     assert game.levels == [level, menu]
     assert game.level is menu

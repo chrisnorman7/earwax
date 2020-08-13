@@ -124,7 +124,3 @@ class Menu(TitleMixin, DismissibleMixin, Level):
         """Show the current selection. That will be the same as speaking the
         title, unless the initial focus has been set."""
         self.show_selection()
-
-    def on_reveal(self) -> None:
-        """Show the current selection."""
-        self.show_selection()

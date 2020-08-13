@@ -1,10 +1,9 @@
 """Provides the Action class."""
 
 from time import time
-from typing import TYPE_CHECKING, Callable, Generator, List, Optional
+from typing import TYPE_CHECKING, Callable, Generator, Optional
 
 from attr import Factory, attrib, attrs
-from pyglet.window import key
 
 if TYPE_CHECKING:
     from .level import Level
@@ -72,16 +71,4 @@ class Action:
 
     def __str__(self) -> str:
         """Return a string representing this action."""
-        s: str = self.title
-        triggers: List[str] = []
-        if self.symbol:
-            key_string: str = key.symbol_string(self.symbol)
-            if self.modifiers:
-                modifiers_string: str = key.modifiers_string(self.modifiers)
-                modifiers_string = modifiers_string.replace('|', '+')\
-                    .replace('MOD_', '')
-                key_string = f'{modifiers_string} + {key_string}'
-            triggers.append(key_string)
-        if triggers:
-            s += f' [{" | ".join(triggers)}]'
-        return s
+        return self.title
