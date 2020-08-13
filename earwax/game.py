@@ -119,8 +119,7 @@ class Game:
     def run(self, window: Window) -> None:
         """Run the game."""
         pyglet.options['shadow_window'] = False
-        for func in (self.on_close, self.on_key_press, self.on_key_release):
-            window.event(func)
+        window.push_handlers(self)
         self.window = window
         with initialized():
             self.before_run()
