@@ -19,7 +19,7 @@ MotionFunctionType = Callable[[], None]
 MotionsType = Dict[int, MotionFunctionType]
 
 
-@attrs(auto_attribs=True)
+@attrs(auto_attribs=True, repr=False)
 class Game:
     """The main game object.
 
