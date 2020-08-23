@@ -14,52 +14,68 @@ ActionFunctionType = Callable[[], OptionalGenerator]
 
 @attrs(auto_attribs=True)
 class Action:
-    """An action that can be called from within a game."""
+    """An action that can be called from within a game.
 
-    # The level this action is bound to.
+    Actions are added to :class:`~earwax.Level` instances.
+
+    Usually, this class is not used directly, but returned by the
+    :meth:`~earwax.Level.action` method.
+
+    :ivar ~earwax.Action.level: The level this action is bound to.
+
+    :ivar ~earwax.Action.title: The title of this action.
+
+    :ivar ~earwax.Action.func: The function to run.
+
+    :ivar ~earwax.Action.symbol: The keyboard symbol to be used (should be one
+        of the symbols from pyglet.window.key).
+
+    :ivar ~earwax.Action.mouse_button: The mouse button to be used (should be
+        one of the symbols from pyglet.window.mouse).
+
+    :ivar ~earwax.Action.modifiers: Keyboard modifiers. Should be made up of
+        modifiers from pyglet.window.key.
+
+    :ivar ~earwax.Action.interval: How often this action can run.
+
+        If None, then it is a one-time action. One-time actions should be used
+        for things like quitting the game, or passing through exits, where
+        multiple uses in a short space of time would be undesireable. If the
+        value is an integer, it will be the number of seconds which must elapse
+        between runs.
+
+    :ivar ~earwax.Action.last_run: The time this action was last run.
+
+        To get the number of seconds since an action was last run, use `time()
+        - action.last_run`.
+    """
+
     level: 'Level'
-
-    # The title of this action.
     title: str
-
-    # The function to run.
     func: ActionFunctionType
-
-    # The keyboard symbol to be used (should be one of the symbols from
-    # pyglet.window.key).
     symbol: Optional[int] = None
-
-    # The mouse button to be used (should be one of the symbols from
-    # pyglet.window.key).
     mouse_button: Optional[int] = None
-
-    # Keyboard modifiers. Should be made up of modifiers from
-    # pyglet.window.key.
     modifiers: int = 0
-
-    # How often this action can run.
-    #
-    # If None, then it is a one-time action. This type of action should be used
-    # for things like quitting the game, or passing through an exit, where
-    # multiple uses in a short space of time would be undesireable.
-    # Otherwise, this will be the number of seconds which must elapse between
-    # runs.
     interval: Optional[int] = Factory(lambda: None)
-
-    # The time this action was last run.
     last_run: float = attrib(default=Factory(float), init=False)
 
     def run(self, dt: Optional[float]) -> OptionalGenerator:
         """Run this action. May be called by
         pyglet.clock.schedule_interval.
 
-        If you need to know how this action has been called, you can check dt.
-        It will be None if it wasn't called by schedule_interval.
+        If you need to know how an action has been called, you can override
+        this method and check `dt`.
 
-        This will happen either if this is a one-time action (interval is
-        None), or it is being called as soon as it is triggered
-        (schedule_interval doesn't allow a function to be run and
-        scheduled in one call)."""
+        It will be None if it wasn't called by `schedule_interval`. This will
+        happen either if you are dealing with a one-time action
+        (:attr:`~earwax.Action.interval` is None), or the action is being
+        called as soon as it is triggered (`schedule_interval` doesn't allow a
+        function to be run and scheduled in one call).
+
+        If you need to call an action from your own code, you should use::
+
+            action.run(None)
+        """
         now: float = time()
         if self.interval is not None:
             if dt is None:

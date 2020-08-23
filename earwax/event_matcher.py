@@ -10,17 +10,27 @@ if TYPE_CHECKING:
 
 @attrs(auto_attribs=True)
 class EventMatcher:
-    """Used to prevent us writing loads of events out."""
+    """An object to call events on a :class:`~earwax.Game` instance's
+    :attr:`~earwax.Game.level` property.
 
-    # The game this matcher is bound to.
+    Used to prevent us writing loads of events out.
+
+    :ivar ~earwax.EventMatcher.game: The game this matcher is bound to.
+
+    :ivar ~earwax.EventMatcher.name: The name of the event this matcher uses.
+    """
+
     game: 'Game'
-
-    # The name of the event this matcher uses.
     name: str
 
     def dispatch(self, *args, **kwargs) -> None:
         """Find the appropriate event on game.level, if game.level is not
-        None."""
+        None.
+
+        If :attr:`self.game.level <earwax.Game.level>` doesn't have an event of
+        the proper name, search instead on :attr:`self.game
+        <earwax.EventMatcher.game>`.
+        """
         if self.game.level is not None:
             if hasattr(self.game.level, self.name):
                 return getattr(self.game.level, self.name)(*args, **kwargs)

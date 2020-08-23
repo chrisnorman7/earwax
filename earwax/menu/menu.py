@@ -15,21 +15,58 @@ from .menu_item import MenuItem
 @attrs(auto_attribs=True)
 class Menu(TitleMixin, DismissibleMixin, Level):
     """A menu which holds multiple menu items which can be activated using
-    actions."""
+    actions.
 
-    # The list of MenuItem instances for this menu.
+    As menus are simply :class:`~earwax.level.Level` subclasses, they can be
+    :meth:`pushed <earwax.game.Game.push_level>`, :meth:`popped
+    <earwax.game.Game.pop_level>`, and :meth:`replaced
+    <earwax.game.Game.replace_level>`.
+
+    To add items to a menu, you can either use the :meth:`item` decorator, or
+    the :meth:`add_item` function.
+
+
+    >>> from earwax import Game, Level, Menu, tts
+    >>> from pyglet.window import key, Window
+    >>> w = Window(caption='Test Game')
+    >>> g = Game()
+    >>> l = Level()
+    >>> @l.action('Show menu', symbol=key.M)
+    ... def menu():
+    ...     '''Show a file menu.'''
+    ...     m = Menu('Menu', g)
+    ...     @m.item('First Item')
+    ...     def first_item():
+    ...         tts.speak('First menu item.')
+    ...         g.pop_level()
+    ...     @m.item('Second Item')
+    ...     def second_item():
+    ...         tts.speak('Second menu item.')
+    ...         g.pop_level()
+    ...     g.push_level(m)
+    ...
+    >>> g.push_level(l)
+    >>> g.run(w)
+
+    To override the actions that are added to this menu, override
+    :meth:`__attrs_post_init__`.
+
+    :ivar ~earwax.Menu.items: The list of MenuItem instances for this menu.
+
+    :ivar ~earwax.Menu.position: The user's position in this menu.
+
+    :ivar ~earwax.Menu.search_timeout: The maximum time between menu searches.
+
+    :ivar ~earwax.Menu.search_time: The time the last menu search was
+        performed.
+
+    :ivar ~earwax.Menu.search_string: The current menu search search string.
+    """
+
     items: List[MenuItem] = Factory(list)
-
-    # The user's position in this menu.
     position: int = -1
-
-    # The maximum time between menu searches.
     search_timeout: float = 0.5
-
-    # The time the last menu search was performed.
     search_time: float = 0.0
-
-    # The current menu search search string.
     search_string: str = ''
 
     def __attrs_post_init__(self) -> None:
@@ -50,7 +87,12 @@ class Menu(TitleMixin, DismissibleMixin, Level):
         return None
 
     def item(self, title: str) -> Callable[[ActionFunctionType], MenuItem]:
-        """Decorate a function to be used as a menu item."""
+        """Decorate a function to be used as a menu item.
+
+        >>> @menu.item('Title')
+        ... def func():
+        ...     pass
+        """
 
         def inner(func: ActionFunctionType) -> MenuItem:
             """Actually add the function."""
@@ -59,8 +101,9 @@ class Menu(TitleMixin, DismissibleMixin, Level):
         return inner
 
     def add_item(self, title: str, func: 'ActionFunctionType') -> MenuItem:
-        """Add an item to this menu. All arguments are passed to the
-        constructor of MenuItem."""
+        """Add an item to this menu.
+
+        If you would rather use decorator syntax, use :meth:`item`."""
         menu_item: MenuItem = MenuItem(title, func)
         self.items.append(menu_item)
         return menu_item
@@ -70,7 +113,7 @@ class Menu(TitleMixin, DismissibleMixin, Level):
         menu, if position is -1.
 
         This function performs no error checking, so it will happily throw
-        errors if self.position is something stupid."""
+        errors if :attr:`position` is something stupid."""
         item: Optional[MenuItem] = self.current_item
         if item is None:
             tts.speak(self.title)
@@ -79,33 +122,45 @@ class Menu(TitleMixin, DismissibleMixin, Level):
             item.on_selected()
 
     def move_up(self) -> None:
-        """Move up in this menu."""
+        """Move up in this menu.
+
+        Usually triggered by the up arrow key."""
         self.position = max(-1, self.position - 1)
         self.show_selection()
 
     def move_down(self) -> None:
-        """Move down in this menu."""
+        """Move down in this menu.
+
+        Usually triggered by the down arrow key."""
         self.position = min(len(self.items) - 1, self.position + 1)
         self.show_selection()
 
     def activate(self) -> OptionalGenerator:
-        """Activate the currently focused menu item."""
+        """Activate the currently focused menu item.
+
+    Usually triggered by the enter key."""
         if self.current_item is None:
             return None
         return self.current_item.func()
 
     def home(self) -> None:
-        """Move to the start of a menu."""
+        """Move to the start of a menu.
+
+        Usually triggered by the home key."""
         self.position = 0
         self.show_selection()
 
     def end(self) -> None:
-        """Move to the end of a menu."""
+        """Move to the end of a menu.
+
+        Usually triggered by the end key."""
         self.position = len(self.items) - 1
         self.show_selection()
 
     def on_text(self, text: str) -> None:
-        """Search this menu."""
+        """Handle sent text.
+
+        By default, performs a search of this menu."""
         now: float = time()
         if (now - self.search_time) > self.search_timeout:
             self.search_string = text.lower()
@@ -121,6 +176,8 @@ class Menu(TitleMixin, DismissibleMixin, Level):
                 break
 
     def on_push(self) -> None:
-        """Show the current selection. That will be the same as speaking the
+        """This object has been pushed onto a :class:`~earwax.game.Game` instance.
+
+        Show the current selection. That will be the same as speaking the
         title, unless the initial focus has been set."""
         self.show_selection()

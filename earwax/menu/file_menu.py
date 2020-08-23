@@ -13,44 +13,70 @@ from .menu import Menu
 class FileMenuBase:
     """Adds path and func arguments."""
 
-    # The path this menu will start at.
     path: Path
-
-    # The function to run with the resulting file or directory.
     func: Callable[[Optional[Path]], OptionalGenerator]
 
 
 @attrs(auto_attribs=True)
 class FileMenu(FileMenuBase, Menu):
-    """A menu for slecting a file."""
+    """A menu for slecting a file.
 
-    # The root directory which this menu will be chrooted to.
+        >>> from pathlib import Path
+        >>> from earwax import Game, Level, FileMenu, tts
+        >>> from pyglet.window import key, Window
+        >>> w = Window(caption='Test Game')
+        >>> g = Game()
+        >>> l = Level()
+        >>> @l.action('Show file menu', symbol=key.F)
+        ... def file_menu():
+        ...     '''Show a file menu.'''
+        ...     def inner(p):
+        ...         tts.speak(str(p))
+        ...         g.pop_level()
+        ...     f = FileMenu(Path.cwd(), inner, 'File Menu', g)
+        ...     g.push_level(f)
+        ...
+        >>> g.push_level(l)
+        >>> g.run(w)
+
+    :ivar ~file_menu.FileMenuBase.path: The path this menu will start at.
+
+    :ivar ~file_menu.FileMenuBase.func: The function to run with the resulting
+        file or directory.
+
+    :ivar ~file_menu.FileMenu.root: The root directory which this menu will be
+        chrooted to.
+
+    :ivar ~file_menu.FileMenu.empty_label: The label given to an entry which
+        will allow this menu to return None as a result.
+
+        If this label is None (the default), then then no such option will be
+        available.
+
+    :ivar ~file_menu.FileMenu.directory_label: The label given to an entry
+        which will allow a directory - in addition to files - to be selected.
+
+        If this argument is None (the default), then no such option will be
+        available.
+
+        If you only want directories to be selected, then pass show_files=False
+        to the constructor.
+
+    :ivar ~file_menu.FileMenu.show_directories: Whether or not to show
+        directories in the list.
+
+    :ivar ~file_menu.FileMenu.show_files: Whether or not to include files in
+        the list.
+
+    :ivar ~file_menu.FileMenu.up_label: The label given to the entry to go up
+        in the directory tree.
+    """
+
     root: Optional[Path] = None
-
-    # The label given to an entry which will allow this menu to return None as
-    # a result.
-    #
-    # If this label is None (the default), then then no such option will be
-    # available.
     empty_label: Optional[str] = None
-
-    # The label given to an entry which will allow a directory - in addition to
-    # files - to be selected.
-    #
-    # If this argument is None (the default), then no such option will be
-    # available.
-    #
-    # If you only want directories to be selected, then pass show_files=False
-    # to the constructor.
     directory_label: Optional[str] = None
-
-    # Whether or not to show directories in the list.
     show_directories: bool = True
-
-    # Whether or not to include files in the list.
     show_files: bool = True
-
-    # The label given to the entry to go up in the directory tree.
     up_label: str = '..'
 
     def __attrs_post_init__(self) -> None:
@@ -69,8 +95,10 @@ class FileMenu(FileMenuBase, Menu):
                 self.add_item(child.name, self.navigate_to(child))
 
     def navigate_to(self, path: Path) -> Callable[[], None]:
-        """Navigate to a different path. Instead of completely replacing the
-        menu, just change the path, and re-use this instance."""
+        """Navigate to a different path.
+
+        Instead of completely replacing the menu, just change the path, and re-
+        use this instance."""
 
         def inner() -> None:
             self.path = path
@@ -81,7 +109,7 @@ class FileMenu(FileMenuBase, Menu):
     def select_item(self, path: Optional[Path]) -> Callable[
         [], OptionalGenerator
     ]:
-        """Used in place of a lambda."""
+        """Used as the menu handler in place of a lambda."""
 
         def inner():
             return self.func(path)

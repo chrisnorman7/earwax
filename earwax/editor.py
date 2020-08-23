@@ -14,18 +14,24 @@ from .speech import tts
 class EditorBase:
     """Add a func attribute."""
 
-    # The function which should be called when pressing enter in an edit field.
     func: Callable[[str], OptionalGenerator]
 
 
 @attrs(auto_attribs=True)
 class Editor(EditorBase, DismissibleMixin, Level):
-    """A basic text editor."""
+    """A basic text editor.
 
-    # The text which can be edited by this object.
+    By default, the enter key submits the contents to
+    :attr:`~earwax.editor.EditorBase.func`.
+
+    :ivar ~earwax.editor.EditorBase.func: The function which should be called
+        when pressing enter in an edit field.
+
+    :ivar ~earwax.Editor.text: The text which can be edited by this object.
+
+    :ivar ~earwax.Editor.position: The position of the cursor.
+    """
     text: str = ''
-
-    # The position of the cursor.
     cursor_position: Optional[int] = None
 
     def __attrs_post_init__(self) -> None:
@@ -43,7 +49,9 @@ class Editor(EditorBase, DismissibleMixin, Level):
         self.action('Clear', symbol=key.U, modifiers=key.MOD_CTRL)(self.clear)
 
     def submit(self) -> OptionalGenerator:
-        """Submit the text in this control to self.func."""
+        """Submit the text in this control to self.func.
+
+        By default, this method is called when the enter key is pressed."""
         return self.func(self.text)
 
     def on_text(self, text: str) -> None:
@@ -59,19 +67,23 @@ class Editor(EditorBase, DismissibleMixin, Level):
         self.echo(text)
 
     def echo(self, text: str) -> None:
-        """Output entered text. Overridden by PasswordEditor, to speak "*"."""
+        """Output entered and selected text."""
         if text == ' ':
             text = 'space'
         tts.speak(text)
 
     def echo_current_character(self) -> None:
-        """Echo the current character."""
+        """Echo the current character.
+
+        Used when moving through the text."""
         if self.cursor_position is None:
             return self.echo('')
         self.echo(self.text[self.cursor_position])
 
     def set_cursor_position(self, pos: Optional[int]) -> None:
-        """If pos is None, then the cursor will be at the end of the line.
+        """Set the cursor position within :attr:`~earwax.Editor.text`.
+
+        If pos is None, then the cursor will be at the end of the line.
         Otherwise, pos should be an integer between 0 and len(self.text) -
         1."""
         if pos is not None and pos >= len(self.text):
@@ -82,12 +94,17 @@ class Editor(EditorBase, DismissibleMixin, Level):
         self.echo_current_character()
 
     def clear(self) -> None:
-        """Clear this editor."""
+        """Clear this editor.
+
+        By default, this method is called when control + u is pressed."""
         self.text = ''
         self.set_cursor_position(None)
 
     def motion_backspace(self) -> None:
-        """Delete the previous character."""
+        """Delete the previous character.
+
+        This will do nothing if the cursor is at the beginning of the line, or
+        there is no text to delete."""
         if self.cursor_position is None:
             if self.text == '':
                 self.echo('No text to delete.')
@@ -103,7 +120,10 @@ class Editor(EditorBase, DismissibleMixin, Level):
             ]
 
     def motion_delete(self) -> None:
-        """Delete the character under the cursor."""
+        """Delete the character under the cursor.
+
+        Nothing will happen if we are at the end of the line (or there is no
+        text, which will amount to the same thing)."""
         if self.cursor_position is None:
             return self.echo('')
         self.text = self.text[:self.cursor_position] + self.text[
@@ -112,7 +132,10 @@ class Editor(EditorBase, DismissibleMixin, Level):
         self.echo_current_character()
 
     def motion_left(self) -> None:
-        """Move left in the editor."""
+        """Move left in the editor.
+
+        By default, this method is called when the left arrow key is
+        pressed."""
         if self.cursor_position is None:
             if self.text == '':
                 return self.echo('')
@@ -121,29 +144,41 @@ class Editor(EditorBase, DismissibleMixin, Level):
             self.set_cursor_position(max(0, self.cursor_position - 1))
 
     def motion_right(self) -> None:
-        """Move right in the editor."""
+        """Move right in the editor.
+
+        By default, this method is called when the right arrow key is
+        pressed."""
         if self.cursor_position is None:
             return self.echo('')
         self.set_cursor_position(self.cursor_position + 1)
 
     def beginning_of_line(self) -> None:
-        """Move to the start of the current line."""
+        """Move to the start of the current line.
+
+        By default, this method is called when the home key is pressed."""
         self.set_cursor_position(0)
 
     def end_of_line(self) -> None:
-        """Move to the end of the line."""
+        """Move to the end of the line.
+
+        By default, this method is called when the end key is pressed."""
         self.set_cursor_position(None)
 
     def motion_up(self) -> None:
         """Since we're not bothering with multiline text fields at this stage,
         just move the cursor to the start of the line, and read the whole
-        thing."""
+        thing.
+
+        By default, this method is called when the up arrow key is pressed."""
         self.cursor_position = 0
         self.echo(self.text)
 
     def motion_down(self) -> None:
         """Since we're not bothering with multiline text fields at this stage,
         just move the cursor to the end of the line, and read the whole
-        thing."""
+        thing.
+
+        By default, this method is called when the down arrow key ispressed."""
+
         self.cursor_position = None
         self.echo(self.text)

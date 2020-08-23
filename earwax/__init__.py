@@ -1,12 +1,43 @@
-"""Chris's Audio Game Engine
+"""
+Earwax
+======
 
-I am writing this so I can use it in my projects. If you find it useful, then
-that's great.
+    This package is heavily inspired by `Flutter <https://flutter.dev/>`_.
 
-You start with the `Game` class."""
+Usage
+=====
+
+* Begin with a :class:`~earwax.Game` object.
+
+    >>> from earwax import Game, Level
+    >>> g = Game()
+
+* Create a level.
+
+    >>> l = Level()
+
+* Add actions to allow the player to do things.
+
+    >>> @l.action(...)
+    ... def action():
+    ...     pass
+
+* Create a window.
+
+    >>> from pyglet.window import Window
+    >>> w = Window(caption='Earwax Game')
+
+* Run the game you have created.
+
+    >>> g.run(w)
+
+There are ready made :class:`~earwax.Level` classes for creating :class:`menus
+<earwax.Menu>`, and :class:`editors <earwax.Editor>`.
+"""
 
 from .action import Action
 from .editor import Editor
+from .event_matcher import EventMatcher
 from .game import Game
 from .level import Level
 from .menu import ActionMenu, FileMenu, Menu, MenuItem
@@ -17,5 +48,5 @@ from .speech import tts
 __all__ = [
     'Game', 'tts', 'Action', 'Menu', 'MenuItem', 'FileMenu', 'ActionMenu',
     'get_buffer', 'Editor', 'SimpleInterfaceSoundPlayer',
-    'AdvancedInterfaceSoundPlayer', 'Level'
+    'AdvancedInterfaceSoundPlayer', 'Level', 'EventMatcher'
 ]
