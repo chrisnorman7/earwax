@@ -14,16 +14,10 @@ pip install -U earwax
 
 See the `example.py` file, included in this repository.
 
+\\ Documentation
+
+Until I can get RTD working, you can view Earwax's documentation [here](https://chrisnorman7.github.io/earwax/build/html/index.html).
+
 ## Todo
 
 * Menus that provide sound icons.
-
-## Features
-
-### Separation of game "levels"
-
-In Earwax, levels are everything. They should be used for any part of a game which should have different functionality. Currently, editors and menus are both levels.
-
-### Easy to use actions
-
-You can add
