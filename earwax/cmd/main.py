@@ -7,7 +7,7 @@ from .menu import main_menu
 
 
 def main() -> None:
-    """The amin entry point.
+    """The main entry point.
 
     This function will be called by the earwax script."""
     window: Window = Window(caption='Earwax')
