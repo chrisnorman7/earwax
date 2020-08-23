@@ -14,6 +14,8 @@ Implemented Features
 
 * Both :class:`simple <earwax.SimpleInterfaceSoundPlayer>` and :class:`advanced <earwax.AdvancedInterfaceSoundPlayer>` sound players, designed for playing interface sounds.
 
+* A flexible and unobtrusive configuration framework that uses yaml.
+
 Feature Requests
 ----------------
 
