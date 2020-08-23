@@ -6,7 +6,7 @@ from .constants import game
 from .menu import main_menu
 
 
-def main() -> None:
+def cmd_main() -> None:
     """The main entry point.
 
     This function will be called by the earwax script."""

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.config module &mdash; earwax 6.0.6.dev12 documentation</title>
+  <title>earwax.config module &mdash; earwax 6.0.6.dev13 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                6.0.6.dev12
+                6.0.6.dev13
               </div>
             
           
@@ -218,7 +218,7 @@ dumping with json.</p>
 <dd><p>Return all configuration values, recursing through subsections:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">ImaginaryConfiguration</span><span class="p">()</span>
 <span class="n">d</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">dump</span><span class="p">()</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;config.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;config.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -227,16 +227,44 @@ restore dumped values.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="earwax.config.Config.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span><span class="p">:</span> <span class="n">TextIO</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.config.Config.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses the <a class="reference internal" href="earwax.html#earwax.Config.populate_from_dict" title="earwax.Config.populate_from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">populate_from_dict()</span></code></a> method on
+dataloaded from the given file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">ImaginaryConfigSection</span><span class="p">()</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;config.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">):</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To save the data in the furst place, use the
+<a class="reference internal" href="earwax.html#earwax.Config.save" title="earwax.Config.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="earwax.config.Config.populate_from_dict">
 <code class="sig-name descname">populate_from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.config.Config.populate_from_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Populate values from a dictionary, probably provided by
 <a class="reference internal" href="earwax.html#earwax.Config.dump" title="earwax.Config.dump"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dump()</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Config</span><span class="p">()</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;config.json&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;config.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">c</span><span class="o">.</span><span class="n">populate_from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Any missing values from <cite>data</cite> are ignored.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.config.Config.save">
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span><span class="p">:</span> <span class="n">TextIO</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.config.Config.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dump this configuration section to a file.</p>
+<p>Uses the <a class="reference internal" href="earwax.html#earwax.Config.dump" title="earwax.Config.dump"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dump()</span></code></a> method to get the dumpable data.</p>
+<p>You can save a configuration section like so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">ImaginaryConfigSection</span><span class="p">()</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;config.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, YAML is used.</p>
 </dd></dl>
 
 </dd></dl>
