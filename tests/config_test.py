@@ -28,14 +28,14 @@ class GameConfig(Config):
     server: ServerConfig = ServerConfig()
 
 
-def test_init():
+def test_init() -> None:
     c: Config = Config()
     assert c.dump() == {}
     assert c.__config_subsections__ == {}
     assert c.__config_values__ == {}
 
 
-def test_dump():
+def test_dump() -> None:
     c: GameConfig = GameConfig()
     d: Dict[str, Any] = c.dump()
     assert d['server'] == c.server.dump()
@@ -53,3 +53,20 @@ def test_recursive_dump() -> None:
     assert d['account']['server'] == ServerConfig().dump()
     c.populate_from_dict(d)
     assert c.dump() == d
+
+
+def test_set_value() -> None:
+    c = ServerConfig()
+    c.hostname.value = 'microsoft.com'
+    c.port.value = 8080
+    assert c.dump() == {
+        'hostname': 'microsoft.com',
+        'port': 8080
+    }
+
+
+def test_load() -> None:
+    s = ServerConfig()
+    s.populate_from_dict({'hostname': 'google.com', 'port': 9000})
+    assert s.hostname.value == 'google.com'
+    assert s.port.value == 9000

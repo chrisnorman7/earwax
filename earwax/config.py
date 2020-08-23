@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, Optional
 
-from attr import attrs
+from attr import Factory, attrs, attrib
 
 DumpDict = Dict[str, Any]
 
@@ -29,15 +29,20 @@ class ConfigValue:
 
         Currently this attribute is used by :class:`earwax.ConfigMenu` to
         figure out how to construct the widget that will represent this value.
+
+    :ivar `~earwax.ConfigValue.default`: The default value for this
+    configuration value.
     """
 
     value: Any
     name: Optional[str] = None
     type_: Optional[object] = None
+    default: Optional[Any] = attrib(default=Factory(type(None)), init=False)
 
     def __attrs_post_init__(self) -> None:
         if self.type_ is None:
             self.type_ = type(self.value)
+        self.default = self.value
 
 
 class Config:
@@ -64,8 +69,6 @@ class Config:
             value: Any = getattr(cls, name)
             if isinstance(value, ConfigValue):
                 self.__config_values__[name] = value
-                setattr(self, name, value.value)
-                self.__annotations__[name] = value.type_
             elif isinstance(value, Config):
                 self.__config_subsections__[name] = value
 
@@ -73,8 +76,9 @@ class Config:
         """Return this object as a dictionary."""
         d: DumpDict = {}
         name: str
-        for name in self.__config_values__:
-            d[name] = getattr(self, name)
+        value: ConfigValue
+        for name, value in self.__config_values__.items():
+            d[name] = value.value
         subsection: Config
         for name, subsection in self.__config_subsections__.items():
             d[name] = subsection.dump()
@@ -95,7 +99,7 @@ class Config:
         name: str
         value: ConfigValue
         for name, value in self.__config_values__.items():
-            setattr(self, name, data.get(name, value.value))
+            value.value = data.get(name, value.value)
         subsection: Config
         for name, subsection in self.__config_subsections__.items():
             subsection.populate_from_dict(data.get(name, {}))
