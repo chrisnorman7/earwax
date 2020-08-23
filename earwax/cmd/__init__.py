@@ -9,4 +9,4 @@ This document will be updated as this program matures.
 
 from .main import cmd_main
 
-__all__ = ['main']
+__all__ = ['cmd_main']
