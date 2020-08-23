@@ -1,0 +1,391 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>earwax.editor module &mdash; earwax 6.0.5.dev8 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="earwax.event_matcher module" href="earwax.event_matcher.html" />
+    <link rel="prev" title="earwax.action module" href="earwax.action.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> earwax
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                6.0.5.dev8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#full-example">Full example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">earwax</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="earwax.html">earwax package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="earwax.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="earwax.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="earwax.action.html">earwax.action module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">earwax.editor module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="earwax.event_matcher.html">earwax.event_matcher module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="earwax.game.html">earwax.game module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="earwax.level.html">earwax.level module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="earwax.sound.html">earwax.sound module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="earwax.speech.html">earwax.speech module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="earwax.html#module-earwax">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">earwax</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">earwax</a> &raquo;</li>
+        
+          <li><a href="earwax.html">earwax package</a> &raquo;</li>
+        
+      <li>earwax.editor module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/earwax.editor.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-earwax.editor">
+<span id="earwax-editor-module"></span><h1>earwax.editor module<a class="headerlink" href="#module-earwax.editor" title="Permalink to this headline">¶</a></h1>
+<p>Provides the Editor class.</p>
+<dl class="py class">
+<dt id="earwax.editor.Editor">
+<em class="property">class </em><code class="sig-prename descclassname">earwax.editor.</code><code class="sig-name descname">Editor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">[</span>str<span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">game</span><span class="p">:</span> <span class="n">Game</span></em>, <em class="sig-param"><span class="n">dismissible</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">cursor_position</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.editor.Editor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#earwax.editor.EditorBase" title="earwax.editor.EditorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.editor.EditorBase</span></code></a>, <a class="reference internal" href="earwax.level.html#earwax.level.DismissibleMixin" title="earwax.level.DismissibleMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.level.DismissibleMixin</span></code></a>, <a class="reference internal" href="earwax.level.html#earwax.level.Level" title="earwax.level.Level"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.level.Level</span></code></a></p>
+<p>A basic text editor.</p>
+<p>By default, the enter key submits the contents to
+<a class="reference internal" href="#earwax.editor.EditorBase.func" title="earwax.editor.EditorBase.func"><code class="xref py py-attr docutils literal notranslate"><span class="pre">func</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#earwax.editor.EditorBase.func" title="earwax.editor.EditorBase.func"><strong>func</strong></a> – The function which should be called
+when pressing enter in an edit field.</p></li>
+<li><p><a class="reference internal" href="earwax.html#earwax.Editor.text" title="earwax.Editor.text"><strong>text</strong></a> – The text which can be edited by this object.</p></li>
+<li><p><strong>position</strong> – The position of the cursor.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="earwax.editor.Editor.beginning_of_line">
+<code class="sig-name descname">beginning_of_line</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.beginning_of_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move to the start of the current line.</p>
+<p>By default, this method is called when the home key is pressed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.clear">
+<code class="sig-name descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear this editor.</p>
+<p>By default, this method is called when control + u is pressed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="earwax.editor.Editor.cursor_position">
+<code class="sig-name descname">cursor_position</code><em class="property">: Optional<span class="p">[</span>int<span class="p">]</span></em><a class="headerlink" href="#earwax.editor.Editor.cursor_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.echo">
+<code class="sig-name descname">echo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.echo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output entered and selected text.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.echo_current_character">
+<code class="sig-name descname">echo_current_character</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.echo_current_character" title="Permalink to this definition">¶</a></dt>
+<dd><p>Echo the current character.</p>
+<p>Used when moving through the text.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.end_of_line">
+<code class="sig-name descname">end_of_line</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.end_of_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move to the end of the line.</p>
+<p>By default, this method is called when the end key is pressed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.motion_backspace">
+<code class="sig-name descname">motion_backspace</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.motion_backspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the previous character.</p>
+<p>This will do nothing if the cursor is at the beginning of the line, or
+there is no text to delete.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.motion_delete">
+<code class="sig-name descname">motion_delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.motion_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the character under the cursor.</p>
+<p>Nothing will happen if we are at the end of the line (or there is no
+text, which will amount to the same thing).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.motion_down">
+<code class="sig-name descname">motion_down</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.motion_down" title="Permalink to this definition">¶</a></dt>
+<dd><p>Since we’re not bothering with multiline text fields at this stage,
+just move the cursor to the end of the line, and read the whole
+thing.</p>
+<p>By default, this method is called when the down arrow key ispressed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.motion_left">
+<code class="sig-name descname">motion_left</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.motion_left" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move left in the editor.</p>
+<p>By default, this method is called when the left arrow key is
+pressed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.motion_right">
+<code class="sig-name descname">motion_right</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.motion_right" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move right in the editor.</p>
+<p>By default, this method is called when the right arrow key is
+pressed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.motion_up">
+<code class="sig-name descname">motion_up</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.motion_up" title="Permalink to this definition">¶</a></dt>
+<dd><p>Since we’re not bothering with multiline text fields at this stage,
+just move the cursor to the start of the line, and read the whole
+thing.</p>
+<p>By default, this method is called when the up arrow key is pressed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.on_text">
+<code class="sig-name descname">on_text</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.on_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Text has been entered.</p>
+<p>If the cursor is at the end of the line, append the text. Otherwise,
+insert it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.set_cursor_position">
+<code class="sig-name descname">set_cursor_position</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pos</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.editor.Editor.set_cursor_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the cursor position within <a class="reference internal" href="earwax.html#earwax.Editor.text" title="earwax.Editor.text"><code class="xref py py-attr docutils literal notranslate"><span class="pre">text</span></code></a>.</p>
+<p>If pos is None, then the cursor will be at the end of the line.
+Otherwise, pos should be an integer between 0 and len(self.text) -
+1.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.editor.Editor.submit">
+<code class="sig-name descname">submit</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#earwax.editor.Editor.submit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Submit the text in this control to self.func.</p>
+<p>By default, this method is called when the enter key is pressed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="earwax.editor.Editor.text">
+<code class="sig-name descname">text</code><em class="property">: str</em><a class="headerlink" href="#earwax.editor.Editor.text" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="earwax.editor.EditorBase">
+<em class="property">class </em><code class="sig-prename descclassname">earwax.editor.</code><code class="sig-name descname">EditorBase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">[</span>str<span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.editor.EditorBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Add a func attribute.</p>
+<dl class="py attribute">
+<dt id="earwax.editor.EditorBase.func">
+<code class="sig-name descname">func</code><em class="property">: Callable<span class="p">[</span><span class="p">[</span>str<span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></em><a class="headerlink" href="#earwax.editor.EditorBase.func" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="earwax.event_matcher.html" class="btn btn-neutral float-right" title="earwax.event_matcher module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="earwax.action.html" class="btn btn-neutral float-left" title="earwax.action module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Chris Norman
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
