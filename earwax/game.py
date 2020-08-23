@@ -6,11 +6,11 @@ from typing import Callable, Dict, Generator, Iterator, List, Optional, cast
 import pyglet
 from attr import Factory, attrib, attrs
 from pyglet import app, clock
-from .event_matcher import EventMatcher
 from pyglet.window import Window
 from synthizer import initialized
 
 from .action import Action, OptionalGenerator
+from .event_matcher import EventMatcher
 from .level import Level
 
 ActionListType = List[Action]
