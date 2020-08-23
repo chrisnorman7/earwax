@@ -1,7 +1,11 @@
-from pytest import fixture
-from synthizer import Context, initialize, shutdown
+import pyglet
 
-from earwax import Editor, Game, Level, Menu
+pyglet.options['shadow_window'] = False
+
+from pytest import fixture  # noqa: E402
+from synthizer import Context, initialize, shutdown  # noqa: E402
+
+from earwax import Editor, Game, Level, Menu  # noqa: E402
 
 
 @fixture(name='level')
