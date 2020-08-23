@@ -4,7 +4,7 @@ An audio game engine with a silly name, because the one I originally wanted isn'
 
 ## Installation
 
-You can instlal iwth pip:
+You can install with pip:
 
 ```python
 pip install -U earwax
