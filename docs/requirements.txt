@@ -1,7 +1,5 @@
-sphinx
-sphinx-rtd-theme
 sphinxcontrib.apidoc
 pyglet
-synthizer
 accessible_output2
 attrs
+synthizer
