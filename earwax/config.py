@@ -29,10 +29,10 @@ class Config:
         self = cls(**data)  # type: ignore[call-arg]
         a: Attribute
         for a in cls.__attrs_attrs__:  # type: ignore[attr-defined]
-            if isclass(a.type) and issubclass(
-                a.type, Config  # type: ignore[arg-type]
+            if a.type is not None and isclass(a.type) and issubclass(
+                a.type, Config
             ):
                 setattr(
-                    self, a.name, a.type(**data[a.name])  # type: ignore[misc]
+                    self, a.name, a.type.from_dict(data[a.name])
                 )
         return self

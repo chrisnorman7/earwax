@@ -14,6 +14,19 @@ class ServerConfig(Config):
 
 
 @attrs(auto_attribs=True)
+class AccountConfig(Config):
+    username: str = 'test'
+    password: str = 'test123!'
+    server: ServerConfig = ServerConfig()
+
+
+@attrs(auto_attribs=True)
+class RecursiveConfig(Config):
+    data_dir: str = '.'
+    account: AccountConfig = AccountConfig()
+
+
+@attrs(auto_attribs=True)
 class GameConfig(Config):
     """Pretend game configuration."""
 
@@ -36,3 +49,10 @@ def test_dump():
         'server': {'hostname': 'example.com', 'port': 1234}
     }
     assert GameConfig.from_dict(d) == c
+
+
+def test_recursive_dump() -> None:
+    c = RecursiveConfig()
+    d: Dict[str, Any] = c.dump()
+    assert d['account']['server'] == ServerConfig().dump()
+    assert RecursiveConfig.from_dict(d) == c
