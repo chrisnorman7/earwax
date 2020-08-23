@@ -1,35 +1,35 @@
 """
 Earwax
-======
+------
 
     This package is heavily inspired by `Flutter <https://flutter.dev/>`_.
 
 Usage
 =====
 
-* Begin with a :class:`~earwax.Game` object.
+* Begin with a :class:`~earwax.Game` object::
 
-    >>> from earwax import Game, Level
-    >>> g = Game()
+    from earwax import Game, Level
+    g = Game()
 
-* Create a level.
+* Create a level::
 
-    >>> l = Level()
+    l = Level()
 
-* Add actions to allow the player to do things.
+* Add actions to allow the player to do things::
 
-    >>> @l.action(...)
-    ... def action():
-    ...     pass
+    @l.action(...)
+    def action():
+        pass
 
-* Create a window.
+* Create a Pyglet window::
 
-    >>> from pyglet.window import Window
-    >>> w = Window(caption='Earwax Game')
+    from pyglet.window import Window
+    w = Window(caption='Earwax Game')
 
-* Run the game you have created.
+* Run the game you have created::
 
-    >>> g.run(w)
+    g.run(w)
 
 There are ready made :class:`~earwax.Level` classes for creating :class:`menus
 <earwax.Menu>`, and :class:`editors <earwax.Editor>`.

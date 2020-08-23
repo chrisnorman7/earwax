@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.speech module &mdash; earwax 6.0.5.dev8 documentation</title>
+  <title>earwax.speech module &mdash; earwax 6.0.5.dev9 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
   
@@ -30,6 +31,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script src="../_static/custom.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -60,7 +63,7 @@
             
             
               <div class="version">
-                6.0.5.dev8
+                6.0.5.dev9
               </div>
             
           
@@ -87,9 +90,8 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html#full-example">Full example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">earwax</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="earwax.html">earwax package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="earwax.html#subpackages">Subpackages</a></li>
@@ -180,10 +182,15 @@
   <div class="section" id="module-earwax.speech">
 <span id="earwax-speech-module"></span><h1>earwax.speech module<a class="headerlink" href="#module-earwax.speech" title="Permalink to this headline">¶</a></h1>
 <p>Provides the tts object.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">tts</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s1">&#39;Hello, Earwax.&#39;</span><span class="p">)</span>
+<p>You can use this object to output speech through either the currently active
+screen reader, or SAPI:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">tts</span>
+<span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s1">&#39;Hello, Earwax.&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Although Earwax currently uses <a class="reference external" href="https://pypi.org/project/accessible-output2/">accessible_output2</a> for the TTS backend, you
+should not rely upon its specifics in your own code, as this is subject to
+possible future change.</p>
 </div>
 
 

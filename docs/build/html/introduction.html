@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction &mdash; earwax 6.0.5.dev8 documentation</title>
+  <title>Introduction &mdash; earwax 6.0.5.dev9 documentation</title>
   
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
   
@@ -30,14 +31,16 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script src="_static/custom.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Features" href="features.html" />
-    <link rel="prev" title="Welcome to Earwax’s documentation!" href="index.html" /> 
+    <link rel="next" title="earwax" href="api/modules.html" />
+    <link rel="prev" title="Features" href="features.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,7 +64,7 @@
             
             
               <div class="version">
-                6.0.5.dev8
+                6.0.5.dev9
               </div>
             
           
@@ -88,9 +91,12 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#full-example">Full example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#workflow">Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#full-example">Full Example</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">earwax</a></li>
 </ul>
 
@@ -159,6 +165,8 @@
             
   <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="workflow">
+<h2>Workflow<a class="headerlink" href="#workflow" title="Permalink to this headline">¶</a></h2>
 <p>The basic flow of an Earwax program is:</p>
 <ul class="simple">
 <li><p>Create a <cite>Game instance</cite>.</p></li>
@@ -169,30 +177,32 @@
 </ul>
 </div>
 <div class="section" id="full-example">
-<h1>Full example<a class="headerlink" href="#full-example" title="Permalink to this headline">¶</a></h1>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">Game</span><span class="p">,</span> <span class="n">Level</span><span class="p">,</span> <span class="n">tts</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyglet.window</span> <span class="kn">import</span> <span class="n">key</span><span class="p">,</span> <span class="n">mouse</span><span class="p">,</span> <span class="n">Window</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">w</span> <span class="o">=</span> <span class="n">Window</span><span class="p">(</span><span class="n">caption</span><span class="o">=</span><span class="s1">&#39;Test Game&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Game</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">Level</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nd">@l</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;Key speak&#39;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">S</span><span class="p">)</span>
-<span class="gp">... </span><span class="k">def</span> <span class="nf">key_speak</span><span class="p">():</span>
-<span class="gp">... </span>    <span class="sd">&quot;&quot;&quot;&quot;Say something when the s key is pressed.&quot;&quot;&quot;</span>
-<span class="gp">... </span>    <span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s1">&#39;You pressed the s key.&#39;</span><span class="p">)</span>
-<span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nd">@l</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;Mouse speak&#39;</span><span class="p">,</span> <span class="n">mouse_button</span><span class="o">=</span><span class="n">mouse</span><span class="o">.</span><span class="n">LEFT</span><span class="p">)</span>
-<span class="gp">... </span><span class="k">def</span> <span class="nf">mouse_speak</span><span class="p">():</span>
-<span class="gp">... </span>    <span class="sd">&quot;&quot;&quot;Speak when the left mouse button is pressed.&quot;&quot;&quot;</span>
-<span class="gp">... </span>    <span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s1">&#39;You pressed the left mouse button.&#39;</span><span class="p">)</span>
-<span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nd">@l</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;Quit&#39;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">ESCAPE</span><span class="p">,</span> <span class="n">mouse_button</span><span class="o">=</span><span class="n">mouse</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">)</span>
-<span class="gp">... </span><span class="k">def</span> <span class="nf">do_quit</span><span class="p">():</span>
-<span class="gp">... </span>    <span class="sd">&quot;&quot;&quot;Quit the game.&quot;&quot;&quot;</span>
-<span class="gp">... </span>    <span class="n">w</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-<span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+<h2>Full Example<a class="headerlink" href="#full-example" title="Permalink to this headline">¶</a></h2>
+<p>The below code is a full -albeit minimal -  code example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">Game</span><span class="p">,</span> <span class="n">Level</span><span class="p">,</span> <span class="n">tts</span>
+<span class="kn">from</span> <span class="nn">pyglet.window</span> <span class="kn">import</span> <span class="n">key</span><span class="p">,</span> <span class="n">mouse</span><span class="p">,</span> <span class="n">Window</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">Window</span><span class="p">(</span><span class="n">caption</span><span class="o">=</span><span class="s1">&#39;Test Game&#39;</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">Game</span><span class="p">()</span>
+<span class="n">l</span> <span class="o">=</span> <span class="n">Level</span><span class="p">()</span>
+<span class="nd">@l</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;Key speak&#39;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">S</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">key_speak</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;&quot;Say something when the s key is pressed.&quot;&quot;&quot;</span>
+    <span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s1">&#39;You pressed the s key.&#39;</span><span class="p">)</span>
+
+<span class="nd">@l</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;Mouse speak&#39;</span><span class="p">,</span> <span class="n">mouse_button</span><span class="o">=</span><span class="n">mouse</span><span class="o">.</span><span class="n">LEFT</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">mouse_speak</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Speak when the left mouse button is pressed.&quot;&quot;&quot;</span>
+    <span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s1">&#39;You pressed the left mouse button.&#39;</span><span class="p">)</span>
+
+<span class="nd">@l</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;Quit&#39;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">ESCAPE</span><span class="p">,</span> <span class="n">mouse_button</span><span class="o">=</span><span class="n">mouse</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">do_quit</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Quit the game.&quot;&quot;&quot;</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
 </pre></div>
+</div>
 </div>
 </div>
 
@@ -204,10 +214,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="features.html" class="btn btn-neutral float-right" title="Features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="api/modules.html" class="btn btn-neutral float-right" title="earwax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Earwax’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="features.html" class="btn btn-neutral float-left" title="Features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

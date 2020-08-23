@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.sound module &mdash; earwax 6.0.5.dev8 documentation</title>
+  <title>earwax.sound module &mdash; earwax 6.0.5.dev9 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
   
@@ -30,6 +31,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script src="../_static/custom.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -61,7 +64,7 @@
             
             
               <div class="version">
-                6.0.5.dev8
+                6.0.5.dev9
               </div>
             
           
@@ -88,9 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html#full-example">Full example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">earwax</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="earwax.html">earwax package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="earwax.html#subpackages">Subpackages</a></li>
@@ -187,18 +189,18 @@
 <dd><p>Bases: <a class="reference internal" href="#earwax.sound.SimpleInterfaceSoundPlayer" title="earwax.sound.SimpleInterfaceSoundPlayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.sound.SimpleInterfaceSoundPlayer</span></code></a></p>
 <p>An interface player that can play any sound you throw at it.</p>
 <p>To play a sound, pass a path to the
-<a class="reference internal" href="earwax.html#earwax.AdvancedInterfaceSoundPlayer.play_path" title="earwax.AdvancedInterfaceSoundPlayer.play_path"><code class="xref py py-meth docutils literal notranslate"><span class="pre">play_path()</span></code></a> method.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">synthizer</span> <span class="kn">import</span> <span class="n">Context</span><span class="p">,</span> <span class="n">initialized</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">AdvancedInterfaceSoundPlayer</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">initialized</span><span class="p">():</span>
-<span class="gp">... </span>    <span class="n">c</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
-<span class="gp">... </span>    <span class="n">p</span> <span class="o">=</span> <span class="n">AdvancedInterfaceSoundPlayer</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">p</span><span class="o">.</span><span class="n">play_path</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;sound.wav&#39;</span><span class="p">))</span>
-<span class="gp">... </span>    <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">p</span><span class="o">.</span><span class="n">play_path</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;move.wav&#39;</span><span class="p">))</span>
-<span class="gp">... </span>    <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<a class="reference internal" href="earwax.html#earwax.AdvancedInterfaceSoundPlayer.play_path" title="earwax.AdvancedInterfaceSoundPlayer.play_path"><code class="xref py py-meth docutils literal notranslate"><span class="pre">play_path()</span></code></a> method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">synthizer</span> <span class="kn">import</span> <span class="n">Context</span><span class="p">,</span> <span class="n">initialized</span>
+<span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">AdvancedInterfaceSoundPlayer</span>
+<span class="k">with</span> <span class="n">initialized</span><span class="p">():</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">AdvancedInterfaceSoundPlayer</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">play_path</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;sound.wav&#39;</span><span class="p">))</span>
+    <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">play_path</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;move.wav&#39;</span><span class="p">))</span>
+    <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -240,18 +242,19 @@ play the given path.</p>
 <p>An object which plays a sound whenever its play method is called.</p>
 <p>The same sound will be used, and it will be restarted on each call to play.</p>
 <p>No panning or fx are applied.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">synthizer</span> <span class="kn">import</span> <span class="n">Context</span><span class="p">,</span> <span class="n">BufferGenerator</span><span class="p">,</span> <span class="n">initialize</span><span class="p">,</span> <span class="n">shutdown</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">earwax.sound</span> <span class="kn">import</span> <span class="n">get_buffer</span><span class="p">,</span> <span class="n">SimpleInterfaceSoundPlayer</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">initialize</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">BufferGenerator</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">get_buffer</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;sound.wav&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">b</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">SimpleInterfaceSoundPlayer</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">shutdown</span><span class="p">()</span>
+<p>Here is a basic example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">synthizer</span> <span class="kn">import</span> <span class="n">Context</span><span class="p">,</span> <span class="n">BufferGenerator</span><span class="p">,</span> <span class="n">initialize</span><span class="p">,</span> <span class="n">shutdown</span>
+<span class="kn">from</span> <span class="nn">earwax.sound</span> <span class="kn">import</span> <span class="n">get_buffer</span><span class="p">,</span> <span class="n">SimpleInterfaceSoundPlayer</span>
+<span class="n">initialize</span><span class="p">()</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">BufferGenerator</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">get_buffer</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;sound.wav&#39;</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">b</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">SimpleInterfaceSoundPlayer</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">shutdown</span><span class="p">()</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -293,11 +296,13 @@ through.</p></li>
 <dd><p>Get a Buffer instance.
 Buffers are cached in the buffers dictionary, so if there is already a
 buffer with the given protocol and path, it will be returned. Otherwise, a
-new buffer will be created, and added to the dictionary.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_buffer</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;sound.wav&#39;</span><span class="p">)</span>
-<span class="go">&lt;synthizer.Buffer object at 0x000001A075E387B0&gt;</span>
+new buffer will be created, and added to the dictionary:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Returns True.</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">get_buffer</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;sound.wav&#39;</span><span class="p">),</span> <span class="n">synthizer</span><span class="o">.</span><span class="n">Buffer</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>If you are going to destroy a buffer, make sure you remove it from the
+buffers dictionary.</p>
 </dd></dl>
 
 </div>

@@ -51,14 +51,14 @@ class Level:
     def action(self, name: str, **kwargs) -> Callable[
         [ActionFunctionType], Action
     ]:
-        """A decorator to add an action to this level.
+        """A decorator to add an action to this level::
 
-        >>> @level.action(
-        ...     'Walk forwards', symbol=key.W, mouse_button=mouse.RIGHT,
-        ...     interval=0.5
-        ... )
-        ... def walk_forwards():
-        ...     # ...
+            @level.action(
+                'Walk forwards', symbol=key.W, mouse_button=mouse.RIGHT,
+                interval=0.5
+            )
+            def walk_forwards():
+                # ...
 
         All extra keyword arguments are passed along to the constructor of
         :class:`earwax.Action`.
@@ -75,11 +75,14 @@ class Level:
     def motion(self, motion: int) -> Callable[
         ['MotionFunctionType'], 'MotionFunctionType'
     ]:
-        """A decorator to add a handler to self.motions.
+        """A decorator to add a handler to self.motions::
 
-        >>> @level.motion(key.MOTION_LEFT)
-        >>>def move_left():
-        ...     # ...
+            @level.motion(key.MOTION_LEFT)
+            def move_left():
+                # ...
+
+        This is the method used by :class:`earwax.Editor`, to make text
+        editable, and :class:`earwax.Menu`, to make menus searchable.
         """
 
         def inner(func: 'MotionFunctionType') -> 'MotionFunctionType':

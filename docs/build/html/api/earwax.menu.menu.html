@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.menu.menu module &mdash; earwax 6.0.5.dev8 documentation</title>
+  <title>earwax.menu.menu module &mdash; earwax 6.0.5.dev9 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
   
@@ -30,6 +31,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script src="../_static/custom.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -61,7 +64,7 @@
             
             
               <div class="version">
-                6.0.5.dev8
+                6.0.5.dev9
               </div>
             
           
@@ -88,9 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html#full-example">Full example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">earwax</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="earwax.html">earwax package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="earwax.html#subpackages">Subpackages</a><ul class="current">
@@ -187,31 +189,32 @@ actions.</p>
 <a class="reference internal" href="earwax.game.html#earwax.game.Game.push_level" title="earwax.game.Game.push_level"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pushed</span></code></a>, <a class="reference internal" href="earwax.game.html#earwax.game.Game.pop_level" title="earwax.game.Game.pop_level"><code class="xref py py-meth docutils literal notranslate"><span class="pre">popped</span></code></a>, and <a class="reference internal" href="earwax.game.html#earwax.game.Game.replace_level" title="earwax.game.Game.replace_level"><code class="xref py py-meth docutils literal notranslate"><span class="pre">replaced</span></code></a>.</p>
 <p>To add items to a menu, you can either use the <a class="reference internal" href="#earwax.menu.menu.Menu.item" title="earwax.menu.menu.Menu.item"><code class="xref py py-meth docutils literal notranslate"><span class="pre">item()</span></code></a> decorator, or
 the <a class="reference internal" href="#earwax.menu.menu.Menu.add_item" title="earwax.menu.menu.Menu.add_item"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_item()</span></code></a> function.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">Game</span><span class="p">,</span> <span class="n">Level</span><span class="p">,</span> <span class="n">Menu</span><span class="p">,</span> <span class="n">tts</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyglet.window</span> <span class="kn">import</span> <span class="n">key</span><span class="p">,</span> <span class="n">Window</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">w</span> <span class="o">=</span> <span class="n">Window</span><span class="p">(</span><span class="n">caption</span><span class="o">=</span><span class="s1">&#39;Test Game&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Game</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">Level</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nd">@l</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;Show menu&#39;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">M</span><span class="p">)</span>
-<span class="gp">... </span><span class="k">def</span> <span class="nf">menu</span><span class="p">():</span>
-<span class="gp">... </span>    <span class="sd">&#39;&#39;&#39;Show a file menu.&#39;&#39;&#39;</span>
-<span class="gp">... </span>    <span class="n">m</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;Menu&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="nd">@m</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="s1">&#39;First Item&#39;</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="k">def</span> <span class="nf">first_item</span><span class="p">():</span>
-<span class="gp">... </span>        <span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s1">&#39;First menu item.&#39;</span><span class="p">)</span>
-<span class="gp">... </span>        <span class="n">g</span><span class="o">.</span><span class="n">pop_level</span><span class="p">()</span>
-<span class="gp">... </span>    <span class="nd">@m</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="s1">&#39;Second Item&#39;</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="k">def</span> <span class="nf">second_item</span><span class="p">():</span>
-<span class="gp">... </span>        <span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s1">&#39;Second menu item.&#39;</span><span class="p">)</span>
-<span class="gp">... </span>        <span class="n">g</span><span class="o">.</span><span class="n">pop_level</span><span class="p">()</span>
-<span class="gp">... </span>    <span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-<span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+<p>Here is an example of both methods:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">Game</span><span class="p">,</span> <span class="n">Level</span><span class="p">,</span> <span class="n">Menu</span><span class="p">,</span> <span class="n">tts</span>
+<span class="kn">from</span> <span class="nn">pyglet.window</span> <span class="kn">import</span> <span class="n">key</span><span class="p">,</span> <span class="n">Window</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">Window</span><span class="p">(</span><span class="n">caption</span><span class="o">=</span><span class="s1">&#39;Test Game&#39;</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">Game</span><span class="p">()</span>
+<span class="n">l</span> <span class="o">=</span> <span class="n">Level</span><span class="p">()</span>
+<span class="nd">@l</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;Show menu&#39;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">M</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">menu</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;Show a menu with 2 items.&#39;&#39;&#39;</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;Menu&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+    <span class="nd">@m</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="s1">&#39;First Item&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">first_item</span><span class="p">():</span>
+        <span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s1">&#39;First menu item.&#39;</span><span class="p">)</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">pop_level</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">second_item</span><span class="p">():</span>
+        <span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s1">&#39;Second menu item.&#39;</span><span class="p">)</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">pop_level</span><span class="p">()</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">add_item</span><span class="p">(</span><span class="s1">&#39;Second Item&#39;</span><span class="p">,</span> <span class="n">second_item</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+<span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>To override the actions that are added to this menu, override
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">__attrs_post_init__()</span></code>.</p>
+<p>To override the default actions that are added to a menu, subclass
+<a class="reference internal" href="earwax.html#earwax.Menu" title="earwax.Menu"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.Menu</span></code></a>, and override <code class="xref py py-meth docutils literal notranslate"><span class="pre">__attrs_post_init__()</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
@@ -235,7 +238,15 @@ performed.</p></li>
 <dt id="earwax.menu.menu.Menu.add_item">
 <code class="sig-name descname">add_item</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="earwax.menu.menu_item.html#earwax.menu.menu_item.MenuItem" title="earwax.menu.menu_item.MenuItem">earwax.menu.menu_item.MenuItem</a><a class="headerlink" href="#earwax.menu.menu.Menu.add_item" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add an item to this menu.</p>
-<p>If you would rather use decorator syntax, use <a class="reference internal" href="#earwax.menu.menu.Menu.item" title="earwax.menu.menu.Menu.item"><code class="xref py py-meth docutils literal notranslate"><span class="pre">item()</span></code></a>.</p>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;Example Menu&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">f</span><span class="p">():</span>
+    <span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="s1">&#39;Menu item activated.&#39;</span><span class="p">)</span>
+<span class="n">m</span><span class="o">.</span><span class="n">add_item</span><span class="p">(</span><span class="s1">&#39;Test Item&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you would rather use decorators, use the <a class="reference internal" href="earwax.html#earwax.Menu.item" title="earwax.Menu.item"><code class="xref py py-meth docutils literal notranslate"><span class="pre">item()</span></code></a>
+method instead.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -263,11 +274,14 @@ None.</p>
 <dt id="earwax.menu.menu.Menu.item">
 <code class="sig-name descname">item</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; Callable<span class="p">[</span><span class="p">[</span>Callable<span class="p">[</span><span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span><span class="p">]</span><span class="p">, </span><a class="reference internal" href="earwax.menu.menu_item.html#earwax.menu.menu_item.MenuItem" title="earwax.menu.menu_item.MenuItem">earwax.menu.menu_item.MenuItem</a><span class="p">]</span><a class="headerlink" href="#earwax.menu.menu.Menu.item" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decorate a function to be used as a menu item.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@menu</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="s1">&#39;Title&#39;</span><span class="p">)</span>
-<span class="gp">... </span><span class="k">def</span> <span class="nf">func</span><span class="p">():</span>
-<span class="gp">... </span>    <span class="k">pass</span>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@menu</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="s1">&#39;Title&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">func</span><span class="p">():</span>
+    <span class="k">pass</span>
 </pre></div>
 </div>
+<p>If you don’t want to use a decorator, you can use the
+<a class="reference internal" href="earwax.html#earwax.Menu.add_item" title="earwax.Menu.add_item"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_item()</span></code></a> method instead.</p>
 </dd></dl>
 
 <dl class="py attribute">

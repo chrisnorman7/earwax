@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.level module &mdash; earwax 6.0.5.dev8 documentation</title>
+  <title>earwax.level module &mdash; earwax 6.0.5.dev9 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
   
@@ -30,6 +31,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script src="../_static/custom.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -61,7 +64,7 @@
             
             
               <div class="version">
-                6.0.5.dev8
+                6.0.5.dev9
               </div>
             
           
@@ -88,9 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html#full-example">Full example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">earwax</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="earwax.html">earwax package</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="earwax.html#subpackages">Subpackages</a></li>
@@ -255,13 +257,13 @@ the <a class="reference internal" href="earwax.html#earwax.Level.motion" title="
 <dl class="py method">
 <dt id="earwax.level.Level.action">
 <code class="sig-name descname">action</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Callable<span class="p">[</span><span class="p">[</span>Callable<span class="p">[</span><span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span><span class="p">]</span><span class="p">, </span><a class="reference internal" href="earwax.action.html#earwax.action.Action" title="earwax.action.Action">earwax.action.Action</a><span class="p">]</span><a class="headerlink" href="#earwax.level.Level.action" title="Permalink to this definition">¶</a></dt>
-<dd><p>A decorator to add an action to this level.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@level</span><span class="o">.</span><span class="n">action</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="s1">&#39;Walk forwards&#39;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="n">mouse_button</span><span class="o">=</span><span class="n">mouse</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">interval</span><span class="o">=</span><span class="mf">0.5</span>
-<span class="gp">... </span><span class="p">)</span>
-<span class="gp">... </span><span class="k">def</span> <span class="nf">walk_forwards</span><span class="p">():</span>
-<span class="gp">... </span>    <span class="c1"># ...</span>
+<dd><p>A decorator to add an action to this level:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@level</span><span class="o">.</span><span class="n">action</span><span class="p">(</span>
+    <span class="s1">&#39;Walk forwards&#39;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="n">mouse_button</span><span class="o">=</span><span class="n">mouse</span><span class="o">.</span><span class="n">RIGHT</span><span class="p">,</span>
+    <span class="n">interval</span><span class="o">=</span><span class="mf">0.5</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">walk_forwards</span><span class="p">():</span>
+    <span class="c1"># ...</span>
 </pre></div>
 </div>
 <p>All extra keyword arguments are passed along to the constructor of
@@ -276,12 +278,14 @@ the <a class="reference internal" href="earwax.html#earwax.Level.motion" title="
 <dl class="py method">
 <dt id="earwax.level.Level.motion">
 <code class="sig-name descname">motion</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">motion</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; Callable<span class="p">[</span><span class="p">[</span>MotionFunctionType<span class="p">]</span><span class="p">, </span>MotionFunctionType<span class="p">]</span><a class="headerlink" href="#earwax.level.Level.motion" title="Permalink to this definition">¶</a></dt>
-<dd><p>A decorator to add a handler to self.motions.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@level</span><span class="o">.</span><span class="n">motion</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">MOTION_LEFT</span><span class="p">)</span>
-<span class="go">&gt;&gt;&gt;def move_left():</span>
-<span class="gp">... </span>    <span class="c1"># ...</span>
+<dd><p>A decorator to add a handler to self.motions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@level</span><span class="o">.</span><span class="n">motion</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">MOTION_LEFT</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">move_left</span><span class="p">():</span>
+    <span class="c1"># ...</span>
 </pre></div>
 </div>
+<p>This is the method used by <a class="reference internal" href="earwax.html#earwax.Editor" title="earwax.Editor"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.Editor</span></code></a>, to make text
+editable, and <a class="reference internal" href="earwax.html#earwax.Menu" title="earwax.Menu"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.Menu</span></code></a>, to make menus searchable.</p>
 </dd></dl>
 
 <dl class="py attribute">

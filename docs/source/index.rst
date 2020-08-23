@@ -10,9 +10,9 @@ Welcome to Earwax's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   introduction
-
    features
+
+   introduction
 
    api/modules.rst
 

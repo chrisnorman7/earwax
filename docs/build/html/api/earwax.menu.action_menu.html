@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.menu.action_menu module &mdash; earwax 6.0.5.dev8 documentation</title>
+  <title>earwax.menu.action_menu module &mdash; earwax 6.0.5.dev9 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
   
@@ -30,6 +31,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script src="../_static/custom.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -61,7 +64,7 @@
             
             
               <div class="version">
-                6.0.5.dev8
+                6.0.5.dev9
               </div>
             
           
@@ -88,9 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html#full-example">Full example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">earwax</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="earwax.html">earwax package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="earwax.html#subpackages">Subpackages</a><ul class="current">
@@ -183,19 +185,19 @@
 <dd><p>Bases: <a class="reference internal" href="earwax.menu.menu.html#earwax.menu.menu.Menu" title="earwax.menu.menu.Menu"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.menu.menu.Menu</span></code></a></p>
 <p>A menu to show a list of actions, and their associated triggers.</p>
 <p>You can use this class with any game, like so:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">Game</span><span class="p">,</span> <span class="n">Level</span><span class="p">,</span> <span class="n">ActionMenu</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyglet.window</span> <span class="kn">import</span> <span class="n">Window</span><span class="p">,</span> <span class="n">key</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">w</span> <span class="o">=</span> <span class="n">Window</span><span class="p">(</span><span class="n">caption</span><span class="o">=</span><span class="s1">&#39;Test Game&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Game</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">Level</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nd">@l</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;Show actions&#39;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">SLASH</span><span class="p">,</span> <span class="n">modifiers</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">MOD_SHIFT</span><span class="p">)</span>
-<span class="gp">... </span><span class="k">def</span> <span class="nf">actions_menu</span><span class="p">():</span>
-<span class="gp">... </span>    <span class="sd">&#39;&#39;&#39;Show an actions menu.&#39;&#39;&#39;</span>
-<span class="gp">... </span>    <span class="n">a</span> <span class="o">=</span> <span class="n">ActionMenu</span><span class="p">(</span><span class="s1">&#39;Actions&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-<span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">Game</span><span class="p">,</span> <span class="n">Level</span><span class="p">,</span> <span class="n">ActionMenu</span>
+<span class="kn">from</span> <span class="nn">pyglet.window</span> <span class="kn">import</span> <span class="n">Window</span><span class="p">,</span> <span class="n">key</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">Window</span><span class="p">(</span><span class="n">caption</span><span class="o">=</span><span class="s1">&#39;Test Game&#39;</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">Game</span><span class="p">()</span>
+<span class="n">l</span> <span class="o">=</span> <span class="n">Level</span><span class="p">()</span>
+<span class="nd">@l</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;Show actions&#39;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">SLASH</span><span class="p">,</span> <span class="n">modifiers</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">MOD_SHIFT</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">actions_menu</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;Show an actions menu.&#39;&#39;&#39;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">ActionMenu</span><span class="p">(</span><span class="s1">&#39;Actions&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+<span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Now, if you press shift and slash (a question mark on english keyboards),

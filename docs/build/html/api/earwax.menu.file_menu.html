@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.menu.file_menu module &mdash; earwax 6.0.5.dev8 documentation</title>
+  <title>earwax.menu.file_menu module &mdash; earwax 6.0.5.dev9 documentation</title>
   
 
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
 
   
   
@@ -30,6 +31,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script src="../_static/custom.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -61,7 +64,7 @@
             
             
               <div class="version">
-                6.0.5.dev8
+                6.0.5.dev9
               </div>
             
           
@@ -88,9 +91,8 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../introduction.html#full-example">Full example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">earwax</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="earwax.html">earwax package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="earwax.html#subpackages">Subpackages</a><ul class="current">
@@ -182,23 +184,24 @@
 <em class="property">class </em><code class="sig-prename descclassname">earwax.menu.file_menu.</code><code class="sig-name descname">FileMenu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">pathlib.Path</span></em>, <em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">[</span>Optional<span class="p">[</span>pathlib.Path<span class="p">]</span><span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">game</span><span class="p">:</span> <span class="n">Game</span></em>, <em class="sig-param"><span class="n">dismissible</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="earwax.menu.menu_item.html#earwax.menu.menu_item.MenuItem" title="earwax.menu.menu_item.MenuItem">earwax.menu.menu_item.MenuItem</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">position</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">search_timeout</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">search_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">search_string</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">root</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>pathlib.Path<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">empty_label</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">directory_label</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">show_directories</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">show_files</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">up_label</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'..'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.menu.file_menu.FileMenu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#earwax.menu.file_menu.FileMenuBase" title="earwax.menu.file_menu.FileMenuBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.menu.file_menu.FileMenuBase</span></code></a>, <a class="reference internal" href="earwax.menu.menu.html#earwax.menu.menu.Menu" title="earwax.menu.menu.Menu"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.menu.menu.Menu</span></code></a></p>
 <p>A menu for slecting a file.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">Game</span><span class="p">,</span> <span class="n">Level</span><span class="p">,</span> <span class="n">FileMenu</span><span class="p">,</span> <span class="n">tts</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyglet.window</span> <span class="kn">import</span> <span class="n">key</span><span class="p">,</span> <span class="n">Window</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">w</span> <span class="o">=</span> <span class="n">Window</span><span class="p">(</span><span class="n">caption</span><span class="o">=</span><span class="s1">&#39;Test Game&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">Game</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">Level</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nd">@l</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;Show file menu&#39;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">F</span><span class="p">)</span>
-<span class="gp">... </span><span class="k">def</span> <span class="nf">file_menu</span><span class="p">():</span>
-<span class="gp">... </span>    <span class="sd">&#39;&#39;&#39;Show a file menu.&#39;&#39;&#39;</span>
-<span class="gp">... </span>    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
-<span class="gp">... </span>        <span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
-<span class="gp">... </span>        <span class="n">g</span><span class="o">.</span><span class="n">pop_level</span><span class="p">()</span>
-<span class="gp">... </span>    <span class="n">f</span> <span class="o">=</span> <span class="n">FileMenu</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">(),</span> <span class="n">inner</span><span class="p">,</span> <span class="s1">&#39;File Menu&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-<span class="gp">...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+<p>File menus can be used as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">Game</span><span class="p">,</span> <span class="n">Level</span><span class="p">,</span> <span class="n">FileMenu</span><span class="p">,</span> <span class="n">tts</span>
+<span class="kn">from</span> <span class="nn">pyglet.window</span> <span class="kn">import</span> <span class="n">key</span><span class="p">,</span> <span class="n">Window</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">Window</span><span class="p">(</span><span class="n">caption</span><span class="o">=</span><span class="s1">&#39;Test Game&#39;</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">Game</span><span class="p">()</span>
+<span class="n">l</span> <span class="o">=</span> <span class="n">Level</span><span class="p">()</span>
+<span class="nd">@l</span><span class="o">.</span><span class="n">action</span><span class="p">(</span><span class="s1">&#39;Show file menu&#39;</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">F</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">file_menu</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;Show a file menu.&#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+        <span class="n">tts</span><span class="o">.</span><span class="n">speak</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">pop_level</span><span class="p">()</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">FileMenu</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">(),</span> <span class="n">inner</span><span class="p">,</span> <span class="s1">&#39;File Menu&#39;</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+<span class="n">g</span><span class="o">.</span><span class="n">push_level</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="field-list simple">

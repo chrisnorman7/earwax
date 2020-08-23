@@ -25,31 +25,32 @@ class Menu(TitleMixin, DismissibleMixin, Level):
     To add items to a menu, you can either use the :meth:`item` decorator, or
     the :meth:`add_item` function.
 
+    Here is an example of both methods::
 
-    >>> from earwax import Game, Level, Menu, tts
-    >>> from pyglet.window import key, Window
-    >>> w = Window(caption='Test Game')
-    >>> g = Game()
-    >>> l = Level()
-    >>> @l.action('Show menu', symbol=key.M)
-    ... def menu():
-    ...     '''Show a file menu.'''
-    ...     m = Menu('Menu', g)
-    ...     @m.item('First Item')
-    ...     def first_item():
-    ...         tts.speak('First menu item.')
-    ...         g.pop_level()
-    ...     @m.item('Second Item')
-    ...     def second_item():
-    ...         tts.speak('Second menu item.')
-    ...         g.pop_level()
-    ...     g.push_level(m)
-    ...
-    >>> g.push_level(l)
-    >>> g.run(w)
+        from earwax import Game, Level, Menu, tts
+        from pyglet.window import key, Window
+        w = Window(caption='Test Game')
+        g = Game()
+        l = Level()
+        @l.action('Show menu', symbol=key.M)
+        def menu():
+            '''Show a menu with 2 items.'''
+            m = Menu('Menu', g)
+            @m.item('First Item')
+            def first_item():
+                tts.speak('First menu item.')
+                g.pop_level()
+            def second_item():
+                tts.speak('Second menu item.')
+                g.pop_level()
+            m.add_item('Second Item', second_item)
+            g.push_level(m)
 
-    To override the actions that are added to this menu, override
-    :meth:`__attrs_post_init__`.
+        g.push_level(l)
+        g.run(w)
+
+    To override the default actions that are added to a menu, subclass
+    :class:`earwax.Menu`, and override :meth:`__attrs_post_init__`.
 
     :ivar ~earwax.Menu.items: The list of MenuItem instances for this menu.
 
@@ -89,9 +90,14 @@ class Menu(TitleMixin, DismissibleMixin, Level):
     def item(self, title: str) -> Callable[[ActionFunctionType], MenuItem]:
         """Decorate a function to be used as a menu item.
 
-        >>> @menu.item('Title')
-        ... def func():
-        ...     pass
+        For example::
+
+            @menu.item('Title')
+            def func():
+                pass
+
+        If you don't want to use a decorator, you can use the
+        :meth:`~earwax.Menu.add_item` method instead.
         """
 
         def inner(func: ActionFunctionType) -> MenuItem:
@@ -103,7 +109,16 @@ class Menu(TitleMixin, DismissibleMixin, Level):
     def add_item(self, title: str, func: 'ActionFunctionType') -> MenuItem:
         """Add an item to this menu.
 
-        If you would rather use decorator syntax, use :meth:`item`."""
+        For example::
+
+            m = Menu('Example Menu')
+            def f():
+                tts.speak('Menu item activated.')
+            m.add_item('Test Item', f)
+
+        If you would rather use decorators, use the :meth:`~earwax.Menu.item`
+        method instead.
+        """
         menu_item: MenuItem = MenuItem(title, func)
         self.items.append(menu_item)
         return menu_item

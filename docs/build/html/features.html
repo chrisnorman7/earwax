@@ -7,12 +7,13 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Features &mdash; earwax 6.0.5.dev8 documentation</title>
+  <title>Features &mdash; earwax 6.0.5.dev9 documentation</title>
   
 
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
 
   
   
@@ -30,14 +31,16 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script src="_static/custom.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="earwax" href="api/modules.html" />
-    <link rel="prev" title="Introduction" href="introduction.html" /> 
+    <link rel="next" title="Introduction" href="introduction.html" />
+    <link rel="prev" title="Welcome to Earwax’s documentation!" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,7 +64,7 @@
             
             
               <div class="version">
-                6.0.5.dev8
+                6.0.5.dev9
               </div>
             
           
@@ -88,9 +91,12 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#implemented-features">Implemented Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-requests">Feature Requests</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#full-example">Full example</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">earwax</a></li>
 </ul>
 
@@ -159,12 +165,20 @@
             
   <div class="section" id="features">
 <h1>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="implemented-features">
+<h2>Implemented Features<a class="headerlink" href="#implemented-features" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>Ability to separate disparate parts of a game into <cite>Level</cite> constructs.</p></li>
-<li><p>Ability to push, pop, and replace <cite>Level</cite> instances on the central <cite>Game</cite> object.</p></li>
+<li><p>Ability to separate disparate parts of a game into <a class="reference internal" href="api/earwax.html#earwax.Level" title="earwax.Level"><code class="xref py py-class docutils literal notranslate"><span class="pre">Level</span></code></a> constructs.</p></li>
+<li><p>Ability to push, pop, and replace Level instances on the central <a class="reference internal" href="api/earwax.html#earwax.Game" title="earwax.Game"><code class="xref py py-class docutils literal notranslate"><span class="pre">Game</span></code></a> object.</p></li>
 <li><p>A simple event handling system, allowing you to write clear and concise code.</p></li>
 <li><p>Uses <a class="reference external" href="https://synthizer.github.io/">Synthizer</a> as its sound backend.</p></li>
+<li><p>Both <a class="reference internal" href="api/earwax.html#earwax.SimpleInterfaceSoundPlayer" title="earwax.SimpleInterfaceSoundPlayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">simple</span></code></a> and <a class="reference internal" href="api/earwax.html#earwax.AdvancedInterfaceSoundPlayer" title="earwax.AdvancedInterfaceSoundPlayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">advanced</span></code></a> sound players, designed for playing interface sounds.</p></li>
 </ul>
+</div>
+<div class="section" id="feature-requests">
+<h2>Feature Requests<a class="headerlink" href="#feature-requests" title="Permalink to this headline">¶</a></h2>
+<p>If you need a feature that is not already on this list, please <a class="reference external" href="https://github.com/chrisnorman7/earwax/issues/new">submit a feature request</a>.</p>
+</div>
 </div>
 
 
@@ -175,10 +189,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="api/modules.html" class="btn btn-neutral float-right" title="earwax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="introduction.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Earwax’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

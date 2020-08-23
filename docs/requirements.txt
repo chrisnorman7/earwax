@@ -1,3 +1,4 @@
+sphinx_copybutton
 sphinxcontrib.apidoc
 pyglet
 accessible_output2

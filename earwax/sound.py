@@ -15,10 +15,13 @@ def get_buffer(protocol: str, path: str) -> Buffer:
     """Get a Buffer instance.
     Buffers are cached in the buffers dictionary, so if there is already a
     buffer with the given protocol and path, it will be returned. Otherwise, a
-    new buffer will be created, and added to the dictionary.
+    new buffer will be created, and added to the dictionary::
 
-    >>> get_buffer('file', 'sound.wav')
-    <synthizer.Buffer object at 0x000001A075E387B0>
+        # Returns True.
+        assert isinstance(get_buffer('file', 'sound.wav'), synthizer.Buffer)
+
+    If you are going to destroy a buffer, make sure you remove it from the
+    buffers dictionary.
     """
     url: str = f'{protocol}://{path}'
     if url not in buffers:
@@ -34,18 +37,20 @@ class SimpleInterfaceSoundPlayer:
 
     No panning or fx are applied.
 
-    >>> from time import sleep
-    >>> from synthizer import Context, BufferGenerator, initialize, shutdown
-    >>> from earwax.sound import get_buffer, SimpleInterfaceSoundPlayer
-    >>> initialize()
-    >>> c = Context()
-    >>> g = BufferGenerator(c)
-    >>> b = get_buffer('file', 'sound.wav')
-    >>> g.buffer = b
-    >>> p = SimpleInterfaceSoundPlayer(c, g)
-    >>> p.play()
-    >>> sleep(2)
-    >>> shutdown()
+    Here is a basic example::
+
+        from time import sleep
+        from synthizer import Context, BufferGenerator, initialize, shutdown
+        from earwax.sound import get_buffer, SimpleInterfaceSoundPlayer
+        initialize()
+        c = Context()
+        g = BufferGenerator(c)
+        b = get_buffer('file', 'sound.wav')
+        g.buffer = b
+        p = SimpleInterfaceSoundPlayer(c, g)
+        p.play()
+        sleep(2)
+        shutdown()
 
     :ivar ~earwax.SimpleInterfaceSoundPlayer.context: The audio context to use.
 
@@ -82,19 +87,19 @@ class AdvancedInterfaceSoundPlayer(SimpleInterfaceSoundPlayer):
     """An interface player that can play any sound you throw at it.
 
     To play a sound, pass a path to the
-    :meth:`~earwax.AdvancedInterfaceSoundPlayer.play_path` method.
+    :meth:`~earwax.AdvancedInterfaceSoundPlayer.play_path` method::
 
-    >>> from pathlib import Path
-    >>> from time import sleep
-    >>> from synthizer import Context, initialized
-    >>> from earwax import AdvancedInterfaceSoundPlayer
-    >>> with initialized():
-    ...     c = Context()
-    ...     p = AdvancedInterfaceSoundPlayer(c)
-    ...     p.play_path(Path('sound.wav'))
-    ...     sleep(2)
-    ...     p.play_path(Path('move.wav'))
-    ...     sleep(2)
+        from pathlib import Path
+        from time import sleep
+        from synthizer import Context, initialized
+        from earwax import AdvancedInterfaceSoundPlayer
+        with initialized():
+            c = Context()
+            p = AdvancedInterfaceSoundPlayer(c)
+            p.play_path(Path('sound.wav'))
+            sleep(2)
+            p.play_path(Path('move.wav'))
+            sleep(2)
 
     :ivar ~earwax.AdvancedInterfaceSoundPlayer.play_files: If True, then files
         will be played.

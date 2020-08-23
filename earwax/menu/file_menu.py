@@ -21,23 +21,25 @@ class FileMenuBase:
 class FileMenu(FileMenuBase, Menu):
     """A menu for slecting a file.
 
-        >>> from pathlib import Path
-        >>> from earwax import Game, Level, FileMenu, tts
-        >>> from pyglet.window import key, Window
-        >>> w = Window(caption='Test Game')
-        >>> g = Game()
-        >>> l = Level()
-        >>> @l.action('Show file menu', symbol=key.F)
-        ... def file_menu():
-        ...     '''Show a file menu.'''
-        ...     def inner(p):
-        ...         tts.speak(str(p))
-        ...         g.pop_level()
-        ...     f = FileMenu(Path.cwd(), inner, 'File Menu', g)
-        ...     g.push_level(f)
-        ...
-        >>> g.push_level(l)
-        >>> g.run(w)
+    File menus can be used as follows::
+
+        from pathlib import Path
+        from earwax import Game, Level, FileMenu, tts
+        from pyglet.window import key, Window
+        w = Window(caption='Test Game')
+        g = Game()
+        l = Level()
+        @l.action('Show file menu', symbol=key.F)
+        def file_menu():
+            '''Show a file menu.'''
+            def inner(p):
+                tts.speak(str(p))
+                g.pop_level()
+            f = FileMenu(Path.cwd(), inner, 'File Menu', g)
+            g.push_level(f)
+
+        g.push_level(l)
+        g.run(w)
 
     :ivar ~file_menu.FileMenuBase.path: The path this menu will start at.
 

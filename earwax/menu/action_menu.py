@@ -14,21 +14,21 @@ from .menu import Menu
 class ActionMenu(Menu):
     """A menu to show a list of actions, and their associated triggers.
 
-    You can use this class with any game, like so:
+    You can use this class with any game, like so::
 
-    >>> from earwax import Game, Level, ActionMenu
-    >>> from pyglet.window import Window, key
-    >>> w = Window(caption='Test Game')
-    >>> g = Game()
-    >>> l = Level()
-    >>> @l.action('Show actions', symbol=key.SLASH, modifiers=key.MOD_SHIFT)
-    ... def actions_menu():
-    ...     '''Show an actions menu.'''
-    ...     a = ActionMenu('Actions', g)
-    ...     g.push_level(a)
-    ...
-    >>> g.push_level(l)
-    >>> g.run(w)
+        from earwax import Game, Level, ActionMenu
+        from pyglet.window import Window, key
+        w = Window(caption='Test Game')
+        g = Game()
+        l = Level()
+        @l.action('Show actions', symbol=key.SLASH, modifiers=key.MOD_SHIFT)
+        def actions_menu():
+            '''Show an actions menu.'''
+            a = ActionMenu('Actions', g)
+            g.push_level(a)
+
+        g.push_level(l)
+        g.run(w)
 
     Now, if you press shift and slash (a question mark on english keyboards),
     you will get an action menu.
