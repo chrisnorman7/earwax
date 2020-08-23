@@ -1,8 +1,9 @@
 """Provides the Config and ConfigValue classes."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TextIO
 
 from attr import Factory, attrs, attrib
+from yaml import dump, load, FullLoader
 
 DumpDict = Dict[str, Any]
 
@@ -98,7 +99,7 @@ class Config:
 
             c = ImaginaryConfiguration()
             d = c.dump()
-            with open('config.json', 'w') as f:
+            with open('config.yaml', 'w') as f:
                 json.dump(d, f)
 
         Use the :meth:`~earwax.Config.populate_from_dict` method to
@@ -119,7 +120,7 @@ class Config:
         :meth:`~earwax.Config.dump`::
 
             c = Config()
-            with open('config.json', 'r') as f:
+            with open('config.yaml', 'r') as f:
                 c.populate_from_dict(json.load(f))
 
         Any missing values from `data` are ignored.
@@ -132,3 +133,31 @@ class Config:
         subsection: Config
         for name, subsection in self.__config_subsections__.items():
             subsection.populate_from_dict(data.get(name, {}))
+
+    def save(self, f: TextIO) -> None:
+        """Dump this configuration section to a file.
+
+        Uses the :meth:`~earwax.Config.dump` method to get the dumpable data.
+
+        You can save a configuration section like so::
+
+            c = ImaginaryConfigSection()
+            with open('config.yaml', 'w') as f:
+                c.save(f)
+
+        By default, YAML is used."""
+        data: DumpDict = self.dump()
+        dump(data, stream=f)
+
+    def load(self, f: TextIO) -> None:
+        """Uses the :meth:`~earwax.Config.populate_from_dict` method on
+        dataloaded from the given file::
+
+            c = ImaginaryConfigSection()
+            with open('config.yaml', 'r'):
+                c.load(f)
+
+        To save the data in the furst place, use the
+        :meth:`~earwax.Config.save` method."""
+        data: Any = load(f, Loader=FullLoader)
+        self.populate_from_dict(data)

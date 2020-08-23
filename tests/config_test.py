@@ -1,6 +1,8 @@
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from earwax import Config, ConfigValue
+from yaml import load, FullLoader, dump
 
 
 class ServerConfig(Config):
@@ -17,7 +19,7 @@ class AccountConfig(Config):
 
 
 class RecursiveConfig(Config):
-    data_dir: str = '.'
+    data_dir = ConfigValue('.')
     account: AccountConfig = AccountConfig()
 
 
@@ -65,8 +67,43 @@ def test_set_value() -> None:
     }
 
 
-def test_load() -> None:
+def test_populate_from_dict() -> None:
     s = ServerConfig()
     s.populate_from_dict({'hostname': 'google.com', 'port': 9000})
     assert s.hostname.value == 'google.com'
     assert s.port.value == 9000
+
+
+def test_save() -> None:
+    c = RecursiveConfig()
+    p = Path('config.yaml')
+    try:
+        with p.open('w') as f:
+            c.save(f)
+        assert p.is_file()
+        with p.open('r') as f:
+            d = load(f, Loader=FullLoader)
+        assert d == c.dump()
+    finally:
+        p.unlink()
+
+
+def test_load() -> None:
+    p = Path('config.yaml')
+    username: str = 'chrisnorman7'
+    c: RecursiveConfig = RecursiveConfig()
+    c.account.username.value = username
+    d = c.dump()
+    del d['account']['username']
+    d['account']['password'] = 'IChangedItWoot!"'
+    d['data_dir'] = '/home/test'
+    try:
+        with p.open('w') as f:
+            dump(d, stream=f)
+        with p.open('r') as f:
+            c.load(f)
+        assert c.data_dir.value == d['data_dir']
+        assert c.account.username.value == username
+        assert c.account.password.value == d['account']['password']
+    finally:
+        p.unlink()
