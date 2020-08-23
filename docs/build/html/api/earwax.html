@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax package &mdash; earwax 6.0.5 documentation</title>
+  <title>earwax package &mdash; earwax 6.0.6.dev12 documentation</title>
   
 
   
@@ -39,7 +39,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="earwax.menu package" href="earwax.menu.html" />
+    <link rel="next" title="earwax.cmd package" href="earwax.cmd.html" />
     <link rel="prev" title="earwax" href="modules.html" /> 
 </head>
 
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                6.0.5
+                6.0.6.dev12
               </div>
             
           
@@ -96,11 +96,13 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">earwax</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">earwax package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="earwax.cmd.html">earwax.cmd package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="earwax.menu.html">earwax.menu package</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="earwax.action.html">earwax.action module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="earwax.config.html">earwax.config module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="earwax.editor.html">earwax.editor module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="earwax.event_matcher.html">earwax.event_matcher module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="earwax.game.html">earwax.game module</a></li>
@@ -190,6 +192,26 @@
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="earwax.cmd.html">earwax.cmd package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="earwax.cmd.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="earwax.cmd.menu.html">earwax.cmd.menu package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="earwax.cmd.menu.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="earwax.cmd.menu.html#module-earwax.cmd.menu">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="earwax.cmd.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="earwax.cmd.constants.html">earwax.cmd.constants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="earwax.cmd.main.html">earwax.cmd.main module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="earwax.cmd.html#module-earwax.cmd">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="earwax.cmd.html#earwax-script">Earwax Script</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="earwax.menu.html">earwax.menu package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="earwax.menu.html#submodules">Submodules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="earwax.menu.action_menu.html">earwax.menu.action_menu module</a></li>
@@ -209,6 +231,7 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="earwax.action.html">earwax.action module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="earwax.config.html">earwax.config module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="earwax.editor.html">earwax.editor module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="earwax.event_matcher.html">earwax.event_matcher module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="earwax.game.html">earwax.game module</a></li>
@@ -489,6 +512,115 @@ True, and the given path represents a directory, play a random file
 from that directory. Otherwise, if <a class="reference internal" href="#earwax.AdvancedInterfaceSoundPlayer.play_files" title="earwax.AdvancedInterfaceSoundPlayer.play_files"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.play_files</span></code></a> evaluates to True,
 play the given path.</p>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="earwax.Config">
+<em class="property">class </em><code class="sig-prename descclassname">earwax.</code><code class="sig-name descname">Config</code><a class="headerlink" href="#earwax.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Holds configuration subsections and values.</p>
+<p>Any attribute that is an instance of <a class="reference internal" href="#earwax.Config" title="earwax.Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></a> is considered
+a subsection.</p>
+<p>Any attribute that is an instance of <a class="reference internal" href="#earwax.ConfigValue" title="earwax.ConfigValue"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConfigValue</span></code></a> is
+considered a configuration value.</p>
+<p>You can create sections like so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">earwax</span> <span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">ConfigValue</span>
+
+<span class="k">class</span> <span class="nc">GameConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Example configuration page.&#39;&#39;&#39;</span>
+
+    <span class="n">hostname</span> <span class="o">=</span> <span class="n">ConfigValue</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">)</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">ConfigValue</span><span class="p">(</span><span class="mi">1234</span><span class="p">)</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">GameConfig</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Then you can access configuration values like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">host_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">hostname</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">:</span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">port</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="c1"># ...</span>
+</pre></div>
+</div>
+<p>Use the <a class="reference internal" href="#earwax.Config.dump" title="earwax.Config.dump"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dump()</span></code></a> method to get a dictionary suitable for
+dumping with json.</p>
+<dl class="py method">
+<dt id="earwax.Config.dump">
+<code class="sig-name descname">dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><a class="headerlink" href="#earwax.Config.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all configuration values, recursing through subsections:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">ImaginaryConfiguration</span><span class="p">()</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">dump</span><span class="p">()</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;config.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use the <a class="reference internal" href="#earwax.Config.populate_from_dict" title="earwax.Config.populate_from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">populate_from_dict()</span></code></a> method to
+restore dumped values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="earwax.Config.populate_from_dict">
+<code class="sig-name descname">populate_from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.Config.populate_from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Populate values from a dictionary, probably provided by
+<a class="reference internal" href="#earwax.Config.dump" title="earwax.Config.dump"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dump()</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Config</span><span class="p">()</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;config.json&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">populate_from_dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Any missing values from <cite>data</cite> are ignored.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="earwax.ConfigValue">
+<em class="property">class </em><code class="sig-prename descclassname">earwax.</code><code class="sig-name descname">ConfigValue</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="p">:</span> <span class="n">Any</span></em>, <em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">type_</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>object<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.ConfigValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A configuration value.</p>
+<p>This class is used to make configuration values:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">name</span> <span class="o">=</span> <span class="n">ConfigValue</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Your character name&#39;</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#earwax.ConfigValue.value" title="earwax.ConfigValue.value"><strong>value</strong></a> – The value held by this configuration
+value.</p></li>
+<li><p><a class="reference internal" href="#earwax.ConfigValue.name" title="earwax.ConfigValue.name"><strong>name</strong></a> – <p>The human-readable name of this
+configuration value.</p>
+<p>The name is currently only used by <code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.ConfigMenu</span></code>.</p>
+</p></li>
+<li><p><a class="reference internal" href="#earwax.ConfigValue.type_" title="earwax.ConfigValue.type_"><strong>type_</strong></a> – <p>The type of this value. Can be inferred
+from <a class="reference internal" href="#earwax.ConfigValue.value" title="earwax.ConfigValue.value"><code class="xref py py-attr docutils literal notranslate"><span class="pre">value</span></code></a>.</p>
+<p>Currently this attribute is used by <code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.ConfigMenu</span></code> to
+figure out how to construct the widget that will represent this value.</p>
+</p></li>
+<li><p><a class="reference internal" href="#earwax.ConfigValue.default" title="earwax.ConfigValue.default"><strong>default</strong></a> – <p>The default value for this
+configuration value.</p>
+<p>This will be inferred from <a class="reference internal" href="#earwax.ConfigValue.value" title="earwax.ConfigValue.value"><code class="xref py py-attr docutils literal notranslate"><span class="pre">value</span></code></a>.</p>
+</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="earwax.ConfigValue.default">
+<code class="sig-name descname">default</code><em class="property">: Optional<span class="p">[</span>Any<span class="p">]</span></em><a class="headerlink" href="#earwax.ConfigValue.default" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="earwax.ConfigValue.name">
+<code class="sig-name descname">name</code><em class="property">: Optional<span class="p">[</span>str<span class="p">]</span></em><a class="headerlink" href="#earwax.ConfigValue.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="earwax.ConfigValue.type_">
+<code class="sig-name descname">type_</code><em class="property">: Optional<span class="p">[</span>object<span class="p">]</span></em><a class="headerlink" href="#earwax.ConfigValue.type_" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="earwax.ConfigValue.value">
+<code class="sig-name descname">value</code><em class="property">: Any</em><a class="headerlink" href="#earwax.ConfigValue.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1373,7 +1505,7 @@ buffers dictionary.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="earwax.menu.html" class="btn btn-neutral float-right" title="earwax.menu package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="earwax.cmd.html" class="btn btn-neutral float-right" title="earwax.cmd package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="modules.html" class="btn btn-neutral float-left" title="earwax" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

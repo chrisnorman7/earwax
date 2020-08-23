@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   earwax.cmd
    earwax.menu
 
 Submodules
@@ -16,6 +17,7 @@ Submodules
    :maxdepth: 4
 
    earwax.action
+   earwax.config
    earwax.editor
    earwax.event_matcher
    earwax.game

@@ -1,4 +1,4 @@
-"""Provides the Config class."""
+"""Provides the Config and ConfigValue classes."""
 
 from typing import Any, Dict, Optional
 
@@ -13,8 +13,7 @@ class ConfigValue:
 
     This class is used to make configuration values::
 
-        class GameConfig(Config):
-            name = ConfigValue('username', name='The name of your character')
+        name = ConfigValue('username', name='Your character name', type_=str)
 
     :ivar `~earwax.ConfigValue.value`: The value held by this configuration
         value.
@@ -31,7 +30,9 @@ class ConfigValue:
         figure out how to construct the widget that will represent this value.
 
     :ivar `~earwax.ConfigValue.default`: The default value for this
-    configuration value.
+        configuration value.
+
+        This will be inferred from :attr:`~earwax.ConfigValue.value`.
     """
 
     value: Any
@@ -53,6 +54,26 @@ class Config:
 
     Any attribute that is an instance of :class:`~earwax.ConfigValue` is
     considered a configuration value.
+
+    You can create sections like so::
+
+        from earwax import Config, ConfigValue
+
+        class GameConfig(Config):
+            '''Example configuration page.'''
+
+            hostname = ConfigValue('localhost')
+            port = ConfigValue(1234)
+
+        c = GameConfig()
+
+    Then you can access configuration values like this::
+
+        host_string = f'{c.hostname.value}:{c.port.value}'
+        # ...
+
+    Use the :meth:`~earwax.Config.dump` method to get a dictionary suitable for
+    dumping with json.
     """
 
     __config_values__: Dict[str, ConfigValue]
@@ -73,7 +94,16 @@ class Config:
                 self.__config_subsections__[name] = value
 
     def dump(self) -> DumpDict:
-        """Return this object as a dictionary."""
+        """Return all configuration values, recursing through subsections::
+
+            c = ImaginaryConfiguration()
+            d = c.dump()
+            with open('config.json', 'w') as f:
+                json.dump(d, f)
+
+        Use the :meth:`~earwax.Config.populate_from_dict` method to
+        restore dumped values.
+        """
         d: DumpDict = {}
         name: str
         value: ConfigValue
@@ -85,15 +115,14 @@ class Config:
         return d
 
     def populate_from_dict(self, data: DumpDict) -> None:
-        """Load and return an instance from a dictionary, probably provided by
+        """Populate values from a dictionary, probably provided by
         :meth:`~earwax.Config.dump`::
 
             c = Config()
             with open('config.json', 'r') as f:
                 c.populate_from_dict(json.load(f))
 
-        As a shortcut, you can use :meth:`~earwax.Config.from_path` to loadfrom
-        a file.
+        Any missing values from `data` are ignored.
 
         """
         name: str
