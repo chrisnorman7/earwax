@@ -1,3 +1,4 @@
+sphinx
 sphinx_copybutton
 sphinxcontrib.apidoc
 sphinx_rtd_theme
