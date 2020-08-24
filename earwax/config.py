@@ -75,8 +75,11 @@ class Config:
 
     Use the :meth:`~earwax.Config.dump` method to get a dictionary suitable for
     dumping with json.
+
+    :ivar ~earwax.Config.name: The human-readable name of this section.
     """
 
+    name: Optional[str] = None
     __config_values__: Dict[str, ConfigValue]
     __config_subsections__: Dict[str, 'Config']
 
