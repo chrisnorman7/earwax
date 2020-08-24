@@ -66,18 +66,22 @@ class ConfigMenu(ConfigMenuBase, Menu):
     def __attrs_post_init__(self) -> None:
         """Add default type handlers, and populate the menu."""
         super().__attrs_post_init__()
-        # Let's add subsections first:
+        # Here we iterate over all members of the object, and pull the correct
+        # sections and values from the appropriate dictionaries.
         name: str
         subsection: Config
-        for name, subsection in self.config.__config_subsections__.items():
-            name = self.get_subsection_name(subsection, name)
-            self.item(f'{name}...')(self.subsection_menu(subsection, name))
-        # Now the configuration values.
         value: ConfigValue
-        for name, value in self.config.__config_values__.items():
-            name = self.get_option_name(value, name)
-            self.add_item(name, self.option_menu(value, name))
-        # And finally, let's ass some type handlers.
+        cls: object = type(self.config)
+        for name in cls.__dict__:
+            if name in self.config.__config_subsections__:
+                subsection = self.config.__config_subsections__[name]
+                name = self.get_subsection_name(subsection, name)
+                self.item(f'{name}...')(self.subsection_menu(subsection, name))
+            elif name in self.config.__config_values__:
+                value = self.config.__config_values__[name]
+                name = self.get_option_name(value, name)
+                self.add_item(name, self.option_menu(value, name))
+        # Now, let's add us some type handlers.
         self.type_handler(
             bool, lambda o, n: 'Disable' if o.value else 'Enable'
         )(self.handle_bool)
@@ -263,7 +267,12 @@ class ConfigMenu(ConfigMenuBase, Menu):
         def inner() -> Generator[None, None, None]:
             """Create and push the menu."""
             yield
-            m: Menu = Menu(f'{name}: {option.value_to_string()}', self.game)
+            printable_value: str = option.value_to_string()
+            t: object = type(option.value)
+            if option.value_converters is not None and \
+               t in option.value_converters:
+                printable_value = option.value_converters[t](option)
+            m: Menu = Menu(f'{name}: {printable_value}', self.game)
             types: Tuple[object]
             if is_union_type(option.type_):
                 types = get_args(option.type_)

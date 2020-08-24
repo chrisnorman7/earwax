@@ -17,11 +17,20 @@ class ConnectionConfig(Config):
     """Pretend connection configuration."""
 
     __section_name__ = 'Connection Options'
-    type = ConfigValue(
+    connection_speed = ConfigValue(
         'normal', type_=('slow', 'normal', 'fast'), name='Connection speed'
     )
-    ssl = ConfigValue(True, type_=Optional[bool], name='Use TLS')
-    timeout = ConfigValue(30.0, name='Connection timeout')
+    tls = ConfigValue(
+        True, type_=Optional[bool], name='Use TLS', value_converters={
+            type(None): lambda o: 'Automatic',
+            bool: lambda o: 'Enabled' if o.value else 'Disabled'
+        }
+    )
+    timeout = ConfigValue(
+        30.0, name='Connection timeout', value_converters={
+            float: lambda o: f'{o.value} seconds'
+        }
+    )
 
 
 class ServerConfig(Config):

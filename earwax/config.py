@@ -1,6 +1,6 @@
 """Provides the Config and ConfigValue classes."""
 
-from typing import Any, Dict, Optional, TextIO
+from typing import Any, Callable, Dict, Optional, TextIO
 
 from attr import Factory, attrib, attrs
 from yaml import FullLoader, dump, load
@@ -30,6 +30,13 @@ class ConfigValue:
         Currently this attribute is used by :class:`earwax.ConfigMenu` to
         figure out how to construct the widget that will represent this value.
 
+    :ivar ~earwax.ConfigValue.value_converters: A dictionary of ``type``:
+        ``converter`` functions.
+
+        These are used by :meth:`earwax.ConfigMenu.option_menu` to print
+        :attr:`~earwax.ConfigValue.value`, instead of
+        :meth:`~earwax.ConfigValue.value_to_string`.
+
     :ivar `~earwax.ConfigValue.default`: The default value for this
         configuration value.
 
@@ -39,6 +46,9 @@ class ConfigValue:
     value: Any
     name: Optional[str] = None
     type_: Optional[object] = None
+    value_converters: Optional[
+        Dict[object, Callable[['ConfigValue'], str]]
+    ] = None
     default: Optional[Any] = attrib(default=Factory(type(None)), init=False)
 
     def __attrs_post_init__(self) -> None:

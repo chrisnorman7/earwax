@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.config module &mdash; earwax 6.0.6.dev22 documentation</title>
+  <title>earwax.config module &mdash; earwax 6.0.6.dev23 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                6.0.6.dev22
+                6.0.6.dev23
               </div>
             
           
@@ -286,7 +286,7 @@ dataloaded from the given file:</p>
 
 <dl class="py class">
 <dt id="earwax.config.ConfigValue">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.config.</code><code class="sig-name descname">ConfigValue</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="p">:</span> <span class="n">Any</span></em>, <em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">type_</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>object<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.config.ConfigValue" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.config.</code><code class="sig-name descname">ConfigValue</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="p">:</span> <span class="n">Any</span></em>, <em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">type_</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>object<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">value_converters</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">[</span>object<span class="p">, </span>Callable<span class="p">[</span><span class="p">[</span><a class="reference internal" href="#earwax.config.ConfigValue" title="earwax.config.ConfigValue">ConfigValue</a><span class="p">]</span><span class="p">, </span>str<span class="p">]</span><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.config.ConfigValue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A configuration value.</p>
 <p>This class is used to make configuration values:</p>
@@ -306,6 +306,12 @@ configuration value.</p>
 from <a class="reference internal" href="earwax.html#earwax.ConfigValue.value" title="earwax.ConfigValue.value"><code class="xref py py-attr docutils literal notranslate"><span class="pre">value</span></code></a>.</p>
 <p>Currently this attribute is used by <a class="reference internal" href="earwax.html#earwax.ConfigMenu" title="earwax.ConfigMenu"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.ConfigMenu</span></code></a> to
 figure out how to construct the widget that will represent this value.</p>
+</p></li>
+<li><p><a class="reference internal" href="earwax.html#earwax.ConfigValue.value_converters" title="earwax.ConfigValue.value_converters"><strong>value_converters</strong></a> – <p>A dictionary of <code class="docutils literal notranslate"><span class="pre">type</span></code>:
+<code class="docutils literal notranslate"><span class="pre">converter</span></code> functions.</p>
+<p>These are used by <a class="reference internal" href="earwax.html#earwax.ConfigMenu.option_menu" title="earwax.ConfigMenu.option_menu"><code class="xref py py-meth docutils literal notranslate"><span class="pre">earwax.ConfigMenu.option_menu()</span></code></a> to print
+<a class="reference internal" href="earwax.html#earwax.ConfigValue.value" title="earwax.ConfigValue.value"><code class="xref py py-attr docutils literal notranslate"><span class="pre">value</span></code></a>, instead of
+<a class="reference internal" href="earwax.html#earwax.ConfigValue.value_to_string" title="earwax.ConfigValue.value_to_string"><code class="xref py py-meth docutils literal notranslate"><span class="pre">value_to_string()</span></code></a>.</p>
 </p></li>
 <li><p><a class="reference internal" href="earwax.html#earwax.ConfigValue.default" title="earwax.ConfigValue.default"><strong>default</strong></a> – <p>The default value for this
 configuration value.</p>
@@ -332,6 +338,11 @@ configuration value.</p>
 <dl class="py attribute">
 <dt id="earwax.config.ConfigValue.value">
 <code class="sig-name descname">value</code><em class="property">: Any</em><a class="headerlink" href="#earwax.config.ConfigValue.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="earwax.config.ConfigValue.value_converters">
+<code class="sig-name descname">value_converters</code><em class="property">: Optional<span class="p">[</span>Dict<span class="p">[</span>object<span class="p">, </span>Callable<span class="p">[</span><span class="p">[</span><a class="reference internal" href="#earwax.config.ConfigValue" title="earwax.config.ConfigValue">earwax.config.ConfigValue</a><span class="p">]</span><span class="p">, </span>str<span class="p">]</span><span class="p">]</span><span class="p">]</span></em><a class="headerlink" href="#earwax.config.ConfigValue.value_converters" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
