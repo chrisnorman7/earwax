@@ -75,3 +75,4 @@ autodoc_mock_imports = [
     'synthizer', 'pyglet', 'attr', 'yaml', 'accessible_output2',
     'typing_inspect'
 ]
+master_doc = 'index'
