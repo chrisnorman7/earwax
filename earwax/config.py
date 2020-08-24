@@ -2,8 +2,8 @@
 
 from typing import Any, Dict, Optional, TextIO
 
-from attr import Factory, attrs, attrib
-from yaml import dump, load, FullLoader
+from attr import Factory, attrib, attrs
+from yaml import FullLoader, dump, load
 
 DumpDict = Dict[str, Any]
 
@@ -45,6 +45,13 @@ class ConfigValue:
         if self.type_ is None:
             self.type_ = type(self.value)
         self.default = self.value
+
+    def value_to_string(self) -> str:
+        """Return :attr:`~earwax.ConfigValue.value` as a string.
+
+        This method is used by :class:`earwax.ConfigMenu` when it shows
+        values."""
+        return repr(self.value)
 
 
 class Config:

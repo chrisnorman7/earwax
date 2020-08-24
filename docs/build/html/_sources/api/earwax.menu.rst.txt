@@ -8,6 +8,7 @@ Submodules
    :maxdepth: 4
 
    earwax.menu.action_menu
+   earwax.menu.config_menu
    earwax.menu.file_menu
    earwax.menu.menu
    earwax.menu.menu_item

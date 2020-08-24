@@ -2,15 +2,43 @@
 
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Generator, Optional
 
 from pyglet.window import Window, key, mouse
 from synthizer import BufferGenerator, Context, DirectSource, SynthizerError
 
-from earwax import (
-    ActionMenu, AdvancedInterfaceSoundPlayer, Editor, FileMenu, Game, Level,
-    SimpleInterfaceSoundPlayer, get_buffer, tts)
+from earwax import (ActionMenu, AdvancedInterfaceSoundPlayer, Config,
+                    ConfigMenu, ConfigValue, Editor, FileMenu, Game, Level,
+                    SimpleInterfaceSoundPlayer, get_buffer, tts)
 from earwax.action import OptionalGenerator
+
+
+class ConnectionConfig(Config):
+    """Pretend connection configuration."""
+
+    __section_name__ = 'Connection Options'
+    type = ConfigValue(
+        'normal', type_=('slow', 'normal', 'fast'), name='Connection speed'
+    )
+    ssl = ConfigValue(True, type_=Optional[bool], name='Use TLS')
+    timeout = ConfigValue(30.0, name='Connection timeout')
+
+
+class ServerConfig(Config):
+    """Configure an imaginary server."""
+
+    hostname = ConfigValue('localhost')
+    port = ConfigValue(1234)
+    connection = ConnectionConfig()
+
+
+class ExampleConfig(Config):
+    """Accessed with the o key."""
+
+    __section_name__ = 'Options'
+    username = ConfigValue('')
+    remember = ConfigValue(True, name='Remember username')
+    server = ServerConfig()
 
 
 class ExampleGame(Game):
@@ -39,6 +67,7 @@ class ExampleGame(Game):
 def main() -> None:
     g: ExampleGame = ExampleGame()
     level: Level = Level()
+    config: ExampleConfig = ExampleConfig()
     g.push_level(level)
 
     def file_selected(name: Optional[Path]) -> OptionalGenerator:
@@ -116,6 +145,13 @@ def main() -> None:
             Path.cwd(), file_selected, 'Select A File', g
         )
         g.push_level(menu)
+
+    @level.action('Options', symbol=key.O)
+    def options() -> Generator[None, None, None]:
+        """Show the options menu."""
+        yield
+        m: ConfigMenu = ConfigMenu(config, 'Options', g)
+        g.push_level(m)
 
     @level.action(
         'Show actions', symbol=key.SLASH, modifiers=key.MOD_SHIFT

@@ -1,8 +1,9 @@
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from yaml import FullLoader, dump, load
+
 from earwax import Config, ConfigValue
-from yaml import load, FullLoader, dump
 
 
 class ServerConfig(Config):

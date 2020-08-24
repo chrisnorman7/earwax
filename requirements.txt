@@ -3,3 +3,4 @@ synthizer
 accessible_output2
 attrs
 pyyaml
+typing_inspect

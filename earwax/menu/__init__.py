@@ -15,8 +15,12 @@ By default:
 Optionally, menus can be dismissed with the escape key."""
 
 from .action_menu import ActionMenu
+from .config_menu import ConfigMenu, TypeHandler, UnknownTypeError
 from .file_menu import FileMenu
 from .menu import Menu
 from .menu_item import MenuItem
 
-__all__ = ['Menu', 'MenuItem', 'ActionMenu', 'FileMenu']
+__all__ = [
+    'Menu', 'MenuItem', 'ActionMenu', 'FileMenu', 'ConfigMenu', 'TypeHandler',
+    'UnknownTypeError'
+]
