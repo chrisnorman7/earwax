@@ -109,15 +109,15 @@ def test_load() -> None:
         p.unlink()
 
 
-def test_name() -> None:
+def test_name_() -> None:
     class SecondConfig(Config):
-        name = 'Second Configuration Page'
+        __section_name__ = 'Second Configuration Page'
 
     class FirstConfig(Config):
-        name = 'First Configuration Page'
+        __section_name__ = 'First Configuration Page'
         second = SecondConfig()
 
     c = FirstConfig()
-    assert c.name == 'First Configuration Page'
-    assert Config.name is None
-    assert c.second.name == 'Second Configuration Page'
+    assert c.__section_name__ == 'First Configuration Page'
+    assert Config.__section_name__ is None
+    assert c.second.__section_name__ == 'Second Configuration Page'

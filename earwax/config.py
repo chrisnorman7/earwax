@@ -76,10 +76,20 @@ class Config:
     Use the :meth:`~earwax.Config.dump` method to get a dictionary suitable for
     dumping with json.
 
-    :ivar ~earwax.Config.name: The human-readable name of this section.
+    To set the name that will be used by :class:`earwax.ConfigMenu`,
+    subclass :class:`earwax.Config`, and include a `__section_name__`
+    attribute::
+
+        class NamedConfig(Config):
+            __section_name__ = 'Options'
+
+    :ivar ~earwax.Config.__section_name__: The human-readable name of this
+        section.
+
+        At present, this attribute is only used by :class:`earwax.ConfigMenu`.
     """
 
-    name: Optional[str] = None
+    __section_name__: Optional[str] = None
     __config_values__: Dict[str, ConfigValue]
     __config_subsections__: Dict[str, 'Config']
 
