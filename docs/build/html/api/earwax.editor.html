@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.editor module &mdash; earwax 6.0.6.dev23 documentation</title>
+  <title>earwax.editor module &mdash; earwax 6.0.6.dev24 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                6.0.6.dev23
+                6.0.6.dev24
               </div>
             
           
@@ -186,7 +186,7 @@
 <p>Provides the Editor class.</p>
 <dl class="py class">
 <dt id="earwax.editor.Editor">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.editor.</code><code class="sig-name descname">Editor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">[</span>str<span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">game</span><span class="p">:</span> <span class="n">Game</span></em>, <em class="sig-param"><span class="n">dismissible</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">cursor_position</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.editor.Editor" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.editor.</code><code class="sig-name descname">Editor</code><a class="headerlink" href="#earwax.editor.Editor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#earwax.editor.EditorBase" title="earwax.editor.EditorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.editor.EditorBase</span></code></a>, <a class="reference internal" href="earwax.level.html#earwax.level.DismissibleMixin" title="earwax.level.DismissibleMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.level.DismissibleMixin</span></code></a>, <a class="reference internal" href="earwax.level.html#earwax.level.Level" title="earwax.level.Level"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.level.Level</span></code></a></p>
 <p>A basic text editor.</p>
 <p>By default, the enter key submits the contents to
@@ -217,7 +217,7 @@ when pressing enter in an edit field.</p></li>
 
 <dl class="py attribute">
 <dt id="earwax.editor.Editor.cursor_position">
-<code class="sig-name descname">cursor_position</code><em class="property">: Optional<span class="p">[</span>int<span class="p">]</span></em><a class="headerlink" href="#earwax.editor.Editor.cursor_position" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">cursor_position</code><em class="property">: Optional<span class="p">[</span>int<span class="p">]</span></em><em class="property"> = None</em><a class="headerlink" href="#earwax.editor.Editor.cursor_position" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -316,14 +316,14 @@ Otherwise, pos should be an integer between 0 and len(self.text) -
 
 <dl class="py attribute">
 <dt id="earwax.editor.Editor.text">
-<code class="sig-name descname">text</code><em class="property">: str</em><a class="headerlink" href="#earwax.editor.Editor.text" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">text</code><em class="property">: str</em><em class="property"> = ''</em><a class="headerlink" href="#earwax.editor.Editor.text" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt id="earwax.editor.EditorBase">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.editor.</code><code class="sig-name descname">EditorBase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">[</span>str<span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.editor.EditorBase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.editor.</code><code class="sig-name descname">EditorBase</code><a class="headerlink" href="#earwax.editor.EditorBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Add a func attribute.</p>
 <dl class="py attribute">

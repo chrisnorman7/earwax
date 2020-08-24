@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.level module &mdash; earwax 6.0.6.dev23 documentation</title>
+  <title>earwax.level module &mdash; earwax 6.0.6.dev24 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                6.0.6.dev23
+                6.0.6.dev24
               </div>
             
           
@@ -186,7 +186,7 @@
 <p>Provides classes for working with levels.</p>
 <dl class="py class">
 <dt id="earwax.level.DismissibleMixin">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.level.</code><code class="sig-name descname">DismissibleMixin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">game</span><span class="p">:</span> <span class="n">Game</span></em>, <em class="sig-param"><span class="n">dismissible</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">NOTHING</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.level.DismissibleMixin" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.level.</code><code class="sig-name descname">DismissibleMixin</code><a class="headerlink" href="#earwax.level.DismissibleMixin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#earwax.level.GameMixin" title="earwax.level.GameMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.level.GameMixin</span></code></a></p>
 <p>Make any <a class="reference internal" href="#earwax.level.Level" title="earwax.level.Level"><code class="xref py py-class docutils literal notranslate"><span class="pre">Level</span></code></a> subclass dismissible.</p>
 <dl class="field-list simple">
@@ -207,16 +207,16 @@ evaluates to True.</p>
 the attached <a class="reference internal" href="earwax.html#earwax.Game" title="earwax.Game"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.Game</span></code></a> instance.</p>
 </dd></dl>
 
-<dl class="py attribute">
+<dl class="py method">
 <dt id="earwax.level.DismissibleMixin.dismissible">
-<code class="sig-name descname">dismissible</code><em class="property">: bool</em><a class="headerlink" href="#earwax.level.DismissibleMixin.dismissible" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">dismissible</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#earwax.level.DismissibleMixin.dismissible" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt id="earwax.level.GameMixin">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.level.</code><code class="sig-name descname">GameMixin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">game</span><span class="p">:</span> <span class="n">Game</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.level.GameMixin" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.level.</code><code class="sig-name descname">GameMixin</code><a class="headerlink" href="#earwax.level.GameMixin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Add a game attribute to any <a class="reference internal" href="#earwax.level.Level" title="earwax.level.Level"><code class="xref py py-class docutils literal notranslate"><span class="pre">Level</span></code></a> subclass.</p>
 <dl class="field-list simple">
@@ -248,7 +248,7 @@ you, by way of the <a class="reference internal" href="earwax.html#earwax.EventM
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference internal" href="earwax.html#earwax.Level.actions" title="earwax.Level.actions"><strong>actions</strong></a> – A list of actions which can be called on this
+<li><p><strong>actions</strong> – A list of actions which can be called on this
 object. To define more, use the <a class="reference internal" href="earwax.html#earwax.Level.action" title="earwax.Level.action"><code class="xref py py-meth docutils literal notranslate"><span class="pre">action()</span></code></a> decorator.</p></li>
 <li><p><a class="reference internal" href="earwax.html#earwax.Level.motions" title="earwax.Level.motions"><strong>motions</strong></a> – The defined motion events. To define more, use
 the <a class="reference internal" href="earwax.html#earwax.Level.motion" title="earwax.Level.motion"><code class="xref py py-meth docutils literal notranslate"><span class="pre">motion()</span></code></a> decorator.</p></li>
@@ -271,11 +271,6 @@ the <a class="reference internal" href="earwax.html#earwax.Level.motion" title="
 <a class="reference internal" href="earwax.html#earwax.Action" title="earwax.Action"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.Action</span></code></a>.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt id="earwax.level.Level.actions">
-<code class="sig-name descname">actions</code><em class="property">: ActionListType</em><a class="headerlink" href="#earwax.level.Level.actions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="py method">
 <dt id="earwax.level.Level.motion">
 <code class="sig-name descname">motion</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">motion</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; Callable<span class="p">[</span><span class="p">[</span>MotionFunctionType<span class="p">]</span><span class="p">, </span>MotionFunctionType<span class="p">]</span><a class="headerlink" href="#earwax.level.Level.motion" title="Permalink to this definition">¶</a></dt>
@@ -291,8 +286,9 @@ editable, and <a class="reference internal" href="earwax.html#earwax.Menu" title
 
 <dl class="py attribute">
 <dt id="earwax.level.Level.motions">
-<code class="sig-name descname">motions</code><em class="property">: MotionsType</em><a class="headerlink" href="#earwax.level.Level.motions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">motions</code><a class="headerlink" href="#earwax.level.Level.motions" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">builtins.dict</span></code></p>
+</dd></dl>
 
 <dl class="py method">
 <dt id="earwax.level.Level.on_pop">
@@ -328,7 +324,7 @@ the provided motion is found, then that function will be called.</p>
 
 <dl class="py class">
 <dt id="earwax.level.TitleMixin">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.level.</code><code class="sig-name descname">TitleMixin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.level.TitleMixin" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.level.</code><code class="sig-name descname">TitleMixin</code><a class="headerlink" href="#earwax.level.TitleMixin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Add a title to any <a class="reference internal" href="#earwax.level.Level" title="earwax.level.Level"><code class="xref py py-class docutils literal notranslate"><span class="pre">Level</span></code></a> subclass.</p>
 <dl class="field-list simple">

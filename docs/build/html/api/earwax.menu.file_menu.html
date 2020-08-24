@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.menu.file_menu module &mdash; earwax 6.0.6.dev23 documentation</title>
+  <title>earwax.menu.file_menu module &mdash; earwax 6.0.6.dev24 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                6.0.6.dev23
+                6.0.6.dev24
               </div>
             
           
@@ -182,7 +182,7 @@
 <p>Provides the FileMenu class.</p>
 <dl class="py class">
 <dt id="earwax.menu.file_menu.FileMenu">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.file_menu.</code><code class="sig-name descname">FileMenu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">pathlib.Path</span></em>, <em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">[</span>Optional<span class="p">[</span>pathlib.Path<span class="p">]</span><span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">game</span><span class="p">:</span> <span class="n">Game</span></em>, <em class="sig-param"><span class="n">dismissible</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="earwax.menu.menu_item.html#earwax.menu.menu_item.MenuItem" title="earwax.menu.menu_item.MenuItem">earwax.menu.menu_item.MenuItem</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">position</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">search_timeout</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">search_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">search_string</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">root</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>pathlib.Path<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">empty_label</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">directory_label</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">show_directories</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">show_files</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">up_label</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'..'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.menu.file_menu.FileMenu" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.file_menu.</code><code class="sig-name descname">FileMenu</code><a class="headerlink" href="#earwax.menu.file_menu.FileMenu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#earwax.menu.file_menu.FileMenuBase" title="earwax.menu.file_menu.FileMenuBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.menu.file_menu.FileMenuBase</span></code></a>, <a class="reference internal" href="earwax.menu.menu.html#earwax.menu.menu.Menu" title="earwax.menu.menu.Menu"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.menu.menu.Menu</span></code></a></p>
 <p>A menu for slecting a file.</p>
 <p>File menus can be used as follows:</p>
@@ -236,12 +236,12 @@ in the directory tree.</p></li>
 </dl>
 <dl class="py attribute">
 <dt id="earwax.menu.file_menu.FileMenu.directory_label">
-<code class="sig-name descname">directory_label</code><em class="property">: Optional<span class="p">[</span>str<span class="p">]</span></em><a class="headerlink" href="#earwax.menu.file_menu.FileMenu.directory_label" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">directory_label</code><em class="property">: Optional<span class="p">[</span>str<span class="p">]</span></em><em class="property"> = None</em><a class="headerlink" href="#earwax.menu.file_menu.FileMenu.directory_label" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="earwax.menu.file_menu.FileMenu.empty_label">
-<code class="sig-name descname">empty_label</code><em class="property">: Optional<span class="p">[</span>str<span class="p">]</span></em><a class="headerlink" href="#earwax.menu.file_menu.FileMenu.empty_label" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">empty_label</code><em class="property">: Optional<span class="p">[</span>str<span class="p">]</span></em><em class="property"> = None</em><a class="headerlink" href="#earwax.menu.file_menu.FileMenu.empty_label" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -254,7 +254,7 @@ use this instance.</p>
 
 <dl class="py attribute">
 <dt id="earwax.menu.file_menu.FileMenu.root">
-<code class="sig-name descname">root</code><em class="property">: Optional<span class="p">[</span>pathlib.Path<span class="p">]</span></em><a class="headerlink" href="#earwax.menu.file_menu.FileMenu.root" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">root</code><em class="property">: Optional<span class="p">[</span>pathlib.Path<span class="p">]</span></em><em class="property"> = None</em><a class="headerlink" href="#earwax.menu.file_menu.FileMenu.root" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -265,24 +265,24 @@ use this instance.</p>
 
 <dl class="py attribute">
 <dt id="earwax.menu.file_menu.FileMenu.show_directories">
-<code class="sig-name descname">show_directories</code><em class="property">: bool</em><a class="headerlink" href="#earwax.menu.file_menu.FileMenu.show_directories" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">show_directories</code><em class="property">: bool</em><em class="property"> = True</em><a class="headerlink" href="#earwax.menu.file_menu.FileMenu.show_directories" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="earwax.menu.file_menu.FileMenu.show_files">
-<code class="sig-name descname">show_files</code><em class="property">: bool</em><a class="headerlink" href="#earwax.menu.file_menu.FileMenu.show_files" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">show_files</code><em class="property">: bool</em><em class="property"> = True</em><a class="headerlink" href="#earwax.menu.file_menu.FileMenu.show_files" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="earwax.menu.file_menu.FileMenu.up_label">
-<code class="sig-name descname">up_label</code><em class="property">: str</em><a class="headerlink" href="#earwax.menu.file_menu.FileMenu.up_label" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">up_label</code><em class="property">: str</em><em class="property"> = '..'</em><a class="headerlink" href="#earwax.menu.file_menu.FileMenu.up_label" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt id="earwax.menu.file_menu.FileMenuBase">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.file_menu.</code><code class="sig-name descname">FileMenuBase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">pathlib.Path</span></em>, <em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">[</span>Optional<span class="p">[</span>pathlib.Path<span class="p">]</span><span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.menu.file_menu.FileMenuBase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.file_menu.</code><code class="sig-name descname">FileMenuBase</code><a class="headerlink" href="#earwax.menu.file_menu.FileMenuBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Adds path and func arguments.</p>
 <dl class="py attribute">

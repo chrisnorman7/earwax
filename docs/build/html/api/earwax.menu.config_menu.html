@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.menu.config_menu module &mdash; earwax 6.0.6.dev23 documentation</title>
+  <title>earwax.menu.config_menu module &mdash; earwax 6.0.6.dev24 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                6.0.6.dev23
+                6.0.6.dev24
               </div>
             
           
@@ -182,7 +182,7 @@
 <p>Provides the ConfigMenu class,.</p>
 <dl class="py class">
 <dt id="earwax.menu.config_menu.ConfigMenu">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.config_menu.</code><code class="sig-name descname">ConfigMenu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="earwax.config.html#earwax.config.Config" title="earwax.config.Config">earwax.config.Config</a></span></em>, <em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">game</span><span class="p">:</span> <span class="n">Game</span></em>, <em class="sig-param"><span class="n">dismissible</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="earwax.menu.menu_item.html#earwax.menu.menu_item.MenuItem" title="earwax.menu.menu_item.MenuItem">earwax.menu.menu_item.MenuItem</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">position</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">search_timeout</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">search_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">search_string</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.menu.config_menu.ConfigMenu" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.config_menu.</code><code class="sig-name descname">ConfigMenu</code><a class="headerlink" href="#earwax.menu.config_menu.ConfigMenu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#earwax.menu.config_menu.ConfigMenuBase" title="earwax.menu.config_menu.ConfigMenuBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.menu.config_menu.ConfigMenuBase</span></code></a>, <a class="reference internal" href="earwax.menu.menu.html#earwax.menu.menu.Menu" title="earwax.menu.menu.Menu"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.menu.menu.Menu</span></code></a></p>
 <p>A menu that allows the user to set values on configuration sections.</p>
 <p>If an option is present with a type the menu doesn’t know how to handle,
@@ -192,7 +192,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><a class="reference internal" href="#earwax.menu.config_menu.ConfigMenuBase.config" title="earwax.menu.config_menu.ConfigMenuBase.config"><strong>config</strong></a> – The configuration section this menu will
 configure.</p></li>
-<li><p><a class="reference internal" href="earwax.html#earwax.ConfigMenu.type_handlers" title="earwax.ConfigMenu.type_handlers"><strong>type_handlers</strong></a> – <p>Functions to handle the types this
+<li><p><strong>type_handlers</strong> – <p>Functions to handle the types this
 menu knows about.</p>
 <p>New types can be handled with the
 <a class="reference internal" href="earwax.html#earwax.ConfigMenu.type_handler" title="earwax.ConfigMenu.type_handler"><code class="xref py py-meth docutils literal notranslate"><span class="pre">type_handler()</span></code></a> method.</p>
@@ -318,16 +318,11 @@ returns a function that - when called - will push it onto the stack.</p>
 more menus, and yielding.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt id="earwax.menu.config_menu.ConfigMenu.type_handlers">
-<code class="sig-name descname">type_handlers</code><em class="property">: Dict<span class="p">[</span>object<span class="p">, </span><a class="reference internal" href="#earwax.menu.config_menu.TypeHandler" title="earwax.menu.config_menu.TypeHandler">earwax.menu.config_menu.TypeHandler</a><span class="p">]</span></em><a class="headerlink" href="#earwax.menu.config_menu.ConfigMenu.type_handlers" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
 <dt id="earwax.menu.config_menu.ConfigMenuBase">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.config_menu.</code><code class="sig-name descname">ConfigMenuBase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="earwax.config.html#earwax.config.Config" title="earwax.config.Config">earwax.config.Config</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.menu.config_menu.ConfigMenuBase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.config_menu.</code><code class="sig-name descname">ConfigMenuBase</code><a class="headerlink" href="#earwax.menu.config_menu.ConfigMenuBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Adds a <code class="docutils literal notranslate"><span class="pre">config</span></code> argument to the constructor.</p>
 <dl class="py attribute">
@@ -339,7 +334,7 @@ more menus, and yielding.</p>
 
 <dl class="py class">
 <dt id="earwax.menu.config_menu.TypeHandler">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.config_menu.</code><code class="sig-name descname">TypeHandler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">[</span><a class="reference internal" href="earwax.config.html#earwax.config.ConfigValue" title="earwax.config.ConfigValue">earwax.config.ConfigValue</a><span class="p">, </span>str<span class="p">]</span><span class="p">, </span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">[</span><a class="reference internal" href="earwax.config.html#earwax.config.ConfigValue" title="earwax.config.ConfigValue">earwax.config.ConfigValue</a><span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.menu.config_menu.TypeHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.config_menu.</code><code class="sig-name descname">TypeHandler</code><a class="headerlink" href="#earwax.menu.config_menu.TypeHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A type handler for use with <a class="reference internal" href="earwax.html#earwax.ConfigMenu" title="earwax.ConfigMenu"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConfigMenu</span></code></a> instances.</p>
 <dl class="field-list simple">

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.game module &mdash; earwax 6.0.6.dev23 documentation</title>
+  <title>earwax.game module &mdash; earwax 6.0.6.dev24 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                6.0.6.dev23
+                6.0.6.dev24
               </div>
             
           
@@ -199,14 +199,14 @@ thereof - to be useful.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference internal" href="earwax.html#earwax.Game.window" title="earwax.Game.window"><strong>window</strong></a> – The pyglet window used to display the game.</p></li>
-<li><p><a class="reference internal" href="earwax.html#earwax.Game.levels" title="earwax.Game.levels"><strong>levels</strong></a> – All the pushed levels.</p></li>
-<li><p><a class="reference internal" href="earwax.html#earwax.Game.triggered_actions" title="earwax.Game.triggered_actions"><strong>triggered_actions</strong></a> – The currently triggered actions.</p></li>
-<li><p><a class="reference internal" href="earwax.html#earwax.Game.key_release_generators" title="earwax.Game.key_release_generators"><strong>key_release_generators</strong></a> – The actions which returned
+<li><p><strong>window</strong> – The pyglet window used to display the game.</p></li>
+<li><p><strong>levels</strong> – All the pushed levels.</p></li>
+<li><p><strong>triggered_actions</strong> – The currently triggered actions.</p></li>
+<li><p><strong>key_release_generators</strong> – The actions which returned
 generators, and need to do something on key release.</p></li>
-<li><p><a class="reference internal" href="earwax.html#earwax.Game.mouse_release_generators" title="earwax.Game.mouse_release_generators"><strong>mouse_release_generators</strong></a> – The actions which returned
+<li><p><strong>mouse_release_generators</strong> – The actions which returned
 generators, and need to do something on mouse release.</p></li>
-<li><p><a class="reference internal" href="earwax.html#earwax.Game.event_matchers" title="earwax.Game.event_matchers"><strong>event_matchers</strong></a> – <p>The event matchers used by this object.</p>
+<li><p><strong>event_matchers</strong> – <p>The event matchers used by this object.</p>
 <p>To take advantage of the pyglet events system, subclass
 <a class="reference internal" href="earwax.html#earwax.Game" title="earwax.Game"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.Game</span></code></a>, or <a class="reference internal" href="earwax.html#earwax.Level" title="earwax.Level"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.Level</span></code></a>, and include events from
 the <a class="reference external" href="https://pyglet.readthedocs.io/en/latest/">Pyglet documentation</a>.</p>
@@ -239,32 +239,12 @@ that is popped.</p>
 button.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt id="earwax.game.Game.event_matchers">
-<code class="sig-name descname">event_matchers</code><em class="property">: Dict<span class="p">[</span>str<span class="p">, </span><a class="reference internal" href="earwax.event_matcher.html#earwax.event_matcher.EventMatcher" title="earwax.event_matcher.EventMatcher">earwax.event_matcher.EventMatcher</a><span class="p">]</span></em><a class="headerlink" href="#earwax.game.Game.event_matchers" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="earwax.game.Game.key_release_generators">
-<code class="sig-name descname">key_release_generators</code><em class="property">: Dict<span class="p">[</span>int<span class="p">, </span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span></em><a class="headerlink" href="#earwax.game.Game.key_release_generators" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="py method">
 <dt id="earwax.game.Game.level">
 <em class="property">property </em><code class="sig-name descname">level</code><a class="headerlink" href="#earwax.game.Game.level" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the most recently added level.</p>
 <p>If the stack is empty, None will be returned.</p>
 </dd></dl>
-
-<dl class="py attribute">
-<dt id="earwax.game.Game.levels">
-<code class="sig-name descname">levels</code><em class="property">: List<span class="p">[</span><a class="reference internal" href="earwax.level.html#earwax.level.Level" title="earwax.level.Level">earwax.level.Level</a><span class="p">]</span></em><a class="headerlink" href="#earwax.game.Game.levels" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="earwax.game.Game.mouse_release_generators">
-<code class="sig-name descname">mouse_release_generators</code><em class="property">: Dict<span class="p">[</span>int<span class="p">, </span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span></em><a class="headerlink" href="#earwax.game.Game.mouse_release_generators" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt id="earwax.game.Game.on_close">
@@ -279,7 +259,7 @@ button.</p>
 <code class="sig-name descname">on_key_press</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">symbol</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">modifiers</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#earwax.game.Game.on_key_press" title="Permalink to this definition">¶</a></dt>
 <dd><p>A key has been pressed down.</p>
 <p>This is the default event that is used by <cite>pyglet.window.Window</cite>.</p>
-<p>By default it iterates through <a class="reference internal" href="earwax.html#earwax.Level.actions" title="earwax.Level.actions"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.level.actions</span></code></a>, and searches for events that match the given
+<p>By default it iterates through <code class="xref py py-attr docutils literal notranslate"><span class="pre">self.level.actions</span></code>, and searches for events that match the given
 symbol and modifiers.</p>
 </dd></dl>
 
@@ -353,7 +333,7 @@ with what methods will be called on each level.</p>
 
 <dl class="py method">
 <dt id="earwax.game.Game.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">window</span><span class="p">:</span> <span class="n">pyglet.window.BaseWindow</span></em>, <em class="sig-param"><span class="n">mouse_exclusive</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.game.Game.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">window</span><span class="p">:</span> <span class="n">pyglet.window.Window</span></em>, <em class="sig-param"><span class="n">mouse_exclusive</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#earwax.game.Game.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the game.</p>
 <p>By default, this method will perform the following actions in order:</p>
 <ul class="simple">
@@ -395,16 +375,6 @@ key sequence being pressed - that triggers an action.</p>
 previously triggered an action, such as releasing a key or a mouse
 button.</p>
 </dd></dl>
-
-<dl class="py attribute">
-<dt id="earwax.game.Game.triggered_actions">
-<code class="sig-name descname">triggered_actions</code><em class="property">: List<span class="p">[</span><a class="reference internal" href="earwax.action.html#earwax.action.Action" title="earwax.action.Action">earwax.action.Action</a><span class="p">]</span></em><a class="headerlink" href="#earwax.game.Game.triggered_actions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="earwax.game.Game.window">
-<code class="sig-name descname">window</code><em class="property">: Optional<span class="p">[</span>pyglet.window.BaseWindow<span class="p">]</span></em><a class="headerlink" href="#earwax.game.Game.window" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 

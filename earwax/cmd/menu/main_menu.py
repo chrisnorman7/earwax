@@ -4,18 +4,21 @@ from earwax import Menu
 
 from ..constants import game
 
-main_menu = Menu('Main Menu', game, dismissible=False)
 
+class MainMenu(Menu):
+    """The main menu for the earwax program."""
 
-@main_menu.item('New Game')
-def new_game() -> None:
-    """Create a new game."""
-    print('New game.')
-    game.pop_level()
+    def __init__(self) -> None:
+        super().__init__('Main Menu', game)
+        self.item('New Game')(self.new_game)
+        self.item('Exit')(self.do_exit)
 
+    def new_game(self) -> None:
+        """Create a new game."""
+        print('New game.')
+        game.pop_level()
 
-@main_menu.item('Exit')
-def do_exit() -> None:
-    """Exit the program."""
-    if game.window is not None:
-        game.window.close()
+    def do_exit(self) -> None:
+        """Exit the program."""
+        if game.window is not None:
+            game.window.close()

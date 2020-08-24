@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.action module &mdash; earwax 6.0.6.dev23 documentation</title>
+  <title>earwax.action module &mdash; earwax 6.0.6.dev24 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                6.0.6.dev23
+                6.0.6.dev24
               </div>
             
           
@@ -186,7 +186,7 @@
 <p>Provides the Action class.</p>
 <dl class="py class">
 <dt id="earwax.action.Action">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.action.</code><code class="sig-name descname">Action</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">level</span><span class="p">:</span> <span class="n">Level</span></em>, <em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">symbol</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mouse_button</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">modifiers</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">interval</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">NOTHING</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.action.Action" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.action.</code><code class="sig-name descname">Action</code><a class="headerlink" href="#earwax.action.Action" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>An action that can be called from within a game.</p>
 <p>Actions are added to <a class="reference internal" href="earwax.html#earwax.Level" title="earwax.Level"><code class="xref py py-class docutils literal notranslate"><span class="pre">Level</span></code></a> instances.</p>
@@ -211,7 +211,7 @@ multiple uses in a short space of time would be undesireable. If the
 value is an integer, it will be the number of seconds which must elapse
 between runs.</p>
 </p></li>
-<li><p><a class="reference internal" href="earwax.html#earwax.Action.last_run" title="earwax.Action.last_run"><strong>last_run</strong></a> – <p>The time this action was last run.</p>
+<li><p><strong>last_run</strong> – <p>The time this action was last run.</p>
 <p>To get the number of seconds since an action was last run, use <cite>time()
 - action.last_run</cite>.</p>
 </p></li>
@@ -223,14 +223,9 @@ between runs.</p>
 <code class="sig-name descname">func</code><em class="property">: Callable<span class="p">[</span><span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></em><a class="headerlink" href="#earwax.action.Action.func" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
+<dl class="py method">
 <dt id="earwax.action.Action.interval">
-<code class="sig-name descname">interval</code><em class="property">: Optional<span class="p">[</span>int<span class="p">]</span></em><a class="headerlink" href="#earwax.action.Action.interval" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="earwax.action.Action.last_run">
-<code class="sig-name descname">last_run</code><em class="property">: float</em><a class="headerlink" href="#earwax.action.Action.last_run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">interval</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#earwax.action.Action.interval" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -240,12 +235,12 @@ between runs.</p>
 
 <dl class="py attribute">
 <dt id="earwax.action.Action.modifiers">
-<code class="sig-name descname">modifiers</code><em class="property">: int</em><a class="headerlink" href="#earwax.action.Action.modifiers" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">modifiers</code><em class="property">: int</em><em class="property"> = 0</em><a class="headerlink" href="#earwax.action.Action.modifiers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="earwax.action.Action.mouse_button">
-<code class="sig-name descname">mouse_button</code><em class="property">: Optional<span class="p">[</span>int<span class="p">]</span></em><a class="headerlink" href="#earwax.action.Action.mouse_button" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">mouse_button</code><em class="property">: Optional<span class="p">[</span>int<span class="p">]</span></em><em class="property"> = None</em><a class="headerlink" href="#earwax.action.Action.mouse_button" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -268,7 +263,7 @@ function to be run and scheduled in one call).</p>
 
 <dl class="py attribute">
 <dt id="earwax.action.Action.symbol">
-<code class="sig-name descname">symbol</code><em class="property">: Optional<span class="p">[</span>int<span class="p">]</span></em><a class="headerlink" href="#earwax.action.Action.symbol" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">symbol</code><em class="property">: Optional<span class="p">[</span>int<span class="p">]</span></em><em class="property"> = None</em><a class="headerlink" href="#earwax.action.Action.symbol" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

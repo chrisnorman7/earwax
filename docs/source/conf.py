@@ -69,3 +69,9 @@ def setup(app):
     app.add_js_file(
         'https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js'
     )
+
+
+autodoc_mock_imports = [
+    'synthizer', 'pyglet', 'attr', 'yaml', 'accessible_output2',
+    'typing_inspect'
+]

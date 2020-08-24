@@ -3,7 +3,7 @@
 from pyglet.window import Window
 
 from .constants import game
-from .menu import main_menu
+from .menu import MainMenu
 
 
 def cmd_main() -> None:
@@ -11,5 +11,6 @@ def cmd_main() -> None:
 
     This function will be called by the earwax script."""
     window: Window = Window(caption='Earwax')
+    main_menu = MainMenu()
     game.push_level(main_menu)
     game.run(window)

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>earwax.menu package &mdash; earwax 6.0.6.dev23 documentation</title>
+  <title>earwax.menu package &mdash; earwax 6.0.6.dev24 documentation</title>
   
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                6.0.6.dev23
+                6.0.6.dev24
               </div>
             
           
@@ -206,7 +206,7 @@
 <p>Optionally, menus can be dismissed with the escape key.</p>
 <dl class="py class">
 <dt id="earwax.menu.ActionMenu">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.</code><code class="sig-name descname">ActionMenu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">game</span><span class="p">:</span> <span class="n">Game</span></em>, <em class="sig-param"><span class="n">dismissible</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="earwax.menu.menu_item.html#earwax.menu.menu_item.MenuItem" title="earwax.menu.menu_item.MenuItem">earwax.menu.menu_item.MenuItem</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">position</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">search_timeout</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">search_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">search_string</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.menu.ActionMenu" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.</code><code class="sig-name descname">ActionMenu</code><a class="headerlink" href="#earwax.menu.ActionMenu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="earwax.menu.menu.html#earwax.menu.menu.Menu" title="earwax.menu.menu.Menu"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.menu.menu.Menu</span></code></a></p>
 <p>A menu to show a list of actions, and their associated triggers.</p>
 <p>You can use this class with any game, like so:</p>
@@ -246,11 +246,6 @@ displayed.</p>
 select a trigger to activate the current action.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt id="earwax.menu.ActionMenu.items">
-<code class="sig-name descname">items</code><em class="property">: List<span class="p">[</span><a class="reference internal" href="earwax.menu.menu_item.html#earwax.menu.menu_item.MenuItem" title="earwax.menu.menu_item.MenuItem">earwax.menu.menu_item.MenuItem</a><span class="p">]</span></em><a class="headerlink" href="#earwax.menu.ActionMenu.items" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="py method">
 <dt id="earwax.menu.ActionMenu.mouse_to_string">
 <code class="sig-name descname">mouse_to_string</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span><span class="p">:</span> <span class="n"><a class="reference internal" href="earwax.action.html#earwax.action.Action" title="earwax.action.Action">earwax.action.Action</a></span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#earwax.menu.ActionMenu.mouse_to_string" title="Permalink to this definition">¶</a></dt>
@@ -259,26 +254,6 @@ to trigger the provided action.</p>
 <p>You can be certain that <cite>action.mouse_button is not None</cite>.</p>
 <p>Override this method to change how mouse triggers appear.</p>
 </dd></dl>
-
-<dl class="py attribute">
-<dt id="earwax.menu.ActionMenu.position">
-<code class="sig-name descname">position</code><em class="property">: int</em><a class="headerlink" href="#earwax.menu.ActionMenu.position" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="earwax.menu.ActionMenu.search_string">
-<code class="sig-name descname">search_string</code><em class="property">: str</em><a class="headerlink" href="#earwax.menu.ActionMenu.search_string" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="earwax.menu.ActionMenu.search_time">
-<code class="sig-name descname">search_time</code><em class="property">: float</em><a class="headerlink" href="#earwax.menu.ActionMenu.search_time" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="earwax.menu.ActionMenu.search_timeout">
-<code class="sig-name descname">search_timeout</code><em class="property">: float</em><a class="headerlink" href="#earwax.menu.ActionMenu.search_timeout" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt id="earwax.menu.ActionMenu.symbol_to_string">
@@ -293,7 +268,7 @@ trigger the provided action.</p>
 
 <dl class="py class">
 <dt id="earwax.menu.ConfigMenu">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.</code><code class="sig-name descname">ConfigMenu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference internal" href="earwax.config.html#earwax.config.Config" title="earwax.config.Config">earwax.config.Config</a></span></em>, <em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">game</span><span class="p">:</span> <span class="n">Game</span></em>, <em class="sig-param"><span class="n">dismissible</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="earwax.menu.menu_item.html#earwax.menu.menu_item.MenuItem" title="earwax.menu.menu_item.MenuItem">earwax.menu.menu_item.MenuItem</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">position</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">search_timeout</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">search_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">search_string</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.menu.ConfigMenu" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.</code><code class="sig-name descname">ConfigMenu</code><a class="headerlink" href="#earwax.menu.ConfigMenu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="earwax.menu.config_menu.html#earwax.menu.config_menu.ConfigMenuBase" title="earwax.menu.config_menu.ConfigMenuBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.menu.config_menu.ConfigMenuBase</span></code></a>, <a class="reference internal" href="earwax.menu.menu.html#earwax.menu.menu.Menu" title="earwax.menu.menu.Menu"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.menu.menu.Menu</span></code></a></p>
 <p>A menu that allows the user to set values on configuration sections.</p>
 <p>If an option is present with a type the menu doesn’t know how to handle,
@@ -303,7 +278,7 @@ trigger the provided action.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><a class="reference internal" href="earwax.menu.config_menu.html#earwax.menu.config_menu.ConfigMenuBase.config" title="earwax.menu.config_menu.ConfigMenuBase.config"><strong>config</strong></a> – The configuration section this menu will
 configure.</p></li>
-<li><p><a class="reference internal" href="earwax.html#earwax.ConfigMenu.type_handlers" title="earwax.ConfigMenu.type_handlers"><strong>type_handlers</strong></a> – <p>Functions to handle the types this
+<li><p><strong>type_handlers</strong> – <p>Functions to handle the types this
 menu knows about.</p>
 <p>New types can be handled with the
 <a class="reference internal" href="earwax.html#earwax.ConfigMenu.type_handler" title="earwax.ConfigMenu.type_handler"><code class="xref py py-meth docutils literal notranslate"><span class="pre">type_handler()</span></code></a> method.</p>
@@ -429,16 +404,11 @@ returns a function that - when called - will push it onto the stack.</p>
 more menus, and yielding.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt id="earwax.menu.ConfigMenu.type_handlers">
-<code class="sig-name descname">type_handlers</code><em class="property">: Dict<span class="p">[</span>object<span class="p">, </span><a class="reference internal" href="earwax.menu.config_menu.html#earwax.menu.config_menu.TypeHandler" title="earwax.menu.config_menu.TypeHandler">earwax.menu.config_menu.TypeHandler</a><span class="p">]</span></em><a class="headerlink" href="#earwax.menu.ConfigMenu.type_handlers" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
 <dt id="earwax.menu.FileMenu">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.</code><code class="sig-name descname">FileMenu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">pathlib.Path</span></em>, <em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">[</span>Optional<span class="p">[</span>pathlib.Path<span class="p">]</span><span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">game</span><span class="p">:</span> <span class="n">Game</span></em>, <em class="sig-param"><span class="n">dismissible</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="earwax.menu.menu_item.html#earwax.menu.menu_item.MenuItem" title="earwax.menu.menu_item.MenuItem">earwax.menu.menu_item.MenuItem</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">position</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">search_timeout</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">search_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">search_string</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">root</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>pathlib.Path<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">empty_label</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">directory_label</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">show_directories</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">show_files</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">up_label</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'..'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.menu.FileMenu" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.</code><code class="sig-name descname">FileMenu</code><a class="headerlink" href="#earwax.menu.FileMenu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="earwax.menu.file_menu.html#earwax.menu.file_menu.FileMenuBase" title="earwax.menu.file_menu.FileMenuBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.menu.file_menu.FileMenuBase</span></code></a>, <a class="reference internal" href="earwax.menu.menu.html#earwax.menu.menu.Menu" title="earwax.menu.menu.Menu"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.menu.menu.Menu</span></code></a></p>
 <p>A menu for slecting a file.</p>
 <p>File menus can be used as follows:</p>
@@ -492,12 +462,12 @@ in the directory tree.</p></li>
 </dl>
 <dl class="py attribute">
 <dt id="earwax.menu.FileMenu.directory_label">
-<code class="sig-name descname">directory_label</code><em class="property">: Optional<span class="p">[</span>str<span class="p">]</span></em><a class="headerlink" href="#earwax.menu.FileMenu.directory_label" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">directory_label</code><em class="property">: Optional<span class="p">[</span>str<span class="p">]</span></em><em class="property"> = None</em><a class="headerlink" href="#earwax.menu.FileMenu.directory_label" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="earwax.menu.FileMenu.empty_label">
-<code class="sig-name descname">empty_label</code><em class="property">: Optional<span class="p">[</span>str<span class="p">]</span></em><a class="headerlink" href="#earwax.menu.FileMenu.empty_label" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">empty_label</code><em class="property">: Optional<span class="p">[</span>str<span class="p">]</span></em><em class="property"> = None</em><a class="headerlink" href="#earwax.menu.FileMenu.empty_label" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -510,7 +480,7 @@ use this instance.</p>
 
 <dl class="py attribute">
 <dt id="earwax.menu.FileMenu.root">
-<code class="sig-name descname">root</code><em class="property">: Optional<span class="p">[</span>pathlib.Path<span class="p">]</span></em><a class="headerlink" href="#earwax.menu.FileMenu.root" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">root</code><em class="property">: Optional<span class="p">[</span>pathlib.Path<span class="p">]</span></em><em class="property"> = None</em><a class="headerlink" href="#earwax.menu.FileMenu.root" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -521,24 +491,24 @@ use this instance.</p>
 
 <dl class="py attribute">
 <dt id="earwax.menu.FileMenu.show_directories">
-<code class="sig-name descname">show_directories</code><em class="property">: bool</em><a class="headerlink" href="#earwax.menu.FileMenu.show_directories" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">show_directories</code><em class="property">: bool</em><em class="property"> = True</em><a class="headerlink" href="#earwax.menu.FileMenu.show_directories" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="earwax.menu.FileMenu.show_files">
-<code class="sig-name descname">show_files</code><em class="property">: bool</em><a class="headerlink" href="#earwax.menu.FileMenu.show_files" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">show_files</code><em class="property">: bool</em><em class="property"> = True</em><a class="headerlink" href="#earwax.menu.FileMenu.show_files" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="earwax.menu.FileMenu.up_label">
-<code class="sig-name descname">up_label</code><em class="property">: str</em><a class="headerlink" href="#earwax.menu.FileMenu.up_label" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">up_label</code><em class="property">: str</em><em class="property"> = '..'</em><a class="headerlink" href="#earwax.menu.FileMenu.up_label" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt id="earwax.menu.Menu">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.</code><code class="sig-name descname">Menu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">game</span><span class="p">:</span> <span class="n">Game</span></em>, <em class="sig-param"><span class="n">dismissible</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="earwax.menu.menu_item.html#earwax.menu.menu_item.MenuItem" title="earwax.menu.menu_item.MenuItem">earwax.menu.menu_item.MenuItem</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">NOTHING</span></em>, <em class="sig-param"><span class="n">position</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">search_timeout</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.5</span></em>, <em class="sig-param"><span class="n">search_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">search_string</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.menu.Menu" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.</code><code class="sig-name descname">Menu</code><a class="headerlink" href="#earwax.menu.Menu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="earwax.level.html#earwax.level.TitleMixin" title="earwax.level.TitleMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.level.TitleMixin</span></code></a>, <a class="reference internal" href="earwax.level.html#earwax.level.DismissibleMixin" title="earwax.level.DismissibleMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.level.DismissibleMixin</span></code></a>, <a class="reference internal" href="earwax.level.html#earwax.level.Level" title="earwax.level.Level"><code class="xref py py-class docutils literal notranslate"><span class="pre">earwax.level.Level</span></code></a></p>
 <p>A menu which holds multiple menu items which can be activated using
 actions.</p>
@@ -643,8 +613,9 @@ None.</p>
 
 <dl class="py attribute">
 <dt id="earwax.menu.Menu.items">
-<code class="sig-name descname">items</code><em class="property">: List<span class="p">[</span><a class="reference internal" href="earwax.menu.menu_item.html#earwax.menu.menu_item.MenuItem" title="earwax.menu.menu_item.MenuItem">earwax.menu.menu_item.MenuItem</a><span class="p">]</span></em><a class="headerlink" href="#earwax.menu.Menu.items" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">items</code><a class="headerlink" href="#earwax.menu.Menu.items" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">builtins.list</span></code></p>
+</dd></dl>
 
 <dl class="py method">
 <dt id="earwax.menu.Menu.move_down">
@@ -677,22 +648,22 @@ title, unless the initial focus has been set.</p>
 
 <dl class="py attribute">
 <dt id="earwax.menu.Menu.position">
-<code class="sig-name descname">position</code><em class="property">: int</em><a class="headerlink" href="#earwax.menu.Menu.position" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">position</code><em class="property">: int</em><em class="property"> = -1</em><a class="headerlink" href="#earwax.menu.Menu.position" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="earwax.menu.Menu.search_string">
-<code class="sig-name descname">search_string</code><em class="property">: str</em><a class="headerlink" href="#earwax.menu.Menu.search_string" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">search_string</code><em class="property">: str</em><em class="property"> = ''</em><a class="headerlink" href="#earwax.menu.Menu.search_string" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="earwax.menu.Menu.search_time">
-<code class="sig-name descname">search_time</code><em class="property">: float</em><a class="headerlink" href="#earwax.menu.Menu.search_time" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">search_time</code><em class="property">: float</em><em class="property"> = 0.0</em><a class="headerlink" href="#earwax.menu.Menu.search_time" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="earwax.menu.Menu.search_timeout">
-<code class="sig-name descname">search_timeout</code><em class="property">: float</em><a class="headerlink" href="#earwax.menu.Menu.search_timeout" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">search_timeout</code><em class="property">: float</em><em class="property"> = 0.5</em><a class="headerlink" href="#earwax.menu.Menu.search_timeout" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -708,7 +679,7 @@ errors if <a class="reference internal" href="#earwax.menu.Menu.position" title=
 
 <dl class="py class">
 <dt id="earwax.menu.MenuItem">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.</code><code class="sig-name descname">MenuItem</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.menu.MenuItem" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.</code><code class="sig-name descname">MenuItem</code><a class="headerlink" href="#earwax.menu.MenuItem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>An item in a <a class="reference internal" href="#earwax.menu.Menu" title="earwax.menu.Menu"><code class="xref py py-class docutils literal notranslate"><span class="pre">Menu</span></code></a>.</p>
 <p>This class is rarely used directly, instead
@@ -744,7 +715,7 @@ selected.</p>
 
 <dl class="py class">
 <dt id="earwax.menu.TypeHandler">
-<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.</code><code class="sig-name descname">TypeHandler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">[</span><a class="reference internal" href="earwax.config.html#earwax.config.ConfigValue" title="earwax.config.ConfigValue">earwax.config.ConfigValue</a><span class="p">, </span>str<span class="p">]</span><span class="p">, </span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">func</span><span class="p">:</span> <span class="n">Callable<span class="p">[</span><span class="p">[</span><a class="reference internal" href="earwax.config.html#earwax.config.ConfigValue" title="earwax.config.ConfigValue">earwax.config.ConfigValue</a><span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Generator<span class="p">[</span>None<span class="p">, </span>None<span class="p">, </span>None<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#earwax.menu.TypeHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">earwax.menu.</code><code class="sig-name descname">TypeHandler</code><a class="headerlink" href="#earwax.menu.TypeHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A type handler for use with <a class="reference internal" href="earwax.html#earwax.ConfigMenu" title="earwax.ConfigMenu"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConfigMenu</span></code></a> instances.</p>
 <dl class="field-list simple">
