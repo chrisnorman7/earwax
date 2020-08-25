@@ -29,7 +29,7 @@ class Game:
     Instances of the Level class can be pushed, popped, and replaced. The
     entire stack can also be cleared.
 
-    Although it doesn't matter in what order you create objects, a `Game`
+    Although it doesn't matter in what order you create objects, a ``Game``
     instance is necessary for :class:`~earwax.Level` instances - and subclasses
     thereof - to be useful.
 
@@ -55,16 +55,21 @@ class Game:
     window: Optional[Window] = attrib(
         default=Factory(lambda: None), init=False
     )
+
     levels: List[Level] = attrib(default=Factory(list), init=False)
+
     triggered_actions: 'ActionListType' = attrib(
         default=Factory(list), init=False
     )
+
     key_release_generators: ReleaseGeneratorListType = attrib(
         default=Factory(dict), init=False
     )
+
     mouse_release_generators: ReleaseGeneratorListType = attrib(
         default=Factory(dict), init=False
     )
+
     event_matchers: Dict[str, EventMatcher] = attrib(
         default=Factory(dict), init=False, repr=False
     )

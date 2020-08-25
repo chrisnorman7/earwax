@@ -17,8 +17,8 @@ def get_buffer(protocol: str, path: str) -> Buffer:
     buffer with the given protocol and path, it will be returned. Otherwise, a
     new buffer will be created, and added to the dictionary::
 
-        # Returns True.
         assert isinstance(get_buffer('file', 'sound.wav'), synthizer.Buffer)
+        # True.
 
     If you are going to destroy a buffer, make sure you remove it from the
     buffers dictionary.
