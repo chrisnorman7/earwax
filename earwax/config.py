@@ -61,7 +61,7 @@ class ConfigValue:
 
         This method is used by :class:`earwax.ConfigMenu` when it shows
         values."""
-        return repr(self.value)
+        return str(self.value)
 
 
 class Config:
