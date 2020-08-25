@@ -84,6 +84,11 @@ class FileMenu(FileMenuBase, Menu):
     def __attrs_post_init__(self) -> None:
         """Add the menu items."""
         super().__attrs_post_init__()
+        self.rebuild_menu()
+
+    def rebuild_menu(self) -> None:
+        """Rebuild the menu."""
+        self.items.clear()
         if self.empty_label is not None:
             self.add_item(self.empty_label, self.select_item(None))
         if self.directory_label is not None:
@@ -104,6 +109,7 @@ class FileMenu(FileMenuBase, Menu):
 
         def inner() -> None:
             self.path = path
+            self.rebuild_menu()
             self.home()
 
         return inner
