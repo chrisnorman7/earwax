@@ -48,6 +48,7 @@ class ExampleConfig(Config):
     username = ConfigValue('')
     remember = ConfigValue(True, name='Remember username')
     server = ServerConfig()
+    start_script = ConfigValue(None, type_=Optional[Path], name='Start script')
 
 
 class ExampleGame(Game):

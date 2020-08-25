@@ -1,6 +1,7 @@
 """Provides the ConfigMenu class,."""
 
-from typing import Any, Callable, Dict, Generator, Tuple
+from pathlib import Path
+from typing import Any, Callable, Dict, Generator, Optional, Tuple
 
 from attr import Factory, attrib, attrs
 from typing_inspect import get_args, is_union_type
@@ -9,6 +10,7 @@ from ..action import OptionalGenerator
 from ..config import Config, ConfigValue
 from ..editor import Editor
 from ..speech import tts
+from .file_menu import FileMenu
 from .menu import Menu
 
 TypeHandlerFunc = Callable[[ConfigValue], OptionalGenerator]
@@ -97,6 +99,9 @@ class ConfigMenu(ConfigMenuBase, Menu):
         self.type_handler(float, lambda option, name: 'Enter Float')(
             self.handle_float
         )
+        self.type_handler(Path, lambda option, name: 'Select a path')(
+            self.handle_path
+        )
 
     def handle_bool(self, option: ConfigValue) -> None:
         """Toggle a boolean value.
@@ -182,6 +187,26 @@ class ConfigMenu(ConfigMenuBase, Menu):
         self.game.push_level(
             Editor(inner, self.game, text=str(option.value) or '')
         )
+
+    def handle_path(self, option: ConfigValue) -> Generator[None, None, None]:
+        """Allow selecting files and folders."""
+
+        def inner(value: Optional[Path]) -> None:
+            """Set the value."""
+            self.set_value(option, value)()
+            self.game.pop_level()
+
+        yield
+        t: object = option.type_
+        empty_label: Optional[str] = None
+        if is_union_type(t) and type(None) in get_args(t):
+            empty_label = 'Clear'
+        fm: FileMenu = FileMenu(
+            option.value.parent if isinstance(option.value, Path) else
+            Path.cwd(), inner, 'Select Path', self.game,
+            empty_label=empty_label
+        )
+        self.game.push_level(fm)
 
     def type_handler(self, type_: object, title: TitleFunc) -> Callable[
         [TypeHandlerFunc], TypeHandlerFunc
