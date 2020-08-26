@@ -10,14 +10,14 @@ class MenuConfig(Config):
     """The menu configuration section."""
 
     __section_name__ = 'Menu Configuration'
-    default_item_select_sound = ConfigValue(
+    default_item_select_sound: ConfigValue = ConfigValue(
         None, type_=Optional[Path],
         name='The default sound that plays when moving through menus',
         value_converters={
             type(None): lambda o: '<Unset>'
         }
     )
-    default_item_activate_sound = ConfigValue(
+    default_item_activate_sounddefault_item_select_sound: ConfigValue = ConfigValue(
         None, type_=Optional[Path],
         name='The default sound that plays when activating items in menus',
         value_converters={
@@ -35,4 +35,4 @@ class EarwaxConfig(Config):
     """
 
     __section_name__ = 'Earwax Configuration'
-    menus = MenuConfig()
+    menus: MenuConfig = MenuConfig()

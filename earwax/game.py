@@ -48,7 +48,7 @@ class Game:
 
     :ivar ~earwax.Game.interface_sound_player: An
         :class:`earwax.AdvancedInterfaceSoundPlayer` instance, used for playing
-            interface sounds.
+        interface sounds.
 
     :ivar ~earwax.Game.levels: All the pushed levels.
 

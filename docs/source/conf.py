@@ -68,6 +68,8 @@ def setup(app):
     app.add_js_file(
         'https://cdn.jsdelivr.net/npm/clipboard@1/dist/clipboard.min.js'
     )
+    from earwax import ConfigValue
+    print('Imported %r.' % ConfigValue)
 
 
 autodoc_mock_imports = [
