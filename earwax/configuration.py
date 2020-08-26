@@ -10,7 +10,6 @@ class MenuConfig(Config):
     """The menu configuration section."""
 
     __section_name__ = 'Menu Configuration'
-    print(ConfigValue)
     default_item_select_sound = ConfigValue(
         None, type_=Optional[Path],
         name='The default sound that plays when moving through menus',
