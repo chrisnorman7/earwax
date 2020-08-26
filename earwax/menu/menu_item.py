@@ -1,5 +1,8 @@
 """Provides the MenuItem class."""
 
+from pathlib import Path
+from typing import Optional
+
 from attr import attrs
 
 from ..action import ActionFunctionType
@@ -16,14 +19,34 @@ class MenuItem:
 
     :ivar ~earwax.MenuItem.func: The function which will be called when this
         item is activated.
+
+    :ivar ~earwax.MenuItem.select_sound_path: The path to a sound which should
+        play when this menu item is selected.
+
+        If this value is ``None`` (the default), then no sound will be heard
+        unless the containing menu has its
+        :attr ~earwax.Menu.item_select_sound_path` attribute set to something
+        that is not ``None``, or
+        :attr:`~earwax.config.menus.default_item_selected_sound` is not
+        ``None``.
+
+    :ivar ~earwax.MenuItem.activate_sound_path: The path to a sound which
+        should play when this menu item is activated.
+
+        If this value is ``None`` (the default), then no sound will be heard
+        unless the containing menu has its
+        :attr:`~earwax.Menu.item_activate_sound_path` attribute set to
+        something that is not ``None``, or
+        :attr:`earwax.config.menus.default_item_activate_sound` is not
+        ``None``.
     """
 
     title: str
     func: ActionFunctionType
+    select_sound_path: Optional[Path] = None
+    activate_sound_path: Optional[Path] = None
 
     def on_selected(self) -> None:
         """The function which will be called when this menu item is
-        selected.
-
-        Could be overridden to play a sound for example."""
+        selected."""
         pass

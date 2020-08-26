@@ -10,6 +10,7 @@ from pyglet.window import Window
 from synthizer import Context, initialized
 
 from .action import Action, OptionalGenerator
+from .configuration import EarwaxConfig
 from .event_matcher import EventMatcher
 from .level import Level
 from .sound import AdvancedInterfaceSoundPlayer
@@ -39,6 +40,8 @@ class Game:
 
     :ivar ~earwax.Game.window: The pyglet window used to display the game.
 
+    :ivar ~earwax.Game.config: The configuration object used by this game.
+
     :ivar ~earwax.Game.audio_context`: The audio context, created by the
         :meth:`~earwax.Game.run` method, after :meth:`~earwax.Game.before_run`
         has been called.
@@ -65,6 +68,8 @@ class Game:
     """
 
     window: Optional[Window] = attrib(default=Factory(type(None)), init=False)
+
+    config: EarwaxConfig = attrib(default=Factory(EarwaxConfig), init=False)
 
     audio_context: Optional[Context] = attrib(
         default=Factory(type(None)), init=False

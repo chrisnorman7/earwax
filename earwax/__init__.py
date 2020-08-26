@@ -37,6 +37,7 @@ There are ready made :class:`~earwax.Level` classes for creating :class:`menus
 
 from .action import Action
 from .config import Config, ConfigValue
+from .configuration import EarwaxConfig
 from .editor import Editor
 from .event_matcher import EventMatcher
 from .game import Game
@@ -51,5 +52,5 @@ __all__ = [
     'Game', 'tts', 'Action', 'Menu', 'MenuItem', 'FileMenu', 'ActionMenu',
     'get_buffer', 'Editor', 'SimpleInterfaceSoundPlayer',
     'AdvancedInterfaceSoundPlayer', 'Level', 'EventMatcher', 'Config',
-    'ConfigValue', 'ConfigMenu', 'TypeHandler', 'UnknownTypeError'
+    'ConfigValue', 'ConfigMenu', 'TypeHandler', 'UnknownTypeError', 'EarwaxConfig'
 ]

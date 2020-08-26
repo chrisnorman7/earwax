@@ -9,7 +9,6 @@ from pyglet.window import Window, key, mouse
 
 from earwax import (ActionMenu, Config, ConfigMenu, ConfigValue, Editor,
                     FileMenu, Game, Level, tts)
-from earwax import config as earwax_config
 from earwax.action import OptionalGenerator
 
 
@@ -130,7 +129,7 @@ def main() -> None:
     def configure_earwax() -> Generator[None, None, None]:
         """Configure the earwax library."""
         yield
-        m: ConfigMenu = ConfigMenu(earwax_config, 'Earwax Configuration', g)
+        m: ConfigMenu = ConfigMenu(g.config, 'Earwax Configuration', g)
         g.push_level(m)
 
     @level.action(

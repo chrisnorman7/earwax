@@ -1,5 +1,6 @@
 """Provides the Menu class."""
 
+from pathlib import Path
 from time import time
 from typing import Callable, List, Optional
 
@@ -52,6 +53,12 @@ class Menu(TitleMixin, DismissibleMixin, Level):
     To override the default actions that are added to a menu, subclass
     :class:`earwax.Menu`, and override :meth:`__attrs_post_init__`.
 
+    :ivar ~earwax.Menu.item_sound_path: The default sound to play when moving
+        through the menu.
+
+        If the selected item's :attr:`~earwax.MenuItem.sound_path` attribute is
+        not ``None``, then that value takes precedence.
+
     :ivar ~earwax.Menu.items: The list of MenuItem instances for this menu.
 
     :ivar ~earwax.Menu.position: The user's position in this menu.
@@ -64,6 +71,8 @@ class Menu(TitleMixin, DismissibleMixin, Level):
     :ivar ~earwax.Menu.search_string: The current menu search search string.
     """
 
+    item_select_sound_path: Optional[Path] = None
+    item_activate_sound_path: Optional[Path] = None
     items: List[MenuItem] = Factory(list)
     position: int = -1
     search_timeout: float = 0.5
@@ -87,7 +96,9 @@ class Menu(TitleMixin, DismissibleMixin, Level):
             return self.items[self.position]
         return None
 
-    def item(self, title: str) -> Callable[[ActionFunctionType], MenuItem]:
+    def item(self, title: str, **kwargs) -> Callable[
+        [ActionFunctionType], MenuItem
+    ]:
         """Decorate a function to be used as a menu item.
 
         For example::
@@ -96,17 +107,23 @@ class Menu(TitleMixin, DismissibleMixin, Level):
             def func():
                 pass
 
+            @menu.item('Item with sound', sound_path=Path('sound.wav'))
+            def item_with_sound():
+                pass
+
         If you don't want to use a decorator, you can use the
         :meth:`~earwax.Menu.add_item` method instead.
         """
 
         def inner(func: ActionFunctionType) -> MenuItem:
             """Actually add the function."""
-            return self.add_item(title, func)
+            return self.add_item(title, func, **kwargs)
 
         return inner
 
-    def add_item(self, title: str, func: 'ActionFunctionType') -> MenuItem:
+    def add_item(
+        self, title: str, func: 'ActionFunctionType', **kwargs
+    ) -> MenuItem:
         """Add an item to this menu.
 
         For example::
@@ -115,11 +132,12 @@ class Menu(TitleMixin, DismissibleMixin, Level):
             def f():
                 tts.speak('Menu item activated.')
             m.add_item('Test Item', f)
+            m.add_item('Item with sound', f, sound_path=Path('sound.wav'))
 
         If you would rather use decorators, use the :meth:`~earwax.Menu.item`
         method instead.
         """
-        menu_item: MenuItem = MenuItem(title, func)
+        menu_item: MenuItem = MenuItem(title, func, **kwargs)
         self.items.append(menu_item)
         return menu_item
 
@@ -135,6 +153,12 @@ class Menu(TitleMixin, DismissibleMixin, Level):
         else:
             tts.speak(item.title)
             item.on_selected()
+            sound_path: Optional[Path] = item.select_sound_path or \
+                self.item_select_sound_path or \
+                self.game.config.menus.default_item_select_sound.value
+            if sound_path is not None and \
+               self.game.interface_sound_player is not None:
+                self.game.interface_sound_player.play_path(sound_path)
 
     def move_up(self) -> None:
         """Move up in this menu.
@@ -154,9 +178,16 @@ class Menu(TitleMixin, DismissibleMixin, Level):
         """Activate the currently focused menu item.
 
     Usually triggered by the enter key."""
-        if self.current_item is None:
-            return None
-        return self.current_item.func()
+        item: Optional[MenuItem] = self.current_item
+        if item is not None:
+            sound_path: Optional[Path] = item.activate_sound_path or \
+                self.item_activate_sound_path or \
+                self.game.config.menus.default_item_activate_sound.value
+            if sound_path is not None and \
+               self.game.interface_sound_player is not None:
+                self.game.interface_sound_player.play_path(sound_path)
+            return item.func()
+        return None
 
     def home(self) -> None:
         """Move to the start of a menu.
