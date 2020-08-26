@@ -34,7 +34,6 @@ author = 'Chris Norman'
 extensions = [
     'sphinxcontrib.apidoc',
     'sphinx_rtd_theme',
-    'sphinx.ext.doctest',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
