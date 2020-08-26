@@ -1,15 +1,15 @@
 """A quick example game."""
 
 import sys
+from synthizer import SynthizerError
 from pathlib import Path
 from typing import Generator, Optional
 
 from pyglet.window import Window, key, mouse
-from synthizer import BufferGenerator, Context, DirectSource, SynthizerError
 
-from earwax import (ActionMenu, AdvancedInterfaceSoundPlayer, Config,
-                    ConfigMenu, ConfigValue, Editor, FileMenu, Game, Level,
-                    SimpleInterfaceSoundPlayer, get_buffer, tts)
+from earwax import (ActionMenu, Config, ConfigMenu, ConfigValue, Editor,
+                    FileMenu, Game, Level, tts)
+from earwax import config as earwax_config
 from earwax.action import OptionalGenerator
 
 
@@ -55,23 +55,6 @@ class ExampleGame(Game):
     """A game with some extra stuff."""
 
     can_beep: bool = True
-    menu_sound_player: SimpleInterfaceSoundPlayer
-    ctx: Context
-    source: DirectSource
-    generator: BufferGenerator
-
-    def before_run(self) -> None:
-        """Set up some things."""
-        self.ctx = Context()
-        self.source = DirectSource(self.ctx)
-        self.generator = BufferGenerator(self.ctx)
-        self.generator.looping = True
-        self.menu_sound_player = SimpleInterfaceSoundPlayer(
-            self.ctx, BufferGenerator(self.ctx)
-        )
-        self.menu_sound_player.generator.buffer = get_buffer(
-            'file', 'move.wav'
-        )
 
 
 def main() -> None:
@@ -79,22 +62,6 @@ def main() -> None:
     level: Level = Level()
     config: ExampleConfig = ExampleConfig()
     g.push_level(level)
-
-    def file_selected(name: Optional[Path]) -> OptionalGenerator:
-        """A file has been chosen."""
-        g.pop_level()
-        try:
-            g.source.remove_generator(g.generator)
-        except SynthizerError:
-            pass  # No worries.
-        if name is not None:
-            try:
-                buffer = get_buffer('file', str(name))
-                g.generator.buffer = buffer
-                g.source.add_generator(g.generator)
-            except SynthizerError as e:
-                tts.speak(str(e))
-        return None
 
     @level.action('Change window title', symbol=key.T)
     def set_title() -> OptionalGenerator:
@@ -139,21 +106,17 @@ def main() -> None:
     @level.action('Menu', symbol=key.M)
     def menu() -> OptionalGenerator:
         """Select a file."""
-        player: AdvancedInterfaceSoundPlayer = AdvancedInterfaceSoundPlayer(
-            g.ctx, play_directories=False
-        )
 
-        def play_sound(path: Path) -> None:
+        def play_sound(path: Optional[Path]) -> None:
             """Call player.play in a try block."""
-            try:
-                player.play_path(path)
-            except SynthizerError:
-                pass  # Not a sound file.
+            if g.interface_sound_player is not None and path is not None:
+                try:
+                    g.interface_sound_player.play_path(path)
+                except SynthizerError:
+                    pass  # Not a sound file.
 
         yield
-        menu: FileMenu = FileMenu(
-            Path.cwd(), file_selected, 'Select A File', g
-        )
+        menu: FileMenu = FileMenu(Path.cwd(), play_sound, 'Select A File', g)
         g.push_level(menu)
 
     @level.action('Options', symbol=key.O)
@@ -161,6 +124,13 @@ def main() -> None:
         """Show the options menu."""
         yield
         m: ConfigMenu = ConfigMenu(config, 'Options', g)
+        g.push_level(m)
+
+    @level.action('Configure Earwax', symbol=key.C)
+    def configure_earwax() -> Generator[None, None, None]:
+        """Configure the earwax library."""
+        yield
+        m: ConfigMenu = ConfigMenu(earwax_config, 'Earwax Configuration', g)
         g.push_level(m)
 
     @level.action(

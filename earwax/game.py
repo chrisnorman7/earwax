@@ -7,11 +7,12 @@ import pyglet
 from attr import Factory, attrib, attrs
 from pyglet import app, clock
 from pyglet.window import Window
-from synthizer import initialized
+from synthizer import Context, initialized
 
 from .action import Action, OptionalGenerator
 from .event_matcher import EventMatcher
 from .level import Level
+from .sound import AdvancedInterfaceSoundPlayer
 
 ActionListType = List[Action]
 ReleaseGeneratorListType = Dict[int, Generator[None, None, None]]
@@ -26,6 +27,9 @@ class Game:
     This object holds a reference to the game window, as well as a list of
     Level instances.
 
+    In addition, references to various parts of the audio subsystem reside on
+    this object, namely :attr:`~earwax.Game.audio_context`.
+
     Instances of the Level class can be pushed, popped, and replaced. The
     entire stack can also be cleared.
 
@@ -34,6 +38,14 @@ class Game:
     thereof - to be useful.
 
     :ivar ~earwax.Game.window: The pyglet window used to display the game.
+
+    :ivar ~earwax.Game.audio_context`: The audio context, created by the
+        :meth:`~earwax.Game.run` method, after :meth:`~earwax.Game.before_run`
+        has been called.
+
+    :ivar ~earwax.Game.interface_sound_player: An
+        :class:`earwax.AdvancedInterfaceSoundPlayer` instance, used for playing
+            interface sounds.
 
     :ivar ~earwax.Game.levels: All the pushed levels.
 
@@ -52,8 +64,14 @@ class Game:
         the `Pyglet documentation <https://pyglet.readthedocs.io/en/latest/>`_.
     """
 
-    window: Optional[Window] = attrib(
-        default=Factory(lambda: None), init=False
+    window: Optional[Window] = attrib(default=Factory(type(None)), init=False)
+
+    audio_context: Optional[Context] = attrib(
+        default=Factory(type(None)), init=False
+    )
+
+    interface_sound_player: Optional[AdvancedInterfaceSoundPlayer] = attrib(
+        default=Factory(type(None)), init=False
     )
 
     levels: List[Level] = attrib(default=Factory(list), init=False)
@@ -228,7 +246,10 @@ mouse buttons, rather than symbols."""
 
         * Set the requested mouse exclusive mode on the provided window.
 
-        * Enter a `synthizer.initialized` contextmanager.
+        * Enter a ``synthizer.initialized`` contextmanager.
+
+        * populate :attr:`~earwax.Game.audio_context`, and
+            :attr:`~earwax.Game.interface_sound_player`.
 
         * Call the :meth:`~earwax.Game.before_run` method.
 
@@ -244,6 +265,10 @@ mouse buttons, rather than symbols."""
         window.set_exclusive_mouse(mouse_exclusive)
         self.window = window
         with initialized():
+            self.audio_context = Context()
+            self.interface_sound_player = AdvancedInterfaceSoundPlayer(
+                self.audio_context
+            )
             self.before_run()
             app.run()
 
