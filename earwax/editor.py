@@ -58,7 +58,10 @@ class Editor(EditorBase, DismissibleMixin, Level):
         """Text has been entered.
 
         If the cursor is at the end of the line, append the text. Otherwise,
-        insert it."""
+        insert it.
+
+        :param text: The text that has been enetered.
+        """
         if self.cursor_position is None:
             self.text += text
         else:
@@ -67,7 +70,10 @@ class Editor(EditorBase, DismissibleMixin, Level):
         self.echo(text)
 
     def echo(self, text: str) -> None:
-        """Output entered and selected text."""
+        """Speak the provided text.
+
+        :param text: The text to speak, using ``tts.speak``.
+        """
         if text == ' ':
             text = 'space'
         tts.speak(text)
@@ -83,9 +89,12 @@ class Editor(EditorBase, DismissibleMixin, Level):
     def set_cursor_position(self, pos: Optional[int]) -> None:
         """Set the cursor position within :attr:`~earwax.Editor.text`.
 
-        If pos is None, then the cursor will be at the end of the line.
-        Otherwise, pos should be an integer between 0 and len(self.text) -
-        1."""
+        If ``pos`` is ``None``, then the cursor will be at the end of the line.
+        Otherwise, ``pos`` should be an integer between 0 and ``len(self.text)
+        - 1``.
+
+        :param pos: The new cursor position.
+        """
         if pos is not None and pos >= len(self.text):
             pos = None
         self.cursor_position = pos

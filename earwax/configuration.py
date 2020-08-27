@@ -17,7 +17,8 @@ class MenuConfig(Config):
             type(None): lambda o: '<Unset>'
         }
     )
-    default_item_activate_sounddefault_item_select_sound: ConfigValue = ConfigValue(
+    default_item_activate_sound: ConfigValue
+    default_item_activate_sound = ConfigValue(
         None, type_=Optional[Path],
         name='The default sound that plays when activating items in menus',
         value_converters={

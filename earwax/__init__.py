@@ -52,5 +52,6 @@ __all__ = [
     'Game', 'tts', 'Action', 'Menu', 'MenuItem', 'FileMenu', 'ActionMenu',
     'get_buffer', 'Editor', 'SimpleInterfaceSoundPlayer',
     'AdvancedInterfaceSoundPlayer', 'Level', 'EventMatcher', 'Config',
-    'ConfigValue', 'ConfigMenu', 'TypeHandler', 'UnknownTypeError', 'EarwaxConfig'
+    'ConfigValue', 'ConfigMenu', 'TypeHandler', 'UnknownTypeError',
+    'EarwaxConfig'
 ]

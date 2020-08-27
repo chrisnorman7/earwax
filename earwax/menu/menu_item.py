@@ -13,7 +13,7 @@ class MenuItem:
     """An item in a :class:`~earwax.menu.Menu`.
 
     This class is rarely used directly, instead
-    :meth:`~earwax.menu.Menu.add_item` can be used to return an instance.
+    :meth:`earwax.menu.Menu.add_item` can be used to return an instance.
 
     :ivar ~earwax.MenuItem.title: The title of this menu item.
 
@@ -25,9 +25,9 @@ class MenuItem:
 
         If this value is ``None`` (the default), then no sound will be heard
         unless the containing menu has its
-        :attr ~earwax.Menu.item_select_sound_path` attribute set to something
+        :attr:`~earwax.Menu.item_select_sound_path` attribute set to something
         that is not ``None``, or
-        :attr:`~earwax.config.menus.default_item_selected_sound` is not
+        :attr:`earwax.EarwaxConfig.menus.default_item_select_sound` is not
         ``None``.
 
     :ivar ~earwax.MenuItem.activate_sound_path: The path to a sound which
@@ -37,7 +37,7 @@ class MenuItem:
         unless the containing menu has its
         :attr:`~earwax.Menu.item_activate_sound_path` attribute set to
         something that is not ``None``, or
-        :attr:`earwax.config.menus.default_item_activate_sound` is not
+        :attr:`earwax.EarwaxConfig.menus.default_item_select_sound` is not
         ``None``.
     """
 

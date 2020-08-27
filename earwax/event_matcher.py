@@ -30,6 +30,12 @@ class EventMatcher:
         If :attr:`self.game.level <earwax.Game.level>` doesn't have an event of
         the proper name, search instead on :attr:`self.game
         <earwax.EventMatcher.game>`.
+
+        :param args: The positional arguments to pass to any event that is
+            found.
+
+        :param kwargs: The keyword arguments to pass to any event that is
+            found.
         """
         if self.game.level is not None:
             if hasattr(self.game.level, self.name):

@@ -18,7 +18,8 @@ TitleFunc = Callable[[ConfigValue, str], str]
 
 
 class UnknownTypeError(Exception):
-    """A ConfigMenu doesn't know how to handle the given type."""
+    """An exception which will be thrown if a :class:`~earwax.ConfigMenu`
+    instance doesn't know how to handle the given type."""
 
 
 @attrs(auto_attribs=True)
@@ -107,16 +108,23 @@ class ConfigMenu(ConfigMenuBase, Menu):
         """Toggle a boolean value.
 
         Used by the default :class:`~earwax.TypeHandler` that
-        handles boolean values."""
+        handles boolean values.
+
+        :param option: The :class:`~earwax.ConfigValue` instance to work on.
+        """
         option.value = not option.value
         tts.speak('Enabled' if option.value else 'Disabled')
         self.game.pop_level()
 
     def clear_value(self, option: ConfigValue) -> None:
-        """Sets option.value to None.
+        """Sets ``option.value`` to ``None``.
 
         Used by the default :class:`~earwax.TypeHandler` that
-        handles nullable values."""
+        handles nullable values.
+
+        :param option: The :class:`~earwax.ConfigValue` instance whose value
+            should be set to ``None``.
+        """
         option.value = None
         tts.speak('Cleared.')
         self.game.pop_level()
@@ -127,7 +135,10 @@ class ConfigMenu(ConfigMenuBase, Menu):
         """Allow editing strings.
 
         Used by the default :class:`~earwax.TypeHandler` that
-        handles string values."""
+        handles string values.
+
+        :param option: The :class:`~earwax.ConfigValue` instance to work on.
+        """
 
         def inner(value: str):
             """Set the option value."""
@@ -144,7 +155,10 @@ class ConfigMenu(ConfigMenuBase, Menu):
         """Allow editing integers.
 
         Used by the default :class:`~earwax.TypeHandler` that
-        handles integer values."""
+        handles integer values.
+
+        :param option: The :class:`~earwax.ConfigValue` instance to work on.
+        """
 
         def inner(value: str):
             """Set the option value."""
@@ -169,7 +183,10 @@ class ConfigMenu(ConfigMenuBase, Menu):
         """Allow editing floats.
 
         Used by the default :class:`~earwax.TypeHandler` that
-        handles float values."""
+        handles float values.
+
+        :param option: The :class:`~earwax.ConfigValue` instance to work on.
+        """
 
         def inner(value: str):
             """Set the option value."""
@@ -189,7 +206,13 @@ class ConfigMenu(ConfigMenuBase, Menu):
         )
 
     def handle_path(self, option: ConfigValue) -> Generator[None, None, None]:
-        """Allow selecting files and folders."""
+        """Allow selecting files and folders.
+
+        Used by the default :class:`~earwax.TypeHandler` that
+        handles ``pathlib.Path`` values.
+
+        :param option: The :class:`~earwax.ConfigValue` instance to work on.
+        """
 
         def inner(value: Optional[Path]) -> None:
             """Set the value."""
@@ -227,6 +250,11 @@ class ConfigMenu(ConfigMenuBase, Menu):
 
         Handlers can do anything menu item functions can do, including creating
         more menus, and yielding.
+
+        :param type_: The type this handler should be registered for.
+
+        :param title: A function which will return the title for the menu item
+            for this handler.
         """
 
         def inner(func: TypeHandlerFunc) -> TypeHandlerFunc:
@@ -242,7 +270,13 @@ class ConfigMenu(ConfigMenuBase, Menu):
 
         The provided ``name`` argument will be the attribute name, so should
         only be used if the subsection has no ``__section_name__``
-        attribute."""
+        attribute.
+
+        :param subsection: The :class:`~earwax.Config` instance whose name
+            should be returned.
+
+        :param name: The name of the attribute that holds the subsection.
+        """
         if subsection.__section_name__ is not None:
             return subsection.__section_name__
         return name
@@ -251,7 +285,13 @@ class ConfigMenu(ConfigMenuBase, Menu):
         """Gets the name for the given option.
 
         The provided ``name`` argument will be the attribute name, so should
-        only be used if the option has no ``__section_name__`` attribute."""
+        only be used if the option has no ``__section_name__`` attribute.
+
+        :param option: The :class:`~earwax.ConfigValue` instance whose name
+            should be returned.
+
+        :param name: The name of the attribute that holds the option.
+        """
         if option.name is not None:
             return option.name
         return name
@@ -262,7 +302,14 @@ class ConfigMenu(ConfigMenuBase, Menu):
         """Used to add a menu for the given subsection.
 
         By default, creates a new :class:`earwax.ConfigMenu` instance, and
-        returns a function that - when called - will push it onto the stack."""
+        returns a function that - when called - will push it onto the stack.
+
+        :param subsection: The :class:`~earwax.Config` instance to create a
+            menu for.
+
+        :param name: The proper name of the subsection, returned by
+            :meth:`~earwax.ConfigMenu.get_subsection_name`.
+        """
 
         def inner() -> Generator[None, None, None]:
             """Push the previously created menu onto the level stack."""
@@ -287,6 +334,12 @@ class ConfigMenu(ConfigMenuBase, Menu):
 
         At the end of the menu, there will be an option to restore the default
         value.
+
+        :param option: The :class:`~earwax.ConfigValue` instance to generate a
+            menu for.
+
+        :param name: The proper name of the given option, as returned by
+            :meth:`~earwax.ConfigMenu.get_option_name`.
         """
 
         def inner() -> Generator[None, None, None]:
@@ -336,7 +389,14 @@ class ConfigMenu(ConfigMenuBase, Menu):
 
         This method returns a callable because it is used extensively by
         :meth:`~earwax.ConfigMenu.option_menu`, and a bunch of lambdas becomes
-        less readable. Plus, Mypy complains about them."""
+        less readable. Plus, Mypy complains about them.
+
+        :param option: The :class:`~earwax.ConfigValue` instance to work on.
+
+        :param value: The value to set ``option.value`` to.
+
+        :param message: The message to be spoken after setting the value.
+        """
 
         def inner():
             option.value = value
@@ -351,7 +411,14 @@ class ConfigMenu(ConfigMenuBase, Menu):
         """Activates the given handler with the given configuration value.
 
         Used by the :meth:`~earwax.ConfigMenu.option_menu` method when building
-        menus."""
+        menus.
+
+        :param handler: The :class:`~earwax.TypeHandler` instance that should
+            be activated.
+
+        :param option: The :class:`~earwax.ConfigValue`
+            instance the handler should work with.
+        """
 
         def inner() -> OptionalGenerator:
             """Actually call the handler's func."""

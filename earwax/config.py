@@ -67,10 +67,10 @@ class ConfigValue:
 class Config:
     """Holds configuration subsections and values.
 
-    Any attribute that is an instance of :class:`~earwax.Config` is considered
+    Any attribute that is an instance of :class:`earwax.Config` is considered
     a subsection.
 
-    Any attribute that is an instance of :class:`~earwax.ConfigValue` is
+    Any attribute that is an instance of :class:`earwax.ConfigValue` is
     considered a configuration value.
 
     You can create sections like so::
@@ -155,6 +155,7 @@ class Config:
 
         Any missing values from `data` are ignored.
 
+        :param data: The data to load.
         """
         name: str
         value: ConfigValue
@@ -175,7 +176,10 @@ class Config:
             with open('config.yaml', 'w') as f:
                 c.save(f)
 
-        By default, YAML is used."""
+        By default, YAML is used.
+
+        :param f: A file-like object to write the resulting data to.
+        """
         data: DumpDict = self.dump()
         dump(data, stream=f)
 
@@ -188,6 +192,9 @@ class Config:
                 c.load(f)
 
         To save the data in the furst place, use the
-        :meth:`~earwax.Config.save` method."""
+        :meth:`~earwax.Config.save` method.
+
+        :param f: A file-like object to load data from.
+        """
         data: Any = load(f, Loader=FullLoader)
         self.populate_from_dict(data)

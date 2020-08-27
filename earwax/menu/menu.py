@@ -91,7 +91,7 @@ class Menu(TitleMixin, DismissibleMixin, Level):
     @property
     def current_item(self) -> Optional[MenuItem]:
         """Return the currently selected menu item. If position is -1, return
-        None."""
+        ``None``."""
         if self.position != -1:
             return self.items[self.position]
         return None
@@ -113,6 +113,11 @@ class Menu(TitleMixin, DismissibleMixin, Level):
 
         If you don't want to use a decorator, you can use the
         :meth:`~earwax.Menu.add_item` method instead.
+
+        :param title: The title of the newly created menu item.
+
+        :param kwargs: Extra arguments to be passed to the constructor of
+            :class:`earwax.MenuItem`.
         """
 
         def inner(func: ActionFunctionType) -> MenuItem:
@@ -136,14 +141,23 @@ class Menu(TitleMixin, DismissibleMixin, Level):
 
         If you would rather use decorators, use the :meth:`~earwax.Menu.item`
         method instead.
+
+        :param title: The title of the newly created menu item.
+
+        :param func: The function which will be called when the menu item is
+            selected.
+
+        :param kwargs: Extra arguments to be passed to the constructor of
+            :class:`earwax.MenuItem`.
         """
         menu_item: MenuItem = MenuItem(title, func, **kwargs)
         self.items.append(menu_item)
         return menu_item
 
     def show_selection(self) -> None:
-        """Speak the menu item at the current position, or the title of this
-        menu, if position is -1.
+        """Speak the menu item at the current position, or :attr:`self.title
+        <earwax.level.TitleMixin.title>`, if :attr:`self.position
+        <earwax.Menu.position>` is -1.
 
         This function performs no error checking, so it will happily throw
         errors if :attr:`position` is something stupid."""
@@ -206,7 +220,10 @@ class Menu(TitleMixin, DismissibleMixin, Level):
     def on_text(self, text: str) -> None:
         """Handle sent text.
 
-        By default, performs a search of this menu."""
+        By default, performs a search of this menu.
+
+        :param text: The text that has been sent.
+        """
         now: float = time()
         if (now - self.search_time) > self.search_timeout:
             self.search_string = text.lower()
@@ -224,6 +241,7 @@ class Menu(TitleMixin, DismissibleMixin, Level):
     def on_push(self) -> None:
         """This object has been pushed onto a :class:`~earwax.game.Game` instance.
 
-        Show the current selection. That will be the same as speaking the
-        title, unless the initial focus has been set."""
+        By default, show the current selection. That will be the same as
+        speaking the title, unless :attr:`self.position <earwax.Menu.position>`
+        has been set to anything other than -1.."""
         self.show_selection()

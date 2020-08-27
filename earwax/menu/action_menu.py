@@ -50,9 +50,13 @@ class ActionMenu(Menu):
         """Returns a string representing the symbol and modifiers needed to
         trigger the provided action.
 
-        You can be certain that `action.symbol is not None`.
+        You can be certain that ``action.symbol is not None``.
 
-        Override this method to change how symbol triggers appear."""
+        Override this method to change how symbol triggers appear.
+
+        :param action: The action whose :attr:`~earwax.Action.symbol` attribute
+            this method will be working on.
+        """
         s: str
         mods: str = ''
         if action.modifiers:
@@ -66,9 +70,13 @@ class ActionMenu(Menu):
         """Returns a string representing the mouse button and modifiers needed
         to trigger the provided action.
 
-        You can be certain that `action.mouse_button is not None`.
+        You can be certain that ``action.mouse_button is not None``.
 
-        Override this method to change how mouse triggers appear."""
+        Override this method to change how mouse triggers appear.
+
+        :param action: The action whose :attr:`~earwax.Action.mouse_button`
+            attribute this method will be working on.
+        """
         s: str
         mods: str = ''
         if action.modifiers:
@@ -79,10 +87,13 @@ class ActionMenu(Menu):
         return s
 
     def action_menu(self, action: Action) -> ActionFunctionType:
-        """Show a submenu of triggers for the given action.
+        """Show a submenu of triggers.
 
         Override this method to change how the submenu for actions are
-        displayed."""
+        displayed.
+
+        :param action: The action to generate the menu for.
+        """
 
         def inner() -> None:
             func: ActionFunctionType = self.handle_action(action)
@@ -102,7 +113,10 @@ class ActionMenu(Menu):
         """Handle an action.
 
         This method is used as the menu handler that is triggered when you
-        select a trigger to activate the current action."""
+        select a trigger to activate the current action.
+
+        :param action: The action to run.
+        """
 
         def inner() -> OptionalGenerator:
             """Pop the menu, and run the action."""

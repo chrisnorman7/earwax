@@ -50,21 +50,26 @@ class Game:
         :class:`earwax.AdvancedInterfaceSoundPlayer` instance, used for playing
         interface sounds.
 
-    :ivar ~earwax.Game.levels: All the pushed levels.
+    :ivar ~earwax.Game.levels: All the pushed :class:`earwax.Level` instances.
 
-    :ivar ~earwax.Game.triggered_actions: The currently triggered actions.
+    :ivar ~earwax.Game.triggered_actions: The currently triggered
+        :class:`earwax.Action` instances.
 
-    :ivar ~earwax.Game.key_release_generators: The actions which returned
-        generators, and need to do something on key release.
+    :ivar ~earwax.Game.key_release_generators: The :class:`earwax.Action`
+        instances which returned generators, and need to do something on key
+        release.
 
-    :ivar ~earwax.Game.mouse_release_generators: The actions which returned
-        generators, and need to do something on mouse release.
+    :ivar ~earwax.Game.mouse_release_generators: The :class:`earwax.Action`
+        instances which returned generators, and need to do something on mouse
+        release.
 
-    :ivar ~earwax.Game.event_matchers: The event matchers used by this object.
+    :ivar ~earwax.Game.event_matchers: The :class:`earwax.EventMatcher`
+        instances used by this object.
 
         To take advantage of the pyglet events system, subclass
         :class:`earwax.Game`, or :class:`earwax.Level`, and include events from
-        the `Pyglet documentation <https://pyglet.readthedocs.io/en/latest/>`_.
+        `pyglet.window.Window
+        <https://pyglet.readthedocs.io/en/latest/modules/window.html>`_.
     """
 
     window: Optional[Window] = attrib(default=Factory(type(None)), init=False)
@@ -99,33 +104,50 @@ class Game:
 
     def start_action(self, a: Action) -> OptionalGenerator:
         """Start an action. If the action has no interval, it will be ran
-        straight away. Otherwise, it will be added to triggered_actions, and
+        straight away. Otherwise, it will be added to
+        :attr:`self.triggered_actions <earwax.Game.triggered_actions>`, and
         only ran if enough time has elapsed since the last run.
 
         This method is used when a trigger fires - such as a mouse button or
-        key sequence being pressed - that triggers an action."""
+        key sequence being pressed - that triggers an action.
+
+        :param a: The :class:`earwax.Action` instance that should be started.
+        """
         if a.interval is not None:
             self.triggered_actions.append(a)
             clock.schedule_interval(a.run, a.interval)
         return a.run(None)
 
     def stop_action(self, a: Action) -> None:
-        """Unschedule an action, and remove it from triggered_actions.
+        """Unschedule an action, and remove it from :attr:`triggered_actions
+        <earwax.Game.triggered_actions>`.
 
         This method is called when the user stops doing something that
         previously triggered an action, such as releasing a key or a mouse
-        button."""
+        button
+
+        :param a: The :class:`earwax.Action` instance that should be stopped.
+        """
         self.triggered_actions.remove(a)
         clock.unschedule(a.run)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool:
         """A key has been pressed down.
 
-        This is the default event that is used by `pyglet.window.Window`.
+        This is the default event that is used by ``pyglet.window.Window``.
 
         By default it iterates through :attr:`self.level.actions
         <earwax.Level.actions>`, and searches for events that match the given
-        symbol and modifiers."""
+        symbol and modifiers.
+
+        :param symbol: One of the key constants from `pyglet.window.key
+            <https://pythonhosted.org/pyglet/api/pyglet.window.key-
+            module.html>`__.
+
+        :param modifiers: One of the modifier constants from `pyglet.window.key
+            <https://pythonhosted.org/pyglet/api/pyglet.window.key-
+            module.html>`__.
+        """
         if self.level is not None:
             a: Action
             for a in self.level.actions:
@@ -142,7 +164,16 @@ class Game:
     def on_key_release(self, symbol: int, modifiers: int) -> bool:
         """A key has been released.
 
-        This is the default event that is used by `pyglet.window.Window`."""
+        This is the default event that is used by ``pyglet.window.Window``.
+
+        :param symbol: One of the key constants from `pyglet.window.key
+            <https://pythonhosted.org/pyglet/api/pyglet.window.key-
+            module.html>`__.
+
+        :param modifiers: One of the modifier constants from `pyglet.window.key
+            <https://pythonhosted.org/pyglet/api/pyglet.window.key-
+            module.html>`__.
+        """
         a: Action
         for a in self.triggered_actions:
             if a.symbol == symbol:
@@ -165,7 +196,22 @@ class Game:
         then releases it.
 
         If string and motion are not None, then on_text, and on_text_motion
-        events will also be fired."""
+        events will also be fired.
+
+        :param symbol: One of the key constants from `pyglet.window.key
+            <https://pythonhosted.org/pyglet/api/pyglet.window.key-
+            module.html>`__.
+
+        :param modifiers: One of the modifier constants from `pyglet.window.key
+            <https://pythonhosted.org/pyglet/api/pyglet.window.key-
+            module.html>`__.
+
+        :param string: A string to be picked up by an ``on_text`` event
+            handler..
+
+        :param motion: A key to be picked up by an ``on_text_motion`` event
+            handler.
+        """
         self.on_key_press(symbol, modifiers)
         if string is not None:
             getattr(self, 'on_text', lambda s: None)(string)
@@ -178,11 +224,24 @@ class Game:
     ) -> bool:
         """A mouse button has been pressed down.
 
-        This is the default event that is used by `pyglet.window.Window`.
+        This is the default event that is used by ``pyglet.window.Window``.
 
-By default, this method pretty much acts the same as
-:meth:`~earwax.Game.on_key_press`, except it checks the discovered actions for
-mouse buttons, rather than symbols."""
+        By default, this method pretty much acts the same as
+        :meth:`~earwax.Game.on_key_press`, except it checks the discovered
+        actions for mouse buttons, rather than symbols.
+
+        :param x: The x coordinate of the mouse.
+
+        :param y: The y coordinate of the mouse.
+
+        :param button: One of the mouse button constants from
+            `pyglet.window.mouse <https://pythonhosted.org/pyglet/api/
+            pyglet.window.mouse-module.html>`__.
+
+        :param modifiers: One of the modifier constants from `pyglet.window.key
+            <https://pythonhosted.org/pyglet/api/pyglet.window.key-
+            module.html>`__.
+        """
         if self.level is not None:
             a: Action
             for a in self.level.actions:
@@ -201,11 +260,24 @@ mouse buttons, rather than symbols."""
     ) -> bool:
         """A mouse button has been released.
 
-        This is the default event that is used by `pyglet.window.Window`.
+        This is the default event that is used by ``pyglet.window.Window``.
 
         By default, this method is pretty much the same as
         :meth:`~earwax.Game.on_key_release`, except that it uses the
-        discovered actions mouse button information."""
+        discovered actions mouse button information.
+
+        :param x: The x coordinate of the mouse.
+
+        :param y: The y coordinate of the mouse.
+
+        :param button: One of the mouse button constants from
+            `pyglet.window.mouse <https://pythonhosted.org/pyglet/api/
+            pyglet.window.mouse-module.html>`__.
+
+        :param modifiers: One of the modifier constants from `pyglet.window.key
+            <https://pythonhosted.org/pyglet/api/pyglet.window.key-
+            module.html>`__.
+        """
         a: Action
         for a in self.triggered_actions:
             if a.mouse_button == button:
@@ -222,7 +294,16 @@ mouse buttons, rather than symbols."""
 
     def click_mouse(self, button: int, modifiers: int) -> None:
         """Used for testing, to simulate pressing and releasing a mouse
-        button."""
+        button.
+
+        :param button: One of the mouse button constants from
+            `pyglet.window.mouse <https://pythonhosted.org/pyglet/api/
+            pyglet.window.mouse-module.html>`__.
+
+        :param modifiers: One of the modifier constants from
+            `pyglet.window.key <https://pythonhosted.org/pyglet/api/
+            pyglet.window.key-module.html>`__.
+        """
         self.on_mouse_press(0, 0, button, modifiers)
         self.on_mouse_release(0, 0, button, modifiers)
 
@@ -232,7 +313,8 @@ mouse buttons, rather than symbols."""
 
         By this point, default events have been decorated, such as
         on_key_press and on_text. Also, we are inside a synthizer.initialized
-        context manager, so feel free to play sounds."""
+        context manager, so feel free to play sounds, and use
+        :attr:`self.audio_context <earwax.Game.audio_context>`."""
         pass
 
     def run(self, window: Window, mouse_exclusive: bool = True) -> None:
@@ -243,11 +325,11 @@ mouse buttons, rather than symbols."""
         * disable pyglet's shadow window, which can cause problems with screen
             readers.
 
-        * Iterate over all the found event types on `pyglet.window.Window`, and
-            decorate them with :class:`~earwax.EventMatcher` instances. This
-            means :class:`~earwax.Game` and :class:`~earwax.Level` subclasses
-            can take full advantage of all event types by simply adding methods
-            with the correct names to their classes.
+        * Iterate over all the found event types on ``pyglet.window.Window``,
+            and decorate them with :class:`~earwax.EventMatcher` instances.
+            This means :class:`~earwax.Game` and :class:`~earwax.Level`
+            subclasses can take full advantage of all event types by simply
+            adding methods with the correct names to their classes.
 
         * Set the requested mouse exclusive mode on the provided window.
 
@@ -259,6 +341,10 @@ mouse buttons, rather than symbols."""
         * Call the :meth:`~earwax.Game.before_run` method.
 
         * Start the pyglet event loop.
+
+        :param window: The pyglet window that will form the game's interface.
+
+        :param mouse_exclusive: The mouse exclusive setting for the window.
         """
         pyglet.options['shadow_window'] = False
         name: str
@@ -278,13 +364,17 @@ mouse buttons, rather than symbols."""
             app.run()
 
     def push_level(self, level: Level) -> None:
-        """Push a level onto self.levels.
+        """Push a level onto :attr:`self.levels <earwax.Game.levels>`.
 
         This ensures that all events will be handled by the provided level
         until another level is pushed on top, or the current one is popped.
 
         This method also calls :meth:`~earwax.Level.on_push` on the provided
-        level."""
+        level.
+
+        :param level: The :class:`earwax.Level` instance to push onto the
+            stack.
+        """
         self.levels.append(level)
         level.on_push()
 
@@ -293,12 +383,16 @@ mouse buttons, rather than symbols."""
 
         This method uses :meth:`~earwax.Game.pop_level`, and
         :meth:`~earwax.Game.push_level`, so make sure you familiarise yourself
-        with what methods will be called on each level."""
+        with what events will be called on each level.
+
+        :param level: The :class:`earwax.Level` instance to push onto the
+            stack.
+        """
         self.pop_level()
         self.push_level(level)
 
     def pop_level(self) -> None:
-        """Pop the most recent level from the stack.
+        """Pop the most recent :class:`earwax.Level` instance from the stack.
 
         If there is a level underneath the current one, then events will be
         passed to it. Otherwise there will be an empty stack, and events won't
@@ -321,9 +415,9 @@ mouse buttons, rather than symbols."""
 
     @property
     def level(self) -> Optional[Level]:
-        """Get the most recently added level.
+        """Get the most recently added :class:`earwax.Level` instance.
 
-        If the stack is empty, None will be returned."""
+        If the stack is empty, ``None`` will be returned."""
         if len(self.levels):
             return self.levels[-1]
         return None
@@ -331,7 +425,7 @@ mouse buttons, rather than symbols."""
     def on_close(self) -> None:
         """Called when the window is closing.
 
-        This is the default event that is used by `pyglet.window.Window`.
+        This is the default event that is used by ``pyglet.window.Window``.
 
         By default, this method calls :meth:`self.clear_levels()
         <earwax.Game.clear_levels>`, to ensure any cleanup code is called."""

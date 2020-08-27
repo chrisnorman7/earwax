@@ -87,7 +87,11 @@ class FileMenu(FileMenuBase, Menu):
         self.rebuild_menu()
 
     def rebuild_menu(self) -> None:
-        """Rebuild the menu."""
+        """Rebuild the menu.
+
+        This method will be called once after initialisation, and every time
+        the directory is changed by the :meth:`~earwax.FileMenu.navigate_to`
+        method."""
         self.items.clear()
         if self.empty_label is not None:
             self.add_item(self.empty_label, self.select_item(None))
@@ -117,7 +121,11 @@ class FileMenu(FileMenuBase, Menu):
     def select_item(self, path: Optional[Path]) -> Callable[
         [], OptionalGenerator
     ]:
-        """Used as the menu handler in place of a lambda."""
+        """Used as the menu handler in place of a lambda.
+
+        :param path: The path that has been selected. Could be a file or a
+            directory.
+        """
 
         def inner():
             return self.func(path)

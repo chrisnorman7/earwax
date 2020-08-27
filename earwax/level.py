@@ -43,7 +43,11 @@ class Level:
         The :attr:`~earwax.Level.motions` dictionary will be consulted, and if
         the provided motion is found, then that function will be called.
 
-        This is the default event that is used by `pyglet.window.Window`.
+        This is the default event that is used by ``pyglet.window.Window``.
+
+        :param motion: One of the motion constants from `pyglet.window.key
+            <https://pythonhosted.org/pyglet/api/pyglet.window.key-
+            module.html>`__.
         """
         if motion in self.motions:
             self.motions[motion]()
@@ -60,8 +64,12 @@ class Level:
             def walk_forwards():
                 # ...
 
-        All extra keyword arguments are passed along to the constructor of
-        :class:`earwax.Action`.
+        :param name: The name of the new action.
+
+            The name is currently only used by :class:`earwax.ActionMenu`.
+
+        :param kwargs: Extra keyword arguments to passed along to the
+            constructor of :class:`earwax.Action`.
         """
 
         def inner(func: ActionFunctionType) -> Action:
@@ -83,6 +91,10 @@ class Level:
 
         This is the method used by :class:`earwax.Editor`, to make text
         editable, and :class:`earwax.Menu`, to make menus searchable.
+
+        :param motion: One of the motion constants from `pyglet.window.key
+            <https://pythonhosted.org/pyglet/api/pyglet.window.key-
+            module.html>`__.
         """
 
         def inner(func: 'MotionFunctionType') -> 'MotionFunctionType':

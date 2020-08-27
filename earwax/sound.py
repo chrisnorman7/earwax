@@ -13,6 +13,7 @@ buffers: Dict[str, Buffer] = {}
 
 def get_buffer(protocol: str, path: str) -> Buffer:
     """Get a Buffer instance.
+
     Buffers are cached in the buffers dictionary, so if there is already a
     buffer with the given protocol and path, it will be returned. Otherwise, a
     new buffer will be created, and added to the dictionary::
@@ -22,6 +23,15 @@ def get_buffer(protocol: str, path: str) -> Buffer:
 
     If you are going to destroy a buffer, make sure you remove it from the
     buffers dictionary.
+
+    At present, both arguments are passed to ``synthizer.Buffer.from_stream``.
+
+    :param protocol: One of the protocols from `Synthizer
+        <https://synthizer.github.io/>`__.
+
+        As far as I know, currently only ``'file'`` works.
+
+    :param path: The path to the socket data.
     """
     url: str = f'{protocol}://{path}'
     if url not in buffers:
