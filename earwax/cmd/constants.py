@@ -1,17 +1,15 @@
-"""Provides various constants for the earwax script."""
+"""Provides various constants used by the script."""
 
 from pathlib import Path
 
-from pyglet.resource import get_settings_path
+# Where to store the earwax options.
+options_file: Path = Path('options.yaml')
 
-from earwax import Game
+# Where to store the main game file.
+game_file: Path = Path('game.yaml')
 
-game: Game = Game()
+# The directory to store sounds in.
+sounds_directory: Path = Path('sounds')
 
-settings_path_str: str = get_settings_path('earwax')
-settings_path: Path
-
-if isinstance(settings_path_str, str):
-    settings_path = Path()
-else:
-    settings_path = Path.cwd()
+# The directory where surface directory are found.
+surfaces_directory: Path = sounds_directory / 'surfaces'
