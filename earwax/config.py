@@ -7,6 +7,8 @@ from yaml import FullLoader, dump, load
 
 DumpDict = Dict[str, Any]
 
+DumpLoad = Callable[[Any], Any]
+
 
 @attrs(auto_attribs=True)
 class ConfigValue:
@@ -15,6 +17,20 @@ class ConfigValue:
     This class is used to make configuration values::
 
         name = ConfigValue('username', name='Your character name', type_=str)
+
+    If you are dealing with a non-standard object, you can set custom functions
+    for loading and dumping the objects::
+
+        from pathlib import Path
+        option = ConfigValue(Path.cwd(), name='Some directory')
+
+        @option.dump
+        def dump_path(value: Path) -> str:
+            return str(value)
+
+        @option.load
+        def load_path(value: str) -> Path:
+            return Path(value)
 
     :ivar `~earwax.ConfigValue.value`: The value held by this configuration
         value.
@@ -41,6 +57,12 @@ class ConfigValue:
         configuration value.
 
         This will be inferred from :attr:`~earwax.ConfigValue.value`.
+
+    :ivar ~earwax.ConfigValue.dump_func: A function that will take the actual
+        value, and return something that YAML can dump.
+
+    :ivar ~earwax.ConfigValue.load_func: A function that takes the value that
+        was loaded by YAML, and returns the actual value.
     """
 
     value: Any
@@ -50,6 +72,8 @@ class ConfigValue:
         Dict[object, Callable[['ConfigValue'], str]]
     ] = None
     default: Optional[Any] = attrib(default=Factory(type(None)), init=False)
+    dump_func: Optional[DumpLoad] = None
+    load_func: Optional[DumpLoad] = None
 
     def __attrs_post_init__(self) -> None:
         if self.type_ is None:
@@ -62,6 +86,26 @@ class ConfigValue:
         This method is used by :class:`earwax.ConfigMenu` when it shows
         values."""
         return str(self.value)
+
+    def dump(self, func: DumpLoad) -> DumpLoad:
+        """A decorator to add a dump function.
+
+        :param func: The function that should be used.
+
+            See the description for :attr:`~earwax.ConfigValue.dump_func`.
+        """
+        self.dump_func = func
+        return func
+
+    def load(self, func: DumpLoad) -> DumpLoad:
+        """A decorator to add a load function.
+
+        :param func: The function to be used.
+
+            See the description for :attr:`~earwax.ConfigValue.load_func`.
+        """
+        self.load_func = func
+        return func
 
 
 class Config:
@@ -137,9 +181,12 @@ class Config:
         """
         d: DumpDict = {}
         name: str
-        value: ConfigValue
-        for name, value in self.__config_values__.items():
-            d[name] = value.value
+        option: ConfigValue
+        for name, option in self.__config_values__.items():
+            value: Any = option.value
+            if option.dump_func is not None:
+                value = option.dump_func(value)
+            d[name] = value
         subsection: Config
         for name, subsection in self.__config_subsections__.items():
             d[name] = subsection.dump()
@@ -158,9 +205,12 @@ class Config:
         :param data: The data to load.
         """
         name: str
-        value: ConfigValue
-        for name, value in self.__config_values__.items():
-            value.value = data.get(name, value.value)
+        option: ConfigValue
+        for name, option in self.__config_values__.items():
+            value: Any = data.get(name, option.value)
+            if option.load_func is not None:
+                value = option.load_func(value)
+            option.value = value
         subsection: Config
         for name, subsection in self.__config_subsections__.items():
             subsection.populate_from_dict(data.get(name, {}))

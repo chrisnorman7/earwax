@@ -6,6 +6,20 @@ from typing import Optional
 from .config import Config, ConfigValue
 
 
+def dump_path(value: Optional[Path]) -> Optional[str]:
+    """Return a path as a string."""
+    if value is not None:
+        return str(value)
+    return None
+
+
+def load_path(value: Optional[str]) -> Optional[Path]:
+    """Load a path from a string."""
+    if value is not None:
+        return Path(value)
+    return None
+
+
 class MenuConfig(Config):
     """The menu configuration section."""
 
@@ -17,14 +31,18 @@ class MenuConfig(Config):
             type(None): lambda o: '<Unset>'
         }
     )
-    default_item_activate_sound: ConfigValue
-    default_item_activate_sound = ConfigValue(
+    default_item_select_sound.dump(dump_path)
+    default_item_select_sound.load(load_path)
+
+    default_item_activate_sound: ConfigValue = ConfigValue(
         None, type_=Optional[Path],
         name='The default sound that plays when activating items in menus',
         value_converters={
             type(None): lambda o: '<Unset>'
         }
     )
+    default_item_activate_sound.dump(dump_path)
+    default_item_activate_sound.load(load_path)
 
 
 class EarwaxConfig(Config):
