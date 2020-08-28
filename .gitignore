@@ -130,3 +130,4 @@ dmypy.json
 AUTHORS
 ChangeLog
 docs/source/api/
+*.yaml
