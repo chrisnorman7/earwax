@@ -35,18 +35,23 @@ There are ready made :class:`~earwax.Level` classes for creating :class:`menus
 <earwax.Menu>`, and :class:`editors <earwax.Editor>`.
 """
 
-from .action import Action
-from .config import Config, ConfigValue
-from .configuration import EarwaxConfig
-from .editor import Editor
-from .event_matcher import EventMatcher
-from .game import Game
-from .level import Level
-from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
-                   TypeHandler, UnknownTypeError)
-from .sound import (AdvancedInterfaceSoundPlayer, SimpleInterfaceSoundPlayer,
-                    get_buffer)
-from .speech import tts
+import pyglet
+
+pyglet.options['shadow_window'] = False
+
+if True:
+    from .action import Action
+    from .config import Config, ConfigValue
+    from .configuration import EarwaxConfig
+    from .editor import Editor
+    from .event_matcher import EventMatcher
+    from .game import Game
+    from .level import Level
+    from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
+                       TypeHandler, UnknownTypeError)
+    from .sound import (AdvancedInterfaceSoundPlayer,
+                        SimpleInterfaceSoundPlayer, get_buffer)
+    from .speech import tts
 
 __all__ = [
     'Game', 'tts', 'Action', 'Menu', 'MenuItem', 'FileMenu', 'ActionMenu',

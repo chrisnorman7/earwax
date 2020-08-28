@@ -3,7 +3,6 @@
 from inspect import isgenerator
 from typing import Callable, Dict, Generator, Iterator, List, Optional, cast
 
-import pyglet
 from attr import Factory, attrib, attrs
 from pyglet import app, clock
 from pyglet.window import Window
@@ -322,9 +321,6 @@ class Game:
 
         By default, this method will perform the following actions in order:
 
-        * disable pyglet's shadow window, which can cause problems with screen
-            readers.
-
         * Iterate over all the found event types on ``pyglet.window.Window``,
             and decorate them with :class:`~earwax.EventMatcher` instances.
             This means :class:`~earwax.Game` and :class:`~earwax.Level`
@@ -346,7 +342,6 @@ class Game:
 
         :param mouse_exclusive: The mouse exclusive setting for the window.
         """
-        pyglet.options['shadow_window'] = False
         name: str
         em: EventMatcher
         for name in window.event_types:
