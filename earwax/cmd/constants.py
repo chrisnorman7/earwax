@@ -13,3 +13,9 @@ sounds_directory: Path = Path('sounds')
 
 # The directory where surface directory are found.
 surfaces_directory: Path = sounds_directory / 'surfaces'
+
+# The directory where ambiances are stored.
+ambiances_directory: Path = sounds_directory / 'ambiances'
+
+# The directory where music files are store.
+music_directory: Path = sounds_directory / 'music'

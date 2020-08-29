@@ -5,7 +5,8 @@ from pathlib import Path
 
 from earwax import EarwaxConfig
 
-from ..constants import options_file
+from ..constants import (ambiances_directory, music_directory, options_file,
+                         sounds_directory, surfaces_directory)
 
 
 def update(p: Path) -> None:
@@ -21,6 +22,17 @@ def update(p: Path) -> None:
             config.save(f)
     else:
         print('Earwax configuration already exists.')
+    path: Path
+    for path in (
+        sounds_directory, surfaces_directory, ambiances_directory,
+        music_directory
+    ):
+        path = p / path
+        if not path.is_dir():
+            path.mkdir()
+            print(f'Created directory {path.relative_to(p)}.')
+        else:
+            print(f'Skipping directory {path.relative_to(p)}.')
 
 
 def init_game(args: Namespace) -> None:

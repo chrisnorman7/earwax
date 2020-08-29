@@ -54,7 +54,8 @@ subcommand(
 )
 
 subcommand(
-    'config', configure_earwax, formatter_class=ArgumentDefaultsHelpFormatter
+    'config', configure_earwax, formatter_class=ArgumentDefaultsHelpFormatter,
+    description='Configure the earwax module for use in your game.'
 )
 
 
