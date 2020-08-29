@@ -1,9 +1,15 @@
-"""Provides the main function."""
+"""Provides the main function, and registers subcommands.
+
+If you want to create more subcommands, add them in the subcommands directory,
+then register them with the :meth:`subcommand` method.
+"""
 
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from typing import Callable
 
+from .constants import surfaces_directory
 from .subcommands.configure_earwax import configure_earwax
+from .subcommands.game_surfaces import game_surfaces
 from .subcommands.init_game import init_game
 
 SubcommandFunction = Callable[[Namespace], None]
@@ -56,6 +62,16 @@ subcommand(
 subcommand(
     'config', configure_earwax, formatter_class=ArgumentDefaultsHelpFormatter,
     description='Configure the earwax module for use in your game.'
+)
+
+game_surfaces_parser = subcommand(
+    'surfaces', game_surfaces, formatter_class=ArgumentDefaultsHelpFormatter,
+    description=f'Show the surfaces from the {surfaces_directory} directory.'
+)
+
+game_surfaces_parser.add_argument(
+    'surface', default=None, help='The name of a surface to view files for',
+    nargs='?'
 )
 
 

@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List
 
-from attr import Attribute, Factory, attrib, attrs, asdict
+from attr import Attribute, Factory, asdict, attrib, attrs
 from shortuuid import uuid
 
 from ..level import GameMixin, Level, TitleMixin
