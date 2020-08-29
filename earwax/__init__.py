@@ -35,9 +35,11 @@ There are ready made :class:`~earwax.Level` classes for creating :class:`menus
 <earwax.Menu>`, and :class:`editors <earwax.Editor>`.
 """
 
-import pyglet
-
-pyglet.options['shadow_window'] = False
+try:
+    import pyglet
+    pyglet.options['shadow_window'] = False
+except (ImportError, TypeError):
+    pass  # Docs are building.
 
 if True:
     from .action import Action

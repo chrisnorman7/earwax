@@ -5,6 +5,15 @@ from typing import Optional
 
 from .config import Config, ConfigValue
 
+try:
+    ConfigValue('Test')
+except TypeError:
+    _configValue = ConfigValue
+
+    def ConfigValue(*args, **kwargs) -> _configValue:  # type: ignore[no-redef]
+        """This code stops building docs on readthedocs from failing."""
+        return _configValue()  # type: ignore[call-arg]
+
 
 def dump_path(value: Optional[Path]) -> Optional[str]:
     """Return a path as a string."""
