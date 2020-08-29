@@ -6,7 +6,7 @@ then register them with the :meth:`subcommand` method.
 
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from typing import Callable
-
+from .subcommands.game_title import game_title
 from .constants import surfaces_directory
 from .subcommands.configure_earwax import configure_earwax
 from .subcommands.game_surfaces import game_surfaces
@@ -73,6 +73,13 @@ game_surfaces_parser.add_argument(
     'surface', default=None, help='The name of a surface to view files for',
     nargs='?'
 )
+
+game_title_parser = subcommand(
+    'title', game_title, formatter_class=ArgumentDefaultsHelpFormatter,
+    description='Rename the current game'
+)
+
+game_title_parser.add_argument('title', help='The new name')
 
 
 def cmd_main() -> None:
