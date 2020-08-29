@@ -6,7 +6,7 @@ from pathlib import Path
 from ... import EarwaxConfig
 from ..constants import (ambiances_directory, levels_directory,
                          music_directory, options_file, sounds_directory,
-                         surfaces_directory)
+                         surfaces_directory, workspace_file)
 from ..workspace import Workspace
 
 
@@ -39,8 +39,12 @@ def update(p: Path) -> None:
 def init_game(args: Namespace) -> None:
     """Update the game at the given directory."""
     directory: Path = Path.cwd()
-    workspace: Workspace = Workspace(title='Untitled Game')
-    workspace.save()
-    print(f'Created {workspace.title}.')
+    workspace_path: Path = directory / workspace_file
+    if workspace_path.is_file():
+        print(f'There is already a game file at {workspace_path}.')
+    else:
+        workspace: Workspace = Workspace(title='Untitled Game')
+        workspace.save()
+        print(f'Created {workspace.title}.')
     update(directory)
     print('Updated.')
