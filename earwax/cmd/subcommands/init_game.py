@@ -4,8 +4,10 @@ from argparse import Namespace
 from pathlib import Path
 
 from ... import EarwaxConfig
-from ..constants import (ambiances_directory, music_directory, options_file,
-                         sounds_directory, surfaces_directory)
+from ..constants import (ambiances_directory, levels_directory,
+                         music_directory, options_file, sounds_directory,
+                         surfaces_directory)
+from ..workspace import Workspace
 
 
 def update(p: Path) -> None:
@@ -24,7 +26,7 @@ def update(p: Path) -> None:
     path: Path
     for path in (
         sounds_directory, surfaces_directory, ambiances_directory,
-        music_directory
+        music_directory, levels_directory
     ):
         path = p / path
         if not path.is_dir():
@@ -37,5 +39,8 @@ def update(p: Path) -> None:
 def init_game(args: Namespace) -> None:
     """Update the game at the given directory."""
     directory: Path = Path.cwd()
+    workspace: Workspace = Workspace(title='Untitled Game')
+    workspace.save()
+    print(f'Created {workspace.title}.')
     update(directory)
     print('Updated.')
