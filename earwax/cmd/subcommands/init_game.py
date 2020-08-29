@@ -3,7 +3,7 @@
 from argparse import Namespace
 from pathlib import Path
 
-from earwax import EarwaxConfig
+from ... import EarwaxConfig
 
 from ..constants import (ambiances_directory, music_directory, options_file,
                          sounds_directory, surfaces_directory)

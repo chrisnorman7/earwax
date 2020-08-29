@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pyglet.window import Window
 
-from earwax import ConfigMenu, EarwaxConfig, Game
+from ... import ConfigMenu, EarwaxConfig, Game
 
 from ..constants import options_file
 

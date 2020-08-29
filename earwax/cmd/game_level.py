@@ -5,14 +5,39 @@ from typing import Any, Dict, List
 from attr import Attribute, Factory, attrib, attrs, asdict
 from shortuuid import uuid
 
-from earwax.level import GameMixin, Level, TitleMixin
+from ..level import GameMixin, Level, TitleMixin
 
 DumpDict = Dict[str, Any]
 
 
 @attrs(auto_attribs=True)
 class GameLevel(TitleMixin, GameMixin, Level):
-    """A map in a game."""
+    """A level in a game.
+
+    This class attempts to be as neutral as possible, so you can build your own
+    systems on top of it by subclassing.
+
+    That said, it does provide some defaults that should be useful in a wide
+    variety of situations.
+
+    :ivar ~earwax.GameLevel.id: The unique ID of this level.
+
+        By default, this is provided by the `shortuuid
+        <https://pypi.org/project/shortuuid/>`__ package.
+
+        Used by various build tools to reference other levels.
+
+    :ivar ~earwax.GameLevel.min_x: The minimum x value.
+
+    :ivar ~earwax.GameLevel.max_x: The maximum x value.
+
+    :ivar ~earwax.GameLevel.min_y: The minimum y value.
+
+    :ivar ~earwax.GameLevel.max_y: The maximum y value.
+
+    :ivar ~earwax.GameLevel.undumped_attributes: A list of attributes which
+        should be ignored by the :meth:`~earwax.GameLevel.dump` method.
+    """
 
     id: str = Factory(uuid)
     min_x: int = 0
