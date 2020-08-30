@@ -6,11 +6,11 @@ then register them with the :meth:`subcommand` method.
 
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from typing import Callable
-from .subcommands.game_title import game_title
+from .subcommands.project_title import project_title
 from .constants import surfaces_directory
 from .subcommands.configure_earwax import configure_earwax
-from .subcommands.game_surfaces import game_surfaces
-from .subcommands.init_game import init_game
+from .subcommands.project_surfaces import project_surfaces
+from .subcommands.init_project import init_project
 
 SubcommandFunction = Callable[[Namespace], None]
 
@@ -40,8 +40,8 @@ def subcommand(
 
 
 subcommand(
-    'init', init_game, formatter_class=ArgumentDefaultsHelpFormatter,
-    description='Initialise or update an Earwax game in the current directory'
+    'init', init_project, formatter_class=ArgumentDefaultsHelpFormatter,
+    description='Initialise or update an Earwax project in the current directory'
 )
 
 
@@ -61,25 +61,25 @@ subcommand(
 
 subcommand(
     'config', configure_earwax, formatter_class=ArgumentDefaultsHelpFormatter,
-    description='Configure the earwax module for use in your game.'
+    description='Configure the earwax module for use in your project.'
 )
 
-game_surfaces_parser = subcommand(
-    'surfaces', game_surfaces, formatter_class=ArgumentDefaultsHelpFormatter,
+project_surfaces_parser = subcommand(
+    'surfaces', project_surfaces, formatter_class=ArgumentDefaultsHelpFormatter,
     description=f'Show the surfaces from the {surfaces_directory} directory.'
 )
 
-game_surfaces_parser.add_argument(
+project_surfaces_parser.add_argument(
     'surface', default=None, help='The name of a surface to view files for',
     nargs='?'
 )
 
-game_title_parser = subcommand(
-    'title', game_title, formatter_class=ArgumentDefaultsHelpFormatter,
-    description='Rename the current game'
+project_title_parser = subcommand(
+    'title', project_title, formatter_class=ArgumentDefaultsHelpFormatter,
+    description='Rename the current project'
 )
 
-game_title_parser.add_argument('title', help='The new name')
+project_title_parser.add_argument('title', help='The new name')
 
 
 def cmd_main() -> None:

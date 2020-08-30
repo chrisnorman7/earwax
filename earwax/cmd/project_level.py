@@ -1,10 +1,12 @@
 """Provides the GameLevel class."""
 
+from pathlib import Path
+from yaml import dump
 from typing import Any, Dict, List
 
 from attr import Attribute, Factory, asdict, attrib, attrs
 from shortuuid import uuid
-
+from .constants import levels_directory
 from ..level import GameMixin, Level, TitleMixin
 
 DumpDict = Dict[str, Any]
@@ -12,7 +14,7 @@ DumpDict = Dict[str, Any]
 
 @attrs(auto_attribs=True)
 class GameLevel(TitleMixin, GameMixin, Level):
-    """A level in a game.
+    """A level in an Earwax project.
 
     This class attempts to be as neutral as possible, so you can build your own
     systems on top of it by subclassing.
@@ -66,3 +68,9 @@ class GameLevel(TitleMixin, GameMixin, Level):
         :param name: The value that will be returned.
         """
         return a.name not in self.undumped_attributes
+
+    def save(self) -> None:
+        """Save this level to :var:`~earwax.cmd.constants.levels_directory`."""
+        p: Path = levels_directory / (self.id + '.yaml')
+        with p.open('w') as f:
+            dump(self.dump(), stream=f)

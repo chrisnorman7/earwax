@@ -56,12 +56,12 @@ if True:
     from .speech import tts
     from .cmd.game_level import GameLevel
     from .cmd.main import cmd_main
-    from .cmd.workspace import Workspace
+    from .cmd.project import Project
 
 __all__ = [
     'Game', 'tts', 'Action', 'Menu', 'MenuItem', 'FileMenu', 'ActionMenu',
     'get_buffer', 'Editor', 'SimpleInterfaceSoundPlayer',
     'AdvancedInterfaceSoundPlayer', 'Level', 'EventMatcher', 'Config',
     'ConfigValue', 'ConfigMenu', 'TypeHandler', 'UnknownTypeError',
-    'EarwaxConfig', 'GameLevel', 'cmd_main', 'Workspace'
+    'EarwaxConfig', 'GameLevel', 'cmd_main', 'Project'
 ]

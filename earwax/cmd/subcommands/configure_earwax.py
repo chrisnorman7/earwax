@@ -6,12 +6,12 @@ from pathlib import Path
 from pyglet.window import Window
 
 from ... import ConfigMenu, EarwaxConfig, Game
-from ..constants import options_file
+from ..constants import options_filename
 
 
 def configure_earwax(args: Namespace) -> None:
     """Configure earwax, using a :class:`earwax.ConfigMenu` instance."""
-    path: Path = options_file.absolute()
+    path: Path = options_filename.absolute()
     if not path.is_file():
         print('Error: No options file found.')
         print()

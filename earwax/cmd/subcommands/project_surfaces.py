@@ -1,4 +1,4 @@
-"""Provides the game_surfaces subcommand."""
+"""Provides the project_surfaces subcommand."""
 
 from argparse import Namespace
 from pathlib import Path
@@ -6,7 +6,7 @@ from pathlib import Path
 from ..constants import surfaces_directory
 
 
-def game_surfaces(args: Namespace) -> None:
+def project_surfaces(args: Namespace) -> None:
     """Shows a list of surfaces.
 
     Optionally shows what files are in a given directory."""

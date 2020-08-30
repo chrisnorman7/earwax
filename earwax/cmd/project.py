@@ -5,14 +5,14 @@ from typing import Dict, Optional
 from attr import asdict, attrs
 from yaml import FullLoader, dump, load
 
-from .constants import workspace_file
+from .constants import project_filename
 
 WorkspaceDict = Dict[str, str]
 
 
 @attrs(auto_attribs=True)
-class Workspace:
-    """An earwax "game".
+class Project:
+    """An earwax project.
 
     This object holds the id of the initial level (if any), as well as global
     variables the user can create with the ``globals`` subcommand."""
@@ -27,13 +27,13 @@ class Workspace:
     def save(self) -> None:
         """Saves this workspace to
         :var:`~earwax.cmd.constants.workspace_file`."""
-        with workspace_file.absolute().open('w') as f:
+        with project_filename.absolute().open('w') as f:
             dump(self.dump(), stream=f)
 
     @classmethod
-    def load(cls) -> 'Workspace':
+    def load(cls) -> 'Project':
         """Load and return an instance from
         :var:`~earwax.cmd.constants.workspace_file`."""
-        with workspace_file.absolute().open('r') as f:
+        with project_filename.absolute().open('r') as f:
             data: WorkspaceDict = load(f, Loader=FullLoader)
         return cls(**data)

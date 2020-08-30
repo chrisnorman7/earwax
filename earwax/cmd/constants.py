@@ -3,10 +3,10 @@
 from pathlib import Path
 
 # Where to store the earwax options.
-options_file: Path = Path('options.yaml')
+options_filename: Path = Path('options.yaml')
 
-# Where to store the main workspace file.
-workspace_file: Path = Path('workspace.yaml')
+# Where to store the main project file.
+project_filename: Path = Path('project.yaml')
 
 # The main sounds directory.
 sounds_directory: Path = Path('sounds')

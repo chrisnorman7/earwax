@@ -1,13 +1,13 @@
-"""Provides the update_game subcommand."""
+"""Provides the init_project subcommand."""
 
 from argparse import Namespace
 from pathlib import Path
 
 from ... import EarwaxConfig
 from ..constants import (ambiances_directory, levels_directory,
-                         music_directory, options_file, sounds_directory,
-                         surfaces_directory, workspace_file)
-from ..workspace import Workspace
+                         music_directory, options_filename, sounds_directory,
+                         surfaces_directory, project_filename)
+from ..project import Project
 
 
 def update(p: Path) -> None:
@@ -15,7 +15,7 @@ def update(p: Path) -> None:
 
     :param p: The path to update.
     """
-    options_path: Path = p / options_file
+    options_path: Path = p / options_filename
     if not options_path.is_file():
         print('Saving earwax configuration.')
         config: EarwaxConfig = EarwaxConfig()
@@ -36,15 +36,15 @@ def update(p: Path) -> None:
             print(f'Skipping directory {path.relative_to(p)}.')
 
 
-def init_game(args: Namespace) -> None:
-    """Update the game at the given directory."""
+def init_project(args: Namespace) -> None:
+    """Initialise or update the project at the given directory."""
     directory: Path = Path.cwd()
-    workspace_path: Path = directory / workspace_file
-    if workspace_path.is_file():
-        print(f'There is already a game file at {workspace_path}.')
+    project_path: Path = directory / project_filename
+    if project_path.is_file():
+        print(f'There is already a project file at {project_path}.')
     else:
-        workspace: Workspace = Workspace(title='Untitled Game')
-        workspace.save()
-        print(f'Created {workspace.title}.')
+        project: Project = Project(title='Untitled Game')
+        project.save()
+        print(f'Created {project.title}.')
     update(directory)
     print('Updated.')
