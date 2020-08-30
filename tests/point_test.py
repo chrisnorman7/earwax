@@ -48,8 +48,10 @@ def test_multiply() -> None:
 def test_lessthan() -> None:
     assert Point(1, 1) < Point(3, 3)
     assert not Point(4, 4) < Point(2, 1)
+    assert not Point(55, 2) < Point(3, 3)
 
 
 def test_greaterthan() -> None:
     assert Point(4, 4) > Point(2, 1)
     assert not Point(1, 1) > Point(3, 3)
+    assert not Point(4, 1) > Point(2, 2)
