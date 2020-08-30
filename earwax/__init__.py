@@ -49,6 +49,7 @@ if True:
     from .event_matcher import EventMatcher
     from .game import Game
     from .level import Level
+    from .mapping import Box, OutOfBounds, Point
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .sound import (AdvancedInterfaceSoundPlayer,
@@ -63,5 +64,6 @@ __all__ = [
     'get_buffer', 'Editor', 'SimpleInterfaceSoundPlayer',
     'AdvancedInterfaceSoundPlayer', 'Level', 'EventMatcher', 'Config',
     'ConfigValue', 'ConfigMenu', 'TypeHandler', 'UnknownTypeError',
-    'EarwaxConfig', 'ProjectLevel', 'cmd_main', 'Project'
+    'EarwaxConfig', 'ProjectLevel', 'cmd_main', 'Project', 'Box', 'Point',
+    'OutOfBounds'
 ]
