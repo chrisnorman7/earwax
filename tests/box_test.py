@@ -1,6 +1,6 @@
 from pytest import raises
 
-from earwax import Box, OutOfBounds, Point
+from earwax import Box, FittedBox, OutOfBounds, Point
 
 
 def test_init() -> None:
@@ -58,3 +58,12 @@ def test_get_containing_child() -> None:
     assert parent.get_containing_box(Point(0, 0)) is southern_rail
     assert parent.get_containing_box(Point(3, 2)) is northern_rail
     assert parent.get_containing_box(Point(200, 201)) is None
+
+
+def test_fitted_box() -> None:
+    southwest_box: Box = Box(Point(3, 5), Point(8, 2))
+    northeast_box: Box = Box(Point(32, 33), Point(80, 85))
+    middle_box: Box = Box(Point(14, 15), Point(18, 22))
+    box: FittedBox = FittedBox([middle_box, northeast_box, southwest_box])
+    assert box.bottom_left == southwest_box.bottom_left
+    assert box.top_right == northeast_box.top_right

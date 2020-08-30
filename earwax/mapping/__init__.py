@@ -6,7 +6,7 @@ This module is inspired by Camlorn's post at `this link
 All credit goes to him for the idea.
 """
 
-from .box import Box, OutOfBounds
-from .point import Point
+from .box import Box, FittedBox, OutOfBounds
+from .point import Point, PointDirections
 
-__all__ = ['Box', 'Point', 'OutOfBounds']
+__all__ = ['Box', 'Point', 'OutOfBounds', 'PointDirections', 'FittedBox']

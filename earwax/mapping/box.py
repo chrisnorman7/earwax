@@ -1,8 +1,8 @@
-"""Provides the Box class."""
+"""Provides the Box and FittedBox classes."""
 
 from typing import List, Optional
 
-from attr import Factory, attrs
+from attr import Factory, attrib, attrs
 
 from .point import Point
 
@@ -19,11 +19,14 @@ class Box:
     top_right: Point
     name: Optional[str] = None
     parent: Optional['Box'] = None
-    children: List['Box'] = Factory(list)
+    children: List['Box'] = attrib(Factory(list), repr=False)
 
     def __attrs_post_init__(self) -> None:
         if self.parent is not None:
             self.parent.add_child(self)
+        child: Box
+        for child in self.children:
+            child.parent = self
 
     @property
     def top_left(self) -> Point:
@@ -102,3 +105,36 @@ class Box:
         if self.contains_point(coordinates):
             return self
         return None
+
+
+class FittedBox(Box):
+    """A box that fits all its children in.
+
+    Pass a list of :class:`~earwax.Box` instances, and you'll get a box with
+    its :attr:`~earwax.Box.bottom_left`, and :attr:`~earwax.Box.top_right`
+    attributes set to match the outer bounds of the provided children."""
+
+    def __init__(self, children: List[Box]) -> None:
+        """Create a new instance."""
+        bottom_left_x: Optional[int] = None
+        bottom_left_y: Optional[int] = None
+        top_right_x: Optional[int] = None
+        top_right_y: Optional[int] = None
+        child: Box
+        for child in children:
+            if bottom_left_x is None or child.bottom_left.x < bottom_left_x:
+                bottom_left_x = child.bottom_left.x
+            if bottom_left_y is None or child.bottom_left.y < bottom_left_y:
+                bottom_left_y = child.bottom_left.y
+            if top_right_x is None or child.top_right.x > top_right_x:
+                top_right_x = child.top_right.x
+            if top_right_y is None or child.top_right.y > top_right_y:
+                top_right_y = child.top_right.y
+        if bottom_left_x is not None and bottom_left_y is not None and \
+           top_right_x is not None and top_right_y is not None:
+            super().__init__(
+                Point(bottom_left_x, bottom_left_y),
+                Point(top_right_x, top_right_y), children=children
+            )
+        else:
+            raise ValueError('Invalid children: %r.' % children)
