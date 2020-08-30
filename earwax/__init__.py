@@ -49,12 +49,13 @@ if True:
     from .event_matcher import EventMatcher
     from .game import Game
     from .level import Level
-    from .mapping import Box, OutOfBounds, Point
+    from .mapping import Box, FittedBox, OutOfBounds, Point, PointDirections
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .sound import (AdvancedInterfaceSoundPlayer,
                         SimpleInterfaceSoundPlayer, get_buffer)
     from .speech import tts
+    from .walking_directions import walking_directions
 
 # The below imports are intentionally out of order.
 if True:
@@ -68,5 +69,5 @@ __all__ = [
     'AdvancedInterfaceSoundPlayer', 'Level', 'EventMatcher', 'Config',
     'ConfigValue', 'ConfigMenu', 'TypeHandler', 'UnknownTypeError',
     'EarwaxConfig', 'ProjectLevel', 'cmd_main', 'Project', 'Box', 'Point',
-    'OutOfBounds'
+    'OutOfBounds', 'PointDirections', 'walking_directions'
 ]
