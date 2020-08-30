@@ -1,7 +1,8 @@
 """Provides the project_title subcommand."""
 
-from ..project import Project
 from argparse import Namespace
+
+from ..project import Project
 
 
 def project_title(args: Namespace) -> None:

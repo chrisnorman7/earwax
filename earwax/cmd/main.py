@@ -6,11 +6,12 @@ then register them with the :meth:`subcommand` method.
 
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from typing import Callable
-from .subcommands.project_title import project_title
+
 from .constants import surfaces_directory
 from .subcommands.configure_earwax import configure_earwax
-from .subcommands.project_surfaces import project_surfaces
 from .subcommands.init_project import init_project
+from .subcommands.project_surfaces import project_surfaces
+from .subcommands.project_title import project_title
 
 SubcommandFunction = Callable[[Namespace], None]
 

@@ -1,13 +1,14 @@
 """Provides the GameLevel class."""
 
 from pathlib import Path
-from yaml import dump
 from typing import Any, Dict, List
 
 from attr import Attribute, Factory, asdict, attrib, attrs
 from shortuuid import uuid
-from .constants import levels_directory
+from yaml import dump
+
 from ..level import GameMixin, Level, TitleMixin
+from .constants import levels_directory
 
 DumpDict = Dict[str, Any]
 
