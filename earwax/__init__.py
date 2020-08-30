@@ -55,9 +55,12 @@ if True:
     from .sound import (AdvancedInterfaceSoundPlayer,
                         SimpleInterfaceSoundPlayer, get_buffer)
     from .speech import tts
-    from .cmd.project_level import ProjectLevel
+
+# The below imports are intentionally out of order.
+if True:
     from .cmd.main import cmd_main
     from .cmd.project import Project
+    from .cmd.project_level import ProjectLevel
 
 __all__ = [
     'Game', 'tts', 'Action', 'Menu', 'MenuItem', 'FileMenu', 'ActionMenu',
