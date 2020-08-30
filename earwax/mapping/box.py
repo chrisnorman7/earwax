@@ -1,4 +1,4 @@
-"""Provides the Box and FittedBox classes."""
+"""Provides box-related classes, functions, and exceptions."""
 
 from typing import List, Optional
 
@@ -91,9 +91,10 @@ class Box:
         If no child box is found, one of two things will occur:
 
         * If ``self`` contains the given coordinates, ``self`` will be
-        returned.
+            returned.
 
         * If that is not the case, `None`` is returned.
+
         This method scans :attr:`self.children <earwax.Box.children>`.
 
         :param coordinates: The coordinates the child box should span.
@@ -138,3 +139,64 @@ class FittedBox(Box):
             )
         else:
             raise ValueError('Invalid children: %r.' % children)
+
+
+def box_row(
+    start: Point, x_size: int, y_size: int, count: int, x_offset: int,
+    y_offset: int
+) -> List[Box]:
+    """Generates a list of boxes.
+
+    This method is useful for creating rows of buildings, or rooms on a
+    corridor to name a couple of examples.
+
+    It can be used like so::
+
+        offices = row(
+            Point(0, 0),  # The bottom_left corner of the first box.
+            3,  # The width (x) of each box.
+            2,  # The depth (y) of each box.
+            3,  # The number of boxes to build.
+            1  # How far to travel along the x axis each time.
+            0  # How far to travel on the y axis each time.
+        )
+
+    This will result a list containing 3 rooms:
+
+    * The first from (0, 0) to (2, 1)
+
+    * The second from (3, 0) to (5, 1)
+
+    * And the third from (6, 0) to (8, 1)
+
+    :param start: The :attr:`~earwax.Box.bottom_left` coordinate of the first
+        box.
+
+    :param x_size: The width of each box.
+
+    :param y_size: The depth of each box.
+
+    :param count: The number of boxes to build.
+
+    :param x_offset: The amount of x distance between the boxes.
+
+        If the provided value is less than 1, then overlaps will occur.
+
+    :param y_offset: The amount of y distance between the boxes.
+
+        If the provided value is less than 1, then overlaps will occur.
+    """
+    start = start.copy()
+    # In the next line, we subtract 1 from both size values, otherwise we end
+    # up with a box that is too large by 1 on each axis.
+    size_point: Point = Point(x_size - 1, y_size - 1)
+    n: int
+    boxes: List[Box] = []
+    for n in range(count):
+        box: Box = Box(start.copy(), start + size_point)
+        boxes.append(box)
+        if x_offset:
+            start.x += ((x_offset + x_size) - 1)
+        if y_offset:
+            start.y += ((y_offset + y_size) - 1)
+    return boxes

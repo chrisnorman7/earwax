@@ -54,6 +54,11 @@ class Point:
         else:
             return PointDirections.here
 
+    def copy(self) -> 'Point':
+        """Return a ``Point`` instance with duplicate ``x`` and ``y``
+        values."""
+        return type(self)(self.x, self.y)
+
     def __add__(self, offset: Union[int, 'Point']) -> 'Point':
         """Add two points together."""
         if isinstance(offset, int):

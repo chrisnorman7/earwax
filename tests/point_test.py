@@ -55,3 +55,10 @@ def test_greaterthan() -> None:
     assert Point(4, 4) > Point(2, 1)
     assert not Point(1, 1) > Point(3, 3)
     assert not Point(4, 1) > Point(2, 2)
+
+
+def test_copy() -> None:
+    p: Point = Point(5, 4)
+    copy: Point = p.copy()
+    assert p == copy
+    assert copy is not p

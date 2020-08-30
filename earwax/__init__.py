@@ -49,7 +49,8 @@ if True:
     from .event_matcher import EventMatcher
     from .game import Game
     from .level import Level
-    from .mapping import Box, FittedBox, OutOfBounds, Point, PointDirections
+    from .mapping import (Box, FittedBox, OutOfBounds, Point, PointDirections,
+                          box_row)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .sound import (AdvancedInterfaceSoundPlayer,
@@ -57,7 +58,8 @@ if True:
     from .speech import tts
     from .walking_directions import walking_directions
 
-# The below imports are intentionally out of order.
+# The below imports are intentionally separated from those above, to avoid
+# errors when trying to import half-initialised modules.
 if True:
     from .cmd.main import cmd_main
     from .cmd.project import Project
@@ -69,5 +71,6 @@ __all__ = [
     'AdvancedInterfaceSoundPlayer', 'Level', 'EventMatcher', 'Config',
     'ConfigValue', 'ConfigMenu', 'TypeHandler', 'UnknownTypeError',
     'EarwaxConfig', 'ProjectLevel', 'cmd_main', 'Project', 'Box', 'Point',
-    'OutOfBounds', 'PointDirections', 'walking_directions'
+    'OutOfBounds', 'PointDirections', 'walking_directions', 'FittedBox',
+    'box_row'
 ]

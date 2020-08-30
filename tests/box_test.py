@@ -1,6 +1,8 @@
+from typing import List
+
 from pytest import raises
 
-from earwax import Box, FittedBox, OutOfBounds, Point
+from earwax import Box, FittedBox, OutOfBounds, Point, box_row
 
 
 def test_init() -> None:
@@ -67,3 +69,26 @@ def test_fitted_box() -> None:
     box: FittedBox = FittedBox([middle_box, northeast_box, southwest_box])
     assert box.bottom_left == southwest_box.bottom_left
     assert box.top_right == northeast_box.top_right
+
+
+def test_row() -> None:
+    start: Point = Point(1, 1)
+    boxes: List[Box] = box_row(start, 5, 5, 3, 1, 0)
+    assert len(boxes) == 3
+    first: Box
+    second: Box
+    third: Box
+    first, second, third = boxes
+    assert first.bottom_left == start
+    assert first.top_right == Point(5, 5)
+    assert second.bottom_left == Point(6, 1)
+    assert second.top_right == Point(10, 5)
+    assert third.bottom_left == Point(11, 1)
+    assert third.top_right == Point(15, 5)
+    first, second, third = box_row(Point(0, 0), 3, 4, 3, 0, 3)
+    assert first.bottom_left == Point(0, 0)
+    assert first.top_right == Point(2, 3)
+    assert second.bottom_left == Point(0, 6)
+    assert second.top_right == Point(2, 9)
+    assert third.bottom_left == Point(0, 12)
+    assert third.top_right == Point(2, 15)
