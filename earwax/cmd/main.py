@@ -41,7 +41,8 @@ def subcommand(
 
 subcommand(
     'init', init_project, formatter_class=ArgumentDefaultsHelpFormatter,
-    description='Initialise or update an Earwax project in the current directory'
+    description='Initialise or update an Earwax project in the current '
+    'directory'
 )
 
 
@@ -65,7 +66,8 @@ subcommand(
 )
 
 project_surfaces_parser = subcommand(
-    'surfaces', project_surfaces, formatter_class=ArgumentDefaultsHelpFormatter,
+    'surfaces', project_surfaces,
+    formatter_class=ArgumentDefaultsHelpFormatter,
     description=f'Show the surfaces from the {surfaces_directory} directory.'
 )
 
