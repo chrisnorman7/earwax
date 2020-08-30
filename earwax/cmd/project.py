@@ -25,15 +25,15 @@ class Project:
         return asdict(self)
 
     def save(self) -> None:
-        """Saves this workspace to
-        :var:`~earwax.cmd.constants.workspace_file`."""
+        """Saves this workspace to the file specified in
+        ``constants.project_filename``."""
         with project_filename.absolute().open('w') as f:
             dump(self.dump(), stream=f)
 
     @classmethod
     def load(cls) -> 'Project':
-        """Load and return an instance from
-        :var:`~earwax.cmd.constants.workspace_file`."""
+        """Load and return an instance from the file specified in
+        ``constants.project_filename``."""
         with project_filename.absolute().open('r') as f:
             data: WorkspaceDict = load(f, Loader=FullLoader)
         return cls(**data)

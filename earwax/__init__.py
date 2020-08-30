@@ -54,7 +54,7 @@ if True:
     from .sound import (AdvancedInterfaceSoundPlayer,
                         SimpleInterfaceSoundPlayer, get_buffer)
     from .speech import tts
-    from .cmd.game_level import GameLevel
+    from .cmd.project_level import ProjectLevel
     from .cmd.main import cmd_main
     from .cmd.project import Project
 
@@ -63,5 +63,5 @@ __all__ = [
     'get_buffer', 'Editor', 'SimpleInterfaceSoundPlayer',
     'AdvancedInterfaceSoundPlayer', 'Level', 'EventMatcher', 'Config',
     'ConfigValue', 'ConfigMenu', 'TypeHandler', 'UnknownTypeError',
-    'EarwaxConfig', 'GameLevel', 'cmd_main', 'Project'
+    'EarwaxConfig', 'ProjectLevel', 'cmd_main', 'Project'
 ]

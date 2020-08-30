@@ -13,7 +13,7 @@ DumpDict = Dict[str, Any]
 
 
 @attrs(auto_attribs=True)
-class GameLevel(TitleMixin, GameMixin, Level):
+class ProjectLevel(TitleMixin, GameMixin, Level):
     """A level in an Earwax project.
 
     This class attempts to be as neutral as possible, so you can build your own
@@ -70,7 +70,7 @@ class GameLevel(TitleMixin, GameMixin, Level):
         return a.name not in self.undumped_attributes
 
     def save(self) -> None:
-        """Save this level to :var:`~earwax.cmd.constants.levels_directory`."""
+        """Save this level to ``levels_directory``."""
         p: Path = levels_directory / (self.id + '.yaml')
         with p.open('w') as f:
             dump(self.dump(), stream=f)
