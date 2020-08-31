@@ -8,7 +8,7 @@ from pyglet.window import Window, key, mouse
 from synthizer import SynthizerError
 
 from earwax import (ActionMenu, Config, ConfigMenu, ConfigValue, Editor,
-                    FileMenu, Game, Level, play_path, tts)
+                    FileMenu, Game, Level, tts)
 from earwax.action import OptionalGenerator
 
 
