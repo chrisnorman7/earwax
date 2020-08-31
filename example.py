@@ -1,14 +1,14 @@
 """A quick example game."""
 
 import sys
-from synthizer import SynthizerError
 from pathlib import Path
 from typing import Generator, Optional
 
 from pyglet.window import Window, key, mouse
+from synthizer import SynthizerError
 
 from earwax import (ActionMenu, Config, ConfigMenu, ConfigValue, Editor,
-                    FileMenu, Game, Level, tts)
+                    FileMenu, Game, Level, play_path, tts)
 from earwax.action import OptionalGenerator
 
 
@@ -48,16 +48,11 @@ class ExampleConfig(Config):
     remember = ConfigValue(True, name='Remember username')
     server = ServerConfig()
     start_script = ConfigValue(None, type_=Optional[Path], name='Start script')
-
-
-class ExampleGame(Game):
-    """A game with some extra stuff."""
-
-    can_beep: bool = True
+    can_beep = ConfigValue(True, name='Allow beeping')
 
 
 def main() -> None:
-    g: ExampleGame = ExampleGame()
+    g: Game = Game()
     level: Level = Level()
     config: ExampleConfig = ExampleConfig()
     g.push_level(level)
@@ -86,7 +81,7 @@ def main() -> None:
     @level.action('Beep', symbol=key.B, interval=0.75)
     def do_beep() -> None:
         """Speak something."""
-        if g.can_beep:
+        if config.can_beep.value:
             sys.stdout.write('\a')
             sys.stdout.flush()
 
@@ -99,8 +94,10 @@ def main() -> None:
     @level.action('Toggle beeping', symbol=key.P, mouse_button=mouse.RIGHT)
     def toggle_beep() -> None:
         """Toggle beeping."""
-        g.can_beep = not g.can_beep
-        tts.speak(f'Beeping {"enabled" if g.can_beep else "disabled"}.')
+        config.can_beep.value = not config.can_beep.value
+        tts.speak(
+            f'Beeping {"enabled" if config.can_beep.value else "disabled"}.'
+        )
 
     @level.action('Menu', symbol=key.M)
     def menu() -> OptionalGenerator:
