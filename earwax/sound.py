@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from random import choice
-from typing import Dict
+from typing import Dict, Optional, Tuple
 
 from attr import attrs
 from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
@@ -37,6 +37,32 @@ def get_buffer(protocol: str, path: str) -> Buffer:
     if url not in buffers:
         buffers[url] = Buffer.from_stream(protocol, path)
     return buffers[url]
+
+
+def play_path(
+    context: Context, path: Path,
+    generator: Optional[Generator] = None, source: Optional[Source] = None
+) -> Tuple[BufferGenerator, DirectSource]:
+    """Plays the given sound file (or selects one from the given directory).
+
+    :param ctx: The ``synthizer.Context`` to play through.
+
+    :param path: Either the path to a single sound file, or a directory
+        containing 1 or more sound files.
+
+        If ``path`` is a directory, then a random sound file will be selected
+        from it and played instead.
+    """
+    if path.is_dir():
+        path = choice(list(path.iterdir()))
+        return play_path(context, path)
+    if generator is None:
+        generator = BufferGenerator(context)
+    generator.buffer = get_buffer('file', str(path))
+    if source is None:
+        source = DirectSource(context)
+    source.add_generator(generator)
+    return (generator, source)
 
 
 @attrs(auto_attribs=True)
@@ -128,7 +154,7 @@ class AdvancedInterfaceSoundPlayer(SimpleInterfaceSoundPlayer):
     ):
         self.play_files = play_files
         self.play_directories = play_directories
-        super().__init__(context, None)
+        super().__init__(context, BufferGenerator(context))
 
     def play_path(self, path: Path) -> None:
         """If :attr:`self.play_directories
@@ -137,23 +163,18 @@ class AdvancedInterfaceSoundPlayer(SimpleInterfaceSoundPlayer):
         from that directory. Otherwise, if :meth:`self.play_files
         <earwax.AdvancedInterfaceSoundPlayer.play_files>` evaluates to True,
         play the given path."""
-        if self.generator is not None:
-            self.generator.destroy()
-            self.generator = None
+        if self.generator is None:
+            self.generator = BufferGenerator(self.context)
+        if self.source is None:
+            self.source = DirectSource(self.context)
         if path.is_dir():
             if not self.play_directories:
                 return
-            path = path / choice(list(path.iterdir()))
-            if not path.is_file():
-                return  # Don't go through more directories.
         elif path.is_file():
             if not self.play_files:
                 return
         else:
             raise NotImplementedError(f'No clue how to play {path}.')
-        buffer = get_buffer('file', str(path))
-        self.generator = BufferGenerator(self.context)
-        self.generator.buffer = buffer
-        if self.source is None:
-            self.source = DirectSource(self.context)
-        self.source.add_generator(self.generator)
+        self.buffer, self.source = play_path(
+            self.context, path, generator=self.generator, source=self.source
+        )
