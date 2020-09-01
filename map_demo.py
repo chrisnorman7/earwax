@@ -4,20 +4,29 @@ from pyglet.window import Window, key
 
 from earwax import (Box, FittedBox, Game, Level, Point, PointDirections,
                     box_row, tts, walking_directions)
-from earwax.cmd.constants import surfaces_directory
+from earwax.cmd.constants import sounds_directory, surfaces_directory
+
+wall_sounds = sounds_directory / 'walls'
 
 boxes: List[Box] = [
     Box(
-        Point(0, 0), Point(99, 2), name='Main Corridor',
+        Point(0, 0), Point(100, 2), name='Main Corridor',
         surface_sound=surfaces_directory / 'gridwork'
-    )
+    ),
+    Box(Point(0, 3), Point(0, 11), wall=True, wall_sound=wall_sounds),
+    Box(Point(0, 12), Point(100, 12), wall=True, wall_sound=wall_sounds)
 ]
 index: int
 box: Box
-for index, box in enumerate(box_row(Point(0, 3), 20, 10, 5, 1, 0)):
+for index, box in enumerate(box_row(Point(1, 3), 19, 9, 5, 2, 0)):
     box.surface_sound = surfaces_directory / 'concrete'
     box.name = f'Office {index + 1}'
     boxes.append(box)
+
+boxes.extend(
+    box_row(Point(20, 3), 1, 9, 5, 20, 0, wall=True, wall_sound=wall_sounds)
+)
+print(boxes[-4])
 
 main_box: FittedBox = FittedBox(boxes, name='Error')
 
@@ -62,6 +71,9 @@ def move(direction: PointDirections) -> Callable[[], None]:
         y += coordinates.y
         box: Optional[Box] = main_box.get_containing_box(Point(x, y))
         if box is not None:
+            if box.wall:
+                box.dispatch_event('on_collide')
+                return None
             coordinates.x = x
             coordinates.y = y
             box.dispatch_event('on_footstep')
