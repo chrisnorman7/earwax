@@ -10,7 +10,6 @@ def test_init() -> None:
     assert b.bottom_left == Point(0, 0)
     assert b.top_right == Point(3, 3)
     assert b.surface_sound is None
-    assert b.surface_generator is None
     assert b.context is None
     assert b.source is None
     c: Box = Box(b.bottom_left, b.top_right, parent=b)
