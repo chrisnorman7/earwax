@@ -181,15 +181,19 @@ class AdvancedInterfaceSoundPlayer(SimpleInterfaceSoundPlayer):
         )
 
 
-def schedule_generator_destruction(generator: BufferGenerator) -> None:
+def schedule_generator_destruction(generator: BufferGenerator, multiplier: int = 2) -> None:
     """Using ``pyglet.clock.schedule_once``, schedules the given generator for
     destruction.
 
     :param generator: The generator to schedule for destruction.
+
+    :param multiplier: The number to multiply the length of the buffer by.
+
+        If this number is set to 1 (the obvious choice), the audio seems to stop prematurely.
     """
 
     def inner(dt: float) -> None:
         """Perform the destruction."""
         generator.destroy()
 
-    schedule_once(inner, generator.buffer.get_length_in_seconds() * 2)
+    schedule_once(inner, generator.buffer.get_length_in_seconds() * multiplier)
