@@ -93,3 +93,20 @@ def test_row() -> None:
     assert second.top_right == Point(2, 9)
     assert third.bottom_left == Point(0, 12)
     assert third.top_right == Point(2, 15)
+
+
+def test_width() -> None:
+    b: Box = Box(Point(0, 0), Point(3, 3))
+    assert b.width == 3
+
+
+def test_height() -> None:
+    b: Box = Box(Point(0, 0), Point(5, 5))
+    assert b.height == 5
+
+
+def test_area() -> None:
+    b:Box = Box(Point(0, 0), Point(5, 5))
+    assert b.area == 25
+    b = Box(Point(5, 6), Point(9, 12))
+    assert b.area == 24

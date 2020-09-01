@@ -101,6 +101,21 @@ class Box(EventDispatcher):
         """Returns the coordinates of the bottom right corner of this box."""
         return Point(self.top_right.x, self.bottom_left.y)
 
+    @property
+    def width(self) -> int:
+        """Returns the width of this box."""
+        return self.bottom_right.x - self.bottom_left.x
+
+    @property
+    def height(self) -> int:
+        """Returns the height of this box."""
+        return self.top_left.y - self.bottom_left.y
+
+    @property
+    def area(self) -> int:
+        """Returns the area of the box."""
+        return self.width * self.height
+
     def add_child(self, box: 'Box') -> None:
         """Adds the given box to :attr:`self.children
         <~earwax.Box.children>`.
