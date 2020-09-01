@@ -43,7 +43,6 @@ for index, box in enumerate(box_row(Point(1, 4), 19, 9, 5, 2, 0)):
             surface_sound=surfaces_directory / 'concrete'
         )
     )
-    print(ambiance_coordinates[-1])
 
 boxes.extend(
     box_row(Point(20, 4), 1, 9, 5, 20, 0, wall=True, wall_sound=wall_sounds)
@@ -64,7 +63,7 @@ class DemoGame(Game):
         for index, coordinates in enumerate(ambiance_coordinates):
             level.register_ambiance(
                 Ambiance(
-                    level, coordinates.x, coordinates.y, sounds_directory /
+                    level, coordinates.x + 0.5, coordinates.y, sounds_directory /
                     'exits' / f'exit_{index + 1}.wav'
                 )
             )
