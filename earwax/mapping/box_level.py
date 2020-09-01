@@ -30,8 +30,7 @@ class BoxLevel(Level, GameMixin):
     Possible exceptions include if you made an instance to represent some kind
     of long range vision for the player.
 
-    Action-ready Methods
-    --------------------
+    *Action-ready Methods*
 
     * :meth:`~earwax.BoxLevel.move`.
 
