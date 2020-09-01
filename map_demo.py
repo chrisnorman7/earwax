@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Generator, List
 
 from pyglet.window import Window, key, mouse
