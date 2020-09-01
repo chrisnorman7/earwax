@@ -27,8 +27,6 @@ boxes: List[Box] = [
     )
 ]
 
-ambiance_coordinates: List[Point] = []
-
 index: int
 box: Box
 for index, box in enumerate(box_row(Point(1, 4), 19, 9, 5, 2, 0)):
@@ -36,13 +34,16 @@ for index, box in enumerate(box_row(Point(1, 4), 19, 9, 5, 2, 0)):
     box.name = f'Office {index + 1}'
     boxes.append(box)
     door_coordinates: Point = box.bottom_left - Point(0, 2)
-    ambiance_coordinates.append(door_coordinates)
-    boxes.append(
-        Box(
-            door_coordinates, door_coordinates, name='Office Entrance',
-            surface_sound=surfaces_directory / 'concrete'
-        )
+    door: Box = Box(
+        door_coordinates, door_coordinates, name='Office Entrance',
+        surface_sound=surfaces_directory / 'concrete'
     )
+
+    @door.event
+    def on_activate(door=door) -> None:
+        level.set_coordinates(door.bottom_left.x, door.bottom_left.y + 2)
+
+    boxes.append(door)
 
 boxes.extend(
     box_row(Point(20, 4), 1, 9, 5, 20, 0, wall=True, wall_sound=wall_sounds)
@@ -58,15 +59,9 @@ main_box: FittedBox = FittedBox(boxes, name='Error')
 class DemoGame(Game):
     def before_run(self) -> None:
         super().before_run()
-        index: int
-        coordinates: Point
-        for index, coordinates in enumerate(ambiance_coordinates):
-            level.register_ambiance(
-                Ambiance(
-                    level, coordinates.x + 0.5, coordinates.y,
-                    sounds_directory / 'exits' / f'exit_{index + 1}.wav'
-                )
-            )
+        level.register_ambiance(
+            Ambiance(level, 41.5, 2, sounds_directory / 'exit.wav')
+        )
 
 
 game: DemoGame = DemoGame()
@@ -83,6 +78,8 @@ level.action('About turn', symbol=key.S)(level.turn(180))
 
 level.action('Show facing', symbol=key.F)(level.show_facing())
 level.action('Show coordinates', symbol=key.C)(level.show_coordinates)
+
+level.action('Activate', symbol=key.RETURN)(level.activate)
 
 
 @level.action('Quit', symbol=key.ESCAPE)
