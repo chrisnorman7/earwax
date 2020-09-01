@@ -1,12 +1,8 @@
-from typing import Callable, Generator, List, Optional
+from typing import Generator, List
 
-from math import pi, cos, sin
-from pyglet.window import Window, key
-from synthizer import BufferGenerator, Source, Source3D
+from pyglet.window import Window, key, mouse
 
-from earwax import (Box, Editor, FittedBox, Game, Level, Point,
-                    PointDirections, box_row, play_path,
-                    schedule_generator_destruction, tts, walking_directions)
+from earwax import Box, BoxLevel, Editor, FittedBox, Game, Point, box_row, tts
 from earwax.cmd.constants import sounds_directory, surfaces_directory
 
 wall_sounds = sounds_directory / 'walls'
@@ -36,26 +32,19 @@ boxes.extend(
 
 main_box: FittedBox = FittedBox(boxes, name='Error')
 
-
-class MapDemoGame(Game):
-    def before_run(self) -> None:
-        super().before_run()
-        if self.audio_context is not None:
-            rad: float = (0 / 180.0) * pi
-            self.audio_context.orientation = (sin(rad), cos(rad), 0, 0, 0, 1)
-
-
-game: MapDemoGame = MapDemoGame()
+game: Game = Game()
 window: Window = Window(caption='Map Demo')
-coordinates: Point = Point(0, 0)
-old_box: Box = boxes[0]
-level = Level()
+level: BoxLevel = BoxLevel(game, main_box)
 
+level.action('Show coordinates', symbol=key.C)(level.show_coordinates)
 
-@level.action('Show coordinates', symbol=key.K)
-def show_coordinates() -> None:
-    """Speak the current coordinates."""
-    tts.speak(f'{coordinates.x}, {coordinates.y}')
+level.action(
+    'Walk forwards', symbol=key.W, mouse_button=mouse.RIGHT, interval=0.4
+)(level.move())
+
+level.action('Turn left 45 degrees', symbol=key.A)(level.turn(-45))
+level.action('Turn right 45 degrees', symbol=key.D)(level.turn(45))
+level.action('Show facing', symbol=key.F)(level.show_facing())
 
 
 @level.action('Quit', symbol=key.ESCAPE)
@@ -67,17 +56,16 @@ def do_quit() -> None:
 @level.action('Goto', symbol=key.G)
 def goto() -> Generator[None, None, None]:
     """Jump to some coordinates."""
-    dest: Point = coordinates.copy()
+    dest: Point = Point(int(level.x), int(level.y))
 
     def y_inner(value: str) -> None:
         """Set the y coordinate, and jump the player."""
         try:
             dest.y = int(value)
-            if dest == coordinates:
+            if dest.x == int(level.x) and dest.y == int(level.y):
                 tts.speak('Coordinates unchanged.')
                 return None
-            coordinates.x = dest.x
-            coordinates.y = dest.y
+            level.set_coordinates(dest.x, dest.y)
             tts.speak('Moved.')
         except ValueError:
             tts.speak('Invalid coordinate.')
@@ -89,76 +77,18 @@ def goto() -> Generator[None, None, None]:
         try:
             dest.x = int(value)
             yield
-            game.replace_level(Editor(y_inner, game, text=str(coordinates.y)))
-            tts.speak(f'Y coordinate: {coordinates.y}')
+            game.replace_level(Editor(y_inner, game, text='%d' % level.y))
+            tts.speak('Y coordinate: %d' % level.y)
         except ValueError:
             tts.speak('Invalid coordinate.')
             game.pop_level()
 
     yield
-    game.push_level(Editor(x_inner, game, text=str(coordinates.x)))
-    tts.speak(f'X coordinate: {coordinates.x}')
-
-
-def move(direction: PointDirections) -> Callable[[], None]:
-    """Move on the map."""
-
-    def inner() -> None:
-        global old_box
-        x: int
-        y: int
-        x, y = walking_directions[direction]
-        x += coordinates.x
-        y += coordinates.y
-        box: Optional[Box] = main_box.get_containing_box(Point(x, y))
-        if box is not None:
-            generator: BufferGenerator
-            source: Source
-            if box.wall:
-                box.dispatch_event('on_collide')
-                if box.wall_sound is not None and \
-                   game.audio_context is not None:
-                    source = Source3D(game.audio_context)
-                    source.position = (x, y, 0)
-                    print(source.position)
-                    generator, source = play_path(
-                        game.audio_context, box.wall_sound, source=source
-                    )
-                    schedule_generator_destruction(generator)
-                return None
-            coordinates.x = x
-            coordinates.y = y
-            if game.audio_context is not None:
-                game.audio_context.position = (x, y, 0)
-            box.dispatch_event('on_footstep')
-            if box.surface_sound is not None and \
-               game.audio_context is not None:
-                generator, source = play_path(
-                    game.audio_context, box.surface_sound
-                )
-                schedule_generator_destruction(generator)
-            if box is not old_box:
-                tts.speak(str(box.name))
-                old_box = box
-
-    return inner
+    game.push_level(Editor(x_inner, game, text='%d' % level.x))
+    tts.speak('X coordinate: %d' % level.x)
 
 
 def main() -> None:
-    name: str
-    symbol: int
-    direction: PointDirections
-    for name, symbol, direction in [
-        ('North', key.I, PointDirections.north),
-        ('Northeast', key.O, PointDirections.northeast),
-        ('East', key.L, PointDirections.east),
-        ('Southeast', key.PERIOD, PointDirections.southeast),
-        ('South', key.COMMA, PointDirections.south),
-        ('Southwest', key.M, PointDirections.southwest),
-        ('West', key.J, PointDirections.west),
-        ('Northwest', key.U, PointDirections.northwest)
-    ]:
-        level.action(name, symbol=symbol)(move(direction))
     game.push_level(level)
     game.run(window)
 
