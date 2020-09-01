@@ -35,7 +35,14 @@ for index, box in enumerate(box_row(Point(1, 4), 19, 9, 5, 2, 0)):
     box.surface_sound = surfaces_directory / 'concrete'
     box.name = f'Office {index + 1}'
     boxes.append(box)
-    ambiance_coordinates.append(box.bottom_left - Point(0, 2))
+    door_coordinates: Point = box.bottom_left - Point(0, 2)
+    ambiance_coordinates.append(door_coordinates)
+    boxes.append(
+        Box(
+            door_coordinates, door_coordinates, name='Office Entrance',
+            surface_sound=surfaces_directory / 'concrete'
+        )
+    )
     print(ambiance_coordinates[-1])
 
 boxes.extend(
