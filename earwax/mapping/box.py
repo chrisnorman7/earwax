@@ -163,6 +163,10 @@ class Box(EventDispatcher):
             box.top_right
         )
 
+    def sort_children(self) -> List['Box']:
+        """Returns a sorted version of :attr:`~earwax.Box.children`."""
+        return sorted(self.children, key=lambda c: c.area)
+
     def get_containing_box(self, coordinates: Point) -> Optional['Box']:
         """Returns the box that spans the given coordinates.
 
@@ -173,12 +177,13 @@ class Box(EventDispatcher):
 
         * If that is not the case, `None`` is returned.
 
-        This method scans :attr:`self.children <earwax.Box.children>`.
+        This method scans :attr:`self.children <earwax.Box.children>` using the
+        :meth:`~earwax.Box.sort_children` method..
 
         :param coordinates: The coordinates the child box should span.
         """
         box: Box
-        for box in self.children:
+        for box in self.sort_children():
             if box.contains_point(coordinates):
                 return box
         if self.contains_point(coordinates):
