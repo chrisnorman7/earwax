@@ -5,6 +5,7 @@ from random import choice
 from typing import Dict, Optional, Tuple
 
 from attr import attrs
+from pyglet.clock import schedule_once
 from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
                        Generator, Source, SynthizerError)
 
@@ -178,3 +179,17 @@ class AdvancedInterfaceSoundPlayer(SimpleInterfaceSoundPlayer):
         self.buffer, self.source = play_path(
             self.context, path, generator=self.generator, source=self.source
         )
+
+
+def schedule_generator_destruction(generator: BufferGenerator) -> None:
+    """Using ``pyglet.clock.schedule_once``, schedules the given generator for
+    destruction.
+
+    :param generator: The generator to schedule for destruction.
+    """
+
+    def inner(dt: float) -> None:
+        """Perform the destruction."""
+        generator.destroy()
+
+    schedule_once(inner, generator.buffer.get_length_in_seconds() * 2)
