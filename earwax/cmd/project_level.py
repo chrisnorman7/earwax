@@ -30,23 +30,11 @@ class ProjectLevel(TitleMixin, GameMixin, Level):
 
         Used by various build tools to reference other levels.
 
-    :ivar ~earwax.GameLevel.min_x: The minimum x value.
-
-    :ivar ~earwax.GameLevel.max_x: The maximum x value.
-
-    :ivar ~earwax.GameLevel.min_y: The minimum y value.
-
-    :ivar ~earwax.GameLevel.max_y: The maximum y value.
-
     :ivar ~earwax.GameLevel.undumped_attributes: A list of attributes which
         should be ignored by the :meth:`~earwax.GameLevel.dump` method.
     """
 
     id: str = Factory(uuid)
-    min_x: int = 0
-    max_x: int = 200
-    min_y: int = 0
-    max_y: int = 200
 
     undumped_attributes: List[str] = attrib(
         default=Factory(lambda: [
