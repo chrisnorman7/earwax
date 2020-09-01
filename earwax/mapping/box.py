@@ -71,6 +71,7 @@ class Box(EventDispatcher):
     name: Optional[str] = None
     parent: Optional['Box'] = None
     children: List['Box'] = attrib(Factory(list), repr=False)
+    wall: bool = False
     surface_sound: Optional[Path] = None
     wall_sound: Optional[Path] = None
     context: Optional[Context] = None
@@ -83,6 +84,7 @@ class Box(EventDispatcher):
         for child in self.children:
             child.parent = self
         self.register_event_type('on_footstep')
+        self.register_event_type('on_collide')
 
     def on_footstep(self) -> None:
         """Play an appropriate surface sound.
@@ -93,6 +95,19 @@ class Box(EventDispatcher):
             generator: BufferGenerator
             generator, self.source = play_path(
                 self.context, self.surface_sound, source=self.source
+            )
+            schedule_generator_destruction(generator)
+
+    def on_collide(self) -> None:
+        """Play an appropriate wall sound.
+
+        This function will be called by the Pyglet event framework, and should
+        be called when a player collides with this box.
+        """
+        if self.wall_sound is not None and self.context is not None:
+            generator: BufferGenerator
+            generator, self.source = play_path(
+                self.context, self.wall_sound, source=self.source
             )
             schedule_generator_destruction(generator)
 
@@ -212,7 +227,7 @@ class FittedBox(Box):
 
 def box_row(
     start: Point, x_size: int, y_size: int, count: int, x_offset: int,
-    y_offset: int
+    y_offset: int, **kwargs
 ) -> List[Box]:
     """Generates a list of boxes.
 
@@ -230,13 +245,18 @@ def box_row(
             0  # How far to travel on the y axis each time.
         )
 
-    This will result a list containing 3 rooms:
+    This will result in a list containing 3 rooms:
 
     * The first from (0, 0) to (2, 1)
 
     * The second from (3, 0) to (5, 1)
 
     * And the third from (6, 0) to (8, 1)
+
+    **PLEASE NOTE:**
+    If the value of either of the size arguments is less than 1, the top right
+    coordinate will be less than the bottom left, so
+    :meth:`~earwax.Box.get_containing_box` won't ever find it.
 
     :param start: The :attr:`~earwax.Box.bottom_left` coordinate of the first
         box.
@@ -254,6 +274,8 @@ def box_row(
     :param y_offset: The amount of y distance between the boxes.
 
         If the provided value is less than 1, then overlaps will occur.
+
+    :param kwargs: Extra keyword arguments to be passed to ``Box.__init__``.
     """
     start = start.copy()
     # In the next line, we subtract 1 from both size values, otherwise we end
@@ -262,7 +284,7 @@ def box_row(
     n: int
     boxes: List[Box] = []
     for n in range(count):
-        box: Box = Box(start.copy(), start + size_point)
+        box: Box = Box(start.copy(), start + size_point, **kwargs)
         boxes.append(box)
         if x_offset:
             start.x += ((x_offset + x_size) - 1)
