@@ -9,10 +9,21 @@ wall_sounds = sounds_directory / 'walls'
 
 boxes: List[Box] = [
     Box(
-        Point(0, 0), Point(100, 2), name='Main Corridor',
+        Point(0, 0), Point(99, 2), name='Main Corridor',
         surface_sound=surfaces_directory / 'gridwork'
     ),
-    Box(Point(0, 3), Point(0, 12), wall=True, wall_sound=wall_sounds),
+    Box(
+        Point(0, 3), Point(0, 12), wall=True, wall_sound=wall_sounds,
+        name='Western wall'
+    ),
+    Box(
+        Point(0, -1), Point(100, -1), wall=True, wall_sound=wall_sounds,
+        name='Southern wall'
+    ),
+    Box(
+        Point(100, 0), Point(100, 2), wall=True, wall_sound=wall_sounds,
+        name='Fill up the eastern wall'
+    )
 ]
 
 index: int
@@ -36,15 +47,16 @@ game: Game = Game()
 window: Window = Window(caption='Map Demo')
 level: BoxLevel = BoxLevel(game, main_box)
 
-level.action('Show coordinates', symbol=key.C)(level.show_coordinates)
-
 level.action(
     'Walk forwards', symbol=key.W, mouse_button=mouse.RIGHT, interval=0.4
 )(level.move())
 
 level.action('Turn left 45 degrees', symbol=key.A)(level.turn(-45))
 level.action('Turn right 45 degrees', symbol=key.D)(level.turn(45))
+level.action('About turn', symbol=key.S)(level.turn(180))
+
 level.action('Show facing', symbol=key.F)(level.show_facing())
+level.action('Show coordinates', symbol=key.C)(level.show_coordinates)
 
 
 @level.action('Quit', symbol=key.ESCAPE)
