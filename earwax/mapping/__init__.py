@@ -6,11 +6,12 @@ This module is inspired by Camlorn's post at `this link
 All credit goes to him for the idea.
 """
 
+from .ambiance import Ambiance
 from .box import Box, FittedBox, OutOfBounds, box_row
 from .box_level import BoxLevel
 from .point import Point, PointDirections
 
 __all__ = [
     'Box', 'Point', 'OutOfBounds', 'PointDirections', 'FittedBox', 'box_row',
-    'BoxLevel'
+    'BoxLevel', 'Ambiance'
 ]

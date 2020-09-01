@@ -1,8 +1,10 @@
+from pathlib import Path
 from typing import Generator, List
 
 from pyglet.window import Window, key, mouse
 
-from earwax import Box, BoxLevel, Editor, FittedBox, Game, Point, box_row, tts
+from earwax import (Ambiance, Box, BoxLevel, Editor, FittedBox, Game, Point,
+                    box_row, tts)
 from earwax.cmd.constants import sounds_directory, surfaces_directory
 
 wall_sounds = sounds_directory / 'walls'
@@ -26,12 +28,16 @@ boxes: List[Box] = [
     )
 ]
 
+ambiance_coordinates: List[Point] = []
+
 index: int
 box: Box
 for index, box in enumerate(box_row(Point(1, 4), 19, 9, 5, 2, 0)):
     box.surface_sound = surfaces_directory / 'concrete'
     box.name = f'Office {index + 1}'
     boxes.append(box)
+    ambiance_coordinates.append(box.bottom_left - Point(0, 2))
+    print(ambiance_coordinates[-1])
 
 boxes.extend(
     box_row(Point(20, 4), 1, 9, 5, 20, 0, wall=True, wall_sound=wall_sounds)
@@ -43,7 +49,22 @@ boxes.extend(
 
 main_box: FittedBox = FittedBox(boxes, name='Error')
 
-game: Game = Game()
+
+class DemoGame(Game):
+    def before_run(self) -> None:
+        super().before_run()
+        index: int
+        coordinates: Point
+        for index, coordinates in enumerate(ambiance_coordinates):
+            level.register_ambiance(
+                Ambiance(
+                    level, coordinates.x, coordinates.y, sounds_directory /
+                    'exits' / f'exit_{index + 1}.wav'
+                )
+            )
+
+
+game: DemoGame = DemoGame()
 window: Window = Window(caption='Map Demo')
 level: BoxLevel = BoxLevel(game, main_box)
 
