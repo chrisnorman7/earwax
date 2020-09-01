@@ -63,8 +63,8 @@ class DemoGame(Game):
         for index, coordinates in enumerate(ambiance_coordinates):
             level.register_ambiance(
                 Ambiance(
-                    level, coordinates.x + 0.5, coordinates.y, sounds_directory /
-                    'exits' / f'exit_{index + 1}.wav'
+                    level, coordinates.x + 0.5, coordinates.y,
+                    sounds_directory / 'exits' / f'exit_{index + 1}.wav'
                 )
             )
 
