@@ -205,3 +205,12 @@ class BoxLevel(Level, GameMixin):
             self.set_bearing(normalise_angle(self.bearing + amount))
 
         return inner
+
+    def activate(self) -> None:
+        """The enter key has been pressed by the player, and there's nothing
+        else to do with it."""
+        box: Optional[Box] = self.box.get_containing_box(
+            Point(int(self.x), int(self.y))
+        )
+        if box is not None:
+            box.dispatch_event('on_activate')

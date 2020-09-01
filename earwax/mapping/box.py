@@ -75,6 +75,7 @@ class Box(EventDispatcher):
             child.parent = self
         self.register_event_type('on_footstep')
         self.register_event_type('on_collide')
+        self.register_event_type('on_activate')
 
     def on_footstep(self) -> None:
         """Play an appropriate surface sound.
@@ -88,6 +89,14 @@ class Box(EventDispatcher):
 
         This function will be called by the Pyglet event framework, and should
         be called when a player collides with this box.
+        """
+        pass
+
+    def on_activate(self) -> None:
+        """An event which is dispatched when the player presses the enter key.
+
+        It is guaranteed that the instance this event is dispatched on is the
+        one the player is stood on.
         """
         pass
 
