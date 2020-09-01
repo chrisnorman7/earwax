@@ -7,8 +7,10 @@ All credit goes to him for the idea.
 """
 
 from .box import Box, FittedBox, OutOfBounds, box_row
+from .box_level import BoxLevel
 from .point import Point, PointDirections
 
 __all__ = [
-    'Box', 'Point', 'OutOfBounds', 'PointDirections', 'FittedBox', 'box_row'
+    'Box', 'Point', 'OutOfBounds', 'PointDirections', 'FittedBox', 'box_row',
+    'BoxLevel'
 ]

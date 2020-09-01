@@ -7,7 +7,7 @@ from typing import Dict, Optional, Tuple
 from attr import attrs
 from pyglet.clock import schedule_once
 from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
-                       Generator, Source, SynthizerError)
+                       Generator, Source, Source3D, SynthizerError)
 
 buffers: Dict[str, Buffer] = {}
 
@@ -42,8 +42,9 @@ def get_buffer(protocol: str, path: str) -> Buffer:
 
 def play_path(
     context: Context, path: Path,
-    generator: Optional[Generator] = None, source: Optional[Source] = None
-) -> Tuple[BufferGenerator, DirectSource]:
+    generator: Optional[Generator] = None, source: Optional[Source] = None,
+    position: Optional[Tuple[float, float, float]] = None
+) -> Tuple[BufferGenerator, Source]:
     """Plays the given sound file (or selects one from the given directory).
 
     :param ctx: The ``synthizer.Context`` to play through.
@@ -53,6 +54,24 @@ def play_path(
 
         If ``path`` is a directory, then a random sound file will be selected
         from it and played instead.
+
+    :param generator: A ready-to-use ``BufferGenerator``.
+
+        If ``None`` is provided, then a new ``BufferGenerator`` instance will
+        be created and returned.
+
+    :param source: A ready-to-use source.
+
+        If ``None`` is provided, an appropriate ``Source`` instance will be
+        used.
+
+    :param position: The position the new sound should play at.
+
+        If ``None`` is provided, then no position will be set. If ``source`` is
+        ``None``, then a ``DirectSource`` object will be created for you.
+
+        If position is not ``None``, then it will be applied to the source. If
+        ``source`` is ``None``, then a ``Source3D`` instance will be created.
     """
     if path.is_dir():
         path = choice(list(path.iterdir()))
@@ -61,7 +80,13 @@ def play_path(
         generator = BufferGenerator(context)
     generator.buffer = get_buffer('file', str(path))
     if source is None:
-        source = DirectSource(context)
+        if position is None:
+            source = DirectSource(context)
+        else:
+            source = Source3D(context)
+            source.position = position
+    if position is not None:
+        source.position = position
     source.add_generator(generator)
     return (generator, source)
 
@@ -181,15 +206,17 @@ class AdvancedInterfaceSoundPlayer(SimpleInterfaceSoundPlayer):
         )
 
 
-def schedule_generator_destruction(generator: BufferGenerator, multiplier: int = 2) -> None:
-    """Using ``pyglet.clock.schedule_once``, schedules the given generator for
-    destruction.
+def schedule_generator_destruction(
+    generator: BufferGenerator, multiplier: int = 2
+) -> None:
+    """Using ``pyglet.clock.schedule_once``, schedules ``generator.destroy``.
 
     :param generator: The generator to schedule for destruction.
 
     :param multiplier: The number to multiply the length of the buffer by.
 
-        If this number is set to 1 (the obvious choice), the audio seems to stop prematurely.
+        If this number is set to 1 (which would have been the obvious choice),
+        the audio seems to stop prematurely.
     """
 
     def inner(dt: float) -> None:
