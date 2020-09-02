@@ -1,9 +1,10 @@
+from pathlib import Path
 from typing import Generator, List
 
 from pyglet.window import Window, key, mouse
 
-from earwax import (Ambiance, Box, BoxLevel, Editor, FittedBox, Game, Point,
-                    box_row, tts)
+from earwax import (Ambiance, Box, BoxLevel, Door, Editor, FittedBox, Game,
+                    Point, box_row, tts)
 from earwax.cmd.constants import sounds_directory, surfaces_directory
 
 wall_sounds = sounds_directory / 'walls'
@@ -27,22 +28,22 @@ boxes: List[Box] = [
     )
 ]
 
+door_sounds_directory: Path = sounds_directory / 'doors'
 index: int
 box: Box
 for index, box in enumerate(box_row(Point(1, 4), 19, 9, 5, 2, 0)):
     box.surface_sound = surfaces_directory / 'concrete'
     box.name = f'Office {index + 1}'
     boxes.append(box)
-    door_coordinates: Point = box.bottom_left - Point(0, 2)
+    door_coordinates: Point = box.bottom_left + Point(1, -1)
     door: Box = Box(
         door_coordinates, door_coordinates, name='Office Entrance',
-        surface_sound=surfaces_directory / 'concrete'
+        surface_sound=surfaces_directory / 'concrete', door=Door(
+            open=False, closed_sound=door_sounds_directory / 'closed.wav',
+            open_sound=door_sounds_directory / 'open.wav',
+            close_sound=door_sounds_directory / 'close.wav'
+        )
     )
-
-    @door.event
-    def on_activate(door=door) -> None:
-        level.set_coordinates(door.bottom_left.x, door.bottom_left.y + 2)
-
     boxes.append(door)
 
 boxes.extend(
@@ -60,7 +61,7 @@ class DemoGame(Game):
     def before_run(self) -> None:
         super().before_run()
         level.register_ambiance(
-            Ambiance(level, 41.5, 2, sounds_directory / 'exit.wav')
+            Ambiance(level, 41.5, 3, sounds_directory / 'exit.wav')
         )
 
 
