@@ -21,7 +21,7 @@ class OutOfBounds(BoxError):
 
 
 class NotADoor(BoxError):
-    """Tried to call :method:`~earwax.Box.open`, or :meth:`~earwax.Box.close`
+    """Tried to call :meth:`~earwax.Box.open`, or :meth:`~earwax.Box.close`
     on a :class:`~earwax.Box` instance that has its :attr:`~earwax.Box.door`
     attribute set to ``None``."""
 
