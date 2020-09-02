@@ -80,7 +80,7 @@ level.action('About turn', symbol=key.S)(level.turn(180))
 level.action('Show facing', symbol=key.F)(level.show_facing())
 level.action('Show coordinates', symbol=key.C)(level.show_coordinates)
 
-level.action('Activate', symbol=key.RETURN)(level.activate)
+level.action('Activate', symbol=key.RETURN)(level.activate())
 
 
 @level.action('Quit', symbol=key.ESCAPE)
