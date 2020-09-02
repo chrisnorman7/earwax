@@ -32,3 +32,4 @@ class Door:
     closed_sound: Optional[Path] = None
     open_sound: Optional[Path] = None
     close_sound: Optional[Path] = None
+    close_after: Optional[float] = None

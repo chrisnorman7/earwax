@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from attr import Factory, attrib, attrs
+from pyglet.clock import schedule_once, unschedule
 from pyglet.event import EventDispatcher
 from synthizer import Context
 
@@ -256,16 +257,24 @@ class Box(EventDispatcher):
         self.door.open = True
         self.dispatch_event('on_open')
         self.play_sound(ctx, self.door.open_sound)
+        if self.door.close_after is not None:
+            schedule_once(self.scheduled_close, self.door.close_after, ctx)
 
     def close(self, ctx: Optional[Context]) -> None:
         """If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
         :attr:`.open <earwax.Door.open>` attribute to ``False``, and play the
-        appropriate sound. Otherwise, raise :class:`earwax.NotADoor`."""
+        appropriate sound. Otherwise, raise :class:`earwax.NotADoor`.
+        """
+        unschedule(self.scheduled_close)
         if self.door is None:
             raise NotADoor(self)
         self.door.open = False
         self.dispatch_event('on_close')
         self.play_sound(ctx, self.door.close_sound)
+
+    def scheduled_close(self, dt: float, ctx: Optional[Context]) -> None:
+        """Call :meth:`self.close() <earwax.Box.close>` on a schedule."""
+        self.close(ctx)
 
 
 class FittedBox(Box):
