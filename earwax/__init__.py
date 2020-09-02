@@ -49,8 +49,8 @@ if True:
     from .event_matcher import EventMatcher
     from .game import Game
     from .level import Level
-    from .mapping import (Ambiance, Box, BoxLevel, FittedBox, OutOfBounds,
-                          Point, PointDirections, box_row)
+    from .mapping import (Ambiance, Box, BoxLevel, Door, FittedBox, NotADoor,
+                          OutOfBounds, Point, PointDirections, box_row)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .sound import (AdvancedInterfaceSoundPlayer,
@@ -74,5 +74,5 @@ __all__ = [
     'EarwaxConfig', 'ProjectLevel', 'cmd_main', 'Project', 'Box', 'Point',
     'OutOfBounds', 'PointDirections', 'walking_directions', 'FittedBox',
     'box_row', 'play_path', 'schedule_generator_destruction', 'BoxLevel',
-    'Ambiance'
+    'Ambiance', 'Door', 'NotADoor'
 ]

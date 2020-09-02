@@ -2,7 +2,7 @@ from typing import List
 
 from pytest import raises
 
-from earwax import Box, FittedBox, OutOfBounds, Point, box_row
+from earwax import Box, Door, FittedBox, NotADoor, OutOfBounds, Point, box_row
 
 
 def test_init() -> None:
@@ -106,7 +106,52 @@ def test_height() -> None:
 
 
 def test_area() -> None:
-    b:Box = Box(Point(0, 0), Point(5, 5))
+    b: Box = Box(Point(0, 0), Point(5, 5))
     assert b.area == 25
     b = Box(Point(5, 6), Point(9, 12))
     assert b.area == 24
+
+
+def test_open() -> None:
+    b: Box = Box(Point(0, 0), Point(0, 0))
+
+    @b.event
+    def on_close() -> None:
+        raise RuntimeError('This event should not have fired.')
+
+    with raises(NotADoor):
+        b.open(None)
+    d = Door(open=False)
+    b.door = d
+    b.open(None)
+    assert d.open is True
+
+    @b.event
+    def on_open() -> None:
+        d.open = False
+
+    b.open(None)
+    assert d.open is False
+
+
+def test_close() -> None:
+    b: Box = Box(Point(0, 0), Point(0, 0))
+
+    @b.event
+    def on_open() -> None:
+        raise RuntimeError('This event should not have fired.')
+
+    with raises(NotADoor):
+        b.close(None)
+    d = Door(open=True)
+    b.door = d
+    b.close(None)
+    assert d.open is False
+
+    @b.event
+    def on_close() -> None:
+        d.open = True
+
+    b.close(None)
+
+    assert d.open is True

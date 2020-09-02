@@ -7,11 +7,12 @@ All credit goes to him for the idea.
 """
 
 from .ambiance import Ambiance
-from .box import Box, FittedBox, OutOfBounds, box_row
+from .box import Box, FittedBox, NotADoor, OutOfBounds, box_row
 from .box_level import BoxLevel
+from .door import Door
 from .point import Point, PointDirections
 
 __all__ = [
     'Box', 'Point', 'OutOfBounds', 'PointDirections', 'FittedBox', 'box_row',
-    'BoxLevel', 'Ambiance'
+    'BoxLevel', 'Ambiance', 'Door', 'NotADoor'
 ]

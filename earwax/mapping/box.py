@@ -5,12 +5,25 @@ from typing import List, Optional
 
 from attr import Factory, attrib, attrs
 from pyglet.event import EventDispatcher
+from synthizer import Context
 
+from ..sound import play_path
+from .door import Door
 from .point import Point
 
 
-class OutOfBounds(Exception):
+class BoxError(Exception):
+    """The base exception for all box errors."""
+
+
+class OutOfBounds(BoxError):
     """The given point is beyond the bounds of a box."""
+
+
+class NotADoor(BoxError):
+    """Tried to call :method:`~earwax.Box.open`, or :meth:`~earwax.Box.close`
+    on a :class:`~earwax.Box` instance that has its :attr:`~earwax.Box.door`
+    attribute set to ``None``."""
 
 
 @attrs(auto_attribs=True)
@@ -49,6 +62,9 @@ class Box(EventDispatcher):
     :ivar ~earwax.Box.wall: A flag to specify whether or not this instance is a
         wall.
 
+    :ivar ~earwax.Box.door: If this attribute is not ``None``, then this
+        instance is considered a door.
+
     :ivar ~earwax.Box.surface_sound: A path to either the sound that should be
         heard when a player enters this box, or the path of a directory from
         which a random file should be chosen.
@@ -60,10 +76,15 @@ class Box(EventDispatcher):
 
     bottom_left: Point
     top_right: Point
+
     name: Optional[str] = None
+
     parent: Optional['Box'] = None
     children: List['Box'] = attrib(Factory(list), repr=False)
+
     wall: bool = False
+    door: Optional[Door] = None
+
     surface_sound: Optional[Path] = None
     wall_sound: Optional[Path] = None
 
@@ -76,6 +97,8 @@ class Box(EventDispatcher):
         self.register_event_type('on_footstep')
         self.register_event_type('on_collide')
         self.register_event_type('on_activate')
+        self.register_event_type('on_open')
+        self.register_event_type('on_close')
 
     def on_footstep(self) -> None:
         """Play an appropriate surface sound.
@@ -98,6 +121,16 @@ class Box(EventDispatcher):
         It is guaranteed that the instance this event is dispatched on is the
         one the player is stood on.
         """
+        pass
+
+    def on_open(self) -> None:
+        """An event that id dispatched when the :meth:`~earwax.Box.open` method is
+        successfully called on this instance."""
+        pass
+
+    def on_close(self) -> None:
+        """An event which is dispatched when :meth:`~earwax.Box.close` is
+        successfully called on this instance."""
         pass
 
     @property
@@ -198,6 +231,28 @@ class Box(EventDispatcher):
         if self.contains_point(coordinates):
             return self
         return None
+
+    def open(self, ctx: Optional[Context]) -> None:
+        """If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
+        :attr:`.open <earwax.Door.open>` attribute to ``True``, and play the
+        appropriate sound. Otherwise, raise :class:`earwax.NotADoor`."""
+        if self.door is None:
+            raise NotADoor(self)
+        self.door.open = True
+        self.dispatch_event('on_open')
+        if self.door.open_sound is not None and ctx is not None:
+            play_path(ctx, self.door.open_sound)
+
+    def close(self, ctx: Optional[Context]) -> None:
+        """If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
+        :attr:`.open <earwax.Door.open>` attribute to ``False``, and play the
+        appropriate sound. Otherwise, raise :class:`earwax.NotADoor`."""
+        if self.door is None:
+            raise NotADoor(self)
+        self.door.open = False
+        self.dispatch_event('on_close')
+        if self.door.close_sound is not None and ctx is not None:
+            play_path(ctx, self.door.close_sound)
 
 
 class FittedBox(Box):
