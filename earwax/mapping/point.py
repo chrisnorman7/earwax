@@ -22,15 +22,12 @@ class PointDirections(Enum):
     northwest = 8
 
 
-Number = Union[float, int]
-
-
 @attrs(auto_attribs=True, order=False)
 class Point:
     """A point in 2d space."""
 
-    x: Number
-    y: Number
+    x: float
+    y: float
 
     def directions_to(self, other: 'Point') -> PointDirections:
         """Returns the direction between this point and ``other``.

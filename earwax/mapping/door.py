@@ -1,7 +1,7 @@
 """Provides the Door class."""
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple, Union
 
 from attr import attrs
 
@@ -32,4 +32,4 @@ class Door:
     closed_sound: Optional[Path] = None
     open_sound: Optional[Path] = None
     close_sound: Optional[Path] = None
-    close_after: Optional[float] = None
+    close_after: Optional[Union[float, Tuple[float, float]]] = None

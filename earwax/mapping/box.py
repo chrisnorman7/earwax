@@ -145,17 +145,17 @@ class Box(EventDispatcher):
         return Point(self.top_right.x, self.bottom_left.y)
 
     @property
-    def width(self) -> int:
+    def width(self) -> float:
         """Returns the width of this box."""
         return self.bottom_right.x - self.bottom_left.x
 
     @property
-    def height(self) -> int:
+    def height(self) -> float:
         """Returns the height of this box."""
         return self.top_left.y - self.bottom_left.y
 
     @property
-    def area(self) -> int:
+    def area(self) -> float:
         """Returns the area of the box."""
         return self.width * self.height
 
@@ -286,10 +286,10 @@ class FittedBox(Box):
 
     def __init__(self, children: List[Box], **kwargs) -> None:
         """Create a new instance."""
-        bottom_left_x: Optional[int] = None
-        bottom_left_y: Optional[int] = None
-        top_right_x: Optional[int] = None
-        top_right_y: Optional[int] = None
+        bottom_left_x: Optional[float] = None
+        bottom_left_y: Optional[float] = None
+        top_right_x: Optional[float] = None
+        top_right_y: Optional[float] = None
         child: Box
         for child in children:
             if bottom_left_x is None or child.bottom_left.x < bottom_left_x:
