@@ -41,7 +41,9 @@ for index, box in enumerate(box_row(Point(1, 4), 19, 9, 5, 2, 0)):
         surface_sound=surfaces_directory / 'concrete', door=Door(
             open=False, closed_sound=door_sounds_directory / 'closed.wav',
             open_sound=door_sounds_directory / 'open.wav',
-            close_sound=door_sounds_directory / 'close.wav', close_after=3.0
+            close_sound=door_sounds_directory / 'close.wav', close_after=(
+                3.0, 5.0
+            )
         )
     )
     boxes.append(door)

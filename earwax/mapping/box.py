@@ -1,6 +1,7 @@
 """Provides box-related classes, functions, and exceptions."""
 
 from pathlib import Path
+from random import uniform
 from typing import List, Optional
 
 from attr import Factory, attrib, attrs
@@ -257,8 +258,14 @@ class Box(EventDispatcher):
         self.door.open = True
         self.dispatch_event('on_open')
         self.play_sound(ctx, self.door.open_sound)
-        if self.door.close_after is not None:
-            schedule_once(self.scheduled_close, self.door.close_after, ctx)
+        when: float
+        if isinstance(self.door.close_after, tuple):
+            when = uniform(*self.door.close_after)
+        elif isinstance(self.door.close_after, float):
+            when = self.door.close_after
+        else:
+            return None
+        schedule_once(self.scheduled_close, when, ctx)
 
     def close(self, ctx: Optional[Context]) -> None:
         """If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
