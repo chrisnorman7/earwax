@@ -84,7 +84,6 @@ def play_path(
             source = DirectSource(context)
         else:
             source = Source3D(context)
-            source.position = position
     if position is not None:
         source.position = position
     source.add_generator(generator)
@@ -224,3 +223,18 @@ def schedule_generator_destruction(
         generator.destroy()
 
     schedule_once(inner, generator.buffer.get_length_in_seconds() * multiplier)
+
+
+def play_and_destroy(*args, **kwargs) -> None:
+    """Calls :meth:`~earwax.play_path` with the given ``args`` and ``kwargs``,
+    then schedules the returned generator for destruction using
+    :meth:`~earwax.schedule_generator_destruction`.
+
+    :param args: The positional arguments to pass to ``play_path``.
+
+    :param kwargs: The keyword arguments to pass to ``play_path``.
+    """
+    generator: BufferGenerator
+    source: Source
+    generator, source = play_path(*args, **kwargs)
+    schedule_generator_destruction(generator)

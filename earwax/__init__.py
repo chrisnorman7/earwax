@@ -54,7 +54,8 @@ if True:
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .sound import (AdvancedInterfaceSoundPlayer,
-                        SimpleInterfaceSoundPlayer, get_buffer, play_path,
+                        SimpleInterfaceSoundPlayer, get_buffer,
+                        play_and_destroy, play_path,
                         schedule_generator_destruction)
     from .speech import tts
     from .walking_directions import walking_directions
@@ -74,5 +75,5 @@ __all__ = [
     'EarwaxConfig', 'ProjectLevel', 'cmd_main', 'Project', 'Box', 'Point',
     'OutOfBounds', 'PointDirections', 'walking_directions', 'FittedBox',
     'box_row', 'play_path', 'schedule_generator_destruction', 'BoxLevel',
-    'Ambiance', 'Door', 'NotADoor'
+    'Ambiance', 'Door', 'NotADoor', 'play_and_destroy'
 ]
