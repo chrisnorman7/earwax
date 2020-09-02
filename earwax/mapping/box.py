@@ -241,7 +241,7 @@ class Box(EventDispatcher):
         self.door.open = True
         self.dispatch_event('on_open')
         if self.door.open_sound is not None and ctx is not None:
-            play_path(ctx, self.door.open_sound)
+            play_path(ctx, self.door.open_sound, position=(self.bottom_left.x, self.bottom_left.y, 0.0))
 
     def close(self, ctx: Optional[Context]) -> None:
         """If :attr:`self.door <earwax.Box.door>` is not ``None``, set its

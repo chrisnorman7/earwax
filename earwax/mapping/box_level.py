@@ -1,6 +1,6 @@
 """Provides the BoxLevel class."""
 
-from math import cos, sin
+from math import cos, dist, sin
 from typing import TYPE_CHECKING, Callable, List, Optional, Tuple
 
 from attr import Factory, attrs
@@ -219,21 +219,27 @@ class BoxLevel(Level, GameMixin):
 
         return inner
 
-    def activate(self) -> None:
-        """The enter key has been pressed by the player.
+    def activate(self, door_distance: float = 2.0) -> None:
+        """Returns a function that you can call when the enter key is pressed.
 
-        First we check :attr:`self.door <earwax.Box.door` attribute, to see if
-        this box can be opened or closed.
+        First we check all doors, to see if there are any close enough to open
+        or close. If there are none, then dispatch the ``on_activate`` event to
+        let boxes do their own thing.
 
-        If it is ``None``, then dispatch the ``on_activate`` event.
+        :param door_distance: How close doors have to be for this method to
+            open or close them.
         """
-        box: Optional[Box] = self.box.get_containing_box(
-            Point(int(self.x), int(self.y))
-        )
-        if box is not None:
-            if box.door is None:
+        box: Optional[Box]
+        for box in self.box.children:
+            if box.door is not None and dist(
+                (self.x, self.y), (box.bottom_left.x, box.bottom_left.y)
+            ) <= door_distance:
+                if box.door.open:
+                    box.close(self.game.audio_context)
+                else:
+                    box.open(self.game.audio_context)
+                break
+        else:
+            box = self.box.get_containing_box(Point(int(self.x), int(self.y)))
+            if box is not None:
                 box.dispatch_event('on_activate')
-            elif box.door.open:
-                box.close(self.game.audio_context)
-            else:
-                box.open(self.game.audio_context)
