@@ -7,7 +7,7 @@ from attr import Factory, attrib, attrs
 from pyglet.event import EventDispatcher
 from synthizer import Context
 
-from ..sound import play_path
+from ..sound import play_and_destroy
 from .door import Door
 from .point import Point
 
@@ -232,6 +232,21 @@ class Box(EventDispatcher):
             return self
         return None
 
+    def play_sound(self, ctx: Optional[Context], path: Optional[Path]) -> None:
+        """Play a sound at the same position as this box.
+
+        :param ctx: The ``synthizer.Context`` instance to play the sound
+            through. If this value is ``None``, this method does nothing.
+
+        :param path: A path to play. Can be None, in which case this method
+            does nothing.
+        """
+        if ctx is not None and path is not None:
+            play_and_destroy(
+                ctx, path,
+                position=(self.bottom_left.x, self.bottom_left.y, 0.0)
+            )
+
     def open(self, ctx: Optional[Context]) -> None:
         """If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
         :attr:`.open <earwax.Door.open>` attribute to ``True``, and play the
@@ -240,8 +255,7 @@ class Box(EventDispatcher):
             raise NotADoor(self)
         self.door.open = True
         self.dispatch_event('on_open')
-        if self.door.open_sound is not None and ctx is not None:
-            play_path(ctx, self.door.open_sound, position=(self.bottom_left.x, self.bottom_left.y, 0.0))
+        self.play_sound(ctx, self.door.open_sound)
 
     def close(self, ctx: Optional[Context]) -> None:
         """If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
@@ -251,8 +265,7 @@ class Box(EventDispatcher):
             raise NotADoor(self)
         self.door.open = False
         self.dispatch_event('on_close')
-        if self.door.close_sound is not None and ctx is not None:
-            play_path(ctx, self.door.close_sound)
+        self.play_sound(ctx, self.door.close_sound)
 
 
 class FittedBox(Box):

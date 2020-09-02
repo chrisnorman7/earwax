@@ -1,14 +1,14 @@
 """Provides the BoxLevel class."""
 
 from math import cos, dist, sin
-from typing import TYPE_CHECKING, Callable, List, Optional, Tuple
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 from attr import Factory, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
-from synthizer import BufferGenerator, Context, Source
+from synthizer import Context
 
 from ..level import GameMixin, Level
-from ..sound import play_path, schedule_generator_destruction
+from ..sound import play_and_destroy
 from ..speech import tts
 from ..walking_directions import walking_directions
 from .box import Box
@@ -131,39 +131,23 @@ class BoxLevel(Level, GameMixin):
                 Point(int(x), int(y))
             )
             if box is not None:
-                generator: BufferGenerator
-                source: Source
                 ctx: Optional[Context] = self.game.audio_context
-                position: Tuple[float, float, float] = (x, y, 0.0)
                 if box.wall:
                     self.collide(box)
-                    if box.wall_sound is not None and ctx is not None:
-                        generator, source = play_path(
-                            ctx, box.wall_sound, position=position
-                        )
-                        schedule_generator_destruction(generator)
-                    return None
-                if box.door is not None and not box.door.open:
+                    box.play_sound(ctx, box.wall_sound)
+                elif box.door is not None and not box.door.open:
                     self.collide(box)
-                    if box.door.closed_sound is not None and ctx is not None:
-                        generator, source = play_path(
-                            ctx, box.door.closed_sound, position=position
-                        )
-                        schedule_generator_destruction(generator)
-                    return None
-                self.set_coordinates(x, y)
-                if self.game.audio_context is not None:
-                    self.game.audio_context.position = (x, y, 0)
-                box.dispatch_event('on_footstep')
-                if box.surface_sound is not None and \
-                   self.game.audio_context is not None:
-                    generator, source = play_path(
-                        self.game.audio_context, box.surface_sound
-                    )
-                    schedule_generator_destruction(generator)
-                if box is not self.current_box:
-                    tts.speak(str(box.name))
-                    self.current_box = box
+                    box.play_sound(ctx, box.door.closed_sound)
+                else:
+                    self.set_coordinates(x, y)
+                    if ctx is not None:
+                        ctx.position = (x, y, 0)
+                    box.dispatch_event('on_footstep')
+                    if box.surface_sound is not None and ctx is not None:
+                        play_and_destroy(ctx, box.surface_sound)
+                    if box is not self.current_box:
+                        tts.speak(str(box.name))
+                        self.current_box = box
 
         return inner
 
