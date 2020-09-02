@@ -113,6 +113,10 @@ class BoxLevel(Level, GameMixin):
         self.ambiances.append(ambiance)
         ambiance.start()
 
+    def collide(self, box: Box) -> None:
+        """Called to run collision code on a box."""
+        box.dispatch_event('on_collide')
+
     def move(self, distance: float = 1.0) -> Callable[[], None]:
         """Move on the map."""
 
@@ -132,7 +136,7 @@ class BoxLevel(Level, GameMixin):
                 ctx: Optional[Context] = self.game.audio_context
                 position: Tuple[float, float, float] = (x, y, 0.0)
                 if box.wall:
-                    box.dispatch_event('on_collide')
+                    self.collide(box)
                     if box.wall_sound is not None and ctx is not None:
                         generator, source = play_path(
                             ctx, box.wall_sound, position=position
@@ -140,6 +144,7 @@ class BoxLevel(Level, GameMixin):
                         schedule_generator_destruction(generator)
                     return None
                 if box.door is not None and not box.door.open:
+                    self.collide(box)
                     if box.door.closed_sound is not None and ctx is not None:
                         generator, source = play_path(
                             ctx, box.door.closed_sound, position=position
