@@ -1,11 +1,11 @@
 """Provides the BoxLevel class."""
 
 from math import cos, sin
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, List, Optional, Tuple
 
 from attr import Factory, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
-from synthizer import BufferGenerator, Source
+from synthizer import BufferGenerator, Context, Source
 
 from ..level import GameMixin, Level
 from ..sound import play_path, schedule_generator_destruction
@@ -117,6 +117,7 @@ class BoxLevel(Level, GameMixin):
         """Move on the map."""
 
         def inner() -> None:
+            """Perform the move."""
             x: float
             y: float
             x, y = coordinates_in_direction(
@@ -128,13 +129,20 @@ class BoxLevel(Level, GameMixin):
             if box is not None:
                 generator: BufferGenerator
                 source: Source
+                ctx: Optional[Context] = self.game.audio_context
+                position: Tuple[float, float, float] = (x, y, 0.0)
                 if box.wall:
                     box.dispatch_event('on_collide')
-                    if box.wall_sound is not None and \
-                       self.game.audio_context is not None:
+                    if box.wall_sound is not None and ctx is not None:
                         generator, source = play_path(
-                            self.game.audio_context, box.wall_sound,
-                            position=(x, y, 0.0)
+                            ctx, box.wall_sound, position=position
+                        )
+                        schedule_generator_destruction(generator)
+                    return None
+                if box.door is not None and not box.door.open:
+                    if box.door.closed_sound is not None and ctx is not None:
+                        generator, source = play_path(
+                            ctx, box.door.closed_sound, position=position
                         )
                         schedule_generator_destruction(generator)
                     return None
@@ -207,10 +215,20 @@ class BoxLevel(Level, GameMixin):
         return inner
 
     def activate(self) -> None:
-        """The enter key has been pressed by the player, and there's nothing
-        else to do with it."""
+        """The enter key has been pressed by the player.
+
+        First we check :attr:`self.door <earwax.Box.door` attribute, to see if
+        this box can be opened or closed.
+
+        If it is ``None``, then dispatch the ``on_activate`` event.
+        """
         box: Optional[Box] = self.box.get_containing_box(
             Point(int(self.x), int(self.y))
         )
         if box is not None:
-            box.dispatch_event('on_activate')
+            if box.door is None:
+                box.dispatch_event('on_activate')
+            elif box.door.open:
+                box.close(self.game.audio_context)
+            else:
+                box.open(self.game.audio_context)
