@@ -1,6 +1,7 @@
 """Provides the Point class."""
 
 from enum import Enum
+from math import floor
 from typing import Any, Union
 
 from attr import attrs
@@ -21,12 +22,15 @@ class PointDirections(Enum):
     northwest = 8
 
 
+Number = Union[float, int]
+
+
 @attrs(auto_attribs=True, order=False)
 class Point:
     """A point in 2d space."""
 
-    x: int
-    y: int
+    x: Number
+    y: Number
 
     def directions_to(self, other: 'Point') -> PointDirections:
         """Returns the direction between this point and ``other``.
@@ -58,6 +62,10 @@ class Point:
         """Return a ``Point`` instance with duplicate ``x`` and ``y``
         values."""
         return type(self)(self.x, self.y)
+
+    def floor(self) -> 'Point':
+        """Return a version of this object with both coordinates floored."""
+        return type(self)(floor(self.x), floor(self.y))
 
     def __add__(self, offset: Union[int, 'Point']) -> 'Point':
         """Add two points together."""

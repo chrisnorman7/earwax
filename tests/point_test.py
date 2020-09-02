@@ -62,3 +62,8 @@ def test_copy() -> None:
     copy: Point = p.copy()
     assert p == copy
     assert copy is not p
+
+
+def test_floor() -> None:
+    p: Point = Point(1.9, 2.8)
+    assert p.floor() == Point(1, 2)

@@ -128,7 +128,7 @@ class BoxLevel(Level, GameMixin):
                 self.x, self.y, self.bearing, distance=distance
             )
             box: Optional[Box] = self.box.get_containing_box(
-                Point(int(x), int(y))
+                Point(x, y).floor()
             )
             if box is not None:
                 ctx: Optional[Context] = self.game.audio_context
@@ -203,7 +203,7 @@ class BoxLevel(Level, GameMixin):
 
         return inner
 
-    def activate(self, door_distance: float = 2.0) -> None:
+    def activate(self, door_distance: float = 2.0) -> Callable[[], None]:
         """Returns a function that you can call when the enter key is pressed.
 
         First we check all doors, to see if there are any close enough to open
@@ -213,17 +213,21 @@ class BoxLevel(Level, GameMixin):
         :param door_distance: How close doors have to be for this method to
             open or close them.
         """
-        box: Optional[Box]
-        for box in self.box.children:
-            if box.door is not None and dist(
-                (self.x, self.y), (box.bottom_left.x, box.bottom_left.y)
-            ) <= door_distance:
-                if box.door.open:
-                    box.close(self.game.audio_context)
-                else:
-                    box.open(self.game.audio_context)
-                break
-        else:
-            box = self.box.get_containing_box(Point(int(self.x), int(self.y)))
-            if box is not None:
-                box.dispatch_event('on_activate')
+
+        def inner() -> None:
+            box: Optional[Box]
+            for box in self.box.children:
+                if box.door is not None and dist(
+                    (self.x, self.y), (box.bottom_left.x, box.bottom_left.y)
+                ) <= door_distance:
+                    if box.door.open:
+                        box.close(self.game.audio_context)
+                    else:
+                        box.open(self.game.audio_context)
+                    break
+            else:
+                box = self.box.get_containing_box(Point(self.x, self.y))
+                if box is not None:
+                    box.dispatch_event('on_activate')
+
+        return inner
