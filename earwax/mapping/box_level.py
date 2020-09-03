@@ -57,8 +57,8 @@ class BoxLevel(Level, GameMixin):
 
     box: Box
 
-    x: float = 0
-    y: float = 0
+    x: float = 0.0
+    y: float = 0.0
     bearing: int = 0
     current_box: Optional[Box] = None
 

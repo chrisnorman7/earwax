@@ -1,7 +1,7 @@
 from pytest import fixture
 from synthizer import Context, initialize, shutdown
 
-from earwax import Editor, Game, Level, Menu  # noqa: E402
+from earwax import Box, BoxLevel, Editor, Game, Level, Menu, Point
 
 
 @fixture(name='level')
@@ -35,3 +35,13 @@ def initialise_tests():
 @fixture(name='context', scope='session')
 def get_context() -> Context:
     return Context()
+
+
+@fixture(name='box')
+def get_box() -> Box:
+    return Box(Point(0, 0), Point(5, 5))
+
+
+@fixture(name='box_level')
+def box_level(game: Game, box) -> BoxLevel:
+    return BoxLevel(game, box)
