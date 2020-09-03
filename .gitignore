@@ -132,3 +132,4 @@ ChangeLog
 docs/source/api/
 *.yaml
 sounds
+surfaces.py
