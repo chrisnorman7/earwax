@@ -53,13 +53,15 @@ def cmd_help(args: Namespace) -> None:
     print('Subcommands:')
     name: str
     parser: ArgumentParser
-    for name, parser in commands.choices.items():
+    for name, parser in sorted(
+        commands.choices.items(), key=lambda item: item[0]
+    ):
         print(f'{name}: {parser.description}')
 
 
 subcommand(
     'help', cmd_help, description='Show a list of all possible subcommands.',
-    formatter_class=ArgumentDefaultsHelpFormatter
+    formatter_class=ArgumentDefaultsHelpFormatter, aliases=['commands']
 )
 
 subcommand(
