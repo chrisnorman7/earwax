@@ -12,6 +12,7 @@ from .subcommands.configure_earwax import configure_earwax
 from .subcommands.init_project import init_project
 from .subcommands.project_surfaces import project_surfaces
 from .subcommands.project_title import project_title
+from .subcommands.build_surfaces import build_surfaces
 
 SubcommandFunction = Callable[[Namespace], None]
 
@@ -43,7 +44,7 @@ def subcommand(
 subcommand(
     'init', init_project, formatter_class=ArgumentDefaultsHelpFormatter,
     description='Initialise or update an Earwax project in the current '
-    'directory'
+    'directory.'
 )
 
 
@@ -79,10 +80,16 @@ project_surfaces_parser.add_argument(
 
 project_title_parser = subcommand(
     'title', project_title, formatter_class=ArgumentDefaultsHelpFormatter,
-    description='Rename the current project'
+    description='Rename the current project.'
 )
 
 project_title_parser.add_argument('title', help='The new name')
+
+subcommand(
+    'build-surfaces', build_surfaces,
+    formatter_class=ArgumentDefaultsHelpFormatter,
+    description='Build a python file containing all the current surfaces.'
+)
 
 
 def cmd_main() -> None:

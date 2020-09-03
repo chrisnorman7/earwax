@@ -22,3 +22,6 @@ music_directory: Path = sounds_directory / 'music'
 
 # The directory where level files are stored.
 levels_directory: Path = Path('levels')
+
+# Where to store the surfaces.py file.
+surfaces_filename: Path = Path('surfaces.py')
