@@ -12,6 +12,7 @@ from synthizer import Context
 from ..sound import play_and_destroy
 from .door import Door
 from .point import Point
+from .portal import Portal
 
 
 class BoxError(Exception):
@@ -67,6 +68,9 @@ class Box(EventDispatcher):
     :ivar ~earwax.Box.door: If this attribute is not ``None``, then this
         instance is considered a door.
 
+    :ivar ~earwax.Box.portal: If this attribute is not ``None``, then this
+        instance is considered a portal.
+
     :ivar ~earwax.Box.surface_sound: A path to either the sound that should be
         heard when a player enters this box, or the path of a directory from
         which a random file should be chosen.
@@ -86,6 +90,7 @@ class Box(EventDispatcher):
 
     wall: bool = False
     door: Optional[Door] = None
+    portal: Optional[Portal] = None
 
     surface_sound: Optional[Path] = None
     wall_sound: Optional[Path] = None

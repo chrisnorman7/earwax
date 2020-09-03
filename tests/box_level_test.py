@@ -4,7 +4,7 @@ from typing import Callable
 
 from pytest import raises
 
-from earwax import Ambiance, Box, BoxLevel, Door, Point
+from earwax import Ambiance, Box, BoxLevel, Door, Game, Point, Portal
 
 
 class CollideWorks(Exception):
@@ -95,7 +95,7 @@ def test_turn(box_level: BoxLevel) -> None:
     assert box_level.bearing == 0
 
 
-def test_activate(box: Box, box_level: BoxLevel) -> None:
+def test_activate(game: Game, box: Box, box_level: BoxLevel) -> None:
     a: Callable[[], None] = box_level.activate()
     a()
 
@@ -120,3 +120,20 @@ def test_activate(box: Box, box_level: BoxLevel) -> None:
     assert d.open is False
     a()
     assert d.open is True
+    destination: Box = Box(Point(0, 0), Point(15, 15))
+    l: BoxLevel = BoxLevel(game, destination)
+    b.door = None
+    p: Portal = Portal(l, Point(14, 15))
+    b.portal = p
+    game.push_level(box_level)
+    assert game.level is box_level
+    box_level.set_bearing(55)
+    a()
+    assert game.level is l
+    assert l.x == 14
+    assert l.y == 15
+    assert l.bearing == 55
+    game.replace_level(box_level)
+    p.bearing = 32
+    a()
+    assert l.bearing == 32

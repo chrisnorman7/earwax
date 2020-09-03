@@ -16,6 +16,7 @@ from .point import Point, PointDirections
 
 if TYPE_CHECKING:
     from .ambiance import Ambiance
+    from .portal import Portal
 
 
 @attrs(auto_attribs=True)
@@ -113,6 +114,32 @@ class BoxLevel(Level, GameMixin):
         self.ambiances.append(ambiance)
         ambiance.start()
 
+    def handle_portal(self, box: Box) -> None:
+        """The player has just activated a portal.
+
+        :param box: The box that is the portal to handle.
+        """
+        if box.portal is not None:  # We know it is, but this keeps MyPy happy.
+            p: Portal = box.portal
+            if p.level is not self:
+                self.game.replace_level(p.level)
+            p.level.set_coordinates(p.coordinates.x, p.coordinates.y)
+            bearing: int = self.bearing
+            if p.bearing is not None:
+                bearing = p.bearing
+            p.level.set_bearing(bearing)
+
+    def handle_door(self, box: Box) -> None:
+        """The player has just activated a door.
+
+        :param box: The box that is the door to handle.
+        """
+        if box.door is not None:  # We know it is, but this keeps MyPy happy.
+            if box.door.open:
+                box.close(self.game.audio_context)
+            else:
+                box.open(self.game.audio_context)
+
     def collide(self, box: Box) -> None:
         """Called to run collision code on a box."""
         box.dispatch_event('on_collide')
@@ -206,28 +233,32 @@ class BoxLevel(Level, GameMixin):
     def activate(self, door_distance: float = 2.0) -> Callable[[], None]:
         """Returns a function that you can call when the enter key is pressed.
 
-        First we check all doors, to see if there are any close enough to open
-        or close. If there are none, then dispatch the ``on_activate`` event to
-        let boxes do their own thing.
+        First we check if the current box is a portal. If it is, then we call
+        :meth:`~earwax.BoxLevel.handle_portal`.
+
+        Second we check all doors, to see if there are any close enough to open
+        or close. If there are, then we call
+        :meth:`~earwax.BoxLevel.handle_door`. Otherwise, dispatch the
+        ``on_activate`` event to let boxes do their own thing.
 
         :param door_distance: How close doors have to be for this method to
             open or close them.
         """
 
         def inner() -> None:
-            box: Optional[Box]
-            for box in self.box.children:
-                if box.door is not None and dist(
-                    (self.x, self.y), (box.bottom_left.x, box.bottom_left.y)
+            box: Optional[Box] = self.box.get_containing_box(
+                Point(self.x, self.y)
+            )
+            if box is not None and box.portal is not None:
+                return self.handle_portal(box)
+            child: Box
+            for child in self.box.children:
+                if child.door is not None and dist(
+                    (self.x, self.y),
+                    (child.bottom_left.x, child.bottom_left.y)
                 ) <= door_distance:
-                    if box.door.open:
-                        box.close(self.game.audio_context)
-                    else:
-                        box.open(self.game.audio_context)
-                    break
-            else:
-                box = self.box.get_containing_box(Point(self.x, self.y))
-                if box is not None:
-                    box.dispatch_event('on_activate')
+                    return self.handle_door(child)
+            if box is not None:
+                box.dispatch_event('on_activate')
 
         return inner

@@ -11,8 +11,9 @@ from .box import Box, FittedBox, NotADoor, OutOfBounds, box_row
 from .box_level import BoxLevel
 from .door import Door
 from .point import Point, PointDirections
+from .portal import Portal
 
 __all__ = [
     'Box', 'Point', 'OutOfBounds', 'PointDirections', 'FittedBox', 'box_row',
-    'BoxLevel', 'Ambiance', 'Door', 'NotADoor'
+    'BoxLevel', 'Ambiance', 'Door', 'NotADoor', 'Portal'
 ]
