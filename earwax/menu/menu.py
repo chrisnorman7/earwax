@@ -191,7 +191,7 @@ class Menu(TitleMixin, DismissibleMixin, Level):
     def activate(self) -> OptionalGenerator:
         """Activate the currently focused menu item.
 
-    Usually triggered by the enter key."""
+        Usually triggered by the enter key."""
         item: Optional[MenuItem] = self.current_item
         if item is not None:
             sound_path: Optional[Path] = item.activate_sound_path or \
