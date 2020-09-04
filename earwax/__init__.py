@@ -49,7 +49,7 @@ if True:
     from .editor import Editor
     from .event_matcher import EventMatcher
     from .game import Game
-    from .level import Level
+    from .level import DismissibleMixin, IntroLevel, Level, TitleMixin
     from .mapping import (Box, BoxLevel, Door, FittedBox, NotADoor,
                           OutOfBounds, Point, PointDirections, Portal, box_row)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
@@ -78,5 +78,5 @@ __all__ = [
     'OutOfBounds', 'PointDirections', 'walking_directions', 'FittedBox',
     'box_row', 'play_path', 'schedule_generator_destruction', 'BoxLevel',
     'Ambiance', 'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track',
-    'play_paths'
+    'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel'
 ]

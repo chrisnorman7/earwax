@@ -33,7 +33,7 @@ class Level:
     underlying :class:`~earwax.Game` object will do all the heavy lifting for
     you, by way of the :class:`~earwax.EventMatcher` framework.
 
-    :ivar ~earwax.level.GameMixin.game: The game this level is bound to.
+    :ivar ~earwax.Level.game: The game this level is bound to.
 
     :ivar ~earwax.Level.actions: A list of actions which can be called on this
         object. To define more, use the :meth:`~earwax.Level.action` decorator.
@@ -212,12 +212,10 @@ class TitleMixin:
 @attrs(auto_attribs=True)
 class IntroLevel(Level):
     """A level that plays some audio, before optionally replacing itself in the
-    level stack with :attr`self.level <earwax.IntroLevel.level>`.
+    level stack with :attr:`self.level <earwax.IntroLevel.level>`.
 
-    If you want it to be possible to skip this level, bind the
+    If you want it to be possible to skip this level, add a trigger for the
     :meth:`~earwax.IntroLevel.skip` action.
-
-    :ivar ~earwax.IntroLevel.game: The game whose level stack will be altered.
 
     :ivar ~earwax.IntroLevel.level: The level that will replace this one.
 
@@ -257,7 +255,7 @@ class IntroLevel(Level):
 
     def on_push(self) -> None:
         """Start playing :attr:`self.sound_path
-        <earwax.IntroLevel.sound_path>`, and optionally schedule aan automatic
+        <earwax.IntroLevel.sound_path>`, and optionally schedule an automatic
         skip."""
         ctx: Optional[Context] = self.game.audio_context
         if ctx is None:
