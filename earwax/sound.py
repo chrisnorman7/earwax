@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from random import choice
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from attr import attrs
 from pyglet.clock import schedule_once
@@ -238,3 +238,28 @@ def play_and_destroy(*args, **kwargs) -> None:
     source: Source
     generator, source = play_path(*args, **kwargs)
     schedule_generator_destruction(generator)
+
+
+def play_paths(ctx: Context, paths: List[Path], gap: float = 0.1) -> None:
+    """Play every path in the list, one after another.
+
+    :param paths: The paths to play in order.
+
+    :param gap: The number of seconds to add to the scheduling.
+    """
+    delay: Optional[float] = None
+    p: Path
+    for p in paths:
+        buffer: Buffer = get_buffer('file', str(p))
+        duration: float = buffer.get_length_in_seconds()
+
+        def inner(dt: float) -> None:
+            """Actually play the path."""
+            play_and_destroy(ctx, p)
+
+        if delay is None:
+            delay = 0
+            inner(0.0)
+        else:
+            delay += duration + gap
+            schedule_once(inner, delay)

@@ -56,7 +56,7 @@ if True:
                        TypeHandler, UnknownTypeError)
     from .sound import (AdvancedInterfaceSoundPlayer,
                         SimpleInterfaceSoundPlayer, get_buffer,
-                        play_and_destroy, play_path,
+                        play_and_destroy, play_path, play_paths,
                         schedule_generator_destruction)
     from .speech import tts
     from .track import Track
@@ -77,5 +77,6 @@ __all__ = [
     'EarwaxConfig', 'ProjectLevel', 'cmd_main', 'Project', 'Box', 'Point',
     'OutOfBounds', 'PointDirections', 'walking_directions', 'FittedBox',
     'box_row', 'play_path', 'schedule_generator_destruction', 'BoxLevel',
-    'Ambiance', 'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track'
+    'Ambiance', 'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track',
+    'play_paths'
 ]
