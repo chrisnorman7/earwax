@@ -62,7 +62,7 @@ game: Game = Game()
 window: Window = Window(caption='Map Demo')
 level: BoxLevel = BoxLevel(game, main_box)
 
-level.ambiances.append(Ambiance(41.5, 3, sounds_directory / 'exit.wav'))
+level.ambiances.append(Ambiance(41.5, 3, 0, sounds_directory / 'exit.wav'))
 
 level.action(
     'Walk forwards', symbol=key.W, mouse_button=mouse.RIGHT, interval=0.4
