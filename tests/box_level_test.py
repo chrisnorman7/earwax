@@ -81,6 +81,9 @@ def test_move(box: Box, box_level: BoxLevel) -> None:
     m()
     assert box_level.x == 2.0
     assert box_level.y == 2.0
+    box_level.move(bearing=180)()
+    assert box_level.x == 2.0
+    assert box_level.y == 1.0
 
 
 def test_turn(box_level: BoxLevel) -> None:

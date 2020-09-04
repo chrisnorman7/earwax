@@ -144,15 +144,26 @@ class BoxLevel(Level, GameMixin):
         """Called to run collision code on a box."""
         box.dispatch_event('on_collide')
 
-    def move(self, distance: float = 1.0) -> Callable[[], None]:
-        """Move on the map."""
+    def move(
+        self, distance: float = 1.0, bearing: Optional[int] = None
+    ) -> Callable[[], None]:
+        """Returns a callable that allows the player to move on the map.
+
+        :param distance: The distance to move.
+
+        :param bearing: An optional direction to move in.
+
+            If this value is ``None``, then :attr:`self.bearing
+            <earwax.BoxLevel.bearing>` will be used.
+        """
 
         def inner() -> None:
             """Perform the move."""
             x: float
             y: float
+            _bearing: int = self.bearing if bearing is None else bearing
             x, y = coordinates_in_direction(
-                self.x, self.y, self.bearing, distance=distance
+                self.x, self.y, _bearing, distance=distance
             )
             box: Optional[Box] = self.box.get_containing_box(
                 Point(x, y).floor()
