@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 from attr import attrs
-from synthizer import BufferGenerator, Context, DirectSource
+from synthizer import BufferGenerator, Context, Source
 
 from .sound import play_path
 
@@ -18,6 +18,8 @@ class Track:
 
     :ivar ~earwax.Track.sound_path: The track to play.
 
+    :ivar ~earwax.Track.gain: The volume (gain) of the playing sound.
+
     :ivar ~earwax.Track.generator: The ``synthizer.BufferGenerator`` instance
         to play through.
 
@@ -26,16 +28,27 @@ class Track:
     """
 
     sound_path: Path
+    gain: float = 0.25
     generator: Optional[BufferGenerator] = None
-    source: Optional[DirectSource] = None
+    source: Optional[Source] = None
+
+    def load_sound(self, ctx: Context) -> None:
+        """Load :attr:`self.sound_path <earwax.Track.sound_path>`."""
+        self.generator, self.source = play_path(ctx, self.sound_path)
 
     def play(self, ctx: Context) -> None:
         """Play this track on a loop.
 
+        To alter how ``sound_path`` is played, override
+        :meth:`earwax.Track.load_sound`.
+
         :param ctx: The ``synthizer.Context`` instance to play through.
         """
-        self.buffer, self.source = play_path(ctx, self.sound_path)
-        self.buffer.looping = True
+        self.load_sound(ctx)
+        if self.source is not None:
+            self.source.gain = self.gain
+        if self.generator is not None:
+            self.generator.looping = True
 
     def stop(self) -> None:
         """Stop this track playing."""

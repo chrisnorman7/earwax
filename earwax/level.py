@@ -62,7 +62,7 @@ class Level:
             raise RuntimeError('Cannot start ambiances with no audio context.')
         ambiance: Ambiance
         for ambiance in self.ambiances:
-            ambiance.start(ctx)
+            ambiance.play(ctx)
 
     def stop_ambiances(self) -> None:
         """Stops all the ambiances on this instance."""

@@ -1,61 +1,36 @@
 """Provides the Ambiance class."""
 
-from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
 
 from attr import attrs
-from synthizer import BufferGenerator, Context, Source3D
+from synthizer import Context
 
-from .sound import get_buffer
+from .sound import play_path
+from .track import Track
 
 
 @attrs(auto_attribs=True)
-class Ambiance:
-    """A class that represents a stationary sound on a map.
-
-    :ivar ~earwax.Ambiance.x: The x coordinate.
-
-    :ivar ~earwax.Ambiance.y: The y coordinate.
-
-    :ivar ~earwax.Ambiance.sound_path: The path to the sound that shouldplay.
-
-    :ivar ~earwax.Ambiance.gain: The volume (gain) of the playing sound.
-
-    :ivar ~earwax.Ambiance.generator: The generator that the sound will play
-        through.
-
-    :ivar ~earwax.Ambiance.source: The source that
-        :attr:`~earwax.Ambiance.generator` will be connected to.
-    """
-
+class AmbianceBase:
+    """Add coordinates."""
     x: float
     y: float
-    SOUND_path: Path
-    gain: float = 0.25
-
-    generator: Optional[BufferGenerator] = None
-    source: Optional[Source3D] = None
+    z: float
 
     @property
-    def coordinates(self) -> Tuple[float, float]:
+    def coordinates(self) -> Tuple[float, float, float]:
         """Returns the coordinates of this ambiance as a tuple."""
-        return self.x, self.y
+        return self.x, self.y, self.z
 
-    def start(self, ctx: Context) -> None:
-        """Start the sound playing."""
-        self.source = Source3D(ctx)
-        self.source.gain = self.gain
-        self.source.position = self.x, self.y, 0.0
-        self.generator = BufferGenerator(ctx)
-        self.generator.buffer = get_buffer('file', str(self.SOUND_path))
-        self.generator.looping = True
-        self.source.add_generator(self.generator)
 
-    def stop(self) -> None:
-        """Stop the sound."""
-        if self.generator is not None:
-            self.generator.destroy()
-            self.generator = None
-        if self.source is not None:
-            self.source.destroy()
-            self.source = None
+@attrs(auto_attribs=True)
+class Ambiance(AmbianceBase, Track):
+    """A class that represents a stationary sound on a map.
+
+    :ivar ~earwax.Ambiance.point: The coordinates of this ambiance.
+    """
+
+    def load_sound(self, ctx: Context) -> None:
+        """Load the sound, passing a position argument."""
+        self.generator, self.source = play_path(
+            ctx, self.sound_path, position=self.coordinates
+        )
