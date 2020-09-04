@@ -1,9 +1,19 @@
 """Tests the Game class."""
 
-from pyglet.window import key
+from pyglet import app
+from pyglet.clock import schedule_once
+from pyglet.window import key, Window
 from pytest import raises
 
 from earwax import Game, Level, Menu
+
+from earwax.level import GameMixin
+
+
+class RunLevel(GameMixin, Level):
+    def on_push(self) -> None:
+        assert self.game.level is self
+        schedule_once(lambda dt: app.exit(), 0.5)
 
 
 class WorksWithoutYield(Exception):
@@ -116,3 +126,9 @@ def test_level(game: Game, level: Level, menu: Menu) -> None:
     game.clear_levels()
     game.push_level(menu)
     assert game.level is menu
+
+
+def test_run(game: Game) -> None:
+    l: RunLevel = RunLevel(game)
+    game.run(Window(), initial_level=l)
+    assert game.level is l

@@ -316,7 +316,10 @@ class Game:
         :attr:`self.audio_context <earwax.Game.audio_context>`."""
         pass
 
-    def run(self, window: Window, mouse_exclusive: bool = True) -> None:
+    def run(
+        self, window: Window, mouse_exclusive: bool = True,
+        initial_level: Optional[Level] = None
+    ) -> None:
         """Run the game.
 
         By default, this method will perform the following actions in order:
@@ -334,6 +337,8 @@ class Game:
         * populate :attr:`~earwax.Game.audio_context`, and
             :attr:`~earwax.Game.interface_sound_player`.
 
+        * if ``initial_level`` is not ``None``, push the given level.
+
         * Call the :meth:`~earwax.Game.before_run` method.
 
         * Start the pyglet event loop.
@@ -341,6 +346,8 @@ class Game:
         :param window: The pyglet window that will form the game's interface.
 
         :param mouse_exclusive: The mouse exclusive setting for the window.
+
+        :param initial_level: A level to push onto the stack.
         """
         name: str
         em: EventMatcher
@@ -355,6 +362,8 @@ class Game:
             self.interface_sound_player = AdvancedInterfaceSoundPlayer(
                 self.audio_context
             )
+            if initial_level is not None:
+                self.push_level(initial_level)
             self.before_run()
             app.run()
 
