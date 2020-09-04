@@ -58,18 +58,13 @@ boxes.extend(
 
 main_box: FittedBox = FittedBox(boxes, name='Error')
 
-
-class DemoGame(Game):
-    def before_run(self) -> None:
-        super().before_run()
-        level.register_ambiance(
-            Ambiance(level, 41.5, 3, sounds_directory / 'exit.wav')
-        )
-
-
-game: DemoGame = DemoGame()
+game: Game = Game()
 window: Window = Window(caption='Map Demo')
 level: BoxLevel = BoxLevel(game, main_box)
+
+level.register_ambiance(
+    Ambiance(level, 41.5, 3, sounds_directory / 'exit.wav')
+)
 
 level.action(
     'Walk forwards', symbol=key.W, mouse_button=mouse.RIGHT, interval=0.4
@@ -127,8 +122,7 @@ def goto() -> Generator[None, None, None]:
 
 
 def main() -> None:
-    game.push_level(level)
-    game.run(window)
+    game.run(window, initial_level=level)
 
 
 if __name__ == '__main__':
