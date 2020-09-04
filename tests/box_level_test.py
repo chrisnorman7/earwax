@@ -1,10 +1,9 @@
 from math import dist
-from pathlib import Path
 from typing import Callable
 
 from pytest import raises
 
-from earwax import Ambiance, Box, BoxLevel, Door, Game, Point, Portal
+from earwax import Box, BoxLevel, Door, Game, Point, Portal
 
 
 class CollideWorks(Exception):
