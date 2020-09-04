@@ -1,27 +1,23 @@
 """Provides the BoxLevel class."""
 
 from math import cos, dist, sin
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import Callable, List, Optional
 
-from attr import Factory, attrs
+from attr import attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
 from synthizer import Context
 
-from ..level import GameMixin, Level
+from ..level import Level
 from ..sound import play_and_destroy
 from ..speech import tts
 from ..walking_directions import walking_directions
 from .box import Box
 from .point import Point, PointDirections
-from .track import Track
-
-if TYPE_CHECKING:
-    from .ambiance import Ambiance
-    from .portal import Portal
+from .portal import Portal
 
 
 @attrs(auto_attribs=True)
-class BoxLevel(Level, GameMixin):
+class BoxLevel(Level):
     """A level that deals with sound generation for boxes.
 
     This level can be used in your games. Simply bind the various action
@@ -55,11 +51,6 @@ class BoxLevel(Level, GameMixin):
         If you don't set this attribute when creating the instance, then the
         first time the player moves using the :meth:`~earwax.BoxLevel.move`
         method, the name of the box they are standing on will be spoken.
-
-    :ivar ~earwax.BoxLevel.ambiances: The ambiances for this level.
-
-    :ivar ~earwax.BoxLevel.tracks: The tracks (musical or otherwise) that play
-        while this level is top of the stack.
     """
 
     box: Box
@@ -69,47 +60,10 @@ class BoxLevel(Level, GameMixin):
     bearing: int = 0
     current_box: Optional[Box] = None
 
-    ambiances: List['Ambiance'] = Factory(list)
-    tracks: List[Track] = Factory(list)
-
-    def start_ambiances(self) -> None:
-        """Start all the ambiances on this instance."""
-        ambiance: Ambiance
-        for ambiance in self.ambiances:
-            ambiance.start()
-
-    def stop_ambiances(self) -> None:
-        """Stops all the ambiances on this instance."""
-        ambiance: Ambiance
-        for ambiance in self.ambiances:
-            ambiance.stop()
-
-    def start_tracks(self) -> None:
-        """Start all the tracks in :attr:`self.tracks
-        <earwax.BoxLevel.tracks>`."""
-        track: Track
-        if self.game.audio_context is not None:
-            for track in self.tracks:
-                track.play(self.game.audio_context)
-
-    def stop_tracks(self) -> None:
-        """Stop all the tracks in :attr:`self.tracks
-        <earwax.BoxLevel.tracks>`."""
-        track: Track
-        if self.game.audio_context is not None:
-            for track in self.tracks:
-                track.stop()
-
     def on_push(self) -> None:
         """Set listener orientation, and start ambiances and tracks."""
         self.set_coordinates(self.x, self.y)
-        self.start_ambiances()
-        self.start_tracks()
-
-    def on_pop(self) -> None:
-        """Stop ambiances and tracks."""
-        self.stop_ambiances()
-        self.stop_tracks()
+        return super().on_push()
 
     def set_coordinates(self, x: float, y: float) -> None:
         """Set the current coordinates.
@@ -135,13 +89,6 @@ class BoxLevel(Level, GameMixin):
             self.game.audio_context.orientation = (
                 sin(rad), cos(rad), 0, 0, 0, 1
             )
-
-    def register_ambiance(self, ambiance: 'Ambiance') -> None:
-        """Registers an ambiance to be handled by this level.
-
-        :param ambiance: The ambiance to register.
-        """
-        self.ambiances.append(ambiance)
 
     def handle_portal(self, box: Box) -> None:
         """The player has just activated a portal.

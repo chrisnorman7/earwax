@@ -53,9 +53,8 @@ class ExampleConfig(Config):
 
 def main() -> None:
     g: Game = Game()
-    level: Level = Level()
+    level: Level = Level(g)
     config: ExampleConfig = ExampleConfig()
-    g.push_level(level)
 
     @level.action('Change window title', symbol=key.T)
     def set_title() -> OptionalGenerator:
@@ -70,7 +69,7 @@ def main() -> None:
         if g.window is not None:
             tts.speak(f'Window title: {g.window.caption}')
             yield
-            g.push_level(Editor(inner, g, text=g.window.caption))
+            g.push_level(Editor(g, inner, text=g.window.caption))
 
     @level.action('Quit', symbol=key.ESCAPE)
     def do_quit() -> None:
@@ -112,21 +111,23 @@ def main() -> None:
                     pass  # Not a sound file.
 
         yield
-        menu: FileMenu = FileMenu(Path.cwd(), play_sound, 'Select A File', g)
+        menu: FileMenu = FileMenu(
+            g, 'Select A File', func=play_sound, path=Path.cwd(),
+        )
         g.push_level(menu)
 
     @level.action('Options', symbol=key.O)
     def options() -> Generator[None, None, None]:
         """Show the options menu."""
         yield
-        m: ConfigMenu = ConfigMenu(config, 'Options', g)
+        m: ConfigMenu = ConfigMenu(g, 'Options', config=config)
         g.push_level(m)
 
     @level.action('Configure Earwax', symbol=key.C)
     def configure_earwax() -> Generator[None, None, None]:
         """Configure the earwax library."""
         yield
-        m: ConfigMenu = ConfigMenu(g.config, 'Earwax Configuration', g)
+        m: ConfigMenu = ConfigMenu(g, 'Earwax Configuration')
         g.push_level(m)
 
     @level.action(
@@ -135,9 +136,9 @@ def main() -> None:
     def show_actions() -> OptionalGenerator:
         """Show all game actions."""
         yield
-        g.push_level(ActionMenu('Actions', g))
+        g.push_level(ActionMenu(g, 'Actions'))
 
-    g.run(Window(caption='Example Game'))
+    g.run(Window(caption='Example Game'), initial_level=level)
 
 
 if __name__ == '__main__':

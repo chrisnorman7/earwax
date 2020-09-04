@@ -2,15 +2,13 @@
 
 from pyglet import app
 from pyglet.clock import schedule_once
-from pyglet.window import key, Window
+from pyglet.window import Window, key
 from pytest import raises
 
 from earwax import Game, Level, Menu
 
-from earwax.level import GameMixin
 
-
-class RunLevel(GameMixin, Level):
+class RunLevel(Level):
     def on_push(self) -> None:
         assert self.game.level is self
         schedule_once(lambda dt: app.exit(), 0.5)
@@ -74,7 +72,7 @@ def test_on_key_release(game: Game, level: Level) -> None:
 def test_push_level(game: Game, level: Level) -> None:
     game.push_level(level)
     assert game.levels == [level]
-    level_2 = Level()
+    level_2 = Level(game)
     game.push_level(level_2)
     assert game.levels == [level, level_2]
 
@@ -86,7 +84,7 @@ def test_replace_level(game: Game, level: Level, menu: Menu) -> None:
     assert game.levels == [menu]
     game.push_level(level)
     assert game.levels == [menu, level]
-    m2 = Menu('Second Menu', game, )
+    m2 = Menu(game, 'Second Menu')
     game.replace_level(m2)
     assert game.levels == [menu, m2]
 

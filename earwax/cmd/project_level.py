@@ -1,4 +1,4 @@
-"""Provides the GameLevel class."""
+"""Provides the ProjectLevel class."""
 
 from pathlib import Path
 from typing import Any, Dict, List
@@ -7,14 +7,14 @@ from attr import Attribute, Factory, asdict, attrib, attrs
 from shortuuid import uuid
 from yaml import dump
 
-from ..level import GameMixin, Level, TitleMixin
+from ..level import Level, TitleMixin
 from .constants import levels_directory
 
 DumpDict = Dict[str, Any]
 
 
 @attrs(auto_attribs=True)
-class ProjectLevel(TitleMixin, GameMixin, Level):
+class ProjectLevel(Level, TitleMixin):
     """A level in an Earwax project.
 
     This class attempts to be as neutral as possible, so you can build your own

@@ -21,7 +21,7 @@ def test_submit(game: Game) -> None:
     def on_submit(text: str) -> None:
         raise Works(text)
 
-    e = Editor(on_submit, game, text='test')
+    e = Editor(game, on_submit, text='test')
     game.push_level(e)
     with raises(Works) as exc:
         game.press_key(key.RETURN, 0, string='\n')

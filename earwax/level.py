@@ -1,10 +1,16 @@
 """Provides classes for working with levels."""
 
-from typing import TYPE_CHECKING, Callable
+from pathlib import Path
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 from attr import Factory, attrib, attrs
+from pyglet.clock import schedule_once
+from synthizer import Buffer, BufferGenerator, Context, DirectSource
 
 from .action import Action, ActionFunctionType
+from .ambiance import Ambiance
+from .sound import get_buffer
+from .track import Track
 
 if TYPE_CHECKING:
     from .game import Game, ActionListType, MotionsType, MotionFunctionType
@@ -27,15 +33,60 @@ class Level:
     underlying :class:`~earwax.Game` object will do all the heavy lifting for
     you, by way of the :class:`~earwax.EventMatcher` framework.
 
+    :ivar ~earwax.level.GameMixin.game: The game this level is bound to.
+
     :ivar ~earwax.Level.actions: A list of actions which can be called on this
         object. To define more, use the :meth:`~earwax.Level.action` decorator.
 
     :ivar ~earwax.Level.motions: The defined motion events. To define more, use
         the :meth:`~earwax.Level.motion` decorator.
+
+    :ivar ~earwax.BoxLevel.ambiances: The ambiances for this level.
+
+    :ivar ~earwax.BoxLevel.tracks: The tracks (musical or otherwise) that play
+        while this level is top of the stack.
     """
+
+    game: 'Game'
 
     actions: 'ActionListType' = attrib(default=Factory(list), init=False)
     motions: 'MotionsType' = attrib(Factory(dict), init=False)
+
+    ambiances: List['Ambiance'] = attrib(default=Factory(list), init=False)
+    tracks: List[Track] = attrib(default=Factory(list), init=False)
+
+    def start_ambiances(self) -> None:
+        """Start all the ambiances on this instance."""
+        ctx: Optional[Context] = self.game.audio_context
+        if ctx is None:
+            raise RuntimeError('Cannot start ambiances with no audio context.')
+        ambiance: Ambiance
+        for ambiance in self.ambiances:
+            ambiance.start(ctx)
+
+    def stop_ambiances(self) -> None:
+        """Stops all the ambiances on this instance."""
+        ambiance: Ambiance
+        for ambiance in self.ambiances:
+            ambiance.stop()
+
+    def start_tracks(self) -> None:
+        """Start all the tracks on this instance."""
+        ctx: Optional[Context] = self.game.audio_context
+        if ctx is None:
+            raise RuntimeError('Cannot start tracks with no audio context.')
+        track: Track
+        if self.game.audio_context is not None:
+            for track in self.tracks:
+                track.play(ctx)
+
+    def stop_tracks(self) -> None:
+        """Stop all the tracks in :attr:`self.tracks
+        <earwax.BoxLevel.tracks>`."""
+        track: Track
+        if self.game.audio_context is not None:
+            for track in self.tracks:
+                track.stop()
 
     def on_text_motion(self, motion: int) -> None:
         """Call the appropriate motion.
@@ -106,12 +157,14 @@ class Level:
     def on_push(self) -> None:
         """The event which is called when a level has been pushed onto the
         level stack of a game."""
-        pass
+        self.start_ambiances()
+        self.start_tracks()
 
     def on_pop(self) -> None:
         """The event which is called when a level has been popped from thelevel
         stack of a game."""
-        pass
+        self.stop_ambiances()
+        self.stop_tracks()
 
     def on_reveal(self) -> None:
         """The event which is called when the level above this one in the stack
@@ -120,17 +173,7 @@ class Level:
 
 
 @attrs(auto_attribs=True)
-class GameMixin:
-    """Add a game attribute to any :class:`Level` subclass.
-
-    :ivar ~earwax.level.GameMixin.game: The game this level is bound to.
-    """
-
-    game: 'Game'
-
-
-@attrs(auto_attribs=True)
-class DismissibleMixin(GameMixin):
+class DismissibleMixin:
     """Make any :class:`Level` subclass dismissible.
 
     :ivar ~earwax.level.DismissibleMixin.dismissible: Whether or not it should
@@ -142,15 +185,17 @@ class DismissibleMixin(GameMixin):
     def dismiss(self) -> None:
         """Dismiss the currently active level.
 
-     By default, when used by :class:`earwax.Menu` and :class:`earwax.Editor`,
-     this method is called when the escape key is pressed, and only if
-     :attr:`self.dismissible <earwax.level.DismissibleMixin.dismissible>`
-     evaluates to True.
+        By default, when used by :class:`earwax.Menu` and
+        :class:`earwax.Editor`, this method is called when the escape key is
+        pressed, and only if :attr:`self.dismissible
+        <earwax.level.DismissibleMixin.dismissible>` evaluates to ``True``.
 
-     The default implementation simply calls :meth:`~earwax.Game.pop_level` on
-     the attached :class:`earwax.Game` instance."""
+        The default implementation simply calls :meth:`~earwax.Game.pop_level`
+        on the attached :class:`earwax.Game` instance, and announces the
+        cancellation.
+        """
         if self.dismissible:
-            self.game.pop_level()
+            self.game.pop_level()  # type: ignore[attr-defined]
             tts.speak('Cancel.')
 
 
@@ -158,7 +203,90 @@ class DismissibleMixin(GameMixin):
 class TitleMixin:
     """Add a title to any :class:`Level` subclass.
 
-    :ivar ~earwax.level.TitleMixin.title: The title of this menu.
+    :ivar ~earwax.level.TitleMixin.title: The title of this instance.
     """
 
     title: str
+
+
+@attrs(auto_attribs=True)
+class IntroLevel(Level):
+    """A level that plays some audio, before optionally replacing itself in the
+    level stack with :attr`self.level <earwax.IntroLevel.level>`.
+
+    If you want it to be possible to skip this level, bind the
+    :meth:`~earwax.IntroLevel.skip` action.
+
+    :ivar ~earwax.IntroLevel.game: The game whose level stack will be altered.
+
+    :ivar ~earwax.IntroLevel.level: The level that will replace this one.
+
+    :ivar ~earwax.IntroLevel.sound_path: The sound to play when this level is
+        pushed.
+
+    :ivar ~earwax.IntroLevel.skip_after: An optional number of seconds to add
+        to the length of the sound buffer before skipping this level.
+
+        If this value is ``None``, then the level will not automatically skip
+        itself, and you will have to provide some other means of skipping.
+
+    :ivar ~earwax.IntroLevel.looping: Whether or not :attr:`self.generator
+        <earwax.IntroLevel.generator>` should loop.
+
+        If this value is ``True``, then :attr:`self.skip_after
+        <earwax.IntroLevel.skip_after>` must be ``None``, otherwise
+        ``AssertionError`` will be raised.
+
+    :ivar ~earwax.IntroLevel.generator: The ``synthizer.BufferGenerator`` to
+        play the sound through.
+
+    :ivar ~earwax.IntroLevel.source: The source to play :attr:`self.generator
+        <earwax.IntroLevel.buffer>` through.
+    """
+
+    level: Level
+    sound_path: Path
+    skip_after: Optional[float]
+    looping: bool = False
+
+    generator: Optional[BufferGenerator] = None
+    source: Optional[DirectSource] = None
+
+    def __attrs_post_init__(self) -> None:
+        assert self.looping is False or self.skip_after is None
+
+    def on_push(self) -> None:
+        """Start playing :attr:`self.sound_path
+        <earwax.IntroLevel.sound_path>`, and optionally schedule aan automatic
+        skip."""
+        ctx: Optional[Context] = self.game.audio_context
+        if ctx is None:
+            raise RuntimeError(
+                'Cannot start playing without a valid audio context.'
+            )
+        self.source = DirectSource(ctx)
+        self.generator = BufferGenerator(ctx)
+        self.generator.looping = self.looping
+        buffer: Buffer = get_buffer('file', str(self.sound_path))
+        self.generator.buffer = buffer
+        if self.skip_after is not None:
+            schedule_once(
+                lambda dt: self.skip(),
+                self.skip_after + buffer.get_length_in_seconds()
+            )
+
+    def on_pop(self) -> None:
+        """Destroy :attr:`self.generator <earwax.IntroLevel.generator>`, and
+        :attr:`self.source <earwax.IntroLevel.source>`."""
+        if self.generator is not None:
+            self.generator.destroy()
+            self.generator = None
+        if self.source is not None:
+            self.source.destroy()
+            self.source = None
+
+    def skip(self) -> None:
+        """Replace this level in the level stack with :attr:`self.level
+        <earwax.IntroLevel.level>`."""
+        if self.game.level is self:
+            self.game.replace_level(self.level)

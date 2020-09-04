@@ -6,7 +6,7 @@ from typing import Optional
 from attr import attrs
 from synthizer import BufferGenerator, Context, DirectSource
 
-from ..sound import play_path
+from .sound import play_path
 
 
 @attrs(auto_attribs=True)
@@ -15,6 +15,14 @@ class Track:
     levels stack.
 
     No panning or fx are applied to ``Track`` instances.
+
+    :ivar ~earwax.Track.sound_path: The track to play.
+
+    :ivar ~earwax.Track.generator: The ``synthizer.BufferGenerator`` instance
+        to play through.
+
+    :ivar ~earwax.Track.source: The source to route :attr:`self.generator
+        <earwax.Track.generator>` through.
     """
 
     sound_path: Path

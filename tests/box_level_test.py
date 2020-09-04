@@ -43,15 +43,6 @@ def test_set_bearing(box_level: BoxLevel) -> None:
     assert box_level.bearing == 23
 
 
-def test_register_ambiance(box_level: BoxLevel) -> None:
-    a: Ambiance = Ambiance(box_level, 0.0, 0.0, Path('sound.wav'))
-    box_level.register_ambiance(a)
-    assert box_level.ambiances == [a]
-    b: Ambiance = Ambiance(box_level, 2.9, 3.8, Path('other.wav'))
-    box_level.register_ambiance(b)
-    assert box_level.ambiances == [a, b]
-
-
 def test_collide(box_level: BoxLevel, box: Box) -> None:
     box_level.collide(box)
 

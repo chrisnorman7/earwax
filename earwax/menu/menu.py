@@ -4,7 +4,7 @@ from pathlib import Path
 from time import time
 from typing import Callable, List, Optional
 
-from attr import Factory, attrs
+from attr import Factory, attrib, attrs
 from pyglet.window import key
 
 from ..action import ActionFunctionType, OptionalGenerator
@@ -14,7 +14,7 @@ from .menu_item import MenuItem
 
 
 @attrs(auto_attribs=True)
-class Menu(TitleMixin, DismissibleMixin, Level):
+class Menu(Level, TitleMixin, DismissibleMixin):
     """A menu which holds multiple menu items which can be activated using
     actions.
 
@@ -73,11 +73,13 @@ class Menu(TitleMixin, DismissibleMixin, Level):
 
     item_select_sound_path: Optional[Path] = None
     item_activate_sound_path: Optional[Path] = None
-    items: List[MenuItem] = Factory(list)
+
     position: int = -1
     search_timeout: float = 0.5
     search_time: float = 0.0
-    search_string: str = ''
+
+    search_string: str = attrib(default=Factory(str), init=False)
+    items: List[MenuItem] = attrib(default=Factory(list), init=False)
 
     def __attrs_post_init__(self) -> None:
         """Initialise the menu."""

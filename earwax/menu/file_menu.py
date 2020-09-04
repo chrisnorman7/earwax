@@ -3,22 +3,14 @@
 from pathlib import Path
 from typing import Callable, Optional
 
-from attr import attrs
+from attr import Factory, attrs
 
 from ..action import OptionalGenerator
 from .menu import Menu
 
 
 @attrs(auto_attribs=True)
-class FileMenuBase:
-    """Adds path and func arguments."""
-
-    path: Path
-    func: Callable[[Optional[Path]], OptionalGenerator]
-
-
-@attrs(auto_attribs=True)
-class FileMenu(FileMenuBase, Menu):
+class FileMenu(Menu):
     """A menu for slecting a file.
 
     File menus can be used as follows::
@@ -28,14 +20,14 @@ class FileMenu(FileMenuBase, Menu):
         from pyglet.window import key, Window
         w = Window(caption='Test Game')
         g = Game()
-        l = Level()
+        l = Level(g)
         @l.action('Show file menu', symbol=key.F)
         def file_menu():
             '''Show a file menu.'''
             def inner(p):
                 tts.speak(str(p))
                 g.pop_level()
-            f = FileMenu(Path.cwd(), inner, 'File Menu', g)
+            f = FileMenu(g, 'File Menu', Path.cwd(), inner)
             g.push_level(f)
 
         g.push_level(l)
@@ -74,6 +66,8 @@ class FileMenu(FileMenuBase, Menu):
         in the directory tree.
     """
 
+    path: Path = Factory(Path.cwd)
+    func: Callable[[Optional[Path]], OptionalGenerator] = print
     root: Optional[Path] = None
     empty_label: Optional[str] = None
     directory_label: Optional[str] = None

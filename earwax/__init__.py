@@ -43,15 +43,15 @@ except (ImportError, TypeError):
 
 if True:
     from .action import Action
+    from .ambiance import Ambiance
     from .config import Config, ConfigValue
     from .configuration import EarwaxConfig
     from .editor import Editor
     from .event_matcher import EventMatcher
     from .game import Game
     from .level import Level
-    from .mapping import (Ambiance, Box, BoxLevel, Door, FittedBox, NotADoor,
-                          OutOfBounds, Point, PointDirections, Portal, Track,
-                          box_row)
+    from .mapping import (Box, BoxLevel, Door, FittedBox, NotADoor,
+                          OutOfBounds, Point, PointDirections, Portal, box_row)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .sound import (AdvancedInterfaceSoundPlayer,
@@ -59,6 +59,7 @@ if True:
                         play_and_destroy, play_path,
                         schedule_generator_destruction)
     from .speech import tts
+    from .track import Track
     from .walking_directions import walking_directions
 
 # The below imports are intentionally separated from those above, to avoid

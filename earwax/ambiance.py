@@ -6,15 +6,12 @@ from typing import Optional, Tuple
 from attr import attrs
 from synthizer import BufferGenerator, Context, Source3D
 
-from ..sound import get_buffer
-from .box_level import BoxLevel
+from .sound import get_buffer
 
 
 @attrs(auto_attribs=True)
 class Ambiance:
     """A class that represents a stationary sound on a map.
-
-    :ivar ~earwax.Ambiance.level: The box level to attach the ambiance to.
 
     :ivar ~earwax.Ambiance.x: The x coordinate.
 
@@ -31,7 +28,6 @@ class Ambiance:
         :attr:`~earwax.Ambiance.generator` will be connected to.
     """
 
-    level: BoxLevel
     x: float
     y: float
     SOUND_path: Path
@@ -45,17 +41,15 @@ class Ambiance:
         """Returns the coordinates of this ambiance as a tuple."""
         return self.x, self.y
 
-    def start(self) -> None:
+    def start(self, ctx: Context) -> None:
         """Start the sound playing."""
-        ctx: Context = self.level.game.audio_context  # Reduce typing.
-        if ctx is not None:
-            self.source = Source3D(ctx)
-            self.source.gain = self.gain
-            self.source.position = self.x, self.y, 0.0
-            self.generator = BufferGenerator(ctx)
-            self.generator.buffer = get_buffer('file', str(self.SOUND_path))
-            self.generator.looping = True
-            self.source.add_generator(self.generator)
+        self.source = Source3D(ctx)
+        self.source.gain = self.gain
+        self.source.position = self.x, self.y, 0.0
+        self.generator = BufferGenerator(ctx)
+        self.generator.buffer = get_buffer('file', str(self.SOUND_path))
+        self.generator.looping = True
+        self.source.add_generator(self.generator)
 
     def stop(self) -> None:
         """Stop the sound."""

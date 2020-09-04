@@ -39,20 +39,13 @@ class TypeHandler:
 
 
 @attrs(auto_attribs=True)
-class ConfigMenuBase:
-    """Adds a ``config`` argument to the constructor."""
-
-    config: Config
-
-
-@attrs(auto_attribs=True)
-class ConfigMenu(ConfigMenuBase, Menu):
+class ConfigMenu(Menu):
     """A menu that allows the user to set values on configuration sections.
 
     If an option is present with a type the menu doesn't know how to handle,
     :class:`earwax.UnknownTypeError` will be raised.
 
-    :ivar ~ConfigMenuBase.config: The configuration section this menu will
+    :ivar ~ConfigMenu.config: The configuration section this menu will
         configure.
 
     :ivar ~earwax.ConfigMenu.type_handlers: Functions to handle the types this
@@ -61,6 +54,12 @@ class ConfigMenu(ConfigMenuBase, Menu):
         New types can be handled with the
         :meth:`~earwax.ConfigMenu.type_handler` method.
     """
+
+    config: Config = attrib()
+
+    @config.default
+    def earwax_config(instance: 'ConfigMenu') -> Config:
+        return instance.game.config
 
     type_handlers: Dict[object, TypeHandler] = attrib(
         default=Factory(dict), init=False
@@ -147,7 +146,7 @@ class ConfigMenu(ConfigMenuBase, Menu):
 
         yield
         tts.speak(f'Enter value: {option.value}')
-        self.game.push_level(Editor(inner, self.game, text=option.value or ''))
+        self.game.push_level(Editor(self.game, inner, text=option.value or ''))
 
     def handle_int(self, option: ConfigValue) -> Generator[
         None, None, None
@@ -174,7 +173,7 @@ class ConfigMenu(ConfigMenuBase, Menu):
         yield
         tts.speak(f'Enter value: {option.value}')
         self.game.push_level(
-            Editor(inner, self.game, text=str(option.value) or '')
+            Editor(self.game, inner, text=str(option.value) or '')
         )
 
     def handle_float(self, option: ConfigValue) -> Generator[
@@ -202,7 +201,7 @@ class ConfigMenu(ConfigMenuBase, Menu):
         yield
         tts.speak(f'Enter value: {option.value}')
         self.game.push_level(
-            Editor(inner, self.game, text=str(option.value) or '')
+            Editor(self.game, inner, text=str(option.value) or '')
         )
 
     def handle_path(self, option: ConfigValue) -> Generator[None, None, None]:
@@ -225,8 +224,9 @@ class ConfigMenu(ConfigMenuBase, Menu):
         if is_union_type(t) and type(None) in get_args(t):
             empty_label = 'Clear'
         fm: FileMenu = FileMenu(
-            option.value.parent if isinstance(option.value, Path) else
-            Path.cwd(), inner, 'Select Path', self.game,
+            self.game, 'Select Path',
+            path=option.value.parent if isinstance(option.value, Path) else
+            Path.cwd(), func=inner,
             empty_label=empty_label
         )
         self.game.push_level(fm)
@@ -314,7 +314,7 @@ class ConfigMenu(ConfigMenuBase, Menu):
         def inner() -> Generator[None, None, None]:
             """Push the previously created menu onto the level stack."""
             yield
-            m: ConfigMenu = ConfigMenu(subsection, name, self.game)
+            m: ConfigMenu = ConfigMenu(self.game, name, config=subsection)
             self.game.push_level(m)
 
         return inner
@@ -350,7 +350,7 @@ class ConfigMenu(ConfigMenuBase, Menu):
             if option.value_converters is not None and \
                t in option.value_converters:
                 printable_value = option.value_converters[t](option)
-            m: Menu = Menu(f'{name}: {printable_value}', self.game)
+            m: Menu = Menu(self.game, f'{name}: {printable_value}')
             types: Tuple[object]
             if is_union_type(option.type_):
                 types = get_args(option.type_)

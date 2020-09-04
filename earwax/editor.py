@@ -12,25 +12,26 @@ from .speech import tts
 
 @attrs(auto_attribs=True)
 class EditorBase:
-    """Add a func attribute."""
+    """Adds a function argument."""
 
     func: Callable[[str], OptionalGenerator]
 
 
 @attrs(auto_attribs=True)
-class Editor(EditorBase, DismissibleMixin, Level):
+class Editor(Level, EditorBase, DismissibleMixin):
     """A basic text editor.
 
     By default, the enter key submits the contents to
     :attr:`~earwax.editor.EditorBase.func`.
 
-    :ivar ~earwax.editor.EditorBase.func: The function which should be called
+    :ivar ~earwax.Editor.func: The function which should be called
         when pressing enter in an edit field.
 
     :ivar ~earwax.Editor.text: The text which can be edited by this object.
 
     :ivar ~earwax.Editor.position: The position of the cursor.
     """
+
     text: str = ''
     cursor_position: Optional[int] = None
 

@@ -62,9 +62,7 @@ game: Game = Game()
 window: Window = Window(caption='Map Demo')
 level: BoxLevel = BoxLevel(game, main_box)
 
-level.register_ambiance(
-    Ambiance(level, 41.5, 3, sounds_directory / 'exit.wav')
-)
+level.ambiances.append(Ambiance(41.5, 3, sounds_directory / 'exit.wav'))
 
 level.action(
     'Walk forwards', symbol=key.W, mouse_button=mouse.RIGHT, interval=0.4
@@ -110,14 +108,14 @@ def goto() -> Generator[None, None, None]:
         try:
             dest.x = int(value)
             yield
-            game.replace_level(Editor(y_inner, game, text='%d' % level.y))
+            game.replace_level(Editor(game, func=y_inner, text='%d' % level.y))
             tts.speak('Y coordinate: %d' % level.y)
         except ValueError:
             tts.speak('Invalid coordinate.')
             game.pop_level()
 
     yield
-    game.push_level(Editor(x_inner, game, text='%d' % level.x))
+    game.push_level(Editor(game, func=x_inner, text='%d' % level.x))
     tts.speak('X coordinate: %d' % level.x)
 
 

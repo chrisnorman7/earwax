@@ -97,7 +97,7 @@ class ActionMenu(Menu):
 
         def inner() -> None:
             func: ActionFunctionType = self.handle_action(action)
-            m: Menu = Menu('Triggers', self.game)
+            m: Menu = Menu(self.game, 'Triggers')
             s: str
             if action.symbol is not None:
                 s = self.symbol_to_string(action)

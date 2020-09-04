@@ -5,27 +5,29 @@ from earwax import Box, BoxLevel, Editor, Game, Level, Menu, Point
 
 
 @fixture(name='level')
-def get_level() -> Level:
+def get_level(game: Game) -> Level:
     """Get a new Level instance."""
-    return Level()
+    return Level(game)
 
 
 @fixture(name='game')
-def get_game() -> Game:
-    return Game()
+def get_game(context: Context) -> Game:
+    g: Game = Game()
+    g.audio_context = context
+    return g
 
 
 @fixture(name='menu')
 def get_menu(game: Game) -> Menu:
-    return Menu('Test Menu', game)
+    return Menu(game, 'Test Menu')
 
 
 @fixture(name='editor')
 def get_editor(game: Game) -> Editor:
-    return Editor(print, game)
+    return Editor(game, print)
 
 
-@fixture(scope='session')
+@fixture(scope='session', autouse=True)
 def initialise_tests():
     initialize()
     yield
