@@ -1,7 +1,10 @@
 """Tests the Game class."""
 
+from pathlib import Path
+
 from pyglet import app
 from pyglet.clock import schedule_once
+from pyglet.resource import get_settings_path
 from pyglet.window import Window, key
 from pytest import raises
 
@@ -130,3 +133,10 @@ def test_run(game: Game) -> None:
     l: RunLevel = RunLevel(game)
     game.run(Window(), initial_level=l)
     assert game.level is l
+
+
+def test_get_settings_path() -> None:
+    g: Game = Game()
+    assert g.get_settings_path() == Path(get_settings_path('earwax.game'))
+    g = Game(name='testing')
+    assert g.get_settings_path() == Path(get_settings_path('testing'))

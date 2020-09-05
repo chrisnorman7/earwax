@@ -1,10 +1,12 @@
 """Provides the Game class."""
 
 from inspect import isgenerator
+from pathlib import Path
 from typing import Callable, Dict, Generator, Iterator, List, Optional, cast
 
 from attr import Factory, attrib, attrs
 from pyglet import app, clock
+from pyglet.resource import get_settings_path
 from pyglet.window import Window
 from synthizer import Context, initialized
 
@@ -41,6 +43,9 @@ class Game:
 
     :ivar ~earwax.Game.config: The configuration object used by this game.
 
+    :ivar ~earwax.game.name: The name of this game. Used by
+    :meth:`~earwax.Game.get_settings_path`.
+
     :ivar ~earwax.Game.audio_context`: The audio context, created by the
         :meth:`~earwax.Game.run` method, after :meth:`~earwax.Game.before_run`
         has been called.
@@ -74,6 +79,7 @@ class Game:
     window: Optional[Window] = attrib(default=Factory(type(None)), init=False)
 
     config: EarwaxConfig = attrib(default=Factory(EarwaxConfig), init=False)
+    name: str = __name__
 
     audio_context: Optional[Context] = attrib(
         default=Factory(type(None)), init=False
@@ -434,3 +440,8 @@ class Game:
         By default, this method calls :meth:`self.clear_levels()
         <earwax.Game.clear_levels>`, to ensure any cleanup code is called."""
         self.clear_levels()
+
+    def get_settings_path(self) -> Path:
+        """Uses ``pyglet.resource.get_settings_path`` to get an appropriate
+        settings path for this game."""
+        return Path(get_settings_path(self.name))
