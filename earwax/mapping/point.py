@@ -2,7 +2,7 @@
 
 from enum import Enum
 from math import floor
-from typing import Any, Union
+from typing import Any, Tuple, Union
 
 from attr import attrs
 
@@ -59,6 +59,12 @@ class Point:
         """Return a ``Point`` instance with duplicate ``x`` and ``y``
         values."""
         return type(self)(self.x, self.y)
+
+    @property
+    def coords(self) -> Tuple[float, float]:
+        """Returns :attr:`self.x <earwax.Point.x`, and :attr:`self.y
+        <earwax.Point.y>` as a tuple."""
+        return self.x, self.y
 
     def floor(self) -> 'Point':
         """Return a version of this object with both coordinates floored."""

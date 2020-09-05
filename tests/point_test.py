@@ -67,3 +67,11 @@ def test_copy() -> None:
 def test_floor() -> None:
     p: Point = Point(1.9, 2.8)
     assert p.floor() == Point(1, 2)
+
+
+def test_coords() -> None:
+    p: Point = Point(3, 4)
+    assert p.coords == (3, 4)
+    p.x = 6
+    p.y = 5
+    assert p.coords == (6, 5)
