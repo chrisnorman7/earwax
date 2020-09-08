@@ -6,114 +6,125 @@ from earwax import Box, Door, FittedBox, NotADoor, OutOfBounds, Point, box_row
 
 
 def test_init() -> None:
-    b: Box = Box(Point(0, 0), Point(3, 3))
-    assert b.bottom_left == Point(0, 0)
-    assert b.top_right == Point(3, 3)
+    b: Box = Box(Point(0, 0, 0), Point(3, 3, 0))
+    assert b.bottom_left == Point(0, 0, 0)
+    assert b.top_right == Point(3, 3, 0)
     assert b.surface_sound is None
     c: Box = Box(b.bottom_left, b.top_right, parent=b)
     assert c.parent is b
     assert c in b.children
 
 
-def test_corners() -> None:
-    b: Box = Box(Point(3, 4), Point(6, 7))
-    assert b.bottom_right == Point(6, 4)
-    assert b.top_left == Point(3, 7)
-
-
 def test_add_child() -> None:
-    b: Box = Box(Point(0, 0), Point(3, 3))
-    c: Box = Box(Point(1, 1), Point(1, 1))
-    b.add_child(c)
+    b: Box = Box(Point(0, 0, 0), Point(3, 3, 0))
+    c: Box = Box(Point(1, 1, 0), Point(1, 1, 0), parent=b)
     assert c.parent is b
     assert b.children == [c]
-    gc: Box = Box(Point(1, 1), Point(1, 1))
-    c.add_child(gc)
+    gc: Box = Box(Point(1, 1, 0), Point(1, 1, 0), parent=c)
     assert gc.parent is c
     assert c.children == [gc]
-    broken: Box = Box(Point(-1, 0), Point(-1, 0))
+    broken: Box = Box(Point(-1, 0, 5), Point(-1, 0, -2))
     with raises(OutOfBounds) as exc:
         b.add_child(broken)
     assert exc.value.args == (b, broken)
-    broken = Box(Point(10, 10), Point(10, 10))
+    broken = Box(Point(10, 10, 10), Point(10, 10, 10))
     with raises(OutOfBounds) as exc:
         b.add_child(broken)
     assert exc.value.args == (b, broken)
 
 
 def test_contains_point() -> None:
-    b: Box = Box(Point(0, 0), Point(0, 0))
-    assert b.contains_point(Point(0, 0))
-    b.top_right = Point(5, 5)
-    assert b.contains_point(Point(3, 3))
-    assert not b.contains_point(Point(55, 54))
-    assert not b.contains_point(Point(-3, -4))
-    assert not b.contains_point(Point(-1, 4))
-    assert not b.contains_point(Point(3, 7))
+    b: Box = Box(Point(0, 0, 0), Point(0, 0, 0))
+    assert b.contains_point(Point(0, 0, 0))
+    b.top_right = Point(5, 5, 0)
+    assert b.contains_point(Point(3, 3, 0))
+    assert not b.contains_point(Point(55, 54, 52))
+    assert not b.contains_point(Point(-3, -4, 0))
+    assert not b.contains_point(Point(-1, 4, 5))
+    assert not b.contains_point(Point(3, 7, 2))
 
 
 def test_get_containing_child() -> None:
-    parent: Box = Box(Point(0, 0), Point(100, 100))
+    parent: Box = Box(Point(0, 0, 0), Point(100, 100, 5))
     # Draw 2 parallel lines, like train tracks.
-    southern_rail: Box = Box(Point(0, 0), Point(100, 0), parent=parent)
-    northern_rail = Box(Point(0, 2), Point(100, 2), parent=parent)
-    assert parent.get_containing_box(Point(5, 5)) is parent
-    assert parent.get_containing_box(Point(0, 0)) is southern_rail
-    assert parent.get_containing_box(Point(3, 2)) is northern_rail
-    assert parent.get_containing_box(Point(200, 201)) is None
+    southern_rail: Box = Box(Point(0, 0, 0), Point(100, 0, 0), parent=parent)
+    northern_rail = Box(Point(0, 2, 0), Point(100, 2, 0), parent=parent)
+    assert parent.get_containing_box(Point(5, 5, 0)) is parent
+    assert parent.get_containing_box(Point(0, 0, 0)) is southern_rail
+    assert parent.get_containing_box(Point(3, 2, 0)) is northern_rail
+    assert parent.get_containing_box(Point(200, 201, 0)) is None
 
 
 def test_fitted_box() -> None:
-    southwest_box: Box = Box(Point(3, 5), Point(8, 2))
-    northeast_box: Box = Box(Point(32, 33), Point(80, 85))
-    middle_box: Box = Box(Point(14, 15), Point(18, 22))
+    southwest_box: Box = Box(Point(3, 5, 0), Point(8, 2, 0))
+    northeast_box: Box = Box(Point(32, 33, 0), Point(80, 85, 5))
+    middle_box: Box = Box(Point(14, 15, 2), Point(18, 22, 2))
     box: FittedBox = FittedBox([middle_box, northeast_box, southwest_box])
     assert box.bottom_left == southwest_box.bottom_left
     assert box.top_right == northeast_box.top_right
 
 
 def test_row() -> None:
-    start: Point = Point(1, 1)
-    boxes: List[Box] = box_row(start, 5, 5, 3, 1, 0)
+    start: Point = Point(1, 1, 0)
+    boxes: List[Box] = box_row(start, Point(5, 5, 1), 3, Point(1, 0, 0))
     assert len(boxes) == 3
     first: Box
     second: Box
     third: Box
     first, second, third = boxes
     assert first.bottom_left == start
-    assert first.top_right == Point(5, 5)
-    assert second.bottom_left == Point(6, 1)
-    assert second.top_right == Point(10, 5)
-    assert third.bottom_left == Point(11, 1)
-    assert third.top_right == Point(15, 5)
-    first, second, third = box_row(Point(0, 0), 3, 4, 3, 0, 3)
-    assert first.bottom_left == Point(0, 0)
-    assert first.top_right == Point(2, 3)
-    assert second.bottom_left == Point(0, 6)
-    assert second.top_right == Point(2, 9)
-    assert third.bottom_left == Point(0, 12)
-    assert third.top_right == Point(2, 15)
+    assert first.top_right == Point(5, 5, 0)
+    assert second.bottom_left == Point(6, 1, 0)
+    assert second.top_right == Point(10, 5, 0)
+    assert third.bottom_left == Point(11, 1, 0)
+    assert third.top_right == Point(15, 5, 0)
+    first, second, third = box_row(
+        Point(0, 0, 0), Point(3, 4, 1), 3, Point(0, 3, 0)
+    )
+    assert first.bottom_left == Point(0, 0, 0)
+    assert first.top_right == Point(2, 3, 0)
+    assert second.bottom_left == Point(0, 6, 0)
+    assert second.top_right == Point(2, 9, 0)
+    assert third.bottom_left == Point(0, 12, 0)
+    assert third.top_right == Point(2, 15, 0)
+    first, second, third = box_row(start, Point(5, 5, 1), 3, Point(0, 0, 1))
+    assert first.bottom_left == start
+    assert first.top_right == Point(5, 5, 0)
+    assert second.bottom_left == Point(1, 1, 1)
+    assert second.top_right == Point(5, 5, 1)
+    assert third.bottom_left == Point(1, 1, 2)
+    assert third.top_right == Point(5, 5, 2)
 
 
 def test_width() -> None:
-    b: Box = Box(Point(0, 0), Point(3, 3))
-    assert b.width == 3
+    b: Box = Box(Point(0, 1, 2), Point(5, 4, 3))
+    assert b.width == 5
+
+
+def test_depth() -> None:
+    b: Box = Box(Point(0, 1, 2), Point(5, 4, 3))
+    assert b.depth == 3
 
 
 def test_height() -> None:
-    b: Box = Box(Point(0, 0), Point(5, 5))
-    assert b.height == 5
+    b: Box = Box(Point(0, 1, 2), Point(5, 4, 3))
+    assert b.height == 1
 
 
 def test_area() -> None:
-    b: Box = Box(Point(0, 0), Point(5, 5))
+    b: Box = Box(Point(0, 0, 0), Point(5, 5, 5))
     assert b.area == 25
-    b = Box(Point(5, 6), Point(9, 12))
+    b = Box(Point(5, 6, 0), Point(9, 12, 7))
     assert b.area == 24
 
 
+def test_volume() -> None:
+    b: Box = Box(Point(1, 2, 3), Point(10, 9, 8))
+    assert b.volume == 315
+
+
 def test_open() -> None:
-    b: Box = Box(Point(0, 0), Point(0, 0))
+    b: Box = Box(Point(0, 0, 0), Point(0, 0, 0))
 
     @b.event
     def on_close() -> None:
@@ -135,7 +146,7 @@ def test_open() -> None:
 
 
 def test_close() -> None:
-    b: Box = Box(Point(0, 0), Point(0, 0))
+    b: Box = Box(Point(0, 0, 0), Point(0, 0, 0))
 
     @b.event
     def on_open() -> None:

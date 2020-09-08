@@ -3,7 +3,7 @@
 from math import cos, dist, sin
 from typing import Callable, List, Optional
 
-from attr import attrs
+from attr import attrs, Factory
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
 from synthizer import Context
 
@@ -40,9 +40,7 @@ class BoxLevel(Level):
 
     :ivar ~earwax.BoxLevel.box: The box that this level will work with.
 
-    :ivar ~earwax.BoxLevel.x: The x coordinate of the perspective.
-
-    :ivar ~earwax.BoxLevel.y: The y coordinate of the perspective.
+    :ivar ~earwax.BoxLevel.coordinates: The coordinates of the perspective.
 
     :ivar ~earwax.BoxLevel.bearing: The direction the perspective is facing.
 
@@ -55,28 +53,25 @@ class BoxLevel(Level):
 
     box: Box
 
-    x: float = 0.0
-    y: float = 0.0
+    coordinates: Point = Factory(lambda: Point(0.0, 0.0, 0.0))
     bearing: int = 0
     current_box: Optional[Box] = None
 
     def on_push(self) -> None:
         """Set listener orientation, and start ambiances and tracks."""
-        self.set_coordinates(self.x, self.y)
+        self.set_coordinates(self.coordinates)
         return super().on_push()
 
-    def set_coordinates(self, x: float, y: float) -> None:
+    def set_coordinates(self, p: Point) -> None:
         """Set the current coordinates.
         Also set listener position.
 
-        :param x: The x coordinate.
-
-        :param y: The y coordinate.
+        :param p: The new point to assign to :attr:`self.coordinates
+            <earwax.BoxLevel.coordinates>`.
         """
-        self.x = x
-        self.y = y
+        self.coordinates = p
         if self.game.audio_context is not None:
-            self.game.audio_context.position = (x, y, 0.0)
+            self.game.audio_context.position = p.coordinates
 
     def set_bearing(self, angle: int) -> None:
         """Sets the direction of travel, and the listener orientation.
@@ -99,7 +94,7 @@ class BoxLevel(Level):
             p: Portal = box.portal
             if p.level is not self:
                 self.game.replace_level(p.level)
-            p.level.set_coordinates(p.coordinates.x, p.coordinates.y)
+            p.level.set_coordinates(p.coordinates)
             bearing: int = self.bearing
             if p.bearing is not None:
                 bearing = p.bearing
@@ -116,16 +111,34 @@ class BoxLevel(Level):
             else:
                 box.open(self.game.audio_context)
 
+    def handle_box(self, box: Box) -> None:
+        """Handle a bulk standard box.
+
+        The coordinates have already been set, and the ``on_footstep`` event
+        dispatched, so all that is left is to speak the name of the new box, if
+        it is different to the last one, and play the ``surface_sound`` sound.
+        """
+        ctx: Optional[Context] = self.game.audio_context
+        if box.surface_sound is not None and ctx is not None:
+            play_and_destroy(ctx, box.surface_sound)
+        if box is not self.current_box:
+            tts.speak(str(box.name))
+            self.current_box = box
+
     def collide(self, box: Box) -> None:
         """Called to run collision code on a box."""
         box.dispatch_event('on_collide')
 
     def move(
-        self, distance: float = 1.0, bearing: Optional[int] = None
+        self, distance: float = 1.0, vertical: Optional[float] = None,
+        bearing: Optional[int] = None
     ) -> Callable[[], None]:
         """Returns a callable that allows the player to move on the map.
 
         :param distance: The distance to move.
+
+        :param vertical: An optional adjustment to be added to the vertical
+            position.
 
         :param bearing: An optional direction to move in.
 
@@ -137,13 +150,16 @@ class BoxLevel(Level):
             """Perform the move."""
             x: float
             y: float
+            z: float = self.coordinates.z
+            if vertical is not None:
+                z += vertical
             _bearing: int = self.bearing if bearing is None else bearing
             x, y = coordinates_in_direction(
-                self.x, self.y, _bearing, distance=distance
+                self.coordinates.x, self.coordinates.y, _bearing,
+                distance=distance
             )
-            box: Optional[Box] = self.box.get_containing_box(
-                Point(x, y).floor()
-            )
+            p: Point = Point(x, y, z)
+            box: Optional[Box] = self.box.get_containing_box(p.floor())
             if box is not None:
                 ctx: Optional[Context] = self.game.audio_context
                 if box.wall:
@@ -153,21 +169,24 @@ class BoxLevel(Level):
                     self.collide(box)
                     box.play_sound(ctx, box.door.closed_sound)
                 else:
-                    self.set_coordinates(x, y)
-                    if ctx is not None:
-                        ctx.position = (x, y, 0)
+                    self.set_coordinates(p)
                     box.dispatch_event('on_footstep')
-                    if box.surface_sound is not None and ctx is not None:
-                        play_and_destroy(ctx, box.surface_sound)
-                    if box is not self.current_box:
-                        tts.speak(str(box.name))
-                        self.current_box = box
+                    self.handle_box(box)
 
         return inner
 
-    def show_coordinates(self) -> None:
+    def show_coordinates(self, include_z: bool = False) -> Callable[[], None]:
         """Speak the current coordinates."""
-        tts.speak('%d, %d' % (self.x, self.y))
+
+        def inner() -> None:
+            """Speak the coordinates."""
+            c: Point = self.coordinates.floor()
+            s: str = f'{c.x}, {c.y}'
+            if include_z:
+                s += f', {c.z}'
+            tts.speak(s)
+
+        return inner
 
     def show_facing(self, include_angle: bool = True) -> Callable[[], None]:
         """Returns a function that will let you see the current bearing as text::
@@ -233,16 +252,13 @@ class BoxLevel(Level):
         """
 
         def inner() -> None:
-            box: Optional[Box] = self.box.get_containing_box(
-                Point(self.x, self.y)
-            )
+            box: Optional[Box] = self.box.get_containing_box(self.coordinates)
             if box is not None and box.portal is not None:
                 return self.handle_portal(box)
             child: Box
             for child in self.box.children:
                 if child.door is not None and dist(
-                    (self.x, self.y),
-                    (child.bottom_left.x, child.bottom_left.y)
+                    self.coordinates.coordinates, child.bottom_left.coordinates
                 ) <= door_distance:
                     return self.handle_door(child)
             if box is not None:

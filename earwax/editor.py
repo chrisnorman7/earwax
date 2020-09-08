@@ -6,7 +6,8 @@ from attr import attrs
 from pyglet.window import key
 
 from .action import OptionalGenerator
-from .level import DismissibleMixin, Level
+from .level import Level
+from .mixins import DismissibleMixin
 from .speech import tts
 
 

@@ -7,7 +7,8 @@ from attr import Attribute, Factory, asdict, attrib, attrs
 from shortuuid import uuid
 from yaml import dump
 
-from ..level import Level, TitleMixin
+from ..level import Level
+from ..mixins import TitleMixin
 from .constants import levels_directory
 
 DumpDict = Dict[str, Any]

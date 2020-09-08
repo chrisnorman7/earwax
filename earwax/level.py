@@ -13,9 +13,7 @@ from .sound import get_buffer
 from .track import Track
 
 if TYPE_CHECKING:
-    from .game import Game, ActionListType, MotionsType, MotionFunctionType
-
-from .speech import tts
+    from .game import ActionListType, Game, MotionFunctionType, MotionsType
 
 
 @attrs(auto_attribs=True)
@@ -170,43 +168,6 @@ class Level:
         """The event which is called when the level above this one in the stack
         has been popped, thus revealing this level."""
         pass
-
-
-@attrs(auto_attribs=True)
-class DismissibleMixin:
-    """Make any :class:`Level` subclass dismissible.
-
-    :ivar ~earwax.level.DismissibleMixin.dismissible: Whether or not it should
-        be possible to dismiss this level.
-    """
-
-    dismissible: bool = Factory(lambda: True)
-
-    def dismiss(self) -> None:
-        """Dismiss the currently active level.
-
-        By default, when used by :class:`earwax.Menu` and
-        :class:`earwax.Editor`, this method is called when the escape key is
-        pressed, and only if :attr:`self.dismissible
-        <earwax.level.DismissibleMixin.dismissible>` evaluates to ``True``.
-
-        The default implementation simply calls :meth:`~earwax.Game.pop_level`
-        on the attached :class:`earwax.Game` instance, and announces the
-        cancellation.
-        """
-        if self.dismissible:
-            self.game.pop_level()  # type: ignore[attr-defined]
-            tts.speak('Cancel.')
-
-
-@attrs(auto_attribs=True)
-class TitleMixin:
-    """Add a title to any :class:`Level` subclass.
-
-    :ivar ~earwax.level.TitleMixin.title: The title of this instance.
-    """
-
-    title: str
 
 
 @attrs(auto_attribs=True)

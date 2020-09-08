@@ -141,29 +141,29 @@ class Box(EventDispatcher):
         pass
 
     @property
-    def top_left(self) -> Point:
-        """Returns the coordinates of the top left corner of this box."""
-        return Point(self.bottom_left.x, self.top_right.y)
-
-    @property
-    def bottom_right(self) -> Point:
-        """Returns the coordinates of the bottom right corner of this box."""
-        return Point(self.top_right.x, self.bottom_left.y)
-
-    @property
     def width(self) -> float:
         """Returns the width of this box."""
-        return self.bottom_right.x - self.bottom_left.x
+        return self.top_right.x - self.bottom_left.x
+
+    @property
+    def depth(self) -> float:
+        """Get the depth of this box (front to back)."""
+        return self.top_right.y - self.bottom_left.y
 
     @property
     def height(self) -> float:
         """Returns the height of this box."""
-        return self.top_left.y - self.bottom_left.y
+        return self.top_right.z - self.bottom_left.z
 
     @property
     def area(self) -> float:
         """Returns the area of the box."""
-        return self.width * self.height
+        return self.width * self.depth
+
+    @property
+    def volume(self) -> float:
+        """Return the volume of this box."""
+        return self.width * self.depth * self.height
 
     def add_child(self, box: 'Box') -> None:
         """Adds the given box to :attr:`self.children
@@ -186,8 +186,10 @@ class Box(EventDispatcher):
             (
                 coordinates.x >= self.bottom_left.x,
                 coordinates.y >= self.bottom_left.y,
+                coordinates.z >= self.bottom_left.z,
                 coordinates.x <= self.top_right.x,
-                coordinates.y <= self.top_right.y
+                coordinates.y <= self.top_right.y,
+                coordinates.z <= self.top_right.z
             )
         )
 
@@ -300,23 +302,32 @@ class FittedBox(Box):
         """Create a new instance."""
         bottom_left_x: Optional[float] = None
         bottom_left_y: Optional[float] = None
+        bottom_left_z: Optional[float] = None
         top_right_x: Optional[float] = None
         top_right_y: Optional[float] = None
+        top_right_z: Optional[float] = None
         child: Box
         for child in children:
             if bottom_left_x is None or child.bottom_left.x < bottom_left_x:
                 bottom_left_x = child.bottom_left.x
             if bottom_left_y is None or child.bottom_left.y < bottom_left_y:
                 bottom_left_y = child.bottom_left.y
+            if bottom_left_z is None or child.bottom_left.z < bottom_left_z:
+                bottom_left_z = child.bottom_left.z
             if top_right_x is None or child.top_right.x > top_right_x:
                 top_right_x = child.top_right.x
             if top_right_y is None or child.top_right.y > top_right_y:
                 top_right_y = child.top_right.y
-        if bottom_left_x is not None and bottom_left_y is not None and \
-           top_right_x is not None and top_right_y is not None:
+            if top_right_z is None or child.top_right.z > top_right_z:
+                top_right_z = child.top_right.z
+        if (
+            bottom_left_x is not None and bottom_left_y is not None and
+            bottom_left_z is not None and top_right_x is not None and
+            top_right_y is not None and top_right_z is not None
+        ):
             super().__init__(
-                Point(bottom_left_x, bottom_left_y),
-                Point(top_right_x, top_right_y),
+                Point(bottom_left_x, bottom_left_y, bottom_left_z),
+                Point(top_right_x, top_right_y, top_right_z),
                 children=children, **kwargs
             )
         else:
@@ -324,8 +335,7 @@ class FittedBox(Box):
 
 
 def box_row(
-    start: Point, x_size: int, y_size: int, count: int, x_offset: int,
-    y_offset: int, **kwargs
+    start: Point, size: Point, count: int, offset: Point, **kwargs
 ) -> List[Box]:
     """Generates a list of boxes.
 
@@ -336,56 +346,53 @@ def box_row(
 
         offices = row(
             Point(0, 0),  # The bottom_left corner of the first box.
-            3,  # The width (x) of each box.
-            2,  # The depth (y) of each box.
+            Point(3, 2, 0),  # The size of each box.
             3,  # The number of boxes to build.
-            1  # How far to travel along the x axis each time.
-            0  # How far to travel on the y axis each time.
+            # The next argument is how far to move from the top right corner of
+            # each created box:
+            Point(1, 0, 0)
         )
 
     This will result in a list containing 3 rooms:
 
-    * The first from (0, 0) to (2, 1)
+    * The first from (0, 0, 0) to (2, 1, 0)
 
-    * The second from (3, 0) to (5, 1)
+    * The second from (3, 0, 0) to (5, 1, 0)
 
-    * And the third from (6, 0) to (8, 1)
+    * And the third from (6, 0, 0) to (8, 1, 0)
 
     **PLEASE NOTE:**
-    If the value of either of the size arguments is less than 1, the top right
-    coordinate will be less than the bottom left, so
-    :meth:`~earwax.Box.get_containing_box` won't ever find it.
+    If none of the size coordinates are ``>= 1``, the top right coordinate will
+    be less than the bottom left, so :meth:`~earwax.Box.get_containing_box`
+    won't ever find it.
 
     :param start: The :attr:`~earwax.Box.bottom_left` coordinate of the first
         box.
 
-    :param x_size: The width of each box.
-
-    :param y_size: The depth of each box.
+    :param size: The size of each box.
 
     :param count: The number of boxes to build.
 
-    :param x_offset: The amount of x distance between the boxes.
+    :param offset: The distance between the boxes.
 
-        If the provided value is less than 1, then overlaps will occur.
-
-    :param y_offset: The amount of y distance between the boxes.
-
-        If the provided value is less than 1, then overlaps will occur.
+        If no coordinate of the given value is ``>= 1``, overlaps will occur.
 
     :param kwargs: Extra keyword arguments to be passed to ``Box.__init__``.
     """
     start = start.copy()
-    # In the next line, we subtract 1 from both size values, otherwise we end
-    # up with a box that is too large by 1 on each axis.
-    size_point: Point = Point(x_size - 1, y_size - 1)
-    n: int
+    # In the next line, we subtract 1 from all size values, otherwise we end up
+    # with a box that is too large by 1 on each axis.
+    size -= 1
     boxes: List[Box] = []
-    for n in range(count):
-        box: Box = Box(start.copy(), start + size_point, **kwargs)
+    n: int = 0
+    while n < count:
+        box: Box = Box(start.copy(), start + size, **kwargs)
         boxes.append(box)
-        if x_offset:
-            start.x += ((x_offset + x_size) - 1)
-        if y_offset:
-            start.y += ((y_offset + y_size) - 1)
+        if offset.x:
+            start.x += offset.x + size.x
+        if offset.y:
+            start.y += offset.y + size.y
+        if offset.z:
+            start.z += offset.z + size.z
+        n += 1
     return boxes

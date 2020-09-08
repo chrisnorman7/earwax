@@ -8,7 +8,8 @@ from attr import Factory, attrib, attrs
 from pyglet.window import key
 
 from ..action import ActionFunctionType, OptionalGenerator
-from ..level import DismissibleMixin, Level, TitleMixin
+from ..level import Level
+from ..mixins import DismissibleMixin, TitleMixin
 from ..speech import tts
 from .menu_item import MenuItem
 

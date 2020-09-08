@@ -41,7 +41,7 @@ def get_context() -> Context:
 
 @fixture(name='box')
 def get_box() -> Box:
-    return Box(Point(0, 0), Point(5, 5))
+    return Box(Point(0, 0, 0), Point(5, 5, 0))
 
 
 @fixture(name='box_level')

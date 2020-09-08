@@ -49,11 +49,12 @@ if True:
     from .editor import Editor
     from .event_matcher import EventMatcher
     from .game import Game
-    from .level import DismissibleMixin, IntroLevel, Level, TitleMixin
+    from .level import IntroLevel, Level
     from .mapping import (Box, BoxLevel, Door, FittedBox, NotADoor,
                           OutOfBounds, Point, PointDirections, Portal, box_row)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
+    from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
     from .sound import (AdvancedInterfaceSoundPlayer,
                         SimpleInterfaceSoundPlayer, get_buffer,
                         play_and_destroy, play_path, play_paths,
@@ -78,5 +79,6 @@ __all__ = [
     'OutOfBounds', 'PointDirections', 'walking_directions', 'FittedBox',
     'box_row', 'play_path', 'schedule_generator_destruction', 'BoxLevel',
     'Ambiance', 'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track',
-    'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel'
+    'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel',
+    'CoordinatesMixin'
 ]
