@@ -3,16 +3,16 @@
 from math import cos, dist, sin
 from typing import Callable, List, Optional
 
-from attr import attrs, Factory
+from attr import Factory, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
 from synthizer import Context
 
 from ..level import Level
+from ..point import Point, PointDirections
 from ..sound import play_and_destroy
 from ..speech import tts
 from ..walking_directions import walking_directions
 from .box import Box
-from .point import Point, PointDirections
 from .portal import Portal
 
 

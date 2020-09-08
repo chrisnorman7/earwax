@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Optional
 from attr import attrs
 from pyglet.event import EventDispatcher
 
-from .point import Point
+from ..point import Point
 
 if TYPE_CHECKING:
     from .box_level import BoxLevel

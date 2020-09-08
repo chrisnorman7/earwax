@@ -9,9 +9,9 @@ from pyglet.clock import schedule_once, unschedule
 from pyglet.event import EventDispatcher
 from synthizer import Context
 
+from ..point import Point
 from ..sound import play_and_destroy
 from .door import Door
-from .point import Point
 from .portal import Portal
 
 

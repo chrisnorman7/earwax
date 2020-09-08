@@ -1,10 +1,13 @@
 """Provides various mixin classes for used with other objects."""
 
-from typing import Tuple
+from typing import TYPE_CHECKING, Tuple
+
 from attr import attrs
 
-from .game import Game
 from .speech import tts
+
+if TYPE_CHECKING:
+    from .game import Game
 
 
 @attrs(auto_attribs=True)
@@ -30,7 +33,7 @@ class DismissibleMixin:
         cancellation.
         """
         if self.dismissible:
-            self.game: Game
+            self.game: 'Game'
             self.game.pop_level()
             tts.speak('Cancel.')
 

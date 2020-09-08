@@ -51,10 +51,11 @@ if True:
     from .game import Game
     from .level import IntroLevel, Level
     from .mapping import (Box, BoxLevel, Door, FittedBox, NotADoor,
-                          OutOfBounds, Point, PointDirections, Portal, box_row)
+                          OutOfBounds, Portal, box_row)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
+    from .point import Point, PointDirections
     from .sound import (AdvancedInterfaceSoundPlayer,
                         SimpleInterfaceSoundPlayer, get_buffer,
                         play_and_destroy, play_path, play_paths,
