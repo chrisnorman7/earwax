@@ -20,5 +20,5 @@ class Ambiance(Track):
     def load_sound(self, ctx: Context) -> None:
         """Load the sound, passing a position argument."""
         self.generator, self.source = play_path(
-            ctx, self.sound_path, position=self.coordinates
+            ctx, self.sound_path, position=self.coordinates.coordinates
         )
