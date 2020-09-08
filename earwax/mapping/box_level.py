@@ -122,7 +122,8 @@ class BoxLevel(Level):
         if box.surface_sound is not None and ctx is not None:
             play_and_destroy(ctx, box.surface_sound)
         if box is not self.current_box:
-            tts.speak(str(box.name))
+            if box.name != self.current_box.name:
+                tts.speak(str(box.name))
             self.current_box = box
 
     def collide(self, box: Box) -> None:
