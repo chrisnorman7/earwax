@@ -2,7 +2,8 @@ from typing import List
 
 from pytest import raises
 
-from earwax import Box, Door, FittedBox, NotADoor, OutOfBounds, Point, box_row
+from earwax import (Box, BoxLevel, Door, FittedBox, NotADoor, OutOfBounds,
+                    Point, Portal, box_row)
 
 
 def test_init() -> None:
@@ -178,3 +179,15 @@ def test_nearest_door() -> None:
     doorstep.bottom_left.z = room.bottom_left.z
     assert room.nearest_door() is doorstep
     assert room.nearest_door(same_z=False) is doorstep
+
+
+def test_nearest_portal(box_level: BoxLevel) -> None:
+    room: Box = Box(Point(0, 0, 0), Point(3, 3, 3))
+    assert room.nearest_portal() is None
+    p: Portal = Portal(box_level, Point(0, 0, 0))
+    doorstep: Box = Box(room.top_right, room.top_right, portal=p, parent=room)
+    assert room.nearest_portal() is None
+    assert room.nearest_portal(same_z=False) is doorstep
+    doorstep.bottom_left.z = room.bottom_left.z
+    assert room.nearest_portal() is doorstep
+    assert room.nearest_portal(same_z=False) is doorstep

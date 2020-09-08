@@ -294,12 +294,37 @@ class Box(EventDispatcher):
     def nearest_door(self, same_z: bool = True) -> Optional['Box']:
         """Returns the nearest :class:`earwax.Box` instance whose
         :attr:`~earwax.Box.door` attribute is not ``None``.
+
+        :param same_z: If ``True``, then doors on different levels will not be
+            considered.
         """
         box: Optional['Box'] = None
         distance: Optional[float] = None
         child: 'Box'
         for child in self.children:
             if child.door is not None and (
+                not same_z or child.bottom_left.z == self.bottom_left.z
+            ):
+                d: float = dist(
+                    self.bottom_left.coordinates, child.bottom_left.coordinates
+                )
+                if distance is None or d < distance:
+                    box = child
+                    distance = d
+        return box
+
+    def nearest_portal(self, same_z: bool = True) -> Optional['Box']:
+        """Returns the nearest :class:`earwax.Box` instance whose
+        :attr:`~earwax.Box.portal` attribute is not ``None``.
+
+        :param same_z: If ``True``, then portals on different levels will not
+            be considered.
+        """
+        box: Optional['Box'] = None
+        distance: Optional[float] = None
+        child: 'Box'
+        for child in self.children:
+            if child.portal is not None and (
                 not same_z or child.bottom_left.z == self.bottom_left.z
             ):
                 d: float = dist(
