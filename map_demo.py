@@ -4,7 +4,7 @@ from typing import Generator, List
 from pyglet.window import Window, key, mouse
 
 from earwax import (Ambiance, Box, BoxLevel, Door, Editor, FittedBox, Game,
-                    Point, box_row, tts)
+                    Point, Portal, box_row, tts)
 from earwax.cmd.constants import sounds_directory, surfaces_directory
 
 wall_sounds = sounds_directory / 'walls'
@@ -64,49 +64,78 @@ boxes.extend(
     )
 )
 
+main_portal_point: Point = Point(99, 1, 0)
+main_portal_box: Box = Box(
+    main_portal_point, main_portal_point, name=boxes[0].name,
+    surface_sound=surfaces_directory / 'concrete'
+)
+boxes.append(main_portal_box)
+
+back_office: Box = Box(
+    Point(100, 100, 100), Point(125, 125, 102), name='Back Office'
+)
+back_portal_box: Box = Box(back_office.bottom_left, back_office.bottom_left, name=back_office.name)
+
+boxes.extend(
+    [
+        back_office,
+        back_portal_box
+    ]
+)
 main_box: FittedBox = FittedBox(boxes, name='Error')
 
 game: Game = Game()
 window: Window = Window(caption='Map Demo')
-level: BoxLevel = BoxLevel(game, main_box)
+main_level: BoxLevel = BoxLevel(game, main_box)
 
-level.ambiances.append(
+main_portal_box.portal = Portal(
+    main_level, back_office.bottom_left,
+    enter_sound=door_sounds_directory / 'open.wav'
+)
+back_portal_box.portal = Portal(
+    main_level, main_portal_point,
+    enter_sound=door_sounds_directory / 'close.wav'
+)
+
+main_level.ambiances.append(
     Ambiance(sounds_directory / 'exit.wav', coordinates=Point(41.5, 3, 2))
 )
 
-level.action(
+main_level.action(
     'Walk forwards', symbol=key.W, mouse_button=mouse.RIGHT, interval=0.4
-)(level.move())
+)(main_level.move())
 
-level.action('Turn left 45 degrees', symbol=key.A)(level.turn(-45))
-level.action('Turn right 45 degrees', symbol=key.D)(level.turn(45))
-level.action('About turn', symbol=key.S)(level.turn(180))
+main_level.action('Turn left 45 degrees', symbol=key.A)(main_level.turn(-45))
+main_level.action('Turn right 45 degrees', symbol=key.D)(main_level.turn(45))
+main_level.action('About turn', symbol=key.S)(main_level.turn(180))
 
-level.action('Show facing', symbol=key.F)(level.show_facing())
-level.action('Show coordinates', symbol=key.C)(level.show_coordinates())
+main_level.action('Show facing', symbol=key.F)(main_level.show_facing())
+main_level.action(
+    'Show coordinates', symbol=key.C
+)(main_level.show_coordinates())
 
-level.action('Activate', symbol=key.RETURN)(level.activate())
+main_level.action('Activate', symbol=key.RETURN)(main_level.activate())
 
 
-@level.action('Quit', symbol=key.ESCAPE)
+@main_level.action('Quit', symbol=key.ESCAPE)
 def do_quit() -> None:
     """Quit the game."""
     window.dispatch_event('on_close')
 
 
-@level.action('Goto', symbol=key.G)
+@main_level.action('Goto', symbol=key.G)
 def goto() -> Generator[None, None, None]:
     """Jump to some coordinates."""
-    dest: Point = level.coordinates.floor()
+    dest: Point = main_level.coordinates.floor()
 
     def y_inner(value: str) -> None:
         """Set the y coordinate, and jump the player."""
         try:
             dest.y = int(value)
-            if dest == level.coordinates:
+            if dest == main_level.coordinates:
                 tts.speak('Coordinates unchanged.')
                 return None
-            level.set_coordinates(dest)
+            main_level.set_coordinates(dest)
             tts.speak('Moved.')
         except ValueError:
             tts.speak('Invalid coordinate.')
@@ -119,21 +148,19 @@ def goto() -> Generator[None, None, None]:
             dest.x = int(value)
             yield
             game.replace_level(
-                Editor(game, y_inner, text=str(level.coordinates.y))
+                Editor(game, y_inner, text='%d' % main_level.coordinates.y)
             )
-            tts.speak('Y coordinate: %d' % level.coordinates.y)
+            tts.speak('Y coordinate: %d' % main_level.coordinates.y)
         except ValueError:
             tts.speak('Invalid coordinate.')
             game.pop_level()
 
     yield
-    game.push_level(Editor(game, x_inner, text=str(level.coordinates.x)))
-    tts.speak('X coordinate: %d' % level.coordinates.x)
-
-
-def main() -> None:
-    game.run(window, initial_level=level)
+    game.push_level(
+        Editor(game, x_inner, text='%d' % main_level.coordinates.x)
+    )
+    tts.speak('X coordinate: %d' % main_level.coordinates.x)
 
 
 if __name__ == '__main__':
-    main()
+    game.run(window, initial_level=main_level)
