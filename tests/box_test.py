@@ -166,3 +166,15 @@ def test_close() -> None:
     b.close(None)
 
     assert d.open is True
+
+
+def test_nearest_door() -> None:
+    room: Box = Box(Point(0, 0, 0), Point(3, 3, 3))
+    assert room.nearest_door() is None
+    d = Door()
+    doorstep: Box = Box(room.top_right, room.top_right, door=d, parent=room)
+    assert room.nearest_door() is None
+    assert room.nearest_door(same_z=False) is doorstep
+    doorstep.bottom_left.z = room.bottom_left.z
+    assert room.nearest_door() is doorstep
+    assert room.nearest_door(same_z=False) is doorstep

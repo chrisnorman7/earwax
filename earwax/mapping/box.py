@@ -1,5 +1,6 @@
 """Provides box-related classes, functions, and exceptions."""
 
+from math import dist
 from pathlib import Path
 from random import uniform
 from typing import List, Optional
@@ -289,6 +290,25 @@ class Box(EventDispatcher):
     def scheduled_close(self, dt: float, ctx: Optional[Context]) -> None:
         """Call :meth:`self.close() <earwax.Box.close>` on a schedule."""
         self.close(ctx)
+
+    def nearest_door(self, same_z: bool = True) -> Optional['Box']:
+        """Returns the nearest :class:`earwax.Box` instance whose
+        :attr:`~earwax.Box.door` attribute is not ``None``.
+        """
+        box: Optional['Box'] = None
+        distance: Optional[float] = None
+        child: 'Box'
+        for child in self.children:
+            if child.door is not None and (
+                not same_z or child.bottom_left.z == self.bottom_left.z
+            ):
+                d: float = dist(
+                    self.bottom_left.coordinates, child.bottom_left.coordinates
+                )
+                if distance is None or d < distance:
+                    box = child
+                    distance = d
+        return box
 
 
 class FittedBox(Box):
