@@ -14,6 +14,14 @@ class ActivateWorks(Exception):
     pass
 
 
+class MoveWorks(Exception):
+    pass
+
+
+class TurnWorks(Exception):
+    pass
+
+
 def test_init(box: Box, box_level: BoxLevel) -> None:
     # First test the fixtures.
     assert isinstance(box, Box)
@@ -72,6 +80,17 @@ def test_move(box: Box, box_level: BoxLevel) -> None:
     box_level.move(distance=0.0, vertical=1.0)()
     assert box_level.coordinates == Point(2.0, 1.0, 1.0)
 
+    @box_level.event
+    def on_move() -> None:
+        raise MoveWorks()
+
+    with raises(MoveWorks):
+        box_level.move()()
+    # Shouldn't raise this time, because the target coordinates will be
+    # invalid.
+    box_level.coordinates.y = 0
+    box_level.move(bearing=180)()
+
 
 def test_turn(box_level: BoxLevel) -> None:
     t: Callable[[], None] = box_level.turn(90)
@@ -83,6 +102,15 @@ def test_turn(box_level: BoxLevel) -> None:
     assert box_level.bearing == 270
     t()
     assert box_level.bearing == 0
+
+    @box_level.event
+    def on_turn() -> None:
+        raise TurnWorks()
+
+    with raises(TurnWorks):
+        t()
+    # Make sure the event fires after the new bearing is set.
+    assert box_level.bearing == 90
 
 
 def test_activate(game: Game, box: Box, box_level: BoxLevel) -> None:

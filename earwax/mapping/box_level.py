@@ -5,6 +5,7 @@ from typing import Callable, List, Optional
 
 from attr import Factory, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
+from pyglet.event import EventDispatcher
 from synthizer import Context
 
 from ..level import Level
@@ -17,7 +18,7 @@ from .portal import Portal
 
 
 @attrs(auto_attribs=True)
-class BoxLevel(Level):
+class BoxLevel(Level, EventDispatcher):
     """A level that deals with sound generation for boxes.
 
     This level can be used in your games. Simply bind the various action
@@ -56,6 +57,10 @@ class BoxLevel(Level):
     coordinates: Point = Factory(lambda: Point(0.0, 0.0, 0.0))
     bearing: int = 0
     current_box: Optional[Box] = None
+
+    def __attrs_post_init__(self) -> None:
+        self.register_event_type('on_move')
+        self.register_event_type('on_turn')
 
     def on_push(self) -> None:
         """Set listener orientation, and start ambiances and tracks."""
@@ -139,6 +144,9 @@ class BoxLevel(Level):
     ) -> Callable[[], None]:
         """Returns a callable that allows the player to move on the map.
 
+        If the move is successfl (I.E.: There is a box at the destination
+        coordinates), the ``on_move`` event is dispatched.
+
         :param distance: The distance to move.
 
         :param vertical: An optional adjustment to be added to the vertical
@@ -176,6 +184,7 @@ class BoxLevel(Level):
                     self.set_coordinates(p)
                     box.dispatch_event('on_footstep')
                     self.handle_box(box)
+                self.dispatch_event('on_move')
 
         return inner
 
@@ -219,7 +228,8 @@ class BoxLevel(Level):
         return inner
 
     def turn(self, amount: int) -> Callable[[], None]:
-        """Return a function that will turn the perspective by the given amount.
+        """Return a function that will turn the perspective by the given amount,
+        and dispatch the ``on_turn`` event.
 
         For example::
 
@@ -237,6 +247,7 @@ class BoxLevel(Level):
 
         def inner() -> None:
             self.set_bearing(normalise_angle(self.bearing + amount))
+            self.dispatch_event('on_turn')
 
         return inner
 
