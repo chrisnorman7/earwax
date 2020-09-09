@@ -1,7 +1,7 @@
 """Provides classes for working with levels."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import Generator, TYPE_CHECKING, Callable, List, Optional
 
 from attr import Factory, attrib, attrs
 from pyglet.clock import schedule_once
@@ -217,7 +217,9 @@ class IntroLevel(Level):
     def on_push(self) -> None:
         """Start playing :attr:`self.sound_path
         <earwax.IntroLevel.sound_path>`, and optionally schedule an automatic
-        skip."""
+        skip.
+        """
+        super().on_push()
         ctx: Optional[Context] = self.game.audio_context
         if ctx is None:
             raise RuntimeError(
@@ -225,6 +227,7 @@ class IntroLevel(Level):
             )
         self.source = DirectSource(ctx)
         self.generator = BufferGenerator(ctx)
+        self.source.add_generator(self.generator)
         self.generator.looping = self.looping
         buffer: Buffer = get_buffer('file', str(self.sound_path))
         self.generator.buffer = buffer
@@ -236,7 +239,9 @@ class IntroLevel(Level):
 
     def on_pop(self) -> None:
         """Destroy :attr:`self.generator <earwax.IntroLevel.generator>`, and
-        :attr:`self.source <earwax.IntroLevel.source>`."""
+        :attr:`self.source <earwax.IntroLevel.source>`.
+        """
+        super().on_pop()
         if self.generator is not None:
             self.generator.destroy()
             self.generator = None
@@ -244,8 +249,9 @@ class IntroLevel(Level):
             self.source.destroy()
             self.source = None
 
-    def skip(self) -> None:
+    def skip(self) -> Generator[None, None, None]:
         """Replace this level in the level stack with :attr:`self.level
         <earwax.IntroLevel.level>`."""
         if self.game.level is self:
+            yield
             self.game.replace_level(self.level)
