@@ -1,7 +1,7 @@
 """Provides classes for working with levels."""
 
 from pathlib import Path
-from typing import Generator, TYPE_CHECKING, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
 from pyglet.clock import schedule_once
