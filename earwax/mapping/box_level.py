@@ -1,7 +1,7 @@
 """Provides the BoxLevel class."""
 
 from math import cos, dist, sin
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Tuple
 
 from attr import Factory, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
@@ -119,6 +119,25 @@ class BoxLevel(Level, EventDispatcher):
                 sin(rad), cos(rad), 0, 0, 0, 1
             )
 
+    def calculate_coordinates(
+        self, distance: float, bearing: int
+    ) -> Tuple[float, float]:
+        """Used by :meth:`~earwax.BoxLevel.move` to calculate new coordinates.
+
+        Override this method if you want to change the algorithm used to
+        calculate the target coordinates.
+
+        :param distanc: The distance which should be used.
+
+        :param bearing: The bearing the new coordinates are in.
+
+            This value may not be the same as :attr:`self.bearing
+            <earwax.BoxLevel.bearing>`.
+        """
+        return coordinates_in_direction(
+            self.coordinates.x, self.coordinates.y, bearing, distance=distance
+        )
+
     def handle_portal(self, box: Box) -> None:
         """The player has just activated a portal.
 
@@ -197,10 +216,7 @@ class BoxLevel(Level, EventDispatcher):
             if vertical is not None:
                 z += vertical
             _bearing: int = self.bearing if bearing is None else bearing
-            x, y = coordinates_in_direction(
-                self.coordinates.x, self.coordinates.y, _bearing,
-                distance=distance
-            )
+            x, y = self.calculate_coordinates(distance, _bearing)
             p: Point = Point(x, y, z)
             box: Optional[Box] = self.box.get_containing_box(p.floor())
             if box is not None:
