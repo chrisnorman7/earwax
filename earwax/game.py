@@ -44,7 +44,7 @@ class Game:
     :ivar ~earwax.Game.config: The configuration object used by this game.
 
     :ivar ~earwax.game.name: The name of this game. Used by
-    :meth:`~earwax.Game.get_settings_path`.
+        :meth:`~earwax.Game.get_settings_path`.
 
     :ivar ~earwax.Game.audio_context`: The audio context, created by the
         :meth:`~earwax.Game.run` method, after :meth:`~earwax.Game.before_run`

@@ -12,6 +12,6 @@ from .door import Door
 from .portal import Portal
 
 __all__ = [
-    'Box', 'Point', 'OutOfBounds', 'PointDirections', 'FittedBox', 'box_row',
-    'BoxLevel', 'Door', 'NotADoor', 'Portal'
+    'Box', 'OutOfBounds', 'FittedBox', 'box_row', 'BoxLevel', 'Door',
+    'NotADoor', 'Portal'
 ]

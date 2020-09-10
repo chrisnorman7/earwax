@@ -15,7 +15,10 @@ class Ambiance(Track):
     :ivar ~earwax.Ambiance.coordinates: The coordinates of this ambiance.
     """
 
-    coordinates: Point = Point(0, 0, 0)
+    try:
+        coordinates: Point = Point(0, 0, 0)
+    except TypeError:
+        pass  # Docs are building.
 
     def load_sound(self, ctx: Context) -> None:
         """Load the sound, passing a position argument."""
