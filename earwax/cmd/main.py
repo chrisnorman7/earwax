@@ -85,7 +85,7 @@ project_title_parser = subcommand(
     description='Rename the current project.'
 )
 
-project_title_parser.add_argument('title', help='The new name')
+project_title_parser.add_argument('title', nargs='?', help='The new name')
 
 subcommand(
     'build-surfaces', build_surfaces,
