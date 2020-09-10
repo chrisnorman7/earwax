@@ -1,5 +1,5 @@
 from math import dist
-from typing import Callable
+from typing import Callable, Optional
 
 from pytest import raises
 
@@ -15,6 +15,10 @@ class ActivateWorks(Exception):
 
 
 class MoveWorks(Exception):
+    pass
+
+
+class MoveFailWorks(Exception):
     pass
 
 
@@ -154,3 +158,21 @@ def test_activate(game: Game, box: Box, box_level: BoxLevel) -> None:
     p.bearing = 32
     a()
     assert l.bearing == 32
+
+
+def test_move_fail(box_level: BoxLevel) -> None:
+
+    @box_level.event
+    def on_move_fail(
+        distance: float, vertical: Optional[float], bearing: Optional[int]
+    ) -> None:
+        raise MoveFailWorks(distance, vertical, bearing)
+
+    box_level.box.top_right.y = 1
+    box_level.move()()
+    with raises(MoveFailWorks) as exc:
+        box_level.move()()
+    assert exc.value.args == (1.0, None, None)
+    with raises(MoveFailWorks) as exc:
+        box_level.move(distance=2.0, vertical=8.0, bearing=25)()
+    assert exc.value.args == (2.0, 8.0, 25)

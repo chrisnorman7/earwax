@@ -60,12 +60,41 @@ class BoxLevel(Level, EventDispatcher):
 
     def __attrs_post_init__(self) -> None:
         self.register_event_type('on_move')
+        self.register_event_type('on_move_fail')
         self.register_event_type('on_turn')
 
     def on_push(self) -> None:
         """Set listener orientation, and start ambiances and tracks."""
         self.set_coordinates(self.coordinates)
         return super().on_push()
+
+    def on_turn(self) -> None:
+        """An event that will dispatched when the :meth:`~earwax.BoxLevel.turn`
+        action is used.
+        """
+        pass
+
+    def on_move(self) -> None:
+        """An event that will be dispatched when the
+        :meth:`~earwax.BoxLevel.move` action is used.
+        """
+        pass
+
+    def on_move_fail(
+        self, distance: float, vertical: Optional[float],
+        bearing: Optional[int]
+    ) -> None:
+        """An event that will be dispatched when the
+        :meth:`~earwax.BoxLevel.move` action has been used, but no move was
+        performed.
+
+        :param distance: The ``distance`` value that was passed to ``move()``.
+
+        :param vertical: The ``vertical`` value that was passed to ``move``.
+
+        :param bearing: The ``bearing`` argument that was passed to ``move``.
+        """
+        pass
 
     def set_coordinates(self, p: Point) -> None:
         """Set the current coordinates.
@@ -145,7 +174,9 @@ class BoxLevel(Level, EventDispatcher):
         """Returns a callable that allows the player to move on the map.
 
         If the move is successfl (I.E.: There is a box at the destination
-        coordinates), the ``on_move`` event is dispatched.
+        coordinates), the :meth:`~earwax.BoxLevel.on_move` event is dispatched.
+
+        If not, then :meth:`~earwax.BoxLevel.on_move_fail` is dispatched.
 
         :param distance: The distance to move.
 
@@ -185,6 +216,10 @@ class BoxLevel(Level, EventDispatcher):
                     box.dispatch_event('on_footstep')
                     self.handle_box(box)
                 self.dispatch_event('on_move')
+            else:
+                self.dispatch_event(
+                    'on_move_fail', distance, vertical, bearing
+                )
 
         return inner
 
