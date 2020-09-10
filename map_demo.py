@@ -74,7 +74,9 @@ boxes.append(main_portal_box)
 back_office: Box = Box(
     Point(100, 100, 100), Point(125, 125, 102), name='Back Office'
 )
-back_portal_box: Box = Box(back_office.bottom_left, back_office.bottom_left, name=back_office.name)
+back_portal_box: Box = Box(
+    back_office.bottom_left, back_office.bottom_left, name=back_office.name
+)
 
 boxes.extend(
     [
