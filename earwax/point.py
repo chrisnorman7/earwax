@@ -27,9 +27,9 @@ class PointDirections(Enum):
     northwest = 8
 
 
-@attrs(auto_attribs=True, order=False)
+@attrs(auto_attribs=True, order=False, hash=True)
 class Point(CoordinatesMixin):
-    """A point in 2d space."""
+    """A point in 3d space."""
 
     def directions_to(self, other: 'Point') -> PointDirections:
         """Returns the direction between this point and ``other``.

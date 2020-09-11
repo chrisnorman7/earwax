@@ -1,7 +1,7 @@
 from pytest import fixture
 from synthizer import Context, initialize, shutdown
 
-from earwax import Box, BoxLevel, Editor, Game, Level, Menu, Point
+from earwax import Box, BoxLevel, Editor, Game, Level, Menu, Point, GameBoard
 
 
 @fixture(name='level')
@@ -47,3 +47,8 @@ def get_box() -> Box:
 @fixture(name='box_level')
 def box_level(game: Game, box) -> BoxLevel:
     return BoxLevel(game, box)
+
+
+@fixture(name='board')
+def get_gameboard(game: Game) -> GameBoard[int]:
+    return GameBoard(game, Point(2, 2, 2), lambda p: 0)

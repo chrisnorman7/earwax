@@ -49,6 +49,7 @@ if True:
     from .editor import Editor
     from .event_matcher import EventMatcher
     from .game import Game
+    from .game_board import GameBoard, NoSuchTile
     from .level import IntroLevel, Level
     from .mapping import (Box, BoxLevel, Door, FittedBox, NotADoor,
                           OutOfBounds, Portal, box_row)
@@ -81,5 +82,5 @@ __all__ = [
     'box_row', 'play_path', 'schedule_generator_destruction', 'BoxLevel',
     'Ambiance', 'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track',
     'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel',
-    'CoordinatesMixin'
+    'CoordinatesMixin', 'GameBoard', 'NoSuchTile'
 ]
