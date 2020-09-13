@@ -14,6 +14,7 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
 import sys
+from subprocess import check_output
 from typing import List
 
 sys.path.insert(0, os.path.abspath('.'))
@@ -77,3 +78,5 @@ autodoc_mock_imports = [
     'typing_inspect', 'shortuuid'
 ]
 master_doc = 'index'
+
+version: str = check_output(['git', 'describe', '--abbrev=1']).decode().strip()
