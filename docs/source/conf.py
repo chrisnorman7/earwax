@@ -79,4 +79,4 @@ autodoc_mock_imports = [
 ]
 master_doc = 'index'
 
-version: str = check_output(['git', 'describe', '--abbrev=1']).decode().strip()
+version: str = check_output(['git', 'describe', '--abbrev=1', '--debug']).decode().strip()
