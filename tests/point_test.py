@@ -86,3 +86,8 @@ def test_coords() -> None:
     p.y = 5
     p.z = 4
     assert p.coordinates == (6, 5, 4)
+
+
+def test_neg() -> None:
+    p: Point = Point(4, 5, 6)
+    assert -p == Point(-4, -5, -6)

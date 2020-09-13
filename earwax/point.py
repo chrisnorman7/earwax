@@ -108,6 +108,12 @@ class Point(CoordinatesMixin):
                 f'instance. Got {type(offset)} instead.'
             )
 
+    def __neg__(self) -> 'Point':
+        """Return a copy of this instance with all its coordinates multiplied
+        by -1."""
+        cls = type(self)
+        return cls(self.x * -1, self.y * -1, self.z * -1)
+
     def __eq__(self, other: Any) -> bool:
         """Equality test."""
         if other.__class__ is self.__class__:
