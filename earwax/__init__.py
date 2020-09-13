@@ -46,6 +46,7 @@ if True:
     from .ambiance import Ambiance
     from .config import Config, ConfigValue
     from .configuration import EarwaxConfig
+    from .die import Die
     from .editor import Editor
     from .event_matcher import EventMatcher
     from .game import Game
@@ -82,5 +83,5 @@ __all__ = [
     'box_row', 'play_path', 'schedule_generator_destruction', 'BoxLevel',
     'Ambiance', 'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track',
     'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel',
-    'CoordinatesMixin', 'GameBoard', 'NoSuchTile'
+    'CoordinatesMixin', 'GameBoard', 'NoSuchTile', 'Die'
 ]
