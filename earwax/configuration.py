@@ -53,14 +53,16 @@ class MenuConfig(Config):
     default_item_activate_sound.dump(dump_path)
     default_item_activate_sound.load(load_path)
 
+try:
+    class EarwaxConfig(Config):
+        """The main earwax configuration.
 
-class EarwaxConfig(Config):
-    """The main earwax configuration.
+        You can configure this in your programs, and the main
+        :meth:`earwax <earwax.cmd.main.main>` method will use it when configuring
+        games made with it.
+        """
 
-    You can configure this in your programs, and the main
-    :meth:`earwax <earwax.cmd.main.main>` method will use it when configuring
-    games made with it.
-    """
-
-    __section_name__ = 'Earwax Configuration'
-    menus: MenuConfig = MenuConfig()
+        __section_name__ = 'Earwax Configuration'
+        menus: MenuConfig = MenuConfig()
+except TypeError:
+    pass  # Docs are building.
