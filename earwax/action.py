@@ -40,6 +40,11 @@ class Action:
     :ivar ~earwax.Action.modifiers: Keyboard modifiers. Should be made up of
         modifiers from pyglet.window.key.
 
+    :ivar ~earwax.Action.joystick_button: The button that must be pressed on a
+        game controler to trigger this action.
+
+        The button can be any integer supported by any game pad.
+
     :ivar ~earwax.Action.interval: How often this action can run.
 
         If ``None``, then it is a one-time action. One-time actions should be
@@ -60,6 +65,7 @@ class Action:
     symbol: Optional[int] = None
     mouse_button: Optional[int] = None
     modifiers: int = 0
+    joystick_button: Optional[int] = None
     interval: Optional[int] = Factory(lambda: None)
     last_run: float = attrib(default=Factory(float), init=False)
 

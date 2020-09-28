@@ -51,95 +51,103 @@ class ExampleConfig(Config):
     can_beep = ConfigValue(True, name='Allow beeping')
 
 
-def main() -> None:
-    g: Game = Game()
-    level: Level = Level(g)
-    config: ExampleConfig = ExampleConfig()
+g: Game = Game()
+level: Level = Level(g)
+config: ExampleConfig = ExampleConfig()
 
-    @level.action('Change window title', symbol=key.T)
-    def set_title() -> OptionalGenerator:
-        """Set the window title to the given text."""
 
-        def inner(text: str) -> None:
-            if g.window is not None:
-                g.window.set_caption(text)
-            tts.speak('Title set.')
-            g.pop_level()
+@level.action('Change window title', symbol=key.T)
+def set_title() -> OptionalGenerator:
+    """Set the window title to the given text."""
 
+    def inner(text: str) -> None:
         if g.window is not None:
-            tts.speak(f'Window title: {g.window.caption}')
-            yield
-            g.push_level(Editor(g, inner, text=g.window.caption))
+            g.window.set_caption(text)
+        tts.speak('Title set.')
+        g.pop_level()
 
-    @level.action('Quit', symbol=key.ESCAPE)
-    def do_quit() -> None:
-        """Quit the game."""
-        if g.window is not None:
-            g.window.dispatch_event('on_close')
-
-    @level.action('Beep', symbol=key.B, interval=0.75)
-    def do_beep() -> None:
-        """Speak something."""
-        if config.can_beep.value:
-            sys.stdout.write('\a')
-            sys.stdout.flush()
-
-    @level.action('Mouse thing', mouse_button=mouse.LEFT)
-    def mouse_thing():
-        tts.speak('Mouse down.')
+    if g.window is not None:
+        tts.speak(f'Window title: {g.window.caption}')
         yield
-        tts.speak('Mouse up.')
+        g.push_level(Editor(g, inner, text=g.window.caption))
 
-    @level.action('Toggle beeping', symbol=key.P, mouse_button=mouse.RIGHT)
-    def toggle_beep() -> None:
-        """Toggle beeping."""
-        config.can_beep.value = not config.can_beep.value
-        tts.speak(
-            f'Beeping {"enabled" if config.can_beep.value else "disabled"}.'
-        )
 
-    @level.action('Menu', symbol=key.M)
-    def menu() -> OptionalGenerator:
-        """Select a file."""
+@level.action('Quit', symbol=key.ESCAPE, joystick_button=3)
+def do_quit() -> None:
+    """Quit the game."""
+    if g.window is not None:
+        g.window.dispatch_event('on_close')
 
-        def play_sound(path: Optional[Path]) -> None:
-            """Call player.play in a try block."""
-            if g.interface_sound_player is not None and path is not None:
-                try:
-                    g.interface_sound_player.play_path(path)
-                except SynthizerError:
-                    pass  # Not a sound file.
 
-        yield
-        menu: FileMenu = FileMenu(
-            g, 'Select A File', func=play_sound, path=Path.cwd(),
-        )
-        g.push_level(menu)
+@level.action('Beep', symbol=key.B, interval=0.75, joystick_button=0)
+def do_beep() -> None:
+    """Speak something."""
+    if config.can_beep.value:
+        sys.stdout.write('\a')
+        sys.stdout.flush()
 
-    @level.action('Options', symbol=key.O)
-    def options() -> Generator[None, None, None]:
-        """Show the options menu."""
-        yield
-        m: ConfigMenu = ConfigMenu(g, 'Options', config=config)
-        g.push_level(m)
 
-    @level.action('Configure Earwax', symbol=key.C)
-    def configure_earwax() -> Generator[None, None, None]:
-        """Configure the earwax library."""
-        yield
-        m: ConfigMenu = ConfigMenu(g, 'Earwax Configuration')
-        g.push_level(m)
+@level.action('Mouse thing', mouse_button=mouse.LEFT)
+def mouse_thing():
+    tts.speak('Mouse down.')
+    yield
+    tts.speak('Mouse up.')
 
-    @level.action(
-        'Show actions', symbol=key.SLASH, modifiers=key.MOD_SHIFT
+
+@level.action(
+    'Toggle beeping', symbol=key.P, mouse_button=mouse.RIGHT,
+    joystick_button=1
+)
+def toggle_beep() -> Generator[None, None, None]:
+    """Toggle beeping."""
+    config.can_beep.value = not config.can_beep.value
+    yield
+    tts.speak(
+        f'Beeping {"enabled" if config.can_beep.value else "disabled"}.'
     )
-    def show_actions() -> OptionalGenerator:
-        """Show all game actions."""
-        yield
-        g.push_level(ActionMenu(g, 'Actions'))
 
-    g.run(Window(caption='Example Game'), initial_level=level)
+
+@level.action('Menu', symbol=key.M)
+def menu() -> OptionalGenerator:
+    """Select a file."""
+
+    def play_sound(path: Optional[Path]) -> None:
+        """Call player.play in a try block."""
+        if g.interface_sound_player is not None and path is not None:
+            try:
+                g.interface_sound_player.play_path(path)
+            except SynthizerError:
+                pass  # Not a sound file.
+
+    yield
+    menu: FileMenu = FileMenu(
+        g, 'Select A File', func=play_sound, path=Path.cwd(),
+    )
+    g.push_level(menu)
+
+
+@level.action('Options', symbol=key.O)
+def options() -> Generator[None, None, None]:
+    """Show the options menu."""
+    yield
+    m: ConfigMenu = ConfigMenu(g, 'Options', config=config)
+    g.push_level(m)
+
+
+@level.action('Configure Earwax', symbol=key.C)
+def configure_earwax() -> Generator[None, None, None]:
+    """Configure the earwax library."""
+    yield
+    m: ConfigMenu = ConfigMenu(g, 'Earwax Configuration')
+    g.push_level(m)
+
+
+@level.action('Show actions', symbol=key.SLASH, modifiers=key.MOD_SHIFT)
+def show_actions() -> OptionalGenerator:
+    """Show all game actions."""
+    yield
+    g.push_level(ActionMenu(g, 'Actions'))
 
 
 if __name__ == '__main__':
-    main()
+    g.run(Window(caption='Example Game'), initial_level=level)

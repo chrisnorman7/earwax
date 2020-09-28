@@ -2,10 +2,13 @@
 
 from inspect import isgenerator
 from pathlib import Path
-from typing import Callable, Dict, Generator, Iterator, List, Optional, cast
+from typing import (
+    Callable, Dict, Generator, Iterator, List, Optional, Tuple, cast)
 
 from attr import Factory, attrib, attrs
 from pyglet import app, clock
+from pyglet.event import EventDispatcher
+from pyglet.input import Joystick, get_joysticks
 from pyglet.resource import get_settings_path
 from pyglet.window import Window
 from synthizer import Context, initialized
@@ -17,13 +20,16 @@ from .level import Level
 from .sound import AdvancedInterfaceSoundPlayer
 
 ActionListType = List[Action]
-ReleaseGeneratorListType = Dict[int, Generator[None, None, None]]
+ReleaseGeneratorDictType = Dict[int, Generator[None, None, None]]
+JoyButtonReleaseGeneratorDictType = Dict[
+    Tuple[str, int], Generator[None, None, None]
+]
 MotionFunctionType = Callable[[], None]
 MotionsType = Dict[int, MotionFunctionType]
 
 
 @attrs(auto_attribs=True, repr=False)
-class Game:
+class Game(EventDispatcher):
     """The main game object.
 
     This object holds a reference to the game window, as well as a list of
@@ -67,6 +73,10 @@ class Game:
         instances which returned generators, and need to do something on mouse
         release.
 
+    :ivar ~earwax.Game.joybutton_release_generators: The :class:`earwax.Action`
+        instances which returned generators, and need to do something on
+        joystick button release.
+
     :ivar ~earwax.Game.event_matchers: The :class:`earwax.EventMatcher`
         instances used by this object.
 
@@ -95,17 +105,27 @@ class Game:
         default=Factory(list), init=False
     )
 
-    key_release_generators: ReleaseGeneratorListType = attrib(
+    key_release_generators: ReleaseGeneratorDictType = attrib(
         default=Factory(dict), init=False
     )
 
-    mouse_release_generators: ReleaseGeneratorListType = attrib(
+    mouse_release_generators: ReleaseGeneratorDictType = attrib(
+        default=Factory(dict), init=False
+    )
+
+    joybutton_release_generators: JoyButtonReleaseGeneratorDictType = attrib(
         default=Factory(dict), init=False
     )
 
     event_matchers: Dict[str, EventMatcher] = attrib(
         default=Factory(dict), init=False, repr=False
     )
+
+    joysticks: List[Joystick] = attrib(default=Factory(list), init=False)
+
+    def __attrs_post_init__(self) -> None:
+        self.register_event_type('before_run')
+        self.register_event_type('after_run')
 
     def start_action(self, a: Action) -> OptionalGenerator:
         """Start an action. If the action has no interval, it will be ran
@@ -312,6 +332,44 @@ class Game:
         self.on_mouse_press(0, 0, button, modifiers)
         self.on_mouse_release(0, 0, button, modifiers)
 
+    def on_joybutton_press(self, joystick: Joystick, button: int) -> bool:
+        """The default handler that fires when a joystick button is pressed.
+
+        :param joystick: The joystick that emited the event.
+
+        : param button: The button that was pressed.
+        """
+        if self.level is not None:
+            a: Action
+            for a in self.level.actions:
+                if a.joystick_button == button:
+                    res: OptionalGenerator = self.start_action(a)
+                    if isgenerator(res):
+                        next(cast(Iterator[None], res))
+                        self.joybutton_release_generators[
+                            (joystick.device.name, button)
+                        ] = cast(
+                            Generator[None, None, None], res
+                        )
+            return True
+        return False
+
+    def on_joybutton_release(self, joystick: Joystick, button: int) -> bool:
+        t: Tuple[str, int] = (joystick.device.name, button)
+        a: Action
+        for a in self.triggered_actions:
+            if a.joystick_button == button:
+                self.stop_action(a)
+        if t in self.joybutton_release_generators:
+            generator: Generator[
+                None, None, None
+            ] = self.joybutton_release_generators.pop(t)
+            try:
+                next(generator)
+            except StopIteration:
+                pass
+        return True
+
     def before_run(self) -> None:
         """This hook is used by the run method, just before pyglet.app.run is
         called.
@@ -320,6 +378,14 @@ class Game:
         on_key_press and on_text. Also, we are inside a synthizer.initialized
         context manager, so feel free to play sounds, and use
         :attr:`self.audio_context <earwax.Game.audio_context>`."""
+        pass
+
+    def after_run(self) -> None:
+        """An event which is dispatched after the main game loop has ended.
+
+        By this point, synthizer has been shutdown, and there is nothing else
+        to be done.
+        """
         pass
 
     def run(
@@ -337,6 +403,8 @@ class Game:
             adding methods with the correct names to their classes.
 
         * Set the requested mouse exclusive mode on the provided window.
+
+        * call :meth:`~earwax.Game.open_joysticks`.
 
         * Enter a ``synthizer.initialized`` contextmanager.
 
@@ -363,6 +431,7 @@ class Game:
             window.event(name)(em.dispatch)
         window.set_exclusive_mouse(mouse_exclusive)
         self.window = window
+        self.open_joysticks()
         with initialized():
             self.audio_context = Context()
             self.interface_sound_player = AdvancedInterfaceSoundPlayer(
@@ -370,8 +439,24 @@ class Game:
             )
             if initial_level is not None:
                 self.push_level(initial_level)
-            self.before_run()
+            self.dispatch_event('before_run')
             app.run()
+        self.dispatch_event('after_run')
+
+    def open_joysticks(self) -> None:
+        """Open and attach events to all attached joysticks."""
+        j: Joystick
+        for j in get_joysticks():
+            if j in self.joysticks:
+                continue
+            j.open()
+            self.joysticks.append(j)
+            name: str
+            for name in j.event_types:
+                if name not in self.event_matchers:
+                    self.event_matchers[name] = EventMatcher(self, name)
+                m: EventMatcher = self.event_matchers[name]
+                j.event(name)(m.dispatch)
 
     def push_level(self, level: Level) -> None:
         """Push a level onto :attr:`self.levels <earwax.Game.levels>`.

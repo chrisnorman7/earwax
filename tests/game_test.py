@@ -29,6 +29,14 @@ class WorksSecondYield(Exception):
     pass
 
 
+class BeforeRunWorks(Exception):
+    pass
+
+
+class AfterRunWorks(Exception):
+    pass
+
+
 def test_init(game: Game) -> None:
     assert isinstance(game, Game)
     assert game.levels == []
@@ -130,8 +138,17 @@ def test_level(game: Game, level: Level, menu: Menu) -> None:
 
 
 def test_run(game: Game) -> None:
+    w: Window = Window()
     l: RunLevel = RunLevel(game)
-    game.run(Window(), initial_level=l)
+    g: Game = Game()
+
+    @g.event
+    def before_run() -> None:
+        raise BeforeRunWorks
+
+    with raises(BeforeRunWorks):
+        g.run(w)
+    game.run(w, initial_level=l)
     assert game.level is l
 
 
@@ -140,3 +157,14 @@ def test_get_settings_path() -> None:
     assert g.get_settings_path() == Path(get_settings_path('earwax.game'))
     g = Game(name='testing')
     assert g.get_settings_path() == Path(get_settings_path('testing'))
+
+
+def test_after_run(game: Game) -> None:
+    l: RunLevel = RunLevel(game)
+
+    @game.event
+    def after_run() -> None:
+        raise AfterRunWorks
+
+    with raises(AfterRunWorks):
+        game.run(Window(), initial_level=l)
