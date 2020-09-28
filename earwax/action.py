@@ -1,7 +1,7 @@
 """Provides the Action class."""
 
 from time import time
-from typing import TYPE_CHECKING, Callable, Generator, Optional
+from typing import TYPE_CHECKING, Callable, Generator, Optional, Tuple
 
 from attr import Factory, attrib, attrs
 
@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 OptionalGenerator = Optional[Generator[None, None, None]]
 ActionFunctionType = Callable[[], OptionalGenerator]
+HatDirection = Tuple[int, int]
 
 
 @attrs(auto_attribs=True)
@@ -45,6 +46,11 @@ class Action:
 
         The button can be any integer supported by any game pad.
 
+    :ivar ~earwax.Action.hat_direction: The position the hat must be in to
+        trigger this action.
+
+        This value must be one of the members of :var:`earwax.HatPositions`.
+
     :ivar ~earwax.Action.interval: How often this action can run.
 
         If ``None``, then it is a one-time action. One-time actions should be
@@ -66,6 +72,7 @@ class Action:
     mouse_button: Optional[int] = None
     modifiers: int = 0
     joystick_button: Optional[int] = None
+    hat_direction: Optional[HatDirection] = None
     interval: Optional[int] = Factory(lambda: None)
     last_run: float = attrib(default=Factory(float), init=False)
 

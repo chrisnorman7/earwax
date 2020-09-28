@@ -13,7 +13,7 @@ from pyglet.resource import get_settings_path
 from pyglet.window import Window
 from synthizer import Context, initialized
 
-from .action import Action, OptionalGenerator
+from .action import Action, HatDirection, OptionalGenerator
 from .configuration import EarwaxConfig
 from .event_matcher import EventMatcher
 from .level import Level
@@ -23,6 +23,9 @@ ActionListType = List[Action]
 ReleaseGeneratorDictType = Dict[int, Generator[None, None, None]]
 JoyButtonReleaseGeneratorDictType = Dict[
     Tuple[str, int], Generator[None, None, None]
+]
+JoyHatReleaseGeneratorDictType = Dict[
+    HatDirection, Generator[None, None, None]
 ]
 MotionFunctionType = Callable[[], None]
 MotionsType = Dict[int, MotionFunctionType]
@@ -114,6 +117,10 @@ class Game(EventDispatcher):
     )
 
     joybutton_release_generators: JoyButtonReleaseGeneratorDictType = attrib(
+        default=Factory(dict), init=False
+    )
+
+    joyhat_release_generators: JoyHatReleaseGeneratorDictType = attrib(
         default=Factory(dict), init=False
     )
 
@@ -369,6 +376,44 @@ class Game(EventDispatcher):
             except StopIteration:
                 pass
         return True
+
+    def on_joyhat_motion(self, joystick: Joystick, x: int, y: int) -> bool:
+        """The default handler that fires when a hat is moved.
+
+        If the given position is the default position ``(0, 0)``, then any
+        actions started by hat motions are stopped.
+
+        :param joystick: The joystick that emited the event.
+
+        : param x: The left / right position of the hat.
+
+        : param y: The up / down position of the hat.
+        """
+        direction: HatDirection = (x, y)
+        a: Action
+        if direction == (0, 0):
+            for a in self.triggered_actions:
+                if a.hat_direction is direction:
+                    self.stop_action(a)
+            if direction in self.joyhat_release_generators:
+                generator: Generator[
+                    None, None, None
+                ] = self.joyhat_release_generators.pop(direction)
+                try:
+                    next(generator)
+                except StopIteration:
+                    pass
+        if self.level is not None:
+            for a in self.level.actions:
+                if a.hat_direction == direction:
+                    res: OptionalGenerator = self.start_action(a)
+                    if isgenerator(res):
+                        next(cast(Iterator[None], res))
+                        self.joyhat_release_generators[direction] = cast(
+                            Generator[None, None, None], res
+                        )
+            return True
+        return False
 
     def before_run(self) -> None:
         """This hook is used by the run method, just before pyglet.app.run is
