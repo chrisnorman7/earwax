@@ -2,12 +2,11 @@
 
 from inspect import isgenerator
 from pathlib import Path
-from typing import (
-    Callable, Dict, Generator, Iterator, List, Optional, Tuple, cast)
+from typing import (Any, Callable, Dict, Generator, Iterator, List, Optional,
+                    Tuple, cast)
 
 from attr import Factory, attrib, attrs
 from pyglet import app, clock
-from pyglet.event import EventDispatcher
 from pyglet.input import Joystick, get_joysticks
 from pyglet.resource import get_settings_path
 from pyglet.window import Window
@@ -17,6 +16,7 @@ from .action import Action, HatDirection, OptionalGenerator
 from .configuration import EarwaxConfig
 from .event_matcher import EventMatcher
 from .level import Level
+from .mixins import RegisterEventMixin
 from .sound import AdvancedInterfaceSoundPlayer
 
 ActionListType = List[Action]
@@ -32,7 +32,7 @@ MotionsType = Dict[int, MotionFunctionType]
 
 
 @attrs(auto_attribs=True, repr=False)
-class Game(EventDispatcher):
+class Game(RegisterEventMixin):
     """The main game object.
 
     This object holds a reference to the game window, as well as a list of
@@ -131,8 +131,14 @@ class Game(EventDispatcher):
     joysticks: List[Joystick] = attrib(default=Factory(list), init=False)
 
     def __attrs_post_init__(self) -> None:
-        self.register_event_type('before_run')
-        self.register_event_type('after_run')
+        func: Callable[..., Any]
+        for func in (
+            self.before_run, self.after_run, self.on_close,
+            self.on_joybutton_press, self.on_joybutton_release,
+            self.on_joyhat_motion, self.on_key_press, self.on_key_release,
+            self.on_mouse_press, self.on_mouse_release
+        ):
+            self.register_event_type(func.__name__)
 
     def start_action(self, a: Action) -> OptionalGenerator:
         """Start an action. If the action has no interval, it will be ran
@@ -509,14 +515,14 @@ class Game(EventDispatcher):
         This ensures that all events will be handled by the provided level
         until another level is pushed on top, or the current one is popped.
 
-        This method also calls :meth:`~earwax.Level.on_push` on the provided
-        level.
+        This method also dispatches the :meth:`~earwax.Level.on_push` event on
+        the provided level.
 
         :param level: The :class:`earwax.Level` instance to push onto the
             stack.
         """
         self.levels.append(level)
-        level.on_push()
+        level.dispatch_event('on_push')
 
     def replace_level(self, level: Level) -> None:
         """Pop the current level, then push the new one.
@@ -541,9 +547,9 @@ class Game(EventDispatcher):
         This method calls :meth:`~earwax.Level.on_pop` on the popped level, and
         :meth:`~earwax.Level.on_reveal` on the one below it."""
         level: Level = self.levels.pop()
-        level.on_pop()
+        level.dispatch_event('on_pop')
         if self.level is not None:
-            self.level.on_reveal()
+            self.level.dispatch_event('on_reveal')
 
     def clear_levels(self) -> None:
         """Pop all levels.

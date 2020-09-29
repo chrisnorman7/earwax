@@ -9,6 +9,7 @@ from synthizer import Buffer, BufferGenerator, Context, DirectSource
 
 from .action import Action, ActionFunctionType
 from .ambiance import Ambiance
+from .mixins import RegisterEventMixin
 from .sound import get_buffer
 from .track import Track
 
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
 
 
 @attrs(auto_attribs=True)
-class Level:
+class Level(RegisterEventMixin):
     """An object that contains event handlers. Can be pushed and pulled from
     within a :class:`~earwax.Game` instance.
 
@@ -52,6 +53,12 @@ class Level:
 
     ambiances: List['Ambiance'] = attrib(default=Factory(list), init=False)
     tracks: List[Track] = attrib(default=Factory(list), init=False)
+
+    def __attrs_post_init__(self) -> None:
+        self.register_event(self.on_pop)
+        self.register_event(self.on_push)
+        self.register_event(self.on_reveal)
+        self.register_event(self.on_text_motion)
 
     def start_ambiances(self) -> None:
         """Start all the ambiances on this instance."""

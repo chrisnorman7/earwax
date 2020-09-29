@@ -6,10 +6,11 @@ from typing import Optional
 from attr import attrs
 
 from ..action import ActionFunctionType
+from ..mixins import RegisterEventMixin
 
 
 @attrs(auto_attribs=True)
-class MenuItem:
+class MenuItem(RegisterEventMixin):
     """An item in a :class:`~earwax.menu.Menu`.
 
     This class is rarely used directly, instead
@@ -45,6 +46,9 @@ class MenuItem:
     func: ActionFunctionType
     select_sound_path: Optional[Path] = None
     activate_sound_path: Optional[Path] = None
+
+    def __attrs_post_init__(self) -> None:
+        self.register_event(self.on_selected)
 
     def on_selected(self) -> None:
         """The function which will be called when this menu item is

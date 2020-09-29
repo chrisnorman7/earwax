@@ -1,13 +1,16 @@
 """Provides various mixin classes for used with other objects."""
 
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Optional, Tuple, Union
 
 from attr import attrs
+from pyglet.event import EventDispatcher
 
 from .speech import tts
 
 if TYPE_CHECKING:
     from .game import Game
+
+EventFunction = Callable[..., Any]
 
 
 @attrs(auto_attribs=True)
@@ -60,3 +63,25 @@ class CoordinatesMixin:
     def coordinates(self) -> Tuple[float, float, float]:
         """Returns ``self.x``, ``self.y``, and ``self.z`` as a tuple."""
         return self.x, self.y, self.z
+
+
+class RegisterEventMixin(EventDispatcher):
+    """Allows the registration, and binding of events to be handled with one
+    function."""
+
+    def register_event(self, data: Union[EventFunction, str]) -> Union[
+        EventFunction, Callable[[EventFunction], EventFunction]
+    ]:
+        """Registers an event, and binds it at the same time."""
+        name: Optional[str] = None
+        if isinstance(data, str):
+            name = data
+
+        def inner(func: EventFunction) -> EventFunction:
+            _name: str = name or func.__name__
+            self.register_event_type(_name)
+            return self.event(_name)(func)
+
+        if callable(data):
+            return inner(data)
+        return inner

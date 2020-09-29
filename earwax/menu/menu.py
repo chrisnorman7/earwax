@@ -8,6 +8,7 @@ from attr import Factory, attrib, attrs
 from pyglet.window import key
 
 from ..action import ActionFunctionType, OptionalGenerator
+from ..hat_directions import DOWN, LEFT, RIGHT, UP
 from ..level import Level
 from ..mixins import DismissibleMixin, TitleMixin
 from ..speech import tts
@@ -84,12 +85,21 @@ class Menu(Level, TitleMixin, DismissibleMixin):
 
     def __attrs_post_init__(self) -> None:
         """Initialise the menu."""
-        self.action('Activate item', symbol=key.RETURN)(self.activate)
-        self.action('Dismiss', symbol=key.ESCAPE)(self.dismiss)
-        self.action('Move down', symbol=key.DOWN)(self.move_down)
-        self.action('Move up', symbol=key.UP)(self.move_up)
+        self.action('Activate item', symbol=key.RETURN, hat_direction=RIGHT)(
+            self.activate
+        )
+        self.action('Dismiss', symbol=key.ESCAPE, hat_direction=LEFT)(
+            self.dismiss
+        )
+        self.action('Move down', symbol=key.DOWN, hat_direction=DOWN)(
+            self.move_down
+        )
+        self.action('Move up', symbol=key.UP, hat_direction=UP)(
+            self.move_up
+        )
         self.motion(key.MOTION_BEGINNING_OF_LINE)(self.home)
         self.motion(key.MOTION_END_OF_LINE)(self.end)
+        self.register_event(self.on_text)
 
     @property
     def current_item(self) -> Optional[MenuItem]:
@@ -169,7 +179,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
             tts.speak(self.title)
         else:
             tts.speak(item.title)
-            item.on_selected()
+            item.dispatch_event('on_selected')
             sound_path: Optional[Path] = item.select_sound_path or \
                 self.item_select_sound_path or \
                 self.game.config.menus.default_item_select_sound.value

@@ -38,7 +38,9 @@ class EventMatcher:
             found.
         """
         if self.game.level is not None:
-            if hasattr(self.game.level, self.name):
-                return getattr(self.game.level, self.name)(*args, **kwargs)
-        if hasattr(self.game, self.name):
-            return getattr(self.game, self.name)(*args, **kwargs)
+            if self.name in self.game.level.event_types:
+                return self.game.level.dispatch_event(
+                    self.name, *args, **kwargs
+                )
+        if self.name in self.game.event_types:
+            return self.game.dispatch_event(self.name, *args, **kwargs)

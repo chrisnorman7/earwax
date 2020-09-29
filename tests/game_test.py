@@ -11,12 +11,6 @@ from pytest import raises
 from earwax import Game, Level, Menu
 
 
-class RunLevel(Level):
-    def on_push(self) -> None:
-        assert self.game.level is self
-        schedule_once(lambda dt: app.exit(), 0.5)
-
-
 class WorksWithoutYield(Exception):
     pass
 
@@ -75,9 +69,9 @@ def test_on_key_release(game: Game, level: Level) -> None:
         yield
         raise WorksSecondYield()
 
-    game.on_key_press(key._2, 0)
+    game.dispatch_event('on_key_press', key._2, 0)
     with raises(WorksSecondYield):
-        game.on_key_release(key._2, 0)
+        game.dispatch_event('on_key_release', key._2, 0)
 
 
 def test_push_level(game: Game, level: Level) -> None:
@@ -137,9 +131,14 @@ def test_level(game: Game, level: Level, menu: Menu) -> None:
     assert game.level is menu
 
 
-def test_run(game: Game) -> None:
+def test_run(game: Game, level: Level) -> None:
     w: Window = Window()
-    l: RunLevel = RunLevel(game)
+
+    @level.event
+    def on_push() -> None:
+        assert game.level is level
+        schedule_once(lambda dt: app.exit(), 0.5)
+
     g: Game = Game()
 
     @g.event
@@ -148,8 +147,8 @@ def test_run(game: Game) -> None:
 
     with raises(BeforeRunWorks):
         g.run(w)
-    game.run(w, initial_level=l)
-    assert game.level is l
+    game.run(w, initial_level=level)
+    assert game.level is level
 
 
 def test_get_settings_path() -> None:
@@ -159,12 +158,16 @@ def test_get_settings_path() -> None:
     assert g.get_settings_path() == Path(get_settings_path('testing'))
 
 
-def test_after_run(game: Game) -> None:
-    l: RunLevel = RunLevel(game)
+def test_after_run(game: Game, level: Level) -> None:
+
+    @level.event
+    def on_push() -> None:
+        assert game.level is level
+        schedule_once(lambda dt: app.exit(), 0.5)
 
     @game.event
     def after_run() -> None:
         raise AfterRunWorks
 
     with raises(AfterRunWorks):
-        game.run(Window(), initial_level=l)
+        game.run(Window(), initial_level=level)
