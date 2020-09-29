@@ -1,7 +1,7 @@
 """Provides classes for working with levels."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Generator, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
 from pyglet.clock import schedule_once
@@ -55,10 +55,11 @@ class Level(RegisterEventMixin):
     tracks: List[Track] = attrib(default=Factory(list), init=False)
 
     def __attrs_post_init__(self) -> None:
-        self.register_event(self.on_pop)
-        self.register_event(self.on_push)
-        self.register_event(self.on_reveal)
-        self.register_event(self.on_text_motion)
+        func: Callable[[...], Any]
+        for func in (
+            self.on_pop, self.on_push, self.on_reveal, self.on_text_motion
+        ):
+            self.register_event_type(func.__name__)
 
     def start_ambiances(self) -> None:
         """Start all the ambiances on this instance."""
@@ -220,6 +221,7 @@ class IntroLevel(Level):
 
     def __attrs_post_init__(self) -> None:
         assert self.looping is False or self.skip_after is None
+        super().__attrs_post_init__()
 
     def on_push(self) -> None:
         """Start playing :attr:`self.sound_path

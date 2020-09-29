@@ -1,6 +1,6 @@
 """Provides the GameBoard class."""
 
-from typing import Callable, Generic, List, Optional, TypeVar
+from typing import Any, Callable, Generic, List, Optional, TypeVar
 
 from attr import Factory, attrib, attrs
 
@@ -43,10 +43,21 @@ class GameBoard(Level, Generic[T]):
     coordinates: Point = Factory(lambda: Point(0, 0, 0))
 
     tiles: List[List[List[T]]] = attrib(default=Factory(list), init=False)
+    populated_points: List[Point] = attrib(default=Factory(list), init=False)
 
     def __attrs_post_init__(self) -> None:
         """Populate the board."""
         super().__attrs_post_init__()
+        self.populate()
+        func: Callable[..., Any]
+        for func in (self.on_move, self.on_move_fail):
+            self.register_event_type(func.__name__)
+
+    def populate(self) -> None:
+        """Fill the board."""
+        self.tiles.clear()
+        self.populated_points.clear()
+        self.coordinates = Point(0, 0, 0)
         x: int = 0
         while x <= self.size.x:
             self.tiles.append([])
@@ -55,12 +66,12 @@ class GameBoard(Level, Generic[T]):
                 self.tiles[x].append([])
                 z: int = 0
                 while z <= self.size.z:
-                    self.tiles[x][y].append(self.tile_builder(Point(x, y, z)))
+                    p: Point = Point(x, y, z)
+                    self.populated_points.append(p)
+                    self.tiles[x][y].append(self.tile_builder(p))
                     z += 1
                 y += 1
             x += 1
-        self.register_event_type('on_move')
-        self.register_event_type('on_move_fail')
 
     def get_tile(self, p: Point) -> T:
         """Return the tile at the given point.
@@ -89,7 +100,7 @@ class GameBoard(Level, Generic[T]):
         except NoSuchTile:
             return None
 
-    def on_move(self, direction: PointDirections, tile: T) -> None:
+    def on_move(self, direction: PointDirections) -> None:
         """An event that is dispatched by :meth:`~earwax.GameBoard.move`.
 
         :param direction: The direction the player just moved.
@@ -141,9 +152,9 @@ class GameBoard(Level, Generic[T]):
                         if not wrap:
                             raise NoSuchTile()
                         setattr(p, name, 0)
-                tile: T = self.get_tile(p)
+                self.get_tile(p)
                 self.coordinates = p
-                self.dispatch_event('on_move', direction, tile)
+                self.dispatch_event('on_move', direction)
             except NoSuchTile:
                 self.dispatch_event('on_move_fail', direction)
 

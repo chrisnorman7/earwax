@@ -55,8 +55,8 @@ def get_board(game: Game) -> GameBoard[Tuple[float, float, float]]:
     )
 
     @b.event
-    def on_move(p: Point, t: Tuple[float, float, float]) -> None:
-        raise OnMoveWorks(p, t)
+    def on_move(p: Point) -> None:
+        raise OnMoveWorks(p)
 
     @b.event
     def on_move_fail(direction: PointDirections) -> None:
@@ -69,9 +69,7 @@ def test_on_move(game: Game) -> None:
     b: GameBoard[Tuple[float, float, float]] = get_board(game)
     with raises(OnMoveWorks) as exc:
         b.move(PointDirections.northeast)()
-    assert exc.value.args == (
-        PointDirections.northeast, b.coordinates.coordinates
-    )
+    assert exc.value.args == (PointDirections.northeast,)
 
 
 def test_on_move_fail(game: Game) -> None:
@@ -101,3 +99,12 @@ def test_current_tile(game: Game) -> None:
     assert b.current_tile == (1, 2, 3)
     b.coordinates = Point(10, 10, 10)
     assert b.current_tile is None
+
+
+def test_populated_points(game: Game) -> None:
+    b: GameBoard[None] = GameBoard(game, Point(2, 2, 0), lambda P: None)
+    assert len(b.populated_points) == 9
+    assert Point(0, 0, 0) in b.populated_points
+    assert Point(2, 0, 0) in b.populated_points
+    assert Point(2, 2, 0) in b.populated_points
+    assert Point(0, 2, 0) in b.populated_points

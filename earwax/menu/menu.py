@@ -99,7 +99,8 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         )
         self.motion(key.MOTION_BEGINNING_OF_LINE)(self.home)
         self.motion(key.MOTION_END_OF_LINE)(self.end)
-        self.register_event(self.on_text)
+        self.register_event_type(self.on_text.__name__)
+        super().__attrs_post_init__()
 
     @property
     def current_item(self) -> Optional[MenuItem]:
