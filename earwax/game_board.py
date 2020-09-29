@@ -3,7 +3,6 @@
 from typing import Callable, Generic, List, Optional, TypeVar
 
 from attr import Factory, attrib, attrs
-from pyglet.event import EventDispatcher
 
 from .level import Level
 from .point import Point, PointDirections
@@ -21,7 +20,7 @@ class NoSuchTile(Exception):
 
 
 @attrs(auto_attribs=True)
-class GameBoard(Level, EventDispatcher, Generic[T]):
+class GameBoard(Level, Generic[T]):
     """A useful starting point for making board games.
 
     :ivar ~earwax.GameBoard.size: The size of this board.
@@ -47,6 +46,7 @@ class GameBoard(Level, EventDispatcher, Generic[T]):
 
     def __attrs_post_init__(self) -> None:
         """Populate the board."""
+        super().__attrs_post_init__()
         x: int = 0
         while x <= self.size.x:
             self.tiles.append([])
