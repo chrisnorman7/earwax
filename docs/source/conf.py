@@ -60,9 +60,10 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path: List[str] = ['_static']
 
-apidoc_module_dir: str = '../../earwax'
+apidoc_module_dir: str = os.path.abspath('../../earwax')
 apidoc_excluded_paths: List[str] = ['tests']
 apidoc_separate_modules: bool = True
+autodoc_mock_imports = ['synthizer']
 
 
 def setup(app):
@@ -73,10 +74,6 @@ def setup(app):
     )
 
 
-autodoc_mock_imports = [
-    'synthizer', 'pyglet', 'attr', 'yaml', 'accessible_output2',
-    'typing_inspect', 'shortuuid'
-]
 master_doc = 'index'
 
 version: str = check_output(

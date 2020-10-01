@@ -45,7 +45,7 @@ class ConfigMenu(Menu):
     If an option is present with a type the menu doesn't know how to handle,
     :class:`earwax.UnknownTypeError` will be raised.
 
-    :ivar ~ConfigMenu.config: The configuration section this menu will
+    :ivar ~earwax.ConfigMenu.config: The configuration section this menu will
         configure.
 
     :ivar ~earwax.ConfigMenu.type_handlers: Functions to handle the types this
