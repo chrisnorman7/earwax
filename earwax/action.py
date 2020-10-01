@@ -49,7 +49,19 @@ class Action:
     :ivar ~earwax.Action.hat_direction: The position the hat must be in to
         trigger this action.
 
-        This value must be one of the members of :var:`earwax.HatPositions`.
+        This value must be a value supported by the hat control on the
+        controller you're targetting.
+
+        There are some helpful default values in :mod:`earwax.hat_directions`.
+        If they do not suit your purposes, simply provide your own tuple.
+
+        It is worth noting that if you rely on the hat, there are a few things to be aware of:
+
+        If you rely on generators in hat-triggered actions, then all actions
+        that have yielded will be stopped when the hat returns to its default
+        position. This is because Earwax does not attempt to keep track of the
+        last direction, and the hat does not generate release events like
+        joystick buttons do.
 
     :ivar ~earwax.Action.interval: How often this action can run.
 
