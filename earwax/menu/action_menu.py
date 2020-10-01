@@ -1,18 +1,19 @@
 """Provides the ActionMenu class."""
 
 from inspect import isgenerator
-from typing import Iterator, cast
+from typing import Iterator, Tuple, cast
 
 from attr import attrs
 from pyglet.window import key, mouse
 
 from ..action import Action, ActionFunctionType, OptionalGenerator
+from ..hat_directions import DEFAULT, DOWN, LEFT, RIGHT, UP
 from .menu import Menu
 
 
 @attrs(auto_attribs=True)
 class ActionMenu(Menu):
-    """A menu to show a list of actions, and their associated triggers.
+    """A menu to show a list of actions and their associated triggers.
 
     You can use this class with any game, like so::
 
@@ -86,6 +87,21 @@ class ActionMenu(Menu):
             s = f'{mods} + {s}'
         return s
 
+    def hat_direction_to_string(self, direction: Tuple[int, int]) -> str:
+        """Returns the given hat direction as a string."""
+        if direction == DEFAULT:
+            return 'Default'
+        elif direction == UP:
+            return 'Up'
+        elif direction == DOWN:
+            return 'Down'
+        elif direction == LEFT:
+            return 'Left'
+        elif direction == RIGHT:
+            return 'Right'
+        else:
+            return str(direction)
+
     def action_menu(self, action: Action) -> ActionFunctionType:
         """Show a submenu of triggers.
 
@@ -105,6 +121,11 @@ class ActionMenu(Menu):
             if action.mouse_button is not None:
                 s = self.mouse_to_string(action)
                 m.add_item('Mouse: ' + s, func)
+            if action.joystick_button is not None:
+                m.add_item(f'Joystick: Button {action.joystick_button}', func)
+            if action.hat_direction is not None:
+                d: str = self.hat_direction_to_string(action.hat_direction)
+                m.add_item(f'Joystick: {d} hat', func)
             self.game.push_level(m)
 
         return inner
