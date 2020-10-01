@@ -8,7 +8,7 @@ Implemented Features
 
 * Ability to push, pop, and replace Level instances on the central :class:`~earwax.Game` object.
 
-* A simple event handling system, allowing you to write clear and concise code.
+* Uses Pyglet's event system, mostly eliminating the need for subclassing.
 
 * Uses `Synthizer <https://synthizer.github.io/>`_ as its sound backend.
 
@@ -16,7 +16,7 @@ Implemented Features
 
 * A flexible and unobtrusive configuration framework that uses yaml.
 
-* The ability to use generic sound icons in menus, simply by setting a configuration value.
+* The ability to configure various apsects of the framework (including generic sound icons in menus), simply by setting configuration values on a :class:`configuration object <earwax.EarwaxConfig>` which resides on your :class:`game object <earwax.Game>`.
 
 * Various sound functions for playing sounds, and cleaning them up when they're finished.
 
@@ -25,6 +25,12 @@ Implemented Features
     * Game board levels, so you can create board games with minimal boilerplate.
 
     * Box levels, which contain boxes, which can be connected together to make maps. Both free and restricted movement commands are already implemented.
+
+* The ability to add actions to :class:`earwax.Level` instances with keyboard keys, mouse buttons, joystick buttons, and joystick hat positions.
+
+* A text-to-speech system.
+
+* An ``earwax`` command which can currently create default games.
 
 Feature Requests
 ----------------
