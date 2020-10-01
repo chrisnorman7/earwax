@@ -2,8 +2,8 @@
 
 from inspect import isgenerator
 from pathlib import Path
-from typing import (Any, Callable, Dict, Generator, Iterator, List, Optional,
-                    Tuple, cast)
+from typing import (
+    Callable, Dict, Generator, Iterator, List, Optional, Tuple, cast)
 
 from attr import Factory, attrib, attrs
 from pyglet import app, clock
@@ -15,6 +15,7 @@ from synthizer import Context, initialized
 from .action import Action, HatDirection, OptionalGenerator
 from .configuration import EarwaxConfig
 from .event_matcher import EventMatcher
+from .hat_directions import DEFAULT
 from .level import Level
 from .mixins import RegisterEventMixin
 from .sound import AdvancedInterfaceSoundPlayer
@@ -23,9 +24,6 @@ ActionListType = List[Action]
 ReleaseGeneratorDictType = Dict[int, Generator[None, None, None]]
 JoyButtonReleaseGeneratorDictType = Dict[
     Tuple[str, int], Generator[None, None, None]
-]
-JoyHatReleaseGeneratorDictType = Dict[
-    HatDirection, Generator[None, None, None]
 ]
 MotionFunctionType = Callable[[], None]
 MotionsType = Dict[int, MotionFunctionType]
@@ -120,8 +118,8 @@ class Game(RegisterEventMixin):
         default=Factory(dict), init=False
     )
 
-    joyhat_release_generators: JoyHatReleaseGeneratorDictType = attrib(
-        default=Factory(dict), init=False
+    joyhat_release_generators: List[Generator[None, None, None]] = attrib(
+        default=Factory(list), init=False
     )
 
     event_matchers: Dict[str, EventMatcher] = attrib(
@@ -131,7 +129,6 @@ class Game(RegisterEventMixin):
     joysticks: List[Joystick] = attrib(default=Factory(list), init=False)
 
     def __attrs_post_init__(self) -> None:
-        func: Callable[..., Any]
         for func in (
             self.before_run, self.after_run, self.on_close,
             self.on_joybutton_press, self.on_joybutton_release,
@@ -397,26 +394,25 @@ class Game(RegisterEventMixin):
         """
         direction: HatDirection = (x, y)
         a: Action
-        if direction == (0, 0):
+        if direction == DEFAULT:
             for a in self.triggered_actions:
-                if a.hat_direction is direction:
+                if a.hat_direction is not None:
                     self.stop_action(a)
-            if direction in self.joyhat_release_generators:
-                generator: Generator[
-                    None, None, None
-                ] = self.joyhat_release_generators.pop(direction)
+            generator: Generator[None, None, None]
+            for generator in self.joyhat_release_generators:
                 try:
                     next(generator)
                 except StopIteration:
                     pass
+            self.joyhat_release_generators.clear()
         if self.level is not None:
             for a in self.level.actions:
                 if a.hat_direction == direction:
                     res: OptionalGenerator = self.start_action(a)
                     if isgenerator(res):
                         next(cast(Iterator[None], res))
-                        self.joyhat_release_generators[direction] = cast(
-                            Generator[None, None, None], res
+                        self.joyhat_release_generators.append(
+                            cast(Generator[None, None, None], res)
                         )
             return True
         return False

@@ -1,7 +1,7 @@
 """Provides classes for working with levels."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional
+from typing import TYPE_CHECKING, Callable, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
 from pyglet.clock import schedule_once
@@ -55,7 +55,6 @@ class Level(RegisterEventMixin):
     tracks: List[Track] = attrib(default=Factory(list), init=False)
 
     def __attrs_post_init__(self) -> None:
-        func: Callable[[...], Any]
         for func in (
             self.on_pop, self.on_push, self.on_reveal, self.on_text_motion
         ):
