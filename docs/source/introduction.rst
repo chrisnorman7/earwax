@@ -41,5 +41,4 @@ The below code is a full -albeit minimal -  code example::
         """Quit the game."""
         w.close()
 
-    g.push_level(l)
-    g.run(w)
+    g.run(w, initial_level=l)
