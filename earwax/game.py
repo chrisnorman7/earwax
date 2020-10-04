@@ -514,9 +514,14 @@ class Game(RegisterEventMixin):
         This method also dispatches the :meth:`~earwax.Level.on_push` event on
         the provided level.
 
+        If the old level is not None, then the ``on_cover`` event is dispatched
+        on the old level, with the new level as the only argument.
+
         :param level: The :class:`earwax.Level` instance to push onto the
             stack.
         """
+        if self.level is not None:
+            self.level.dispatch_event('on_cover', level)
         self.levels.append(level)
         level.dispatch_event('on_push')
 

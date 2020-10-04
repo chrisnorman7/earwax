@@ -56,7 +56,8 @@ class Level(RegisterEventMixin):
 
     def __attrs_post_init__(self) -> None:
         for func in (
-            self.on_pop, self.on_push, self.on_reveal, self.on_text_motion
+            self.on_pop, self.on_push, self.on_reveal, self.on_text_motion,
+            self.on_cover
         ):
             self.register_event_type(func.__name__)
 
@@ -170,6 +171,10 @@ class Level(RegisterEventMixin):
         stack of a game."""
         self.stop_ambiances()
         self.stop_tracks()
+
+    def on_cover(self, level: 'Level') -> None:
+        """This level has just been covered by a new one."""
+        pass
 
     def on_reveal(self) -> None:
         """The event which is called when the level above this one in the stack

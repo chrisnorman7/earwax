@@ -1,6 +1,11 @@
 """Test level instances."""
 
+from pytest import raises
 from earwax import Action, Game, Level
+
+
+class OnCoverWorks(Exception):
+    pass
 
 
 def test_init(level: Level, game: Game) -> None:
@@ -20,3 +25,23 @@ def test_action(game: Game, level: Level) -> None:
     assert a.interval is None
     assert a.last_run == 0.0
     assert level.actions == [a]
+
+
+def test_on_cover(game: Game, level: Level) -> None:
+    l: Level = Level(game)
+
+    @level.event
+    def on_cover(lev: Level) -> None:
+        assert lev is l
+        raise OnCoverWorks()
+
+    game.push_level(level)
+    with raises(OnCoverWorks):
+        game.push_level(l)
+    assert game.level is level
+    game.pop_level()
+    assert game.level is None
+    game.push_level(l)
+    assert game.level is l
+    game.push_level(level)
+    assert game.level is level
