@@ -267,7 +267,15 @@ def play_paths(ctx: Context, paths: List[Path], gap: float = 0.1) -> None:
 
 @attrs(auto_attribs=True, frozen=True)
 class BufferDirectory:
-    """An object which holds a directory of ``synthizer.Buffer`` instances.
+    """An object which holds a directory of ``synthizer.Buffer`` instances::
+
+        b: BufferDirectory = BufferDirectory(
+            Path('sounds/weapons/cannons'), glob='*.wav'
+        )
+        # Get a random cannon buffer:
+        print(b.random_buffer())
+        # Get a random fully qualified path from the directory.
+        print(b.random_path())
 
     You can select single buffer instances from the
     :attr:`~earwax.BufferDirectory.buffers` dictionary, or a random buffer with
