@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from pytest import raises
+from attr.exceptions import FrozenInstanceError
 from synthizer import Buffer, SynthizerError
 
 from earwax import get_buffer, BufferDirectory
@@ -31,3 +32,13 @@ def test_buffer_directory():
     with raises(KeyError):
         b.buffers['nothing.wav']
     assert b.buffers['move.wav'] != b.buffers['sound.wav']
+    assert isinstance(b.paths['sound.wav'], Path)
+    assert isinstance(b.paths['move.wav'], Path)
+    assert b.paths['sound.wav'] != b.paths['move.wav']
+    with raises(KeyError):
+        b.paths['nothing.wav']
+    assert isinstance(b.random_path(), Path)
+    p: Path = b.random_path()
+    assert b.paths[p.name] is p
+    with raises(FrozenInstanceError):
+        b.path = Path.cwd()

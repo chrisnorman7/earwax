@@ -4,7 +4,7 @@ from pathlib import Path
 from random import choice
 from typing import Dict, List, Optional, Tuple
 
-from attr import attrs
+from attr import Factory, attrib, attrs
 from pyglet.clock import schedule_once
 from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
                        Generator, Source, Source3D, SynthizerError)
@@ -265,6 +265,7 @@ def play_paths(ctx: Context, paths: List[Path], gap: float = 0.1) -> None:
             schedule_once(inner, delay)
 
 
+@attrs(auto_attribs=True, frozen=True)
 class BufferDirectory:
     """An object which holds a directory of ``synthizer.Buffer`` instances.
 
@@ -272,32 +273,52 @@ class BufferDirectory:
     :attr:`~earwax.BufferDirectory.buffers` dictionary, or a random buffer with
     the :meth:`~earwax.BufferDirectory.random_buffer` method.
 
+    You can select single ``Path`` instances from the
+    :attr:`~earwax.BufferDirectory.paths` dictionary, or a random path with the
+    :meth:`~earwax.BufferDirectory.random_path` method.
+
+    :ivar ~earwax.BufferDirectory.path: The path to load audio files from.
+
+    :ivar ~earwax.BufferDirectory.glob: The glob to use when loading files.
+
     :ivar ~earwax.BufferDirectory.buffers: A dictionary of of ``filename:
         Buffer`` pairs.
+
+    :ivar ~earwax.BufferDirectory.paths: A dictionary of ``filename: Path``
+        pairs.
     """
 
-    buffers: Dict[str, Buffer]
+    path: Path
 
-    def __init__(self, path: Path, glob: Optional[str] = None) -> None:
-        """Load a directory of files.
+    glob: Optional[str] = None
 
-        :param path: The directory to load from.
+    paths: Dict[str, Path] = attrib(init=False, default=Factory(dict))
 
-        :param glob: The glob to use.
+    buffers: Dict[str, Buffer] = attrib(init=False)
 
-            If this value is ``None``, then every file will be loaded.
+    @buffers.default
+    def buffers_default(instance: 'BufferDirectory') -> Dict[str, Path]:
+        """Populates the :attr:`~earwax.BufferDirectory.buffers` and
+        :attr:`~earwax.BufferDirectory.paths` dictionaries.
         """
-        assert path.is_dir(), ('Invalid directory: %r.' % path)
         g: Generator[Path]
-        if glob is None:
-            g = path.iterdir()
+        if instance.glob is None:
+            g = instance.path.iterdir()
         else:
-            g = path.glob(glob)
-        self.buffers = {}
+            g = instance.path.glob(instance.glob)
+        d: Dict[str, Buffer] = {}
         p: Path
         for p in g:
             p = p.resolve()
-            self.buffers[p.name] = get_buffer('file', p.name)
+            instance.paths[p.name] = p
+            d[p.name] = get_buffer('file', str(p))
+        return d
+
+    def random_path(self) -> Path:
+        """Returns a random path from :attr:`self.paths
+        <earwax.BufferDirectory.paths>`.
+        """
+        return choice(list(self.paths.values()))
 
     def random_buffer(self) -> Buffer:
         """Returns a random buffer from :attr:`self.buffers
