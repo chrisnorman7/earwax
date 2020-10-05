@@ -58,7 +58,7 @@ if True:
                        TypeHandler, UnknownTypeError)
     from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
     from .point import Point, PointDirections
-    from .sound import (AdvancedInterfaceSoundPlayer,
+    from .sound import (AdvancedInterfaceSoundPlayer, BufferDirectory,
                         SimpleInterfaceSoundPlayer, get_buffer,
                         play_and_destroy, play_path, play_paths,
                         schedule_generator_destruction)
@@ -83,5 +83,5 @@ __all__ = [
     'box_row', 'play_path', 'schedule_generator_destruction', 'BoxLevel',
     'Ambiance', 'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track',
     'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel',
-    'CoordinatesMixin', 'GameBoard', 'NoSuchTile', 'Die'
+    'CoordinatesMixin', 'GameBoard', 'NoSuchTile', 'Die', 'BufferDirectory'
 ]

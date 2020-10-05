@@ -263,3 +263,44 @@ def play_paths(ctx: Context, paths: List[Path], gap: float = 0.1) -> None:
         else:
             delay += duration + gap
             schedule_once(inner, delay)
+
+
+class BufferDirectory:
+    """An object which holds a directory of ``synthizer.Buffer`` instances.
+
+    You can select single buffer instances from the
+    :attr:`~earwax.BufferDirectory.buffers` dictionary, or a random buffer with
+    the :meth:`~earwax.BufferDirectory.random_buffer` method.
+
+    :ivar ~earwax.BufferDirectory.buffers: A dictionary of of ``filename:
+        Buffer`` pairs.
+    """
+
+    buffers: Dict[str, Buffer]
+
+    def __init__(self, path: Path, glob: Optional[str] = None) -> None:
+        """Load a directory of files.
+
+        :param path: The directory to load from.
+
+        :param glob: The glob to use.
+
+            If this value is ``None``, then every file will be loaded.
+        """
+        assert path.is_dir(), ('Invalid directory: %r.' % path)
+        g: Generator[Path]
+        if glob is None:
+            g = path.iterdir()
+        else:
+            g = path.glob(glob)
+        self.buffers = {}
+        p: Path
+        for p in g:
+            p = p.resolve()
+            self.buffers[p.name] = get_buffer('file', p.name)
+
+    def random_buffer(self) -> Buffer:
+        """Returns a random buffer from :attr:`self.buffers
+        <earwax.BufferDirectory.buffers>`.
+        """
+        return choice(list(self.buffers.values()))
