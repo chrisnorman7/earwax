@@ -25,7 +25,7 @@ The below code is a full -albeit minimal -  code example::
     from pyglet.window import key, mouse, Window
     w = Window(caption='Test Game')
     g = Game()
-    l = Level()
+    l = Level(g)
     @l.action('Key speak', symbol=key.S)
     def key_speak():
         """"Say something when the s key is pressed."""
