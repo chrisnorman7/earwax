@@ -55,7 +55,8 @@ class Action:
         There are some helpful default values in :mod:`earwax.hat_directions`.
         If they do not suit your purposes, simply provide your own tuple.
 
-        It is worth noting that if you rely on the hat, there are a few things to be aware of:
+        It is worth noting that if you rely on the hat, there are a few things
+        to be aware of:
 
         If you rely on generators in hat-triggered actions, then all actions
         that have yielded will be stopped when the hat returns to its default
