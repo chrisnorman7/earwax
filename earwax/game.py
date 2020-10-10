@@ -1,6 +1,6 @@
 """Provides the Game class."""
 
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Executor, ThreadPoolExecutor
 from inspect import isgenerator
 from pathlib import Path
 from typing import (
@@ -135,7 +135,7 @@ class Game(RegisterEventMixin):
 
     joysticks: List[Joystick] = attrib(default=Factory(list), init=False)
 
-    thread_pool: ThreadPoolExecutor = attrib(
+    thread_pool: Executor = attrib(
         default=Factory(ThreadPoolExecutor), init=False
     )
 
