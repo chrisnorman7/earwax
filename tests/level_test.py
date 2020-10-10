@@ -1,6 +1,7 @@
 """Test level instances."""
 
 from pytest import raises
+
 from earwax import Action, Game, Level
 
 

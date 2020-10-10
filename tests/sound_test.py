@@ -1,11 +1,12 @@
 """Test the sound system."""
 
 from pathlib import Path
-from pytest import raises
+
 from attr.exceptions import FrozenInstanceError
+from pytest import raises
 from synthizer import Buffer, SynthizerError
 
-from earwax import get_buffer, BufferDirectory
+from earwax import BufferDirectory, get_buffer
 
 
 def test_get_buffer():

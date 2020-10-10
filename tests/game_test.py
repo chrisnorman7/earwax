@@ -1,5 +1,6 @@
 """Tests the Game class."""
 
+from concurrent.futures.thread import ThreadPoolExecutor
 from pathlib import Path
 
 from pyglet import app
@@ -37,6 +38,9 @@ def test_init(game: Game) -> None:
     assert game.window is None
     assert game.triggered_actions == []
     assert game.key_release_generators == {}
+    assert game.event_matchers == {}
+    assert game.joysticks == []
+    assert isinstance(game.thread_pool, ThreadPoolExecutor)
 
 
 def test_on_key_press(game: Game, level: Level) -> None:

@@ -1,5 +1,6 @@
 """Provides the Game class."""
 
+from concurrent.futures import ThreadPoolExecutor
 from inspect import isgenerator
 from pathlib import Path
 from typing import (
@@ -85,6 +86,12 @@ class Game(RegisterEventMixin):
         :class:`earwax.Game`, or :class:`earwax.Level`, and include events from
         `pyglet.window.Window
         <https://pyglet.readthedocs.io/en/latest/modules/window.html>`_.
+
+    :ivar ~earwax.Game.joysticks: The list of joysticks that have been opened
+        by this instance.
+
+    :ivar ~earwax.Game.thread_pool: An instance of ``ThreadPoolExecutor`` to
+        use for threaded operations.
     """
 
     window: Optional[Window] = attrib(default=Factory(type(None)), init=False)
@@ -127,6 +134,10 @@ class Game(RegisterEventMixin):
     )
 
     joysticks: List[Joystick] = attrib(default=Factory(list), init=False)
+
+    thread_pool: ThreadPoolExecutor = attrib(
+        default=Factory(ThreadPoolExecutor), init=False
+    )
 
     def __attrs_post_init__(self) -> None:
         for func in (
