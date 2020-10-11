@@ -3,7 +3,6 @@
 from concurrent.futures.thread import ThreadPoolExecutor
 from pathlib import Path
 
-from pyglet import app
 from pyglet.clock import schedule_once
 from pyglet.resource import get_settings_path
 from pyglet.window import Window, key
@@ -135,13 +134,12 @@ def test_level(game: Game, level: Level, menu: Menu) -> None:
     assert game.level is menu
 
 
-def test_run(game: Game, level: Level) -> None:
-    w: Window = Window()
+def test_run(game: Game, level: Level, window: Window) -> None:
 
     @level.event
     def on_push() -> None:
         assert game.level is level
-        schedule_once(lambda dt: app.exit(), 0.5)
+        schedule_once(lambda dt: window.close(), 0.5)
 
     g: Game = Game()
 
@@ -150,8 +148,8 @@ def test_run(game: Game, level: Level) -> None:
         raise BeforeRunWorks
 
     with raises(BeforeRunWorks):
-        g.run(w)
-    game.run(w, initial_level=level)
+        g.run(window)
+    game.run(window, initial_level=level)
     assert game.level is level
 
 
@@ -162,16 +160,16 @@ def test_get_settings_path() -> None:
     assert g.get_settings_path() == Path(get_settings_path('testing'))
 
 
-def test_after_run(game: Game, level: Level) -> None:
+def test_after_run(game: Game, level: Level, window: Window) -> None:
 
     @level.event
     def on_push() -> None:
         assert game.level is level
-        schedule_once(lambda dt: app.exit(), 0.5)
+        schedule_once(lambda dt: window.close(), 0.5)
 
     @game.event
     def after_run() -> None:
         raise AfterRunWorks
 
     with raises(AfterRunWorks):
-        game.run(Window(), initial_level=level)
+        game.run(window, initial_level=level)

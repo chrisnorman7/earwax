@@ -135,9 +135,10 @@ class ThreadedPromise(EventDispatcher):
         :meth:`~earwax.ThreadedPromise.run` method.
 
         :param func: The function to use. Will be stored in :attr:`self.func
-        <earwax.ThreadedPromise.func>`.
+            <earwax.ThreadedPromise.func>`.
         """
         self.func = func
+        self.state = ThreadedPromiseStates.ready
         return func
 
     def on_done(self, result: Any) -> None:
@@ -208,5 +209,6 @@ class ThreadedPromise(EventDispatcher):
         if self.future is None:
             raise RuntimeError('%s has no future yet.' % self)
         self.future.cancel()
+        unschedule(self.check)
         self.state = ThreadedPromiseStates.cancelled
         self.dispatch_event('on_cancel')

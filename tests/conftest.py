@@ -1,5 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 
+from pyglet.window import Window
 from pytest import fixture
 from synthizer import Context, initialize, shutdown
 
@@ -60,3 +61,8 @@ def box_level(game: Game, box) -> BoxLevel:
 @fixture(name='board')
 def get_gameboard(game: Game) -> GameBoard[int]:
     return GameBoard(game, Point(2, 2, 2), lambda p: 0)
+
+
+@fixture(name='window')
+def get_window() -> Window:
+    return Window(caption='Test')
