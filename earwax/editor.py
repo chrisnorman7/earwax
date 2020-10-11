@@ -8,7 +8,6 @@ from pyglet.window import key
 from .action import OptionalGenerator
 from .level import Level
 from .mixins import DismissibleMixin
-from .speech import tts
 
 
 @attrs(auto_attribs=True)
@@ -78,7 +77,7 @@ class Editor(Level, EditorBase, DismissibleMixin):
         """
         if text == ' ':
             text = 'space'
-        tts.speak(text)
+        self.game.output(text)
 
     def echo_current_character(self) -> None:
         """Echo the current character.

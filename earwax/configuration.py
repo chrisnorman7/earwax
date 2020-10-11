@@ -5,15 +5,6 @@ from typing import Optional
 
 from .config import Config, ConfigValue
 
-try:
-    ConfigValue('Test')
-except TypeError:
-    _configValue = ConfigValue
-
-    def ConfigValue(*args, **kwargs) -> _configValue:  # type: ignore[no-redef]
-        """This code stops building docs on readthedocs from failing."""
-        return _configValue()  # type: ignore[call-arg]
-
 
 def dump_path(value: Optional[Path]) -> Optional[str]:
     """Return a path as a string."""
@@ -54,18 +45,22 @@ class MenuConfig(Config):
     default_item_activate_sound.load(load_path)
 
 
-try:
-    class EarwaxConfig(Config):
-        """The main earwax configuration.
+class SpeechConfig(Config):
+    """The speech configuration section."""
 
-        You can configure this in your programs, and the main
-        :meth:`earwax <earwax.cmd.main.main>` method will use it when
-        configuring games made with it.
-        """
+    __section_name__ = 'Speech Configuration'
+    speak: ConfigValue = ConfigValue(True, name='Enable speech')
+    braille: ConfigValue = ConfigValue(True, name='Enable braille')
 
-        __section_name__ = 'Earwax Configuration'
-        menus: MenuConfig = MenuConfig()
-except TypeError:
-    class EarwaxConfig:  # type: ignore[no-redef]
-        """This class is used when docs are building."""
-        pass
+
+class EarwaxConfig(Config):
+    """The main earwax configuration.
+
+    You can configure this in your programs, and the main
+    :meth:`earwax <earwax.cmd.main.main>` method will use it when
+    configuring games made with it.
+    """
+
+    __section_name__ = 'Earwax Configuration'
+    menus: MenuConfig = MenuConfig()
+    speech: SpeechConfig = SpeechConfig()

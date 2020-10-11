@@ -7,6 +7,7 @@ from typing import (
     Callable, Dict, Generator, Iterator, List, Optional, Tuple, cast)
 
 from attr import Factory, attrib, attrs
+from cytolk.tolk import load, unload
 from pyglet import app, clock
 from pyglet.input import Joystick, get_joysticks
 from pyglet.resource import get_settings_path
@@ -20,6 +21,7 @@ from .hat_directions import DEFAULT
 from .level import Level
 from .mixins import RegisterEventMixin
 from .sound import AdvancedInterfaceSoundPlayer
+from .speech import tts
 
 ActionListType = List[Action]
 ReleaseGeneratorDictType = Dict[int, Generator[None, None, None]]
@@ -454,6 +456,8 @@ class Game(RegisterEventMixin):
 
         By default, this method will perform the following actions in order:
 
+        * Load cytolk.
+
         * Iterate over all the found event types on ``pyglet.window.Window``,
             and decorate them with :class:`~earwax.EventMatcher` instances.
             This means :class:`~earwax.Game` and :class:`~earwax.Level`
@@ -475,6 +479,8 @@ class Game(RegisterEventMixin):
 
         * Start the pyglet event loop.
 
+        * unload cytolk.
+
         :param window: The pyglet window that will form the game's interface.
 
         :param mouse_exclusive: The mouse exclusive setting for the window.
@@ -490,6 +496,7 @@ class Game(RegisterEventMixin):
         window.set_exclusive_mouse(mouse_exclusive)
         self.window = window
         self.open_joysticks()
+        load()
         with initialized():
             self.audio_context = Context()
             self.interface_sound_player = AdvancedInterfaceSoundPlayer(
@@ -499,6 +506,7 @@ class Game(RegisterEventMixin):
                 self.push_level(initial_level)
             self.dispatch_event('before_run')
             app.run()
+        unload()
         self.dispatch_event('after_run')
 
     def open_joysticks(self) -> None:
@@ -593,3 +601,20 @@ class Game(RegisterEventMixin):
         """Uses ``pyglet.resource.get_settings_path`` to get an appropriate
         settings path for this game."""
         return Path(get_settings_path(self.name))
+
+    def output(self, text: str, interrupt: bool = False) -> None:
+        """Output braille and / or speech.
+
+        The earwax configuration is used to determine what should be outputted.
+
+        :param text: The text to be spoken or brailled.
+
+        :param interrupt: If Whether or not to silence speech before outputting
+            anything else.
+        """
+        if interrupt:
+            tts.silence()
+        if self.config.speech.speak.value:
+            tts.speak(text)
+        if self.config.speech.braille.value:
+            tts.braille(text)

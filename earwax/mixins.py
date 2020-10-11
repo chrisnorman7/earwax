@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, Tuple, Union
 from attr import attrs
 from pyglet.event import EventDispatcher
 
-from .speech import tts
-
 if TYPE_CHECKING:
     from .game import Game
 
@@ -38,7 +36,7 @@ class DismissibleMixin:
         if self.dismissible:
             self.game: 'Game'
             self.game.pop_level()
-            tts.speak('Cancel.')
+            self.game.output('Cancel.')
 
 
 @attrs(auto_attribs=True)

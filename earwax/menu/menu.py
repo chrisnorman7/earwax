@@ -11,7 +11,6 @@ from ..action import ActionFunctionType, OptionalGenerator
 from ..hat_directions import DOWN, LEFT, RIGHT, UP
 from ..level import Level
 from ..mixins import DismissibleMixin, TitleMixin
-from ..speech import tts
 from .menu_item import MenuItem
 
 
@@ -177,9 +176,9 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         errors if :attr:`position` is something stupid."""
         item: Optional[MenuItem] = self.current_item
         if item is None:
-            tts.speak(self.title)
+            self.game.output(self.title)
         else:
-            tts.speak(item.title)
+            self.game.output(item.title)
             item.dispatch_event('on_selected')
             sound_path: Optional[Path] = item.select_sound_path or \
                 self.item_select_sound_path or \

@@ -9,7 +9,6 @@ from typing_inspect import get_args, is_union_type
 from ..action import OptionalGenerator
 from ..config import Config, ConfigValue
 from ..editor import Editor
-from ..speech import tts
 from .file_menu import FileMenu
 from .menu import Menu
 
@@ -112,7 +111,7 @@ class ConfigMenu(Menu):
         :param option: The :class:`~earwax.ConfigValue` instance to work on.
         """
         option.value = not option.value
-        tts.speak('Enabled' if option.value else 'Disabled')
+        self.game.output('Enabled' if option.value else 'Disabled')
         self.game.pop_level()
 
     def clear_value(self, option: ConfigValue) -> None:
@@ -125,7 +124,7 @@ class ConfigMenu(Menu):
             should be set to ``None``.
         """
         option.value = None
-        tts.speak('Cleared.')
+        self.game.output('Cleared.')
         self.game.pop_level()
 
     def handle_string(self, option: ConfigValue) -> Generator[
@@ -145,7 +144,7 @@ class ConfigMenu(Menu):
             self.game.pop_level()
 
         yield
-        tts.speak(f'Enter value: {option.value}')
+        self.game.output(f'Enter value: {option.value}')
         self.game.push_level(Editor(self.game, inner, text=option.value or ''))
 
     def handle_int(self, option: ConfigValue) -> Generator[
@@ -166,12 +165,12 @@ class ConfigMenu(Menu):
             try:
                 self.set_value(option, int(value))()
             except ValueError:
-                tts.speak('You must enter a number.')
+                self.game.output('You must enter a number.')
             finally:
                 self.game.pop_level()
 
         yield
-        tts.speak(f'Enter value: {option.value}')
+        self.game.output(f'Enter value: {option.value}')
         self.game.push_level(
             Editor(self.game, inner, text=str(option.value) or '')
         )
@@ -194,12 +193,12 @@ class ConfigMenu(Menu):
             try:
                 self.set_value(option, float(value))()
             except ValueError:
-                tts.speak('You must enter a number.')
+                self.game.output('You must enter a number.')
             finally:
                 self.game.pop_level()
 
         yield
-        tts.speak(f'Enter value: {option.value}')
+        self.game.output(f'Enter value: {option.value}')
         self.game.push_level(
             Editor(self.game, inner, text=str(option.value) or '')
         )
@@ -245,7 +244,7 @@ class ConfigMenu(Menu):
             def add_week(option):
                 '''Add a week to the current value.'''
                 option.value += timedelta(days=7)
-                tts.speak('Added a week.')
+                self.game.output('Added a week.')
                 m.game.pop_level()
 
         Handlers can do anything menu item functions can do, including creating
@@ -400,7 +399,7 @@ class ConfigMenu(Menu):
 
         def inner():
             option.value = value
-            tts.speak(message)
+            self.game.output(message)
             self.game.pop_level()
 
         return inner

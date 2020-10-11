@@ -11,7 +11,6 @@ from synthizer import Context
 from ..level import Level
 from ..point import Point, PointDirections
 from ..sound import play_and_destroy
-from ..speech import tts
 from ..walking_directions import walking_directions
 from .box import Box
 from .portal import Portal
@@ -179,7 +178,7 @@ class BoxLevel(Level, EventDispatcher):
                 self.current_box is not None and
                 box.name != self.current_box.name
             ):
-                tts.speak(str(box.name))
+                self.game.output(str(box.name))
             self.current_box = box
 
     def collide(self, box: Box) -> None:
@@ -248,7 +247,7 @@ class BoxLevel(Level, EventDispatcher):
             s: str = f'{c.x}, {c.y}'
             if include_z:
                 s += f', {c.z}'
-            tts.speak(s)
+            self.game.output(s)
 
         return inner
 
@@ -274,7 +273,7 @@ class BoxLevel(Level, EventDispatcher):
             string: str = directions[index].name
             if include_angle:
                 string = f'{string} ({self.bearing})'
-            tts.speak(string)
+            self.game.output(string)
 
         return inner
 
