@@ -63,6 +63,7 @@ if True:
                         play_and_destroy, play_path, play_paths,
                         schedule_generator_destruction)
     from .speech import tts
+    from .threaded_promise import ThreadedPromise, ThreadedPromiseStates
     from .track import Track
     from .walking_directions import walking_directions
 
@@ -83,5 +84,6 @@ __all__ = [
     'box_row', 'play_path', 'schedule_generator_destruction', 'BoxLevel',
     'Ambiance', 'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track',
     'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel',
-    'CoordinatesMixin', 'GameBoard', 'NoSuchTile', 'Die', 'BufferDirectory'
+    'CoordinatesMixin', 'GameBoard', 'NoSuchTile', 'Die', 'BufferDirectory',
+    'ThreadedPromiseStates', 'ThreadedPromise'
 ]

@@ -1,7 +1,14 @@
+from concurrent.futures import ThreadPoolExecutor
+
 from pytest import fixture
 from synthizer import Context, initialize, shutdown
 
 from earwax import Box, BoxLevel, Editor, Game, GameBoard, Level, Menu, Point
+
+
+@fixture(name='thread_pool', scope='session')
+def get_thread_pool() -> ThreadPoolExecutor:
+    return ThreadPoolExecutor()
 
 
 @fixture(name='level')
@@ -11,9 +18,10 @@ def get_level(game: Game) -> Level:
 
 
 @fixture(name='game')
-def get_game(context: Context) -> Game:
+def get_game(context: Context, thread_pool: ThreadPoolExecutor) -> Game:
     g: Game = Game()
     g.audio_context = context
+    g.thread_pool = thread_pool
     return g
 
 
