@@ -5,9 +5,10 @@ from inspect import isgenerator
 from pathlib import Path
 from typing import (
     Callable, Dict, Generator, Iterator, List, Optional, Tuple, cast)
+from warnings import warn
 
 from attr import Factory, attrib, attrs
-from cytolk.tolk import load, unload
+from cytolk.tolk import detect_screen_reader, load, unload
 from pyglet import app, clock
 from pyglet.input import Joystick, get_joysticks
 from pyglet.resource import get_settings_path
@@ -497,6 +498,11 @@ class Game(RegisterEventMixin):
         self.window = window
         self.open_joysticks()
         load()
+        if detect_screen_reader() is None:
+            warn(
+                'No screen reader detected.\n\n'
+                'Try typing `python -m cytolk -p`.'
+                )
         with initialized():
             self.audio_context = Context()
             self.interface_sound_player = AdvancedInterfaceSoundPlayer(
