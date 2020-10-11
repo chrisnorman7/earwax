@@ -29,6 +29,11 @@ class ThreadedPromise(EventDispatcher):
     Uses an ``Executor`` subclass (like ``ThreadPoolExecutor``, or
     ``ProcessPoolExecutor`` for threading).
 
+    The return value (or raised error) from the contained :attr:`function
+    <earwax.ThreadedPromise.func>`, is accessible with the
+    :meth:`~earwax.ThreadedPromise.on_done`, and
+    :meth:`~earwax.ThreadedPromise.on_error` events respectively.
+
     You can create this class directly, or by using decorators.
 
     Here is an example of the decorator syntax::
@@ -66,8 +71,8 @@ class ThreadedPromise(EventDispatcher):
 
     Note the use of Pyglet's own event system.
 
-    Instances of this class have a few possible states which are all contained
-    in the :class:`~earwax.ThreadedPromiseStates` enumeration:
+    Instances of this class have a few possible states which are contained in
+    the :class:`~earwax.ThreadedPromiseStates` enumeration:
 
     :attr:`~earwax.ThreadedPromiseStates.not_ready`
         The promise has been created, but a function must still be registered
@@ -99,13 +104,14 @@ class ThreadedPromise(EventDispatcher):
     :ivar ~earwax.ThreadedPromise.thread_pool: The thread pool to use.
 
     :ivar ~earwax.ThreadedPromise.func: The function to submit to the thread
-    pool.
+        pool.
 
     :ivar ~earwax.ThreadedPromise.future: The future that is running, or None
-    if the :meth:`~earwax.ThreadedPromise.run` method has not yet been called.
+        if the :meth:`~earwax.ThreadedPromise.run` method has not yet been
+        called.
 
     :ivar ~earwax.ThreadedPromise.state: The state this promise is in (see
-    above).
+        above).
     """
 
     thread_pool: Executor
@@ -118,6 +124,10 @@ class ThreadedPromise(EventDispatcher):
 
     @state.default
     def get_state(instance: 'ThreadedPromise') -> ThreadedPromiseStates:
+        """Provides the default value for :attr:`earwax.ThreadedPromise.state`.
+
+        :param instance: The instance to set the state for.
+        """
         if instance.func is None:
             return ThreadedPromiseStates.not_ready
         return ThreadedPromiseStates.ready
@@ -143,11 +153,19 @@ class ThreadedPromise(EventDispatcher):
 
     def on_done(self, result: Any) -> None:
         """The event that is dispatched when the future completes with no
-        error."""
+        error.
+
+        :param result: The value returned by :attr:`self.func
+            <earwax.ThreadedPromise.func>`.
+        """
         pass
 
     def on_error(self, e: Exception) -> None:
-        """The event that is dispatched when the future raises an error."""
+        """The event that is dispatched when :attr:`self.func
+        <earwax.ThreadedPromise.func>` raises an error.
+
+        :param e: The exception that was raised.
+        """
         raise e
 
     def on_cancel(self) -> None:
@@ -156,18 +174,26 @@ class ThreadedPromise(EventDispatcher):
         pass
 
     def on_finally(self) -> None:
-        """The event that is dispatched when the future completes, whether or
-        not it raises an error."""
+        """The event that is dispatched when :attr:`self.future
+        <earwax.ThreadedPromise.future>` completes, whether or not it raises an
+        error.
+        """
         pass
 
     def check(self, dt: float) -> None:
-        """Check to see if the future has finished or not.
+        """Check to see if :attr:`self.future <earwax.ThreadedPromise.future>`
+        has finished or not.
 
         If it has, dispatch the :meth:`~earwax.ThreadedPromise.on_done` event
         with the resulting value.
 
         If an error has been raised, dispatch the
-        :meth:`~earwax.ThreadedPromise.on_error` event.
+        :meth:`~earwax.ThreadedPromise.on_error` event with the resulting
+        error.
+
+        :param dt: The time since the last run.
+
+            This argument is required by ``pyglet.clock.schedule``.
         """
         if self.future is not None and self.future.done():
             try:
@@ -191,7 +217,7 @@ class ThreadedPromise(EventDispatcher):
         ``RuntimeError`` will be raised.
 
         :param args: The extra positional arguments to pass along to
-        ``submit``.
+            ``submit``.
 
         :param kwargs: The extra keyword arguments to pass along to ``submit``.
         """
@@ -202,7 +228,7 @@ class ThreadedPromise(EventDispatcher):
         schedule(self.check)
 
     def cancel(self) -> None:
-        """Try to cancel :attr:`~earwax.ThreadedPromise.future`.
+        """Try to cancel :attr:`self.future <earwax.ThreadedPromise.future>`.
 
         If There is no future, ``RuntimeError`` will be raised.
         """
