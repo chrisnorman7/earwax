@@ -1,17 +1,21 @@
 """Provides the tts object.
 
-You can use this object to output speech through either the currently active
-screen reader, or SAPI::
+You can use this object to output speech through the currently active screen
+reader::
 
     from earwax import tts
-    tts.speak('Hello, Earwax.')
+    tts.output('Hello, Earwax.')
+    tts.speak('Hello, speech.')
+    tts.braille('Hello, braille.')
 
-Although Earwax currently uses `accessible_output2
-<https://pypi.org/project/accessible-output2/>`_ for the TTS backend, you
-should not rely upon its specifics in your own code, as this is subject to
-possible future change.
+*NOTE*: Since version 2020-10-11, Earwax uses `Cytolk
+<https://pypi.org/project/cytolk/>`_ for its TTS needs.
+
+In addition to this change, there is now an extra :attr:`speech
+<earwax.EarwaxConfig.speech` configuration section, which can be set to make
+the :meth:`~earwax.Game.output` method behave how you'd like.
 """
 
-from accessible_output2.outputs.auto import Auto
+from cytolk import tolk as tts
 
-tts: Auto = Auto()
+__all__ = ['tts']
