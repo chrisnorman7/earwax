@@ -48,9 +48,9 @@ class MenuConfig(Config):
 class SpeechConfig(Config):
     """The speech configuration section."""
 
-    __section_name__ = 'Speech Configuration'
-    speak: ConfigValue = ConfigValue(True, name='Enable speech')
-    braille: ConfigValue = ConfigValue(True, name='Enable braille')
+    __section_name__ = 'Speech and Braille'
+    speak: ConfigValue = ConfigValue(True, name='Speech')
+    braille: ConfigValue = ConfigValue(True, name='Braille')
 
 
 class EarwaxConfig(Config):
