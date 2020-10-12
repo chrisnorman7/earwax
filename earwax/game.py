@@ -506,7 +506,7 @@ class Game(RegisterEventMixin):
         with initialized():
             self.audio_context = Context()
             self.interface_sound_player = AdvancedInterfaceSoundPlayer(
-                self.audio_context
+                self.audio_context, gain=self.config.sound.sound_volume.value
             )
             if initial_level is not None:
                 self.push_level(initial_level)

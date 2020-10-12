@@ -23,7 +23,7 @@ def load_path(value: Optional[str]) -> Optional[Path]:
 class MenuConfig(Config):
     """The menu configuration section."""
 
-    __section_name__ = 'Menu Configuration'
+    __section_name__ = 'Menus'
     default_item_select_sound: ConfigValue = ConfigValue(
         None, type_=Optional[Path],
         name='The default sound that plays when moving through menus',
@@ -53,6 +53,19 @@ class SpeechConfig(Config):
     braille: ConfigValue = ConfigValue(True, name='Braille')
 
 
+class SoundConfig(Config):
+    """Configure various aspects of the sound system.
+
+    The only thing this is used for internally is the volume of
+    :attr:`earwax.Game.interface_sound_player`.
+    """
+
+    __section_name__ = 'Sound'
+    sound_volume: ConfigValue = ConfigValue(0.5, name='Sound volume')
+    music_volume: ConfigValue = ConfigValue(0.4, name='Music volume')
+    ambiance_volume: ConfigValue = ConfigValue(0.4, name='Ambiance volume')
+
+
 class EarwaxConfig(Config):
     """The main earwax configuration.
 
@@ -64,3 +77,4 @@ class EarwaxConfig(Config):
     __section_name__ = 'Earwax Configuration'
     menus: MenuConfig = MenuConfig()
     speech: SpeechConfig = SpeechConfig()
+    sound: SoundConfig = SoundConfig()

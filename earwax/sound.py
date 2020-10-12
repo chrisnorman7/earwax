@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Tuple
 from attr import Factory, attrib, attrs
 from pyglet.clock import schedule_once
 from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
-                       Generator, Source, Source3D, SynthizerError)
+                       Generator, Source, Source3D)
 
 buffers: Dict[str, Buffer] = {}
 
@@ -119,32 +119,29 @@ class SimpleInterfaceSoundPlayer:
 
     :ivar ~earwax.SimpleInterfaceSoundPlayer.source: The source to play
         through.
+
+    :ivar ~earwax.SimpleInterfaceSoundPlayer.gain: The gain to set on
+        :attr:`self.source <earwax.SimpleInterfaceSoundPlayer.source>`, if no
+        source is provided when constructing instances of this class.
     """
 
     context: Context
     generator: Generator
-    source: Source = None
+    source: Optional[Source] = None
+    gain: float = 1.0
 
     def play(self) -> None:
         """Play :attr:`self.generator
         <earwax.SimpleInterfaceSoundPlayer.generator>`."""
         if self.source is None:
             self.source = DirectSource(self.context)
+            self.source.gain = self.gain
             self.source.add_generator(self.generator)
         self.generator.position = 0
 
-    def __del__(self) -> None:
-        """Destroy the source and the generator."""
-        try:
-            if getattr(self, 'generator', None) is not None:
-                self.generator.destroy()
-            if getattr(self, 'source', None) is not None:
-                self.source.destroy()
-        except SynthizerError:
-            pass  # They're already gone.
 
-
-class AdvancedInterfaceSoundPlayer(SimpleInterfaceSoundPlayer):
+@attrs(auto_attribs=True)
+class AdvancedInterfaceSoundPlayer:
     """An interface player that can play any sound you throw at it.
 
     To play a sound, pass a path to the
@@ -170,16 +167,34 @@ class AdvancedInterfaceSoundPlayer(SimpleInterfaceSoundPlayer):
         :meth:`~earwax.AdvancedInterfaceSoundPlayer.play_path` method.
     """
 
-    play_files: bool
-    play_directories: bool
+    context: Context
+    play_files: bool = True
+    play_directories: bool = False
+    generator: BufferGenerator = attrib()
 
-    def __init__(
-        self, context: Context, play_files: bool = True,
-        play_directories: bool = False
-    ):
-        self.play_files = play_files
-        self.play_directories = play_directories
-        super().__init__(context, BufferGenerator(context))
+    @generator.default
+    def get_generator(
+        instance: 'AdvancedInterfaceSoundPlayer'
+    ) -> BufferGenerator:
+        """Make a ``BufferGenerator`` instance, bound to :attr:`self.context
+        <earwax.AdvancedInterfaceSoundPlayer.context>`.
+
+        :param instance: The instance to use.
+        """
+        return BufferGenerator(instance.context)
+
+    gain: float = 1.0
+    source: Source = attrib()
+
+    @source.default
+    def get_source(instance: 'AdvancedInterfaceSoundPlayer') -> Source:
+        """Get a ``DirectSource`` instance, bound to :attr:`self.cntext
+        <earwax.AdvancedInterfaceSoundPlayer>`, with a gain value of
+        :attr:`self.gain <earwax.AdvancedInterfaceSoundPlayer>`.
+        """
+        s: DirectSource = DirectSource(instance.context)
+        s.gain = instance.gain
+        return s
 
     def play_path(self, path: Path) -> None:
         """If :attr:`self.play_directories
@@ -188,10 +203,6 @@ class AdvancedInterfaceSoundPlayer(SimpleInterfaceSoundPlayer):
         from that directory. Otherwise, if :meth:`self.play_files
         <earwax.AdvancedInterfaceSoundPlayer.play_files>` evaluates to True,
         play the given path."""
-        if self.generator is None:
-            self.generator = BufferGenerator(self.context)
-        if self.source is None:
-            self.source = DirectSource(self.context)
         if path.is_dir():
             if not self.play_directories:
                 return

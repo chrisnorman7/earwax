@@ -1,12 +1,16 @@
 """Test the sound system."""
 
 from pathlib import Path
+from typing import Optional
 
 from attr.exceptions import FrozenInstanceError
+from pyglet.clock import schedule_once
+from pyglet.window import Window
 from pytest import raises
 from synthizer import Buffer, SynthizerError
 
-from earwax import BufferDirectory, get_buffer
+from earwax import (
+    AdvancedInterfaceSoundPlayer, BufferDirectory, Game, Level, get_buffer)
 
 
 def test_get_buffer():
@@ -43,3 +47,20 @@ def test_buffer_directory():
     assert b.paths[p.name] is p
     with raises(FrozenInstanceError):
         b.path = Path.cwd()
+
+
+def test_gain(game: Game, window: Window, level: Level) -> None:
+
+    def do_test(dt: float) -> None:
+        i: Optional[AdvancedInterfaceSoundPlayer] = game.interface_sound_player
+        expected: float = game.config.sound.sound_volume.value
+        assert i is not None
+        assert i.source.gain == expected
+        assert i.gain == expected
+        window.close()
+
+    @game.event
+    def before_run() -> None:
+        schedule_once(do_test, 0)
+
+    game.run(window, initial_level=level)
