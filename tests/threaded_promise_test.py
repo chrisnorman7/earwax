@@ -7,7 +7,7 @@ from pyglet.event import EVENT_HANDLED
 from pyglet.window import Window
 from pytest import raises
 
-from earwax import Game, Level, ThreadedPromise, ThreadedPromiseStates
+from earwax import Game, Level, PromiseStates, ThreadedPromise
 
 
 class CorrectException(Exception):
@@ -17,12 +17,12 @@ class CorrectException(Exception):
 def test_init(thread_pool: ThreadPoolExecutor) -> None:
     p: ThreadedPromise = ThreadedPromise(thread_pool)
     assert p.thread_pool is thread_pool
-    assert p.state is ThreadedPromiseStates.not_ready
+    assert p.state is PromiseStates.not_ready
     assert p.future is None
     assert p.func is None
     with raises(RuntimeError):
         p.run()
-        assert p.state is ThreadedPromiseStates.not_ready
+        assert p.state is PromiseStates.not_ready
 
 
 def test_run(game: Game, window: Window, level: Level) -> None:
@@ -32,7 +32,7 @@ def test_run(game: Game, window: Window, level: Level) -> None:
     def increment() -> None:
         game.push_level(level)
 
-    assert p.state is ThreadedPromiseStates.ready
+    assert p.state is PromiseStates.ready
 
     @game.event
     def before_run() -> None:
@@ -42,7 +42,7 @@ def test_run(game: Game, window: Window, level: Level) -> None:
     game.run(window)
     assert game.level is level
     assert game.levels == [level]
-    assert p.state is ThreadedPromiseStates.done
+    assert p.state is PromiseStates.done
 
 
 def test_on_done_no_args(game: Game, window: Window, level: Level) -> None:
@@ -114,7 +114,7 @@ def test_on_error(game: Game, window: Window) -> None:
 
     game.run(window)
     assert game.level is worked
-    assert p.state is ThreadedPromiseStates.error
+    assert p.state is PromiseStates.error
 
 
 def test_cancel(game: Game, window: Window) -> None:
@@ -147,7 +147,7 @@ def test_cancel(game: Game, window: Window) -> None:
 
     game.run(window)
     assert game.levels == [worked]
-    assert p.state is ThreadedPromiseStates.cancelled
+    assert p.state is PromiseStates.cancelled
 
 
 def test_finally_no_error(game: Game, window: Window) -> None:
