@@ -10,7 +10,35 @@ T = TypeVar('T')
 
 
 class PromiseStates(Enum):
-    """The possible states of :class:`earwax.ThreadedPromise` instances."""
+    """The possible states of :class:`earwax.Promise` instances.
+
+    :ivar ~earwax.PromiseStates.not_ready: The promise has been created, but a
+        function must still be added.
+
+        How this is done depends on how the promise subclass in question has
+        been implemented, and may not always be used.
+
+    :ivar ~earwax.PromiseStates.ready: The promise has been created, and a
+        function registered. The :meth:`~earwax.ThreadedPromise.run` method has
+        not yet been called.
+
+    :ivar ~earwax.PromiseStates.running: The promise's
+        :meth:`~earwax.ThreadedPromise.run` method has been called, but the
+        function has not yet returned a value, or raised an error.
+
+    :ivar ~earwax.PromiseStates.done: The promise has finished, and there was
+        no error. The :meth:`~earwax.Promise.on_done` and
+        :meth:`~earwax.Promise.on_finally` events have already been dispatched.
+
+    :ivar ~earwax.PromiseStates.error: The promise completed, but there was an
+        error, which was handled by the :meth:`~earwax.Promise.on_error` event.
+
+        The :meth:`~earwax.Promise.on_finally` event has been dispatched.
+
+    :ivar ~earwax.PromiseStates.cancelled: The promise has had its
+        :meth:`~earwax.Promise.cancel` method called, and its
+        :meth:`~earwax.Promise.on_cancel` event has been dispatched.
+    """
 
     not_ready = 0
     ready = 1
@@ -23,6 +51,9 @@ class PromiseStates(Enum):
 @attrs(auto_attribs=True)
 class Promise(EventDispatcher, Generic[T]):
     """The base class for promises.
+
+    Instances of this class have a few possible states which are contained in
+    the :class:`~earwax.PromiseStates` enumeration.
 
     :ivar ~earwax.Promise.state: The state this promise is in (see
         above).
@@ -37,15 +68,15 @@ class Promise(EventDispatcher, Generic[T]):
             self.register_event_type(func.__name__)
 
     def on_done(self, result: T) -> None:
-        """The event that is dispatched when the future completes with no
+        """The event that is dispatched when this promise completes with no
         error.
 
-        :param result: The value returned by ``self.func``.
+        :param result: The value returned by the function.
         """
         pass
 
     def on_error(self, e: Exception) -> None:
-        """The event that is dispatched when ``self.func`` raises an error.
+        """The event that is dispatched when this promise raises an error.
 
         :param e: The exception that was raised.
         """
@@ -57,8 +88,8 @@ class Promise(EventDispatcher, Generic[T]):
         pass
 
     def on_finally(self) -> None:
-        """The event that is dispatched when ``self.func`` completes, whether
-        or not it raises an error.
+        """The event that is dispatched when this promise completes, whether or
+        not it raises an error.
         """
         pass
 
@@ -72,14 +103,15 @@ class Promise(EventDispatcher, Generic[T]):
         self.dispatch_event('on_cancel')
 
     def done(self, value: T) -> None:
-        """Dispatch the :meth:`earwax.Promise.on_done` event with ``value``,
-        and set :attr:`self.state <earwax.Promise.stage>` to
+        """Dispatch the :meth:`~earwax.Promise.on_done` event with the given
+        ``value``, and set :attr:`self.state <earwax.Promise.state>` to
         :attr:`earwax.PromiseStates.done`.
 
         :param value: The value that was returned from whatever function this
-        promise had.
+            promise had.
         """
         self.dispatch_event('on_done', value)
+        self.dispatch_event('on_finally')
         self.state = PromiseStates.done
 
     def error(self, e: Exception) -> None:
@@ -89,4 +121,5 @@ class Promise(EventDispatcher, Generic[T]):
         :param e: The exception that was raised.
         """
         self.dispatch_event('on_error', e)
+        self.dispatch_event('on_finally')
         self.state = PromiseStates.error

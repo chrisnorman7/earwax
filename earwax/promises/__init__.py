@@ -4,4 +4,7 @@ from .base import Promise, PromiseStates
 from .staggered_promise import StaggeredPromise
 from .threaded_promise import ThreadedPromise
 
-__all__ = ['PromiseStates', 'ThreadedPromise', 'StaggeredPromise', 'Promise']
+__all__ = [
+    'PromiseStates', 'ThreadedPromise', 'StaggeredPromise', 'Promise',
+    'staggered_promise'
+    ]

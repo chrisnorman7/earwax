@@ -18,11 +18,6 @@ class ThreadedPromise(Promise):
     Uses an ``Executor`` subclass (like ``ThreadPoolExecutor``, or
     ``ProcessPoolExecutor`` for threading).
 
-    The return value (or raised error) from the contained :attr:`function
-    <earwax.ThreadedPromise.func>`, is accessible with the
-    :meth:`~earwax.ThreadedPromise.on_done`, and
-    :meth:`~earwax.ThreadedPromise.on_error` events respectively.
-
     You can create this class directly, or by using decorators.
 
     Here is an example of the decorator syntax::
@@ -59,36 +54,6 @@ class ThreadedPromise(Promise):
         promise.run()
 
     Note the use of Pyglet's own event system.
-
-    Instances of this class have a few possible states which are contained in
-    the :class:`~earwax.PromiseStates` enumeration:
-
-    :attr:`~earwax.PromiseStates.not_ready`
-        The promise has been created, but a function must still be registered
-        with the :meth:`~earwax.ThreadedPromise.register_func` method.
-
-    :attr:`~earwax.PromiseStates.ready`
-        The promise has been created, and a function registered. The
-        :meth:`~earwax.ThreadedPromise.run` method has not yet been called.
-
-    :attr:`~earwax.PromiseStates.running`
-        The promise's :meth:`~earwax.ThreadedPromise.run` method has been
-        called, but the :attr:`~earwax.ThreadedPromise.future` has not
-        completed yet.
-
-    :attr:`~earwax.PromiseStates.done`
-        The promise has finished, and there was no error. The
-        :meth:`~earwax.ThreadedPromise.on_done` event has already been
-        dispatched.
-
-    :attr:`~earwax.PromiseStates.error`
-        The promise completed, but there was an error, which was handled by the
-        :attr:`~earwax.ThreadedPromise.on_error` event.
-
-    :attr:`~earwax.PromiseStates.cancelled`
-        The promise has had its :meth:`~earwax.ThreadedPromise.cancel` method
-        called, and its :meth:`~earwax.ThreadedPromise.on_cancel` event has
-        been dispatched.
 
     :ivar ~earwax.ThreadedPromise.thread_pool: The thread pool to use.
 
@@ -128,12 +93,15 @@ class ThreadedPromise(Promise):
         """Check to see if :attr:`self.future <earwax.ThreadedPromise.future>`
         has finished or not.
 
-        If it has, dispatch the :meth:`~earwax.ThreadedPromise.on_done` event
+        If it has, dispatch the :meth:`~earwax.Promise.on_done` event
         with the resulting value.
 
         If an error has been raised, dispatch the
-        :meth:`~earwax.ThreadedPromise.on_error` event with the resulting
+        :meth:`~earwax.Promise.on_error` event with the resulting
         error.
+
+        If either of these things have happened, dispatch the
+        :meth:`~earwax.Promise.on_finally` event.
 
         :param dt: The time since the last run.
 
@@ -146,7 +114,6 @@ class ThreadedPromise(Promise):
                 self.error(e)
             finally:
                 unschedule(self.check)
-                self.dispatch_event('on_finally')
 
     def run(self, *args, **kwargs) -> None:
         """Start this promise running.

@@ -58,7 +58,8 @@ if True:
                        TypeHandler, UnknownTypeError)
     from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
     from .point import Point, PointDirections
-    from .promises import PromiseStates, StaggeredPromise, ThreadedPromise
+    from .promises import (Promise, PromiseStates, StaggeredPromise,
+                           ThreadedPromise, staggered_promise)
     from .sound import (AdvancedInterfaceSoundPlayer, BufferDirectory,
                         SimpleInterfaceSoundPlayer, get_buffer,
                         play_and_destroy, play_path, play_paths,
@@ -85,5 +86,6 @@ __all__ = [
     'Ambiance', 'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track',
     'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel',
     'CoordinatesMixin', 'GameBoard', 'NoSuchTile', 'Die', 'BufferDirectory',
-    'PromiseStates', 'ThreadedPromise', 'StaggeredPromise'
+    'PromiseStates', 'ThreadedPromise', 'StaggeredPromise',
+    'staggered_promise', 'Promise'
 ]
