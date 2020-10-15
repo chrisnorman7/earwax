@@ -1,16 +1,14 @@
 """Provides the Action class."""
 
 from time import time
-from typing import TYPE_CHECKING, Callable, Generator, Optional, Tuple
+from typing import TYPE_CHECKING, Optional
 
 from attr import Factory, attrib, attrs
 
+from .types import ActionFunctionType, HatDirection, OptionalGenerator
+
 if TYPE_CHECKING:
     from .level import Level
-
-OptionalGenerator = Optional[Generator[None, None, None]]
-ActionFunctionType = Callable[[], OptionalGenerator]
-HatDirection = Tuple[int, int]
 
 
 @attrs(auto_attribs=True)

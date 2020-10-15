@@ -42,6 +42,7 @@ except (ImportError, TypeError):
     pass  # Docs are building.
 
 if True:
+    from . import types
     from .action import Action
     from .ambiance import Ambiance
     from .config import Config, ConfigValue
@@ -87,5 +88,5 @@ __all__ = [
     'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel',
     'CoordinatesMixin', 'GameBoard', 'NoSuchTile', 'Die', 'BufferDirectory',
     'PromiseStates', 'ThreadedPromise', 'StaggeredPromise',
-    'staggered_promise', 'Promise'
+    'staggered_promise', 'Promise', 'types'
 ]

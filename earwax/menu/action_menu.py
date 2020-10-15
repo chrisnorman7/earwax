@@ -6,8 +6,9 @@ from typing import Iterator, Tuple, cast
 from attr import attrs
 from pyglet.window import key, mouse
 
-from ..action import Action, ActionFunctionType, OptionalGenerator
+from ..action import Action
 from ..hat_directions import DEFAULT, DOWN, LEFT, RIGHT, UP
+from ..types import ActionFunctionType, OptionalGenerator
 from .menu import Menu
 
 

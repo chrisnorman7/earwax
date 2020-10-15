@@ -5,7 +5,7 @@ from pyglet.event import EVENT_HANDLED
 from pyglet.window import Window
 
 from earwax import Game, Level, PromiseStates, StaggeredPromise
-from earwax.promises.staggered_promise import StaggeredPromiseGeneratorType
+from earwax.types import StaggeredPromiseGeneratorType
 
 
 class Works(Exception):

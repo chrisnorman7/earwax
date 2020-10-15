@@ -3,8 +3,7 @@
 from concurrent.futures import Executor, ThreadPoolExecutor
 from inspect import isgenerator
 from pathlib import Path
-from typing import (
-    Callable, Dict, Generator, Iterator, List, Optional, Tuple, cast)
+from typing import Dict, Generator, Iterator, List, Optional, Tuple, cast
 from warnings import warn
 
 from attr import Factory, attrib, attrs
@@ -23,14 +22,8 @@ from .level import Level
 from .mixins import RegisterEventMixin
 from .sound import AdvancedInterfaceSoundPlayer
 from .speech import tts
-
-ActionListType = List[Action]
-ReleaseGeneratorDictType = Dict[int, Generator[None, None, None]]
-JoyButtonReleaseGeneratorDictType = Dict[
-    Tuple[str, int], Generator[None, None, None]
-]
-MotionFunctionType = Callable[[], None]
-MotionsType = Dict[int, MotionFunctionType]
+from .types import (ActionListType, JoyButtonReleaseGeneratorDictType,
+                    ReleaseGeneratorDictType)
 
 
 @attrs(auto_attribs=True, repr=False)
