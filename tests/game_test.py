@@ -139,7 +139,7 @@ def test_run(game: Game, level: Level, window: Window) -> None:
     @level.event
     def on_push() -> None:
         assert game.level is level
-        schedule_once(lambda dt: window.close(), 0.5)
+        schedule_once(lambda dt: window.close(), 0)
 
     g: Game = Game()
 
@@ -165,7 +165,7 @@ def test_after_run(game: Game, level: Level, window: Window) -> None:
     @level.event
     def on_push() -> None:
         assert game.level is level
-        schedule_once(lambda dt: window.close(), 0.5)
+        schedule_once(lambda dt: window.close(), 0)
 
     @game.event
     def after_run() -> None:

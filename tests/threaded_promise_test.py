@@ -31,12 +31,12 @@ def test_run(game: Game, window: Window, level: Level) -> None:
     @p.register_func
     def increment() -> None:
         game.push_level(level)
+        schedule_once(lambda dt: window.close(), 0)
 
     assert p.state is PromiseStates.ready
 
     @game.event
     def before_run() -> None:
-        schedule_once(lambda dt: window.close(), .25)
         p.run()
 
     game.run(window)
@@ -50,18 +50,18 @@ def test_on_done_no_args(game: Game, window: Window, level: Level) -> None:
 
     @p.register_func
     def return_5() -> int:
-        sleep(1)
+        sleep(.1)
         return 5
 
     @p.event
     def on_done(value: int) -> None:
         assert value == 5
         game.push_level(level)
+        window.close()
 
     @game.event
     def before_run() -> None:
         p.run()
-        schedule_once(lambda dt: window.close(), 1.5)
 
     game.run(window)
     assert game.levels == [level]
@@ -78,11 +78,11 @@ def test_on_done_with_args(game: Game, window: Window, level: Level) -> None:
     def on_done(t: Tuple[str, int]) -> None:
         assert t == ('test', 10)
         game.push_level(level)
+        window.close()
 
     @game.event
     def before_run() -> None:
         p.run('test', number=10)
-        schedule_once(lambda dt: window.close(), .5)
 
     game.run(window)
     assert game.levels == [level]
@@ -105,12 +105,12 @@ def test_on_error(game: Game, window: Window) -> None:
     def on_error(e: Exception) -> None:
         assert isinstance(e, CorrectException)
         game.push_level(worked)
+        window.close()
         return EVENT_HANDLED
 
     @game.event
     def before_run() -> None:
         p.run()
-        schedule_once(lambda dt: window.close(), .5)
 
     game.run(window)
     assert game.level is worked
@@ -134,6 +134,7 @@ def test_cancel(game: Game, window: Window) -> None:
     @p.event
     def on_cancel() -> None:
         game.push_level(worked)
+        window.close()
 
     @p.event
     def on_error(e: Exception) -> None:
@@ -143,7 +144,6 @@ def test_cancel(game: Game, window: Window) -> None:
     def before_run() -> None:
         p.run()
         schedule_once(lambda dt: p.cancel(), 0.5)
-        schedule_once(lambda DT: window.close(), 1.5)
 
     game.run(window)
     assert game.levels == [worked]
@@ -172,11 +172,11 @@ def test_finally_no_error(game: Game, window: Window) -> None:
     @p.event
     def on_finally() -> None:
         game.push_level(finally_level)
+        window.close()
 
     @game.event
     def before_run() -> None:
         p.run()
-        schedule_once(lambda dt: window.close(), .5)
 
     game.run(window)
     assert game.levels == [return_level, finally_level]
@@ -204,11 +204,11 @@ def test_finally_with_error(game: Game, window: Window) -> None:
     @p.event
     def on_finally() -> None:
         game.push_level(finally_level)
+        window.close()
 
     @game.event
     def before_run() -> None:
         p.run()
-        schedule_once(lambda dt: window.close(), .5)
 
     game.run(window)
     assert game.levels == [error_level, finally_level]

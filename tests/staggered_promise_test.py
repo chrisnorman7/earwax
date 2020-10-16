@@ -53,12 +53,12 @@ def test_run_args(game: Game, window: Window) -> None:
     @StaggeredPromise.decorate
     def promise(a, b, c=1) -> StaggeredPromiseGeneratorType:
         started = time()
-        yield 0.1
+        yield 0.5
         assert a == 1
         assert b == 2
         assert c == 3
-        yield 0.1
-        assert (time() - started) >= 0.1
+        yield 0.5
+        assert (time() - started) >= 0.6
         window.close()
 
     @game.event
