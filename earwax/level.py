@@ -19,7 +19,8 @@ from .sound import get_buffer
 from .track import Track
 
 if TYPE_CHECKING:
-    from .game import ActionListType, Game, MotionFunctionType, MotionsType
+    from .game import Game
+    from .types import ActionListType, MotionFunctionType, MotionsType
 
 
 @attrs(auto_attribs=True)
