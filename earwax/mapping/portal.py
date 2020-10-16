@@ -4,7 +4,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 from attr import attrs
-from pyglet.event import EventDispatcher
+
+try:
+    from pyglet.event import EventDispatcher
+except ModuleNotFoundError:
+    EventDispatcher = object
 
 from ..point import Point
 

@@ -16,6 +16,9 @@ In addition to this change, there is now an extra :attr:`speech
 the :meth:`~earwax.Game.output` method behave how you'd like.
 """
 
-from cytolk import tolk as tts
+try:
+    from cytolk import tolk as tts
+except ModuleNotFoundError:
+    tts = None
 
 __all__ = ['tts']

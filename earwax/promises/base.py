@@ -4,7 +4,11 @@ from enum import Enum
 from typing import Generic, TypeVar
 
 from attr import attrib, attrs
-from pyglet.event import EventDispatcher
+
+try:
+    from pyglet.event import EventDispatcher
+except ModuleNotFoundError:
+    EventDispatcher = object
 
 T = TypeVar('T')
 
@@ -49,7 +53,7 @@ class PromiseStates(Enum):
 
 
 @attrs(auto_attribs=True)
-class Promise(EventDispatcher, Generic[T]):
+class Promise(Generic[T], EventDispatcher):
     """The base class for promises.
 
     Instances of this class have a few possible states which are contained in

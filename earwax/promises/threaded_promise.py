@@ -4,7 +4,11 @@ from concurrent.futures import Executor, Future
 from typing import Callable, Optional
 
 from attr import attrs
-from pyglet.clock import schedule, unschedule
+
+try:
+    from pyglet.clock import schedule, unschedule
+except ModuleNotFoundError:
+    pass
 
 from .base import Promise, PromiseStates, T
 

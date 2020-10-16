@@ -5,7 +5,11 @@ from time import time
 from typing import Callable, List, Optional
 
 from attr import Factory, attrib, attrs
-from pyglet.window import key
+
+try:
+    from pyglet.window import key
+except ModuleNotFoundError:
+    key = None
 
 from ..action import ActionFunctionType, OptionalGenerator
 from ..hat_directions import DOWN, LEFT, RIGHT, UP

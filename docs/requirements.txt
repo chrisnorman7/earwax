@@ -1,2 +1,7 @@
 sphinxcontrib.apidoc
 sphinx_rtd_theme
+attrs
+pyyaml
+movement_2d
+typing_inspect
+shortuuid

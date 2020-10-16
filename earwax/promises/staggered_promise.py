@@ -3,7 +3,11 @@
 from typing import Callable, Generator, Optional
 
 from attr import attrib, attrs
-from pyglet.clock import schedule_once, unschedule
+
+try:
+    from pyglet.clock import schedule_once, unschedule
+except ModuleNotFoundError:
+    pass
 
 from .base import Promise, T
 

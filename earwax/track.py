@@ -1,10 +1,12 @@
 """Provides the Track class."""
 
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from attr import attrs
-from synthizer import BufferGenerator, Context, Source
+
+if TYPE_CHECKING:
+    from synthizer import BufferGenerator, Context, Source
 
 from .sound import play_path
 
@@ -29,14 +31,14 @@ class Track:
 
     sound_path: Path
     gain: float = 0.25
-    generator: Optional[BufferGenerator] = None
-    source: Optional[Source] = None
+    generator: Optional['BufferGenerator'] = None
+    source: Optional['Source'] = None
 
-    def load_sound(self, ctx: Context) -> None:
+    def load_sound(self, ctx: 'Context') -> None:
         """Load :attr:`self.sound_path <earwax.Track.sound_path>`."""
         self.generator, self.source = play_path(ctx, self.sound_path)
 
-    def play(self, ctx: Context) -> None:
+    def play(self, ctx: 'Context') -> None:
         """Play this track on a loop.
 
         To alter how ``sound_path`` is played, override

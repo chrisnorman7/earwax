@@ -3,7 +3,11 @@
 from random import randint
 
 from attr import attrs
-from pyglet.event import EventDispatcher
+
+try:
+    from pyglet.event import EventDispatcher
+except ModuleNotFoundError:
+    EventDispatcher = object
 
 
 @attrs(auto_attribs=True)

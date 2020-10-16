@@ -3,7 +3,11 @@
 from typing import Callable, Optional
 
 from attr import attrs
-from pyglet.window import key
+
+try:
+    from pyglet.window import key
+except ModuleNotFoundError:
+    key = None
 
 from .action import OptionalGenerator
 from .level import Level

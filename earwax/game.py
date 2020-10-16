@@ -7,12 +7,26 @@ from typing import Dict, Generator, Iterator, List, Optional, Tuple, cast
 from warnings import warn
 
 from attr import Factory, attrib, attrs
-from cytolk.tolk import detect_screen_reader, load, unload
-from pyglet import app, clock
-from pyglet.input import Joystick, get_joysticks
-from pyglet.resource import get_settings_path
-from pyglet.window import Window
-from synthizer import Context, initialized
+
+try:
+    from cytolk.tolk import detect_screen_reader, load, unload
+    from pyglet import app, clock
+    from pyglet.input import Joystick, get_joysticks
+    from pyglet.resource import get_settings_path
+    from pyglet.window import Window
+    from synthizer import Context, initialized
+except ModuleNotFoundError:
+    detect_screen_reader = None
+    load = None
+    unload = None
+    app = None
+    clock = None
+    Joystick = None
+    get_joysticks = None
+    get_settings_path = None
+    Window = None
+    Context = None
+    initialized = None
 
 from .action import Action, HatDirection, OptionalGenerator
 from .configuration import EarwaxConfig

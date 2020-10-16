@@ -1,12 +1,18 @@
 """Provides the BoxLevel class."""
 
 from math import cos, dist, sin
-from typing import Callable, List, Optional, Tuple
+from typing import TYPE_CHECKING, Callable, List, Optional, Tuple
 
 from attr import Factory, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
-from pyglet.event import EventDispatcher
-from synthizer import Context
+
+try:
+    from pyglet.event import EventDispatcher
+except ModuleNotFoundError:
+    EventDispatcher = object
+
+if TYPE_CHECKING:
+    from synthizer import Context
 
 from ..level import Level
 from ..point import Point, PointDirections
@@ -170,7 +176,7 @@ class BoxLevel(Level, EventDispatcher):
         dispatched, so all that is left is to speak the name of the new box, if
         it is different to the last one, and play the ``surface_sound`` sound.
         """
-        ctx: Optional[Context] = self.game.audio_context
+        ctx: Optional['Context'] = self.game.audio_context
         if box.surface_sound is not None and ctx is not None:
             play_and_destroy(ctx, box.surface_sound)
         if box is not self.current_box:
@@ -219,7 +225,7 @@ class BoxLevel(Level, EventDispatcher):
             p: Point = Point(x, y, z)
             box: Optional[Box] = self.box.get_containing_box(p.floor())
             if box is not None:
-                ctx: Optional[Context] = self.game.audio_context
+                ctx: Optional['Context'] = self.game.audio_context
                 if box.wall:
                     self.collide(box)
                     box.play_sound(ctx, box.wall_sound)

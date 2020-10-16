@@ -4,8 +4,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
-from pyglet.clock import schedule_once
-from synthizer import Buffer, BufferGenerator, Context, DirectSource
+
+try:
+    from pyglet.clock import schedule_once
+except ModuleNotFoundError:
+    pass
+if TYPE_CHECKING:
+    from synthizer import Buffer, BufferGenerator, Context, DirectSource
 
 from .action import Action, ActionFunctionType
 from .ambiance import Ambiance
@@ -220,8 +225,8 @@ class IntroLevel(Level):
     skip_after: Optional[float]
     looping: bool = False
 
-    generator: Optional[BufferGenerator] = None
-    source: Optional[DirectSource] = None
+    generator: Optional['BufferGenerator'] = None
+    source: Optional['DirectSource'] = None
 
     def __attrs_post_init__(self) -> None:
         assert self.looping is False or self.skip_after is None

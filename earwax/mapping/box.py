@@ -3,12 +3,20 @@
 from math import dist
 from pathlib import Path
 from random import uniform
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from attr import Factory, attrib, attrs
-from pyglet.clock import schedule_once, unschedule
-from pyglet.event import EventDispatcher
-from synthizer import Context
+
+try:
+    from pyglet.clock import schedule_once, unschedule
+    from pyglet.event import EventDispatcher
+except ModuleNotFoundError:
+    schedule_once = None
+    unschedule = None
+    EventDispatcher = object
+
+if TYPE_CHECKING:
+    from synthizer import Context
 
 from ..point import Point
 from ..sound import play_and_destroy
@@ -242,7 +250,9 @@ class Box(EventDispatcher):
             return self
         return None
 
-    def play_sound(self, ctx: Optional[Context], path: Optional[Path]) -> None:
+    def play_sound(
+        self, ctx: Optional['Context'], path: Optional[Path]
+    ) -> None:
         """Play a sound at the same position as this box.
 
         :param ctx: The ``synthizer.Context`` instance to play the sound
@@ -257,7 +267,7 @@ class Box(EventDispatcher):
                 position=(self.bottom_left.x, self.bottom_left.y, 0.0)
             )
 
-    def open(self, ctx: Optional[Context]) -> None:
+    def open(self, ctx: Optional['Context']) -> None:
         """If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
         :attr:`.open <earwax.Door.open>` attribute to ``True``, and play the
         appropriate sound. Otherwise, raise :class:`earwax.NotADoor`."""
@@ -275,7 +285,7 @@ class Box(EventDispatcher):
             return None
         schedule_once(self.scheduled_close, when, ctx)
 
-    def close(self, ctx: Optional[Context]) -> None:
+    def close(self, ctx: Optional['Context']) -> None:
         """If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
         :attr:`.open <earwax.Door.open>` attribute to ``False``, and play the
         appropriate sound. Otherwise, raise :class:`earwax.NotADoor`.
@@ -287,7 +297,7 @@ class Box(EventDispatcher):
         self.dispatch_event('on_close')
         self.play_sound(ctx, self.door.close_sound)
 
-    def scheduled_close(self, dt: float, ctx: Optional[Context]) -> None:
+    def scheduled_close(self, dt: float, ctx: Optional['Context']) -> None:
         """Call :meth:`self.close() <earwax.Box.close>` on a schedule."""
         self.close(ctx)
 

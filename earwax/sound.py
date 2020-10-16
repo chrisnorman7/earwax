@@ -5,9 +5,20 @@ from random import choice
 from typing import Dict, List, Optional, Tuple
 
 from attr import Factory, attrib, attrs
-from pyglet.clock import schedule_once
-from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
-                       Generator, Source, Source3D)
+
+try:
+    from pyglet.clock import schedule_once
+except ModuleNotFoundError:
+    pass
+try:
+    from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
+                           Generator, Source, Source3D)
+except ModuleNotFoundError:
+    Buffer = None
+    Context = None
+    Generator = None
+    Source = None
+    BufferGenerator = None
 
 buffers: Dict[str, Buffer] = {}
 

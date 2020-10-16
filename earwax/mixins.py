@@ -3,7 +3,11 @@
 from typing import TYPE_CHECKING, Any, Callable, Optional, Tuple, Union
 
 from attr import attrs
-from pyglet.event import EventDispatcher
+
+try:
+    from pyglet.event import EventDispatcher
+except ModuleNotFoundError:
+    EventDispatcher = object
 
 if TYPE_CHECKING:
     from .game import Game
