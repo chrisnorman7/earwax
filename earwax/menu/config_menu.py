@@ -18,7 +18,8 @@ TitleFunc = Callable[[ConfigValue, str], str]
 
 class UnknownTypeError(Exception):
     """An exception which will be thrown if a :class:`~earwax.ConfigMenu`
-    instance doesn't know how to handle the given type."""
+    instance doesn't know how to handle the given type.
+    """
 
 
 @attrs(auto_attribs=True)
@@ -258,7 +259,8 @@ class ConfigMenu(Menu):
 
         def inner(func: TypeHandlerFunc) -> TypeHandlerFunc:
             """Create and store the
-            :class:`earwax.TypeHandler` instance."""
+            :class:`earwax.TypeHandler` instance.
+            """
             self.type_handlers[type_] = TypeHandler(title, func)
             return func
 

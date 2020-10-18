@@ -143,7 +143,8 @@ class SimpleInterfaceSoundPlayer:
 
     def play(self) -> None:
         """Play :attr:`self.generator
-        <earwax.SimpleInterfaceSoundPlayer.generator>`."""
+        <earwax.SimpleInterfaceSoundPlayer.generator>`.
+        """
         if self.source is None:
             self.source = DirectSource(self.context)
             self.source.gain = self.gain
@@ -213,7 +214,8 @@ class AdvancedInterfaceSoundPlayer:
         True, and the given path represents a directory, play a random file
         from that directory. Otherwise, if :meth:`self.play_files
         <earwax.AdvancedInterfaceSoundPlayer.play_files>` evaluates to True,
-        play the given path."""
+        play the given path.
+        """
         if path.is_dir():
             if not self.play_directories:
                 return

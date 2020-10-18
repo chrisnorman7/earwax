@@ -52,5 +52,6 @@ class MenuItem(RegisterEventMixin):
 
     def on_selected(self) -> None:
         """The function which will be called when this menu item is
-        selected."""
+        selected.
+        """
         pass

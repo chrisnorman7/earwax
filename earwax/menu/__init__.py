@@ -12,7 +12,8 @@ By default:
 
 * The selected item can be activated with the enter key.
 
-Optionally, menus can be dismissed with the escape key."""
+Optionally, menus can be dismissed with the escape key.
+"""
 
 from .action_menu import ActionMenu
 from .config_menu import ConfigMenu, TypeHandler, UnknownTypeError

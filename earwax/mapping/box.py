@@ -35,7 +35,8 @@ class OutOfBounds(BoxError):
 class NotADoor(BoxError):
     """Tried to call :meth:`~earwax.Box.open`, or :meth:`~earwax.Box.close`
     on a :class:`~earwax.Box` instance that has its :attr:`~earwax.Box.door`
-    attribute set to ``None``."""
+    attribute set to ``None``.
+    """
 
 
 @attrs(auto_attribs=True)
@@ -120,7 +121,8 @@ class Box(EventDispatcher):
         """Play an appropriate surface sound.
 
         This function will be called by the Pyglet event framework, and should
-        be called when a player is walking on this box."""
+        be called when a player is walking on this box.
+        """
         pass
 
     def on_collide(self) -> None:
@@ -141,12 +143,14 @@ class Box(EventDispatcher):
 
     def on_open(self) -> None:
         """An event that id dispatched when the :meth:`~earwax.Box.open` method is
-        successfully called on this instance."""
+        successfully called on this instance.
+        """
         pass
 
     def on_close(self) -> None:
         """An event which is dispatched when :meth:`~earwax.Box.close` is
-        successfully called on this instance."""
+        successfully called on this instance.
+        """
         pass
 
     @property
@@ -270,7 +274,8 @@ class Box(EventDispatcher):
     def open(self, ctx: Optional['Context']) -> None:
         """If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
         :attr:`.open <earwax.Door.open>` attribute to ``True``, and play the
-        appropriate sound. Otherwise, raise :class:`earwax.NotADoor`."""
+        appropriate sound. Otherwise, raise :class:`earwax.NotADoor`.
+        """
         if self.door is None:
             raise NotADoor(self)
         self.door.open = True
@@ -351,7 +356,8 @@ class FittedBox(Box):
 
     Pass a list of :class:`~earwax.Box` instances, and you'll get a box with
     its :attr:`~earwax.Box.bottom_left`, and :attr:`~earwax.Box.top_right`
-    attributes set to match the outer bounds of the provided children."""
+    attributes set to match the outer bounds of the provided children.
+    """
 
     def __init__(self, children: List[Box], **kwargs) -> None:
         """Create a new instance."""

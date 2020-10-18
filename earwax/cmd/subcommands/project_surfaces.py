@@ -9,7 +9,8 @@ from ..constants import surfaces_directory
 def project_surfaces(args: Namespace) -> None:
     """Shows a list of surfaces.
 
-    Optionally shows what files are in a given directory."""
+    Optionally shows what files are in a given directory.
+    """
     surface: Path
     if args.surface is None:
         print('Surfaces:')

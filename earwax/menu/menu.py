@@ -108,7 +108,8 @@ class Menu(Level, TitleMixin, DismissibleMixin):
     @property
     def current_item(self) -> Optional[MenuItem]:
         """Return the currently selected menu item. If position is -1, return
-        ``None``."""
+        ``None``.
+        """
         if self.position != -1:
             return self.items[self.position]
         return None
@@ -177,7 +178,8 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         <earwax.Menu.position>` is -1.
 
         This function performs no error checking, so it will happily throw
-        errors if :attr:`position` is something stupid."""
+        errors if :attr:`position` is something stupid.
+        """
         item: Optional[MenuItem] = self.current_item
         if item is None:
             self.game.output(self.title)
@@ -194,21 +196,24 @@ class Menu(Level, TitleMixin, DismissibleMixin):
     def move_up(self) -> None:
         """Move up in this menu.
 
-        Usually triggered by the up arrow key."""
+        Usually triggered by the up arrow key.
+        """
         self.position = max(-1, self.position - 1)
         self.show_selection()
 
     def move_down(self) -> None:
         """Move down in this menu.
 
-        Usually triggered by the down arrow key."""
+        Usually triggered by the down arrow key.
+        """
         self.position = min(len(self.items) - 1, self.position + 1)
         self.show_selection()
 
     def activate(self) -> OptionalGenerator:
         """Activate the currently focused menu item.
 
-        Usually triggered by the enter key."""
+        Usually triggered by the enter key.
+        """
         item: Optional[MenuItem] = self.current_item
         if item is not None:
             sound_path: Optional[Path] = item.activate_sound_path or \
@@ -223,14 +228,16 @@ class Menu(Level, TitleMixin, DismissibleMixin):
     def home(self) -> None:
         """Move to the start of a menu.
 
-        Usually triggered by the home key."""
+        Usually triggered by the home key.
+        """
         self.position = 0
         self.show_selection()
 
     def end(self) -> None:
         """Move to the end of a menu.
 
-        Usually triggered by the end key."""
+        Usually triggered by the end key.
+        """
         self.position = len(self.items) - 1
         self.show_selection()
 
@@ -260,5 +267,6 @@ class Menu(Level, TitleMixin, DismissibleMixin):
 
         By default, show the current selection. That will be the same as
         speaking the title, unless :attr:`self.position <earwax.Menu.position>`
-        has been set to anything other than -1.."""
+        has been set to anything other than -1..
+        """
         self.show_selection()

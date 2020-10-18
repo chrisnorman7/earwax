@@ -85,7 +85,8 @@ class FileMenu(Menu):
 
         This method will be called once after initialisation, and every time
         the directory is changed by the :meth:`~earwax.FileMenu.navigate_to`
-        method."""
+        method.
+        """
         self.items.clear()
         if self.empty_label is not None:
             self.add_item(self.empty_label, self.select_item(None))
@@ -103,7 +104,8 @@ class FileMenu(Menu):
         """Navigate to a different path.
 
         Instead of completely replacing the menu, just change the path, and re-
-        use this instance."""
+        use this instance.
+        """
 
         def inner() -> None:
             self.path = path

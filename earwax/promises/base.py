@@ -88,7 +88,8 @@ class Promise(Generic[T], EventDispatcher):
 
     def on_cancel(self) -> None:
         """The event that is dispatched when this instance has its
-        :meth:`~earwax.Promise.cancel` method called."""
+        :meth:`~earwax.Promise.cancel` method called.
+        """
         pass
 
     def on_finally(self) -> None:

@@ -4,6 +4,8 @@ from typing import Callable, Optional
 
 from attr import attrs
 
+from .hat_directions import LEFT, RIGHT
+
 try:
     from pyglet.window import key
 except ModuleNotFoundError:
@@ -44,7 +46,9 @@ class Editor(Level, EditorBase, DismissibleMixin):
         self.motion(key.MOTION_BACKSPACE)(self.motion_backspace)
         self.motion(key.MOTION_DELETE)(self.motion_delete)
         self.motion(key.MOTION_LEFT)(self.motion_left)
+        self.action('Left arrow', hat_direction=LEFT)(self.motion_left)
         self.motion(key.MOTION_RIGHT)(self.motion_right)
+        self.action('Right arrow', hat_direction=RIGHT)(self.motion_right)
         self.motion(key.MOTION_BEGINNING_OF_LINE)(self.beginning_of_line)
         self.motion(key.MOTION_END_OF_LINE)(self.end_of_line)
         self.motion(key.MOTION_UP)(self.motion_up)
@@ -56,7 +60,8 @@ class Editor(Level, EditorBase, DismissibleMixin):
     def submit(self) -> OptionalGenerator:
         """Submit the text in this control to self.func.
 
-        By default, this method is called when the enter key is pressed."""
+        By default, this method is called when the enter key is pressed.
+        """
         return self.func(self.text)
 
     def on_text(self, text: str) -> None:
@@ -86,7 +91,8 @@ class Editor(Level, EditorBase, DismissibleMixin):
     def echo_current_character(self) -> None:
         """Echo the current character.
 
-        Used when moving through the text."""
+        Used when moving through the text.
+        """
         if self.cursor_position is None:
             return self.echo('')
         self.echo(self.text[self.cursor_position])
@@ -110,7 +116,8 @@ class Editor(Level, EditorBase, DismissibleMixin):
     def clear(self) -> None:
         """Clear this editor.
 
-        By default, this method is called when control + u is pressed."""
+        By default, this method is called when control + u is pressed.
+        """
         self.text = ''
         self.set_cursor_position(None)
 
@@ -118,7 +125,8 @@ class Editor(Level, EditorBase, DismissibleMixin):
         """Delete the previous character.
 
         This will do nothing if the cursor is at the beginning of the line, or
-        there is no text to delete."""
+        there is no text to delete.
+        """
         if self.cursor_position is None:
             if self.text == '':
                 self.echo('No text to delete.')
@@ -137,7 +145,8 @@ class Editor(Level, EditorBase, DismissibleMixin):
         """Delete the character under the cursor.
 
         Nothing will happen if we are at the end of the line (or there is no
-        text, which will amount to the same thing)."""
+        text, which will amount to the same thing).
+        """
         if self.cursor_position is None:
             return self.echo('')
         self.text = self.text[:self.cursor_position] + self.text[
@@ -149,7 +158,8 @@ class Editor(Level, EditorBase, DismissibleMixin):
         """Move left in the editor.
 
         By default, this method is called when the left arrow key is
-        pressed."""
+        pressed.
+        """
         if self.cursor_position is None:
             if self.text == '':
                 return self.echo('')
@@ -161,7 +171,8 @@ class Editor(Level, EditorBase, DismissibleMixin):
         """Move right in the editor.
 
         By default, this method is called when the right arrow key is
-        pressed."""
+        pressed.
+        """
         if self.cursor_position is None:
             return self.echo('')
         self.set_cursor_position(self.cursor_position + 1)
@@ -169,13 +180,15 @@ class Editor(Level, EditorBase, DismissibleMixin):
     def beginning_of_line(self) -> None:
         """Move to the start of the current line.
 
-        By default, this method is called when the home key is pressed."""
+        By default, this method is called when the home key is pressed.
+        """
         self.set_cursor_position(0)
 
     def end_of_line(self) -> None:
         """Move to the end of the line.
 
-        By default, this method is called when the end key is pressed."""
+        By default, this method is called when the end key is pressed.
+        """
         self.set_cursor_position(None)
 
     def motion_up(self) -> None:
@@ -183,7 +196,8 @@ class Editor(Level, EditorBase, DismissibleMixin):
         just move the cursor to the start of the line, and read the whole
         thing.
 
-        By default, this method is called when the up arrow key is pressed."""
+        By default, this method is called when the up arrow key is pressed.
+        """
         self.cursor_position = 0
         self.echo(self.text)
 
@@ -192,7 +206,7 @@ class Editor(Level, EditorBase, DismissibleMixin):
         just move the cursor to the end of the line, and read the whole
         thing.
 
-        By default, this method is called when the down arrow key ispressed."""
-
+        By default, this method is called when the down arrow key ispressed.
+        """
         self.cursor_position = None
         self.echo(self.text)

@@ -445,7 +445,8 @@ class Game(RegisterEventMixin):
         By this point, default events have been decorated, such as
         on_key_press and on_text. Also, we are inside a synthizer.initialized
         context manager, so feel free to play sounds, and use
-        :attr:`self.audio_context <earwax.Game.audio_context>`."""
+        :attr:`self.audio_context <earwax.Game.audio_context>`.
+        """
         pass
 
     def after_run(self) -> None:
@@ -578,7 +579,8 @@ class Game(RegisterEventMixin):
         get handled.
 
         This method calls :meth:`~earwax.Level.on_pop` on the popped level, and
-        :meth:`~earwax.Level.on_reveal` on the one below it."""
+        :meth:`~earwax.Level.on_reveal` on the one below it.
+        """
         level: Level = self.levels.pop()
         level.dispatch_event('on_pop')
         if self.level is not None:
@@ -588,7 +590,8 @@ class Game(RegisterEventMixin):
         """Pop all levels.
 
         The :meth:`earwax.Level.on_pop` method will be called on every level
-        that is popped."""
+        that is popped.
+        """
         while self.levels:
             self.pop_level()
 
@@ -596,7 +599,8 @@ class Game(RegisterEventMixin):
     def level(self) -> Optional[Level]:
         """Get the most recently added :class:`earwax.Level` instance.
 
-        If the stack is empty, ``None`` will be returned."""
+        If the stack is empty, ``None`` will be returned.
+        """
         if len(self.levels):
             return self.levels[-1]
         return None
@@ -607,12 +611,14 @@ class Game(RegisterEventMixin):
         This is the default event that is used by ``pyglet.window.Window``.
 
         By default, this method calls :meth:`self.clear_levels()
-        <earwax.Game.clear_levels>`, to ensure any cleanup code is called."""
+        <earwax.Game.clear_levels>`, to ensure any cleanup code is called.
+        """
         self.clear_levels()
 
     def get_settings_path(self) -> Path:
         """Uses ``pyglet.resource.get_settings_path`` to get an appropriate
-        settings path for this game."""
+        settings path for this game.
+        """
         return Path(get_settings_path(self.name))
 
     def output(self, text: str, interrupt: bool = False) -> None:

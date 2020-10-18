@@ -15,7 +15,8 @@ class Project:
     """An earwax project.
 
     This object holds the id of the initial level (if any), as well as global
-    variables the user can create with the ``globals`` subcommand."""
+    variables the user can create with the ``globals`` subcommand.
+    """
 
     title: str
     initial_level_id: Optional[str] = None
@@ -26,14 +27,16 @@ class Project:
 
     def save(self) -> None:
         """Saves this workspace to the file specified in
-        ``constants.project_filename``."""
+        ``constants.project_filename``.
+        """
         with project_filename.absolute().open('w') as f:
             dump(self.dump(), stream=f)
 
     @classmethod
     def load(cls) -> 'Project':
         """Load and return an instance from the file specified in
-        ``constants.project_filename``."""
+        ``constants.project_filename``.
+        """
         with project_filename.absolute().open('r') as f:
             data: WorkspaceDict = load(f, Loader=FullLoader)
         return cls(**data)

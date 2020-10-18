@@ -69,7 +69,8 @@ class CoordinatesMixin:
 
 class RegisterEventMixin(EventDispatcher):
     """Allows the registration, and binding of events to be handled with one
-    function."""
+    function.
+    """
 
     def register_event(self, data: Union[EventFunction, str]) -> Union[
         EventFunction, Callable[[EventFunction], EventFunction]

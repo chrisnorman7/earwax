@@ -14,7 +14,8 @@ class PointDirections(Enum):
     instances.
 
     There are no vertical directions defined, although they would be easy to
-    include."""
+    include.
+    """
 
     here = 0
     north = 1
@@ -59,7 +60,8 @@ class Point(CoordinatesMixin):
 
     def copy(self) -> 'Point':
         """Return a ``Point`` instance with duplicate ``x`` and ``y``
-        values."""
+        values.
+        """
         return type(self)(self.x, self.y, self.z)
 
     def floor(self) -> 'Point':
@@ -110,7 +112,8 @@ class Point(CoordinatesMixin):
 
     def __neg__(self) -> 'Point':
         """Return a copy of this instance with all its coordinates multiplied
-        by -1."""
+        by -1.
+        """
         cls = type(self)
         return cls(self.x * -1, self.y * -1, self.z * -1)
 

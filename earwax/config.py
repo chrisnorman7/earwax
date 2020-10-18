@@ -84,7 +84,8 @@ class ConfigValue:
         """Return :attr:`~earwax.ConfigValue.value` as a string.
 
         This method is used by :class:`earwax.ConfigMenu` when it shows
-        values."""
+        values.
+        """
         return str(self.value)
 
     def dump(self, func: DumpLoad) -> DumpLoad:
@@ -156,7 +157,8 @@ class Config:
 
     def __init__(self) -> None:
         """Iterate over the attributes of this class, and add configuration
-        values to __config_values__."""
+        values to __config_values__.
+        """
         self.__config_values__ = {}
         self.__config_subsections__ = {}
         cls = type(self)

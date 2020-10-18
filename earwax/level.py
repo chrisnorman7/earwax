@@ -94,7 +94,8 @@ class Level(RegisterEventMixin):
 
     def stop_tracks(self) -> None:
         """Stop all the tracks in :attr:`self.tracks
-        <earwax.BoxLevel.tracks>`."""
+        <earwax.BoxLevel.tracks>`.
+        """
         track: Track
         if self.game.audio_context is not None:
             for track in self.tracks:
@@ -168,13 +169,15 @@ class Level(RegisterEventMixin):
 
     def on_push(self) -> None:
         """The event which is called when a level has been pushed onto the
-        level stack of a game."""
+        level stack of a game.
+        """
         self.start_ambiances()
         self.start_tracks()
 
     def on_pop(self) -> None:
         """The event which is called when a level has been popped from thelevel
-        stack of a game."""
+        stack of a game.
+        """
         self.stop_ambiances()
         self.stop_tracks()
 
@@ -184,7 +187,8 @@ class Level(RegisterEventMixin):
 
     def on_reveal(self) -> None:
         """The event which is called when the level above this one in the stack
-        has been popped, thus revealing this level."""
+        has been popped, thus revealing this level.
+        """
         pass
 
 
@@ -270,7 +274,8 @@ class IntroLevel(Level):
 
     def skip(self) -> Generator[None, None, None]:
         """Replace this level in the level stack with :attr:`self.level
-        <earwax.IntroLevel.level>`."""
+        <earwax.IntroLevel.level>`.
+        """
         if self.game.level is self:
             yield
             self.game.replace_level(self.level)

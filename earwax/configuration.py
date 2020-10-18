@@ -66,6 +66,15 @@ class SoundConfig(Config):
     ambiance_volume: ConfigValue = ConfigValue(0.4, name='Ambiance volume')
 
 
+class EditorConfig(Config):
+    """Configure various things about editors."""
+
+    __section_name__ = 'Editors'
+    hat_alphabet: ConfigValue = ConfigValue(
+        'abcdefghijklmnopqrstuvwxyz.,1234567890@-#[]{}', name='Hat alphabet'
+    )
+
+
 class EarwaxConfig(Config):
     """The main earwax configuration.
 
@@ -78,3 +87,4 @@ class EarwaxConfig(Config):
     menus: MenuConfig = MenuConfig()
     speech: SpeechConfig = SpeechConfig()
     sound: SoundConfig = SoundConfig()
+    editors: EditorConfig = EditorConfig()

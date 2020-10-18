@@ -108,7 +108,8 @@ class StaggeredPromise(Promise):
 
     def cancel(self) -> None:
         """Cancel :attr:`self.generator <earwax.StaggeredPromise.generator>`,
-        and set the proper state."""
+        and set the proper state.
+        """
         super().cancel()
         if self.generator is None:
             raise RuntimeError('This promise has no generator.')

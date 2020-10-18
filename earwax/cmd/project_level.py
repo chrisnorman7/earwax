@@ -46,7 +46,8 @@ class ProjectLevel(Level, TitleMixin):
     def dump(self) -> DumpDict:
         """Return this object as a dictionary.
 
-        Used for serialisation."""
+        Used for serialisation.
+        """
         return asdict(self, filter=self.should_dump)
 
     def should_dump(self, a: Attribute, v: Any) -> bool:

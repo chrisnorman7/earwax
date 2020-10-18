@@ -4,7 +4,9 @@ import sys
 from argparse import Namespace
 from datetime import datetime
 
-src = '''"""A game created by `{}` on {}."""
+src = '''"""A game created by `{}`.
+Date: {}
+"""
 
 from earwax import Game, Level, tts
 
