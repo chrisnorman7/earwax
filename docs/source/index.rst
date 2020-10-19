@@ -10,11 +10,11 @@ Welcome to Earwax's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   introduction
+
    installing
 
    features
-
-   introduction
 
    tutorials/index.rst
 
