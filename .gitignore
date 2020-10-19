@@ -131,6 +131,6 @@ AUTHORS
 ChangeLog
 docs/source/api/
 *.yaml
-sounds
+/sounds
 surfaces.py
 *.dll
