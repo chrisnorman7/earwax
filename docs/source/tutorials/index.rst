@@ -10,3 +10,5 @@ This section contains various tutorials that will show you how to use the differ
    editors
 
    sounds/index.rst
+
+   promises/index.rst
