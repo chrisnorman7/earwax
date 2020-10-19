@@ -35,7 +35,7 @@ class Editor(Level, DismissibleMixin):
 
     text: str = ''
     cursor_position: Optional[int] = None
-    vertical_position: int = -1
+    vertical_position: Optional[int] = None
 
     def __attrs_post_init__(self) -> None:
         """Initialise the editor."""
@@ -66,6 +66,12 @@ class Editor(Level, DismissibleMixin):
         """
         self.dispatch_event('on_submit', self.text)
 
+    def insert_text(self, text: str) -> None:
+        """Insert ``text`` at the current cursor position."""
+        self.text = self.text[:self.cursor_position] + text + self.text[
+            self.cursor_position:
+        ]
+
     def on_text(self, text: str) -> None:
         """Text has been entered.
 
@@ -77,8 +83,8 @@ class Editor(Level, DismissibleMixin):
         if self.cursor_position is None:
             self.text += text
         else:
-            self.text = self.text[:self.cursor_position] + text +\
-                self.text[self.cursor_position:]
+            self.insert_text(text)
+            self.cursor_position += len(text)
         self.echo(text)
 
     def on_submit(self, text: str) -> None:
@@ -117,20 +123,18 @@ class Editor(Level, DismissibleMixin):
         """
         if pos is not None and pos >= len(self.text):
             pos = None
-            self.vertical_position = -1
-        else:
-            index: int
-            try:
-                if self.cursor_position is None:
-                    index = -1
-                else:
-                    index = self.game.config.editors.hat_alphabet.value.index(
-                        self.text[self.cursor_position]
-                    )
-            except ValueError:
-                index = -1
-            self.vertical_position = index
         self.cursor_position = pos
+        index: Optional[int]
+        try:
+            if self.cursor_position is None:
+                index = None
+            else:
+                index = self.game.config.editors.hat_alphabet.value.index(
+                    self.text[self.cursor_position]
+                )
+        except ValueError:
+            index = None
+        self.vertical_position = index
         if pos is None:
             return self.echo('')
         self.echo_current_character()
@@ -183,6 +187,8 @@ class Editor(Level, DismissibleMixin):
         if self.cursor_position is None:
             return self.echo('')
         self.do_delete()
+        if self.cursor_position == len(self.text):
+            self.cursor_position = None
         self.echo_current_character()
 
     def motion_left(self) -> None:
@@ -257,6 +263,8 @@ class Editor(Level, DismissibleMixin):
             else:
                 self.motion_delete()
         else:
+            if self.vertical_position is None:
+                self.vertical_position = 0
             self.vertical_position -= 1
             if self.vertical_position == -1:
                 if self.cursor_position is None:
@@ -270,20 +278,21 @@ class Editor(Level, DismissibleMixin):
                         self.vertical_position
                     ]
                 )
+                if self.cursor_position is not None:
+                    self.cursor_position -= 1
 
     def hat_down(self) -> None:
         """Move down through the list of letters."""
-        self.vertical_position = min(
-            self.vertical_position + 1,
-            len(self.game.config.editors.hat_alphabet.value) - 1
-        )
-        print(self.vertical_position)
-        letter: str = self.game.config.editors.hat_alphabet.value[
-            self.vertical_position
-        ]
+        letters: str = self.game.config.editors.hat_alphabet.value
+        if self.vertical_position is None:
+            self.vertical_position = -1
+        self.vertical_position = (self.vertical_position + 1) % len(letters)
+        letter: str = letters[self.vertical_position]
         # The next line won't work if the cursor is at the end, so no need to
         # check.
         self.do_delete()
         self.on_text(letter)
-        if self.cursor_position is not None:
+        if self.cursor_position is None:
+            self.cursor_position = (len(self.text) - 1)
+        else:
             self.cursor_position -= 1

@@ -71,7 +71,8 @@ class EditorConfig(Config):
 
     __section_name__ = 'Editors'
     hat_alphabet: ConfigValue = ConfigValue(
-        'abcdefghijklmnopqrstuvwxyz.,1234567890@-#[]{}', name='Hat alphabet'
+        ' abcdefghijklmnopqrstuvwxyz.,1234567890@ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        '-#[]{}', name='Hat alphabet'
     )
 
 

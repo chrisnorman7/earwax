@@ -56,7 +56,7 @@ level: Level = Level(g)
 config: ExampleConfig = ExampleConfig()
 
 
-@level.action('Change window title', symbol=key.T)
+@level.action('Change window title', symbol=key.T, joystick_button=2)
 def set_title() -> OptionalGenerator:
     """Set the window title to the given text."""
     if g.window is not None:
