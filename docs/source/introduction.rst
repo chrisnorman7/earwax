@@ -1,6 +1,13 @@
 Introduction
 ============
 
+Project Goals
+-------------
+
+Earwax is an audio game library with a focus on readable code, minimal boilerplate, and rapid prototyping.
+
+It should be possible to create a basic game with basic code. It should also be possible to add layers of complexity without the game library holding you back.
+
 Workflow
 --------
 
