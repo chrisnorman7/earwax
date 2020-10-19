@@ -40,6 +40,10 @@ from .types import (ActionListType, JoyButtonReleaseGeneratorDictType,
                     ReleaseGeneratorDictType)
 
 
+class GameNotRunning(Exception):
+    """This game is not running."""
+
+
 @attrs(auto_attribs=True, repr=False)
 class Game(RegisterEventMixin):
     """The main game object.
@@ -637,3 +641,13 @@ class Game(RegisterEventMixin):
             tts.speak(text)
         if self.config.speech.braille.value:
             tts.braille(text)
+
+    def stop(self) -> None:
+        """Close :attr:`self.window <earwax.Game.window>`.
+
+        If ``self.window`` is ``None``, then :class:earwax.GameNotRunning` will
+        be raised.
+        """
+        if self.window is None:
+            raise GameNotRunning()
+        self.window.dispatch_event('on_close')

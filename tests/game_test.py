@@ -8,7 +8,7 @@ from pyglet.resource import get_settings_path
 from pyglet.window import Window, key
 from pytest import raises
 
-from earwax import Game, Level, Menu
+from earwax import Game, Level, Menu, GameNotRunning
 
 
 class WorksWithoutYield(Exception):
@@ -176,3 +176,14 @@ def test_after_run(game: Game, level: Level, window: Window) -> None:
 
     with raises(AfterRunWorks):
         game.run(window, initial_level=level)
+
+
+def test_stop(game: Game, window: Window) -> None:
+    with raises(GameNotRunning):
+        game.stop()
+
+    @game.event
+    def before_run() -> None:
+        schedule_once(lambda dt: game.stop(), 0.5)
+
+    game.run(window)

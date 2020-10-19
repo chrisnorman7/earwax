@@ -50,7 +50,7 @@ if True:
     from .die import Die
     from .editor import Editor
     from .event_matcher import EventMatcher
-    from .game import Game
+    from .game import Game, GameNotRunning
     from .game_board import GameBoard, NoSuchTile
     from .level import IntroLevel, Level
     from .mapping import (Box, BoxLevel, Door, FittedBox, NotADoor,
@@ -88,5 +88,5 @@ __all__ = [
     'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel',
     'CoordinatesMixin', 'GameBoard', 'NoSuchTile', 'Die', 'BufferDirectory',
     'PromiseStates', 'ThreadedPromise', 'StaggeredPromise',
-    'staggered_promise', 'Promise', 'types', 'utils'
+    'staggered_promise', 'Promise', 'types', 'utils', 'GameNotRunning'
 ]
