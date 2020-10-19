@@ -1,45 +1,41 @@
 """Provides the Editor class."""
 
-from typing import Callable, Optional
+from typing import Optional
 
 from attr import attrs
 
-from .hat_directions import LEFT, RIGHT
+from .hat_directions import DOWN, LEFT, RIGHT, UP
 
 try:
     from pyglet.window import key
 except ModuleNotFoundError:
     key = None
 
-from .action import OptionalGenerator
 from .level import Level
 from .mixins import DismissibleMixin
 
 
 @attrs(auto_attribs=True)
-class EditorBase:
-    """Adds a function argument."""
-
-    func: Callable[[str], OptionalGenerator]
-
-
-@attrs(auto_attribs=True)
-class Editor(Level, EditorBase, DismissibleMixin):
+class Editor(Level, DismissibleMixin):
     """A basic text editor.
 
-    By default, the enter key submits the contents to
-    :attr:`~earwax.editor.EditorBase.func`.
+    By default, the enter key dispatches the ``on_submit`` event, with the
+    contents of :attr:`earwax.Editor.text`.
 
-    :ivar ~earwax.Editor.func: The function which should be called
+    :ivar ~earwax.editor.EditorBase.func: The function which should be called
         when pressing enter in an edit field.
 
     :ivar ~earwax.Editor.text: The text which can be edited by this object.
 
-    :ivar ~earwax.Editor.position: The position of the cursor.
+    :ivar ~earwax.Editor.cursor_position: The position of the cursor.
+
+    :ivar ~earwax.Editor.vertical_position: The position in the alphabet of the
+        hat.
     """
 
     text: str = ''
     cursor_position: Optional[int] = None
+    vertical_position: int = -1
 
     def __attrs_post_init__(self) -> None:
         """Initialise the editor."""
@@ -52,17 +48,23 @@ class Editor(Level, EditorBase, DismissibleMixin):
         self.motion(key.MOTION_BEGINNING_OF_LINE)(self.beginning_of_line)
         self.motion(key.MOTION_END_OF_LINE)(self.end_of_line)
         self.motion(key.MOTION_UP)(self.motion_up)
+        self.action('Choose previous letter', hat_direction=UP)(self.hat_up)
         self.motion(key.MOTION_DOWN)(self.motion_down)
+        self.action('Choose next letter', hat_direction=DOWN)(self.hat_down)
         self.action('Submit text', symbol=key.RETURN)(self.submit)
         self.action('Dismiss', symbol=key.ESCAPE)(self.dismiss)
         self.action('Clear', symbol=key.U, modifiers=key.MOD_CTRL)(self.clear)
+        for func in (self.on_text, self.on_submit):
+            self.register_event_type(func.__name__)
+        return super().__attrs_post_init__()
 
-    def submit(self) -> OptionalGenerator:
-        """Submit the text in this control to self.func.
+    def submit(self) -> None:
+        """Dispatch the :attr:`~earwax.Editor.on_submit` event with the contents
+        of :attr:`self.text <earwax.Editor.text>`.
 
         By default, this method is called when the enter key is pressed.
         """
-        return self.func(self.text)
+        self.dispatch_event('on_submit', self.text)
 
     def on_text(self, text: str) -> None:
         """Text has been entered.
@@ -78,6 +80,13 @@ class Editor(Level, EditorBase, DismissibleMixin):
             self.text = self.text[:self.cursor_position] + text +\
                 self.text[self.cursor_position:]
         self.echo(text)
+
+    def on_submit(self, text: str) -> None:
+        """The event which is dispatched if the enter key is pressed.
+
+        :param text: The contents of :attr:`self.text <earwax.Editor.text>`.
+        """
+        pass
 
     def echo(self, text: str) -> None:
         """Speak the provided text.
@@ -108,6 +117,19 @@ class Editor(Level, EditorBase, DismissibleMixin):
         """
         if pos is not None and pos >= len(self.text):
             pos = None
+            self.vertical_position = -1
+        else:
+            index: int
+            try:
+                if self.cursor_position is None:
+                    index = -1
+                else:
+                    index = self.game.config.editors.hat_alphabet.value.index(
+                        self.text[self.cursor_position]
+                    )
+            except ValueError:
+                index = -1
+            self.vertical_position = index
         self.cursor_position = pos
         if pos is None:
             return self.echo('')
@@ -141,6 +163,17 @@ class Editor(Level, EditorBase, DismissibleMixin):
                 self.cursor_position + 1:
             ]
 
+    def do_delete(self) -> None:
+        """Perform a forward delete.
+
+        Used by :meth:`~earwax.Editor.motion_delete`, as well as the vertical
+        hat movement methods.
+        """
+        if self.cursor_position is not None:
+            self.text = self.text[:self.cursor_position] + self.text[
+                self.cursor_position + 1:
+            ]
+
     def motion_delete(self) -> None:
         """Delete the character under the cursor.
 
@@ -149,9 +182,7 @@ class Editor(Level, EditorBase, DismissibleMixin):
         """
         if self.cursor_position is None:
             return self.echo('')
-        self.text = self.text[:self.cursor_position] + self.text[
-            self.cursor_position + 1:
-        ]
+        self.do_delete()
         self.echo_current_character()
 
     def motion_left(self) -> None:
@@ -210,3 +241,49 @@ class Editor(Level, EditorBase, DismissibleMixin):
         """
         self.cursor_position = None
         self.echo(self.text)
+
+    def hat_up(self) -> None:
+        """Change the current letter to the previous one in the configured alphabet.
+
+        If the cursor is at the end of the line, moving up will select a "save"
+        button.
+
+        If the cursor is not at the end of the line, moving up will select a
+        "delete" button.
+        """
+        if self.vertical_position == -1:
+            if self.cursor_position is None:
+                self.submit()
+            else:
+                self.motion_delete()
+        else:
+            self.vertical_position -= 1
+            if self.vertical_position == -1:
+                if self.cursor_position is None:
+                    self.echo('Submit')
+                else:
+                    self.echo('Delete')
+            else:
+                self.do_delete()
+                self.on_text(
+                    self.game.config.editors.hat_alphabet.value[
+                        self.vertical_position
+                    ]
+                )
+
+    def hat_down(self) -> None:
+        """Move down through the list of letters."""
+        self.vertical_position = min(
+            self.vertical_position + 1,
+            len(self.game.config.editors.hat_alphabet.value) - 1
+        )
+        print(self.vertical_position)
+        letter: str = self.game.config.editors.hat_alphabet.value[
+            self.vertical_position
+        ]
+        # The next line won't work if the cursor is at the end, so no need to
+        # check.
+        self.do_delete()
+        self.on_text(letter)
+        if self.cursor_position is not None:
+            self.cursor_position -= 1

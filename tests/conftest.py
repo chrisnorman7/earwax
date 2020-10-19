@@ -1,5 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 
+from _pytest.fixtures import FixtureRequest
 from pyglet.window import Window
 from pytest import fixture
 from synthizer import Context, initialize, shutdown
@@ -32,8 +33,15 @@ def get_menu(game: Game) -> Menu:
 
 
 @fixture(name='editor')
-def get_editor(game: Game) -> Editor:
-    return Editor(game, print)
+def get_editor(game: Game, window: Window) -> Editor:
+    e: Editor = Editor(game)
+
+    @e.event
+    def on_submit(text: str) -> None:
+        if game.window is not None:
+            game.window.close()
+
+    return e
 
 
 @fixture(scope='session', autouse=True)
@@ -64,5 +72,8 @@ def get_gameboard(game: Game) -> GameBoard[int]:
 
 
 @fixture(name='window')
-def get_window() -> Window:
-    return Window(caption='Test')
+def get_window(request: FixtureRequest) -> Window:
+    name: str = f'{request.function.__module__}.{request.function.__name__}'
+    w: Window = Window(caption=name)
+    yield w
+    w.close()

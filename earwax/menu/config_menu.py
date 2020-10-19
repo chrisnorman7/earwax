@@ -138,15 +138,17 @@ class ConfigMenu(Menu):
 
         :param option: The :class:`~earwax.ConfigValue` instance to work on.
         """
+        self.game.output(f'Enter value: {option.value}')
+        yield
+        e: Editor = Editor(self.game, text=option.value or '')
 
-        def inner(value: str):
+        @e.event
+        def on_submit(value: str):
             """Set the option value."""
             self.set_value(option, value)()
             self.game.pop_level()
 
-        yield
-        self.game.output(f'Enter value: {option.value}')
-        self.game.push_level(Editor(self.game, inner, text=option.value or ''))
+        self.game.push_level(e)
 
     def handle_int(self, option: ConfigValue) -> Generator[
         None, None, None
@@ -158,8 +160,12 @@ class ConfigMenu(Menu):
 
         :param option: The :class:`~earwax.ConfigValue` instance to work on.
         """
+        self.game.output(f'Enter value: {option.value}')
+        yield
+        e: Editor = Editor(self.game, text=str(option.value) or '')
 
-        def inner(value: str):
+        @e.event
+        def on_submit(value: str):
             """Set the option value."""
             if not value:
                 value = '0'
@@ -170,11 +176,7 @@ class ConfigMenu(Menu):
             finally:
                 self.game.pop_level()
 
-        yield
-        self.game.output(f'Enter value: {option.value}')
-        self.game.push_level(
-            Editor(self.game, inner, text=str(option.value) or '')
-        )
+        self.game.push_level(e)
 
     def handle_float(self, option: ConfigValue) -> Generator[
         None, None, None
@@ -186,8 +188,12 @@ class ConfigMenu(Menu):
 
         :param option: The :class:`~earwax.ConfigValue` instance to work on.
         """
+        self.game.output(f'Enter value: {option.value}')
+        yield
+        e: Editor = Editor(self.game, text=str(option.value) or '')
 
-        def inner(value: str):
+        @e.event
+        def on_submit(value: str):
             """Set the option value."""
             if not value:
                 value = '0.0'
@@ -198,11 +204,7 @@ class ConfigMenu(Menu):
             finally:
                 self.game.pop_level()
 
-        yield
-        self.game.output(f'Enter value: {option.value}')
-        self.game.push_level(
-            Editor(self.game, inner, text=str(option.value) or '')
-        )
+        self.game.push_level(e)
 
     def handle_path(self, option: ConfigValue) -> Generator[None, None, None]:
         """Allow selecting files and folders.

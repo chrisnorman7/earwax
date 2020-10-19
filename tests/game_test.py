@@ -134,21 +134,24 @@ def test_level(game: Game, level: Level, menu: Menu) -> None:
     assert game.level is menu
 
 
+def test_before_run(game: Game, window: Window) -> None:
+
+    @game.event
+    def before_run() -> None:
+        raise BeforeRunWorks
+
+    with raises(BeforeRunWorks):
+        game.run(window)
+    window.close()
+
+
 def test_run(game: Game, level: Level, window: Window) -> None:
 
     @level.event
     def on_push() -> None:
         assert game.level is level
-        schedule_once(lambda dt: window.close(), 0)
+        schedule_once(lambda dt: window.close(), 1)
 
-    g: Game = Game()
-
-    @g.event
-    def before_run() -> None:
-        raise BeforeRunWorks
-
-    with raises(BeforeRunWorks):
-        g.run(window)
     game.run(window, initial_level=level)
     assert game.level is level
 

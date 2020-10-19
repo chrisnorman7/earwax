@@ -8,7 +8,7 @@ from pyglet.window import Window, key, mouse
 from synthizer import SynthizerError
 
 from earwax import (ActionMenu, Config, ConfigMenu, ConfigValue, Editor,
-                    FileMenu, Game, Level, tts)
+                    FileMenu, Game, Level)
 from earwax.action import OptionalGenerator
 
 
@@ -59,17 +59,18 @@ config: ExampleConfig = ExampleConfig()
 @level.action('Change window title', symbol=key.T)
 def set_title() -> OptionalGenerator:
     """Set the window title to the given text."""
-
-    def inner(text: str) -> None:
-        if g.window is not None:
-            g.window.set_caption(text)
-        tts.speak('Title set.')
-        g.pop_level()
-
     if g.window is not None:
-        tts.speak(f'Window title: {g.window.caption}')
+        g.output(f'Window title: {g.window.caption}')
         yield
-        g.push_level(Editor(g, inner, text=g.window.caption))
+        e: Editor = Editor(g, text=g.window.caption)
+        g.push_level(e)
+
+        @e.event
+        def on_submit(text: str) -> None:
+            if g.window is not None:
+                g.window.set_caption(text)
+            g.output('Title set.')
+            g.pop_level()
 
 
 @level.action('Quit', symbol=key.ESCAPE, joystick_button=3)
@@ -89,9 +90,9 @@ def do_beep() -> None:
 
 @level.action('Mouse thing', mouse_button=mouse.LEFT)
 def mouse_thing():
-    tts.speak('Mouse down.')
+    g.output('Mouse down.')
     yield
-    tts.speak('Mouse up.')
+    g.output('Mouse up.')
 
 
 @level.action(
@@ -102,7 +103,7 @@ def toggle_beep() -> Generator[None, None, None]:
     """Toggle beeping."""
     config.can_beep.value = not config.can_beep.value
     yield
-    tts.speak(
+    g.output(
         f'Beeping {"enabled" if config.can_beep.value else "disabled"}.'
     )
 

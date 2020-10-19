@@ -152,8 +152,8 @@ class Game(RegisterEventMixin):
     def __attrs_post_init__(self) -> None:
         for func in (
             self.before_run, self.after_run, self.on_close,
-            self.on_joybutton_press, self.on_joybutton_release,
-            self.on_joyhat_motion, self.on_key_press, self.on_key_release,
+            self.on_joyhat_motion, self.on_joybutton_press,
+            self.on_joybutton_release, self.on_key_press, self.on_key_release,
             self.on_mouse_press, self.on_mouse_release
         ):
             self.register_event_type(func.__name__)
