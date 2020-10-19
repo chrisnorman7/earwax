@@ -10,6 +10,8 @@ Welcome to Earwax's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   installing
+
    features
 
    introduction
