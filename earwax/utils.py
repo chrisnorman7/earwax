@@ -80,7 +80,7 @@ def pluralise(n: int, single: str, multiple: Optional[str] = None) -> str:
         pluralise(2, 'person', multiple='people') == 'people'
         pluralise(0, 'person', multiple='people') == 'people'
 
-    :param n: The number of ``single``s.
+    :param n: The number of items we are dealing with.
 
     :param single: The name of the thing when there is only 1.
 
@@ -97,7 +97,7 @@ def pluralise(n: int, single: str, multiple: Optional[str] = None) -> str:
 def format_timedelta(td: timedelta, *args, **kwargs) -> str:
     """Given a timedelta ``td``, return it as a human readable time.
 
-    For example:
+    For example::
 
         td = timedelta(days=400, hours=2, seconds=3)
         format_fimedelta(
@@ -112,7 +112,7 @@ def format_timedelta(td: timedelta, *args, **kwargs) -> str:
         :meth:`~earwax.utils.english_list`.
 
     :param kwargs: The extra keyword arguments to pass onto
-        :earwax:`~earwax.utils.english_list`.
+        :meth:`~earwax.utils.english_list`.
     """
     items: List[str] = []
     years: int

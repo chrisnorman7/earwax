@@ -22,6 +22,16 @@ class Editor(Level, DismissibleMixin):
     By default, the enter key dispatches the ``on_submit`` event, with the
     contents of :attr:`earwax.Editor.text`.
 
+    Below is an example of how to use this class::
+
+        e: Editor = Editor(game)
+
+        @e.event
+        def on_submit(text: str) -> None:
+            # Do something with text...
+
+        game.push_level(e)
+
     :ivar ~earwax.editor.EditorBase.func: The function which should be called
         when pressing enter in an edit field.
 
