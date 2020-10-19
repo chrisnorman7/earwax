@@ -187,9 +187,7 @@ class Editor(Level, DismissibleMixin):
         if self.cursor_position is None:
             return self.echo('')
         self.do_delete()
-        if self.cursor_position == len(self.text):
-            self.cursor_position = None
-        self.echo_current_character()
+        self.set_cursor_position(self.cursor_position)
 
     def motion_left(self) -> None:
         """Move left in the editor.
