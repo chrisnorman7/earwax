@@ -18,7 +18,7 @@ Implemented Features
 
 * The ability to configure various apsects of the framework (including generic sound icons in menus), simply by setting configuration values on a :class:`configuration object <earwax.EarwaxConfig>` which resides on your :class:`game object <earwax.Game>`.
 
-* Various sound functions for playing sounds, and cleaning them up when they're finished.
+* Various functions for playing sounds and cleaning them up when they're finished.
 
 * Different types of levels already implemented:
 
@@ -28,9 +28,11 @@ Implemented Features
 
 * The ability to add actions to :class:`earwax.Level` instances with keyboard keys, mouse buttons, joystick buttons, and joystick hat positions.
 
-* A text-to-speech system.
+* A text-to-speech system wich uses `cytolk <https://github.com/pauliyobo/cytolk>`_.
 
 * An ``earwax`` command which can currently create default games.
+
+* Various Promise-style classes for long-running tasks.
 
 Feature Requests
 ----------------
