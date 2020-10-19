@@ -17,8 +17,8 @@ Alternatively, you could install using git::
     cd earwax
     python setup.py
 
-Running Test
-============
+Running Tests
+=============
 
 To run the tests, you will need to install `pytest <https://pytest.org/>`_::
 
