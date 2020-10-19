@@ -14,6 +14,8 @@ Welcome to Earwax's documentation!
 
    introduction
 
+   tutorials/index.rst
+
    api/modules.rst
 
 Indices and tables
