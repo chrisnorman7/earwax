@@ -58,6 +58,9 @@ if True:
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
+    from .networking import (AlreadyConnected, AlreadyConnecting,
+                             ConnectionError, ConnectionStates,
+                             NetworkConnection, NotConnectedYet)
     from .point import Point, PointDirections
     from .promises import (Promise, PromiseStates, StaggeredPromise,
                            ThreadedPromise, staggered_promise)
@@ -88,5 +91,7 @@ __all__ = [
     'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel',
     'CoordinatesMixin', 'GameBoard', 'NoSuchTile', 'Die', 'BufferDirectory',
     'PromiseStates', 'ThreadedPromise', 'StaggeredPromise',
-    'staggered_promise', 'Promise', 'types', 'utils', 'GameNotRunning'
+    'staggered_promise', 'Promise', 'types', 'utils', 'GameNotRunning',
+    'NetworkConnection', 'ConnectionStates', 'ConnectionError',
+    'AlreadyConnected', 'AlreadyConnecting', 'NotConnectedYet'
 ]
