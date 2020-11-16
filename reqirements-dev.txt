@@ -1,0 +1,8 @@
+flake8
+black
+isort
+mypy
+pytest
+autopep8
+twine
+flake8-docstrings
