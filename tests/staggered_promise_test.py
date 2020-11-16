@@ -19,6 +19,8 @@ def test_staggered_promise() -> None:
         yield 2.0
 
     assert isinstance(promise, StaggeredPromise)
+    assert promise.generator is None
+    assert promise.state is PromiseStates.ready
 
 
 def test_init() -> None:

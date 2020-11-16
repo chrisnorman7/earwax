@@ -16,14 +16,19 @@ class ConnectionError(Exception):
 
 
 class AlreadyConnecting(ConnectionError):
-    """An attempt was made to connect a connection which is already attempting
+    """Already connecting.
+
+    An attempt was made to connect a connection which is already attempting
     to connect.
     """
 
 
 class AlreadyConnected(ConnectionError):
-    """Attempted to call ``connect()`` on an already connected connection
-    object."""
+    """Already connected.
+
+    Attempted to call ``connect()`` on an already connected connection
+    object.
+    """
 
 
 class NotConnectedYet(ConnectionError):
@@ -66,29 +71,43 @@ class NetworkConnection(RegisterEventMixin):
     )
 
     def __attrs_post_init__(self) -> None:
+        """Register default events."""
         for func in (
             self.on_connect, self.on_disconnect, self.on_data, self.on_error
         ):
             self.register_event(func)  # type: ignore[arg-type]
 
     def on_connect(self) -> None:
-        """An event which is dispatched when a connection is established."""
+        """Deal with the connection being opened.
+
+        This event is dispatched when text is first received from
+        :attr:`self.socket <earwax.NetworkConnection.socket>`, since I've not
+        found a better way to know when the socket is properly open.
+        """
         pass
 
     def on_disconnect(self) -> None:
-        """An event which is dispatched when :attr:`self.socket
-        <earwax.NetworkConnection.socket>` has disconnected.
+        """Handle the connection closing.
+
+        Dispatched when :attr:`self.socket <earwax.NetworkConnection.socket>`
+        has disconnected.
+
+        A socket disconnect is defined by the receipt of an empty string.
         """
         pass
 
     def on_data(self, data: bytes) -> None:
-        """An event which is dispatched whenever data is received from
+        """Handle incoming data.
+
+        An event which is dispatched whenever data is received from
         :attr:`self.socket <earwax.NetworkConnection.socket>`.
         """
         pass
 
     def on_error(self, e: Exception) -> None:
-        """An event which is dispatched when there is an error establishing a
+        """Handle a connection error.
+
+        This event is dispatched when there is an error establishing a
         connection.
 
         :param e: The exception that was raised.
@@ -96,7 +115,9 @@ class NetworkConnection(RegisterEventMixin):
         raise e
 
     def connect(self, hostname: str, port: int) -> None:
-        """Connect :attr:`self.socket <earwax.NetworkConnection.socket>` to the
+        """Open a new connection.
+
+        Connect :attr:`self.socket <earwax.NetworkConnection.socket>` to the
         provided hostname and port.
 
         :param hostname: The hostname to connect to.
@@ -120,8 +141,10 @@ class NetworkConnection(RegisterEventMixin):
             self.socket = None
 
     def close(self) -> None:
-        """Disconnect :attr:`self.socket <earwax.NetworkConnection.socket>`,
-        and unschedule :meth:`self.poll <earwax.NetworkConnection.poll>`.
+        """Close this connection.
+
+        Disconnect :attr:`self.socket <earwax.NetworkConnection.socket>`, and
+        call :meth:`~earwax.NetworkConnection.shutdown` to clean up..
         """
         if self.socket is None:
             raise NotConnectedYet(self)
@@ -130,8 +153,14 @@ class NetworkConnection(RegisterEventMixin):
         self.shutdown()
 
     def poll(self, dt: float) -> None:
-        """Poll :attr:`self.socket <earwax.NetworkConnection.socket>` for
-        data.
+        """Check if any data has been received.
+
+        Poll :attr:`self.socket <earwax.NetworkConnection.socket>` for anything
+        that has been received since the last time this function ran.
+
+        This function will be scheduled by
+        :meth:`~earwax.NetworkConnection.connect`, and unscheduled when no more
+        data is received from the socket.
 
         If this connection is not connected yet (I.E.: you called this function
         yourself), then :class:`earwax.NotConnectedYet` will be raised.
@@ -157,13 +186,20 @@ class NetworkConnection(RegisterEventMixin):
             self.dispatch_event('on_data', b''.join(chunks))
 
     def shutdown(self) -> None:
-        """Unschedule :meth:`self.poll <earwax.NetworkConnection.poll>`."""
+        """Shutdown this server.
+
+        Unschedule :meth:`self.poll <earwax.NetworkConnection.poll>`, set
+        :attr:`self.socket <earwax.NetworkConection.socket>` to ``None``, and
+        reset :attr:`self.state <earwax.NetworkConnection.state>`.
+        """
         unschedule(self.poll)
         self.socket = None
         self.state = ConnectionStates.not_connected
 
     def send(self, data: bytes) -> None:
-        """Send some data to :attr:`self.socket
+        r"""Send some data over this conection.
+
+        Sends some data to :attr:`self.socket
         <earwax.NetworkConnection.socket>`.
 
         If this object is not connected yet, then
@@ -171,7 +207,7 @@ class NetworkConnection(RegisterEventMixin):
 
         :param data: The data to send to the socket.
 
-            Must end with ``'\\r\\n'``.
+            Must end with ``'\r\n'``.
         """
         if self.socket is None:
             raise NotConnectedYet(self)
