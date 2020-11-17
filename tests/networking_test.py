@@ -1,9 +1,12 @@
 """Test Earwax networking."""
 
-from earwax import ConnectionStates, Game, Level, NetworkConnection
 from pyglet.clock import schedule_once, unschedule
 from pyglet.event import EVENT_HANDLED
 from pyglet.window import Window
+
+from earwax import ConnectionStates, Game, Level, NetworkConnection
+
+from .conftest import PretendSocket
 
 
 class TooSlow(Exception):
@@ -79,3 +82,12 @@ def test_on_error(
     game.run(window)
     assert game.level is works_level
     unschedule(do_connect)
+
+
+def test_on_send(con: NetworkConnection, socket: PretendSocket) -> None:
+    """Ensure that data is sent properly."""
+    socket.patch(con)
+    con.send(b'test')
+    assert socket.data == b'test'
+    con.send(b'hello world')
+    assert socket.data == b'hello world'

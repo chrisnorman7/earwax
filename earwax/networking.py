@@ -18,16 +18,17 @@ class ConnectionError(Exception):
 class AlreadyConnecting(ConnectionError):
     """Already connecting.
 
-    An attempt was made to connect a connection which is already attempting
-    to connect.
+    An attempt was made to call :meth:`~earwax.NetworkConnection.connect` on an
+    :class:`~earwax.NetworkConnection` instance which is already attempting to
+    connect.
     """
 
 
 class AlreadyConnected(ConnectionError):
     """Already connected.
 
-    Attempted to call ``connect()`` on an already connected connection
-    object.
+    Attempted to call :meth:`~earwax.NetworkConnection.connect` on an already
+    connected :class:`~earwax.NetworkConnection` instance.
     """
 
 
@@ -36,19 +37,23 @@ class NotConnectedYet(ConnectionError):
 
 
 class ConnectionStates(Enum):
-    """Various states that :class:`earwax.NetworkConnection` classes can be in.
+    """Various states that :class:`~earwax.NetworkConnection` classes can be in.
 
-    :ivar not_connected: The connection's
-    :meth:`~earwax.NetworkConnection.connect` method has not yet been called.
+    :ivar ~earwax.ConnectionStates.not_connected: The connection's
+        :meth:`~earwax.NetworkConnection.connect` method has not yet been
+        called.
 
-    :ivar connecting: The connection is still being established.
+    :ivar ~earwax.ConnectionStates.connecting: The connection is still being
+        established.
 
-    :ivar connected: A connection has been established.
+    :ivar ~earwax.ConnectionStates.connected: A connection has been
+        established.
 
-    :ivar disconnected: This connection was connected at some point, but now is
-    not.
+    :ivar ~earwax.ConnectionStates.disconnected: This connection is no longer
+        connected (but was at some point).
 
-    :ivar error: There was an error establishing a connection.
+    :ivar ~earwax.ConnectionStates.error: There was an error establishing a
+        connection.
     """
 
     not_connected = 0
@@ -60,7 +65,17 @@ class ConnectionStates(Enum):
 
 @attrs(auto_attribs=True)
 class NetworkConnection(RegisterEventMixin):
-    """Represents a single outbound connection."""
+    """Represents a single outbound connection.
+
+    You can read data by providing an event handler for
+    :meth:`~earwax.NetworkConnection.on_data`, and write data with the
+    :meth:`~earwax.NetworkConnection.send` method.
+
+    :ivar ~earwax.NetworkConnection.socket: The raw socket this instance uses
+        for communication.
+
+    :ivar ~earwax.NetworkConnection.state: The state this connection is in.
+    """
 
     socket: Optional[_socket] = attrib(
         default=Factory(lambda: None), init=False
@@ -92,7 +107,8 @@ class NetworkConnection(RegisterEventMixin):
         Dispatched when :attr:`self.socket <earwax.NetworkConnection.socket>`
         has disconnected.
 
-        A socket disconnect is defined by the receipt of an empty string.
+        A socket disconnect is defined by the socket in question receiving an
+        empty string.
         """
         pass
 
@@ -159,8 +175,9 @@ class NetworkConnection(RegisterEventMixin):
         that has been received since the last time this function ran.
 
         This function will be scheduled by
-        :meth:`~earwax.NetworkConnection.connect`, and unscheduled when no more
-        data is received from the socket.
+        :meth:`~earwax.NetworkConnection.connect`, and unscheduled by
+        :meth:`~earwax.NetworkConnection.shutdown`, when no more data is
+        received from the socket.
 
         If this connection is not connected yet (I.E.: you called this function
         yourself), then :class:`earwax.NotConnectedYet` will be raised.

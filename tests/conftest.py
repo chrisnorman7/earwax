@@ -1,15 +1,16 @@
 """Setup for tests."""
 
 from concurrent.futures import ThreadPoolExecutor
+from socket import AF_INET, SOCK_STREAM, socket
 from typing import Generator, Optional
-from socket import socket, AF_INET, SOCK_STREAM
 
 from _pytest.fixtures import FixtureRequest
-from earwax import (Box, BoxLevel, Editor, Game, GameBoard, Level, Menu,
-                    NetworkConnection, Point)
 from pyglet.window import Window
 from pytest import fixture
 from synthizer import Context, initialize, shutdown
+
+from earwax import (Box, BoxLevel, ConnectionStates, Editor, Game, GameBoard,
+                    Level, Menu, NetworkConnection, Point)
 
 
 class PretendSocket(socket):
@@ -36,11 +37,11 @@ class PretendSocket(socket):
 
         If ``self.data`` is ``None``, then raise ``BlockingIOError``.
         """
+        if not self.connected:
+            return b''
         if self.data is None:
             raise BlockingIOError('No data yet.')
-        if self.connected:
-            return self.data
-        return b''
+        return self.data
 
     def close(self) -> None:
         """Pretend to close this pretend socket.
@@ -48,6 +49,14 @@ class PretendSocket(socket):
         Really set ``self.connected`` to ``False``.
         """
         self.connected = False
+
+    def patch(self, con: NetworkConnection) -> None:
+        """Assign this socket to a connection.
+
+        This simulates the connection being connected to an actual host.
+        """
+        con.socket = self
+        con.state = ConnectionStates.connected
 
 
 @fixture(name='thread_pool', scope='session')
