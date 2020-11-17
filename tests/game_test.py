@@ -8,7 +8,7 @@ from pyglet.resource import get_settings_path
 from pyglet.window import Window, key
 from pytest import raises
 
-from earwax import Game, Level, Menu, GameNotRunning
+from earwax import Game, GameNotRunning, Level, Menu
 
 
 class WorksWithoutYield(Exception):
