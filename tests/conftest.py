@@ -1,7 +1,8 @@
 """Setup for tests."""
 
 from concurrent.futures import ThreadPoolExecutor
-from typing import Generator
+from typing import Generator, Optional
+from socket import socket, AF_INET, SOCK_STREAM
 
 from _pytest.fixtures import FixtureRequest
 from earwax import (Box, BoxLevel, Editor, Game, GameBoard, Level, Menu,
@@ -9,6 +10,44 @@ from earwax import (Box, BoxLevel, Editor, Game, GameBoard, Level, Menu,
 from pyglet.window import Window
 from pytest import fixture
 from synthizer import Context, initialize, shutdown
+
+
+class PretendSocket(socket):
+    """A pretend socket object."""
+
+    data: Optional[bytes] = None
+    connected: bool = True
+
+    def sendall(  # type: ignore[override]
+        self, data: bytes, flags: int = 0
+    ) -> None:
+        """Pretend to send data.
+
+        Really set ``self.data`` to ``data``.
+        """
+        self.data = data
+
+    def recv(  # type: ignore[override]
+        self, bufsize: int, flags: int = 0
+    ) -> bytes:
+        """Pretend to receive data from a non-existant network connection.
+
+        Really return ``self.data``.
+
+        If ``self.data`` is ``None``, then raise ``BlockingIOError``.
+        """
+        if self.data is None:
+            raise BlockingIOError('No data yet.')
+        if self.connected:
+            return self.data
+        return b''
+
+    def close(self) -> None:
+        """Pretend to close this pretend socket.
+
+        Really set ``self.connected`` to ``False``.
+        """
+        self.connected = False
 
 
 @fixture(name='thread_pool', scope='session')
@@ -99,3 +138,9 @@ def get_window(request: FixtureRequest) -> Window:
 def get_network_connection() -> NetworkConnection:
     """Get a new network connection."""
     return NetworkConnection()
+
+
+@fixture(name='socket')
+def get_socket() -> PretendSocket:
+    """Get a pretend socket."""
+    return PretendSocket(AF_INET, SOCK_STREAM)
