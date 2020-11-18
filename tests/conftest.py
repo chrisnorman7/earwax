@@ -41,7 +41,9 @@ class PretendSocket(socket):
             return b''
         if self.data is None:
             raise BlockingIOError('No data yet.')
-        return self.data
+        data: bytes = self.data
+        self.data = None
+        return data
 
     def close(self) -> None:
         """Pretend to close this pretend socket.

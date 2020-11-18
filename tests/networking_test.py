@@ -1,6 +1,6 @@
 """Test Earwax networking."""
 
-from pyglet.clock import schedule_once, unschedule
+from pyglet.clock import schedule_once, unschedule, schedule
 from pyglet.event import EVENT_HANDLED
 from pyglet.window import Window
 
@@ -91,3 +91,54 @@ def test_on_send(con: NetworkConnection, socket: PretendSocket) -> None:
     assert socket.data == b'test'
     con.send(b'hello world')
     assert socket.data == b'hello world'
+
+
+def test_on_disconnect(
+    socket: PretendSocket, con: NetworkConnection, game: Game, window: Window
+) -> None:
+    """Make sure the ``on_disconnect`` event dispatches properly."""
+    works_level: Level = Level(game)
+    socket.patch(con)
+
+    @con.event
+    def on_disconnect() -> None:
+        game.push_level(works_level)
+        window.close()
+
+    @game.event
+    def before_run() -> None:
+        schedule_once(lambda dt: con.close(), 0.5)
+
+    game.run(window)
+    assert game.level is works_level
+
+
+def test_on_data(
+    socket: PretendSocket, con: NetworkConnection, game: Game, window: Window
+) -> None:
+    """Make sure the ``on_data`` event dispatches properly."""
+    second_level: Level = Level(game)
+    works_level: Level = Level(game)
+    socket.patch(con)
+
+    @con.event
+    def on_data(data: bytes) -> None:
+        if game.level is None:
+            assert data == b'Hello world'
+            con.send(b'test')
+            game.push_level(second_level)
+        elif game.level is second_level:
+            assert data == b'test'
+            game.push_level(works_level)
+            con.shutdown()
+            window.close()
+        else:
+            raise RuntimeError('Something went wrong.')
+
+    def setup(dt: float) -> None:
+        con.send(b'Hello world')
+        schedule(con.poll)
+
+    schedule_once(setup, 0.5)
+    game.run(window)
+    assert game.level is works_level

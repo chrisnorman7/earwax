@@ -33,6 +33,8 @@ def test_recv(socket: PretendSocket) -> None:
         socket.recv(1024)
     socket.sendall(b'Hello world.')
     assert socket.recv(1024) == b'Hello world.'
+    with raises(BlockingIOError):
+        socket.recv(1024)
 
 
 def test_close(socket: PretendSocket) -> None:
