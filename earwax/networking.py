@@ -33,7 +33,7 @@ class AlreadyConnected(ConnectionError):
 
 
 class NotConnectedYet(ConnectionError):
-    """Tried to send data on an connection which is not yet connected."""
+    """Tried to send data on a connection which is not yet connected."""
 
 
 class ConnectionStates(Enum):
@@ -206,8 +206,9 @@ class NetworkConnection(RegisterEventMixin):
         """Shutdown this server.
 
         Unschedule :meth:`self.poll <earwax.NetworkConnection.poll>`, set
-        :attr:`self.socket <earwax.NetworkConection.socket>` to ``None``, and
-        reset :attr:`self.state <earwax.NetworkConnection.state>`.
+        :attr:`self.socket <earwax.NetworkConnection.socket>` to ``None``, and
+        reset :attr:`self.state <earwax.NetworkConnection.state>` to
+        :attr:`earwax.ConnectionStates.not_connected`.
         """
         unschedule(self.poll)
         self.socket = None
@@ -220,7 +221,7 @@ class NetworkConnection(RegisterEventMixin):
         <earwax.NetworkConnection.socket>`.
 
         If this object is not connected yet, then
-        :class:`~earwax.NotConectedYet` will be raised.
+        :class:`~earwax.NotConnectedYet` will be raised.
 
         :param data: The data to send to the socket.
 
