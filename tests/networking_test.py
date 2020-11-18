@@ -1,6 +1,6 @@
 """Test Earwax networking."""
 
-from pyglet.clock import schedule_once, unschedule, schedule
+from pyglet.clock import schedule, schedule_once, unschedule
 from pyglet.event import EVENT_HANDLED
 from pyglet.window import Window
 
