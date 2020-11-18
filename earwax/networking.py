@@ -6,7 +6,11 @@ from socket import socket as _socket
 from typing import List, Optional
 
 from attr import Factory, attrib, attrs
-from pyglet.clock import schedule, unschedule
+try:
+    from pyglet.clock import schedule, unschedule
+except ModuleNotFoundError:
+    schedule = None
+    unschedule = None
 
 from .mixins import RegisterEventMixin
 
