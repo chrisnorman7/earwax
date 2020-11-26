@@ -6,3 +6,4 @@ pytest
 autopep8
 twine
 flake8-docstrings
+flake8-spellcheck
