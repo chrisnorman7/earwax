@@ -64,6 +64,8 @@ class BoxLevel(Level, EventDispatcher):
     current_box: Optional[Box] = None
 
     def __attrs_post_init__(self) -> None:
+        """Register default events."""
+        super().__attrs_post_init__()
         self.register_event_type('on_move')
         self.register_event_type('on_move_fail')
         self.register_event_type('on_turn')
@@ -74,13 +76,17 @@ class BoxLevel(Level, EventDispatcher):
         return super().on_push()
 
     def on_turn(self) -> None:
-        """An event that will dispatched when the :meth:`~earwax.BoxLevel.turn`
+        """Handle turning.
+
+        An event that will dispatched when the :meth:`~earwax.BoxLevel.turn`
         action is used.
         """
         pass
 
     def on_move(self) -> None:
-        """An event that will be dispatched when the
+        """Handle movement.
+
+        An event that will be dispatched when the
         :meth:`~earwax.BoxLevel.move` action is used.
         """
         pass
@@ -89,7 +95,9 @@ class BoxLevel(Level, EventDispatcher):
         self, distance: float, vertical: Optional[float],
         bearing: Optional[int]
     ) -> None:
-        """An event that will be dispatched when the
+        """Handle a move failure.
+
+        An event that will be dispatched when the
         :meth:`~earwax.BoxLevel.move` action has been used, but no move was
         performed.
 
@@ -103,6 +111,7 @@ class BoxLevel(Level, EventDispatcher):
 
     def set_coordinates(self, p: Point) -> None:
         """Set the current coordinates.
+
         Also set listener position.
 
         :param p: The new point to assign to :attr:`self.coordinates
@@ -113,7 +122,7 @@ class BoxLevel(Level, EventDispatcher):
             self.game.audio_context.position = p.coordinates
 
     def set_bearing(self, angle: int) -> None:
-        """Sets the direction of travel, and the listener orientation.
+        """Set the direction of travel and the listener's orientation.
 
         :param angle: The bearing (in degrees).
         """
@@ -127,12 +136,14 @@ class BoxLevel(Level, EventDispatcher):
     def calculate_coordinates(
         self, distance: float, bearing: int
     ) -> Tuple[float, float]:
-        """Used by :meth:`~earwax.BoxLevel.move` to calculate new coordinates.
+        """Calculate coordinates at the given distance in the given direction.
+
+        Used by :meth:`~earwax.BoxLevel.move` to calculate new coordinates.
 
         Override this method if you want to change the algorithm used to
         calculate the target coordinates.
 
-        :param distanc: The distance which should be used.
+        :param distance: The distance which should be used.
 
         :param bearing: The bearing the new coordinates are in.
 
@@ -144,7 +155,7 @@ class BoxLevel(Level, EventDispatcher):
         )
 
     def handle_portal(self, box: Box) -> None:
-        """The player has just activated a portal.
+        """Activate a portal.
 
         :param box: The box that is the portal to handle.
         """
@@ -159,7 +170,7 @@ class BoxLevel(Level, EventDispatcher):
             p.level.set_bearing(bearing)
 
     def handle_door(self, box: Box) -> None:
-        """The player has just activated a door.
+        """Activate a door.
 
         :param box: The box that is the door to handle.
         """
@@ -188,16 +199,19 @@ class BoxLevel(Level, EventDispatcher):
             self.current_box = box
 
     def collide(self, box: Box) -> None:
-        """Called to run collision code on a box."""
+        """Handle collitions.
+
+        Called to run collision code on a box.
+        """
         box.dispatch_event('on_collide')
 
     def move(
         self, distance: float = 1.0, vertical: Optional[float] = None,
         bearing: Optional[int] = None
     ) -> Callable[[], None]:
-        """Returns a callable that allows the player to move on the map.
+        """Return a callable that allows the player to move on the map.
 
-        If the move is successfl (I.E.: There is a box at the destination
+        If the move is successful (I.E.: There is a box at the destination
         coordinates), the :meth:`~earwax.BoxLevel.on_move` event is dispatched.
 
         If not, then :meth:`~earwax.BoxLevel.on_move_fail` is dispatched.
@@ -258,7 +272,9 @@ class BoxLevel(Level, EventDispatcher):
         return inner
 
     def show_facing(self, include_angle: bool = True) -> Callable[[], None]:
-        """Returns a function that will let you see the current bearing as text::
+        """Return a function that will let you see the current bearing as text.
+
+        For example::
 
             l = BoxLevel(...)
             l.action('Show facing', symbol=key.F)(l.show_facing())
@@ -284,7 +300,9 @@ class BoxLevel(Level, EventDispatcher):
         return inner
 
     def turn(self, amount: int) -> Callable[[], None]:
-        """Return a function that will turn the perspective by the given amount,
+        """Return a turn function.
+
+        Return a function that will turn the perspective by the given amount
         and dispatch the ``on_turn`` event.
 
         For example::
@@ -308,7 +326,7 @@ class BoxLevel(Level, EventDispatcher):
         return inner
 
     def activate(self, door_distance: float = 2.0) -> Callable[[], None]:
-        """Returns a function that you can call when the enter key is pressed.
+        """Return a function that can be call when the enter key is pressed.
 
         First we check if the current box is a portal. If it is, then we call
         :meth:`~earwax.BoxLevel.handle_portal`.
