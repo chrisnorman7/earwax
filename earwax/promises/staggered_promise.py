@@ -52,11 +52,14 @@ class StaggeredPromise(Promise):
     )
 
     def __attrs_post_init__(self) -> None:
+        """Register default events."""
         super().__attrs_post_init__()
         self.register_event_type(self.on_next.__name__)
 
     def on_next(self, delay: float) -> None:
-        """The event that is dispatched every time ``next`` is called on
+        """Do something when execution is advanced.
+
+        This event is dispatched every time ``next`` is called on
         :meth:`self.func <earwax.StaggeredPromise.func>`.
 
         :param delay: The delay that was requested by the function.
@@ -64,8 +67,10 @@ class StaggeredPromise(Promise):
         pass
 
     def run(self, *args, **kwargs) -> None:
-        """Start :meth:`self.func <earwax.StaggeredPromise.func>` running, and
-        set the proper state.
+        """Run this promise.
+
+        Start :meth:`self.func <earwax.StaggeredPromise.func>` running, and set
+        the proper state.
 
         :param args: The positional arguments passed to :meth:`self.func
             <earwax.StaggeredPromise.func>`.
@@ -78,7 +83,9 @@ class StaggeredPromise(Promise):
         self.do_next(None)
 
     def do_next(self, dt: Optional[float]) -> None:
-        """Call ``next(self.generator)``, and then suspend for however long the
+        """Advance execution.
+
+        Calls ``next(self.generator)``, and then suspend for however long the
         function demands.
 
         If ``StopIteration`` is raised, then the args from that exception are
@@ -107,8 +114,10 @@ class StaggeredPromise(Promise):
             self.error(e)
 
     def cancel(self) -> None:
-        """Cancel :attr:`self.generator <earwax.StaggeredPromise.generator>`,
-        and set the proper state.
+        """Cancel this promise.
+
+        Cancels :attr:`self.generator <earwax.StaggeredPromise.generator>`, and
+        sets the proper state.
         """
         super().cancel()
         if self.generator is None:
@@ -120,7 +129,10 @@ class StaggeredPromise(Promise):
     def decorate(
         cls, func: StaggeredPromiseFunctionType
     ) -> 'StaggeredPromise':
-        """A decorator method for returning :class:`earwax.StaggeredPromise` instances.
+        """Make an instance from a decorated function.
+
+        This function acts as a decorator method for returning
+        :class:`earwax.StaggeredPromise` instances.
 
         Using this function seems to help mypy figure out what type your
         function is.

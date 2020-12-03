@@ -1,4 +1,4 @@
-"""Test the Action class, and all related functions."""
+"""Test the Action class and all related functions."""
 
 from inspect import isgenerator
 
@@ -9,18 +9,19 @@ from earwax import Action, Game, Level
 
 
 class Works(Exception):
-    pass
+    """A test worked."""
 
 
 class LeftMouseButton(Exception):
-    pass
+    """Left mouse button was pressed."""
 
 
 class RightMouseButton(Exception):
-    pass
+    """The right mouse button was pressed."""
 
 
 def test_init(level: Level) -> None:
+    """Test that instances actions properly."""
     a = Action(level, 'Print', print)
     assert a.level is level
     assert a.title == 'Print'
@@ -33,6 +34,7 @@ def test_init(level: Level) -> None:
 
 
 def test_mouse(game: Game, level: Level) -> None:
+    """Test actions with mouse buttons."""
 
     @level.action('Left mouse button', mouse_button=mouse.LEFT)
     def left_mouse():
@@ -51,6 +53,7 @@ def test_mouse(game: Game, level: Level) -> None:
 
 
 def test_mouse_generator(game: Game, level: Level) -> None:
+    """Test actions with mouse button triggers that yield."""
     game.push_level(level)
 
     @level.action('Mouse button', mouse_button=mouse.LEFT)

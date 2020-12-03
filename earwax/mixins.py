@@ -63,19 +63,17 @@ class CoordinatesMixin:
 
     @property
     def coordinates(self) -> Tuple[float, float, float]:
-        """Returns ``self.x``, ``self.y``, and ``self.z`` as a tuple."""
+        """Return ``self.x``, ``self.y``, and ``self.z`` as a tuple."""
         return self.x, self.y, self.z
 
 
 class RegisterEventMixin(EventDispatcher):
-    """Allows the registration, and binding of events to be handled with one
-    function.
-    """
+    """Allow registering and binding events in one function."""
 
     def register_event(self, data: Union[EventFunction, str]) -> Union[
         EventFunction, Callable[[EventFunction], EventFunction]
     ]:
-        """Registers an event, and binds it at the same time."""
+        """Register an event, and bind it at the same time."""
         name: Optional[str] = None
         if isinstance(data, str):
             name = data

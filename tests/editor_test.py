@@ -8,10 +8,11 @@ from earwax import Editor, Game
 
 
 class Works(Exception):
-    pass
+    """Test worked."""
 
 
 def test_init(editor: Editor) -> None:
+    """Test initialisation."""
     assert editor.text == ''
     assert editor.cursor_position is None
     assert editor.dismissible is True
@@ -19,6 +20,7 @@ def test_init(editor: Editor) -> None:
 
 
 def test_submit(game: Game) -> None:
+    """Test that editors submit properly."""
     e = Editor(game, text='test')
 
     @e.event
@@ -32,6 +34,7 @@ def test_submit(game: Game) -> None:
 
 
 def test_on_text(game: Game, editor: Editor, window: Window) -> None:
+    """Test the on_text event."""
     def inner(dt: float) -> None:
         window.dispatch_event('on_text', 'hello')
         assert editor.text == 'hello'
@@ -50,6 +53,7 @@ def test_on_text(game: Game, editor: Editor, window: Window) -> None:
 
 
 def test_on_text_motion(game: Game, editor: Editor) -> None:
+    """Test the on_text_motion event."""
     editor.text = 'hello world'
     game.push_level(editor)
     editor.on_text_motion(key.MOTION_BACKSPACE)
@@ -63,6 +67,7 @@ def test_on_text_motion(game: Game, editor: Editor) -> None:
 
 
 def test_hat_editing(editor: Editor) -> None:
+    """Test the hat editing feature."""
     editor.text = 'Test'
     editor.set_cursor_position(0)
     editor.hat_up()
@@ -77,6 +82,7 @@ def test_hat_editing(editor: Editor) -> None:
 
 
 def test_hat_deletes(editor: Editor) -> None:
+    """Ensure text can be deleted with the hat."""
     editor.text = ' Test'
     editor.set_cursor_position(0)
     assert editor.vertical_position == 0
@@ -90,6 +96,7 @@ def test_hat_deletes(editor: Editor) -> None:
 
 
 def test_hat_submits(editor: Editor) -> None:
+    """Test that text can be submitted with the hat."""
     @editor.event
     def on_submit(text: str) -> None:
         raise Works()

@@ -1,5 +1,8 @@
-"""Provides a main entry point that can be used without installing all the
-time."""
+"""Provides a main entry point.
+
+With this file, you can type ``python main.py`` without having to install
+earwax the whole time.
+"""
 
 from earwax.cmd.main import cmd_main
 

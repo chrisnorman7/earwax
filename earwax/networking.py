@@ -6,6 +6,7 @@ from socket import socket as _socket
 from typing import List, Optional
 
 from attr import Factory, attrib, attrs
+
 try:
     from pyglet.clock import schedule, unschedule
 except ModuleNotFoundError:
@@ -219,7 +220,7 @@ class NetworkConnection(RegisterEventMixin):
         self.state = ConnectionStates.not_connected
 
     def send(self, data: bytes) -> None:
-        r"""Send some data over this conection.
+        r"""Send some data over this connection.
 
         Sends some data to :attr:`self.socket
         <earwax.NetworkConnection.socket>`.

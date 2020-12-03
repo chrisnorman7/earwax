@@ -25,7 +25,9 @@ if TYPE_CHECKING:
 
 @attrs(auto_attribs=True)
 class Level(RegisterEventMixin):
-    """An object that contains event handlers. Can be pushed and pulled from
+    """A level in a :class:`~earwax.Game` instance.
+
+    An object that contains event handlers. Can be pushed and pulled from
     within a :class:`~earwax.Game` instance.
 
     While the :class:`~earwax.Game` object is the centre of a game, `Level`
@@ -61,6 +63,7 @@ class Level(RegisterEventMixin):
     tracks: List[Track] = attrib(default=Factory(list), init=False)
 
     def __attrs_post_init__(self) -> None:
+        """Register default events."""
         for func in (
             self.on_pop, self.on_push, self.on_reveal, self.on_text_motion,
             self.on_cover
@@ -77,7 +80,7 @@ class Level(RegisterEventMixin):
             ambiance.play(ctx)
 
     def stop_ambiances(self) -> None:
-        """Stops all the ambiances on this instance."""
+        """Stop all the ambiances on this instance."""
         ambiance: Ambiance
         for ambiance in self.ambiances:
             ambiance.stop()
@@ -93,9 +96,7 @@ class Level(RegisterEventMixin):
                 track.play(ctx)
 
     def stop_tracks(self) -> None:
-        """Stop all the tracks in :attr:`self.tracks
-        <earwax.BoxLevel.tracks>`.
-        """
+        """Stop all the tracks on this instance."""
         track: Track
         if self.game.audio_context is not None:
             for track in self.tracks:
@@ -119,7 +120,9 @@ class Level(RegisterEventMixin):
     def action(self, name: str, **kwargs) -> Callable[
         [ActionFunctionType], Action
     ]:
-        """A decorator to add an action to this level::
+        """Add an action to this level.
+
+        For example::
 
             @level.action(
                 'Walk forwards', symbol=key.W, mouse_button=mouse.RIGHT,
@@ -147,7 +150,9 @@ class Level(RegisterEventMixin):
     def motion(self, motion: int) -> Callable[
         ['MotionFunctionType'], 'MotionFunctionType'
     ]:
-        """A decorator to add a handler to self.motions::
+        """Add a handler to :attr:`~earwax.Level.motions`.
+
+        For example::
 
             @level.motion(key.MOTION_LEFT)
             def move_left():
@@ -168,34 +173,43 @@ class Level(RegisterEventMixin):
         return inner
 
     def on_push(self) -> None:
-        """The event which is called when a level has been pushed onto the
-        level stack of a game.
+        """Run code when this level is pushed.
+
+        This event is called when a level has been pushed onto the :attr:`level
+        stack <earwax.Game.levels>` of a game.
         """
         self.start_ambiances()
         self.start_tracks()
 
     def on_pop(self) -> None:
-        """The event which is called when a level has been popped from thelevel
-        stack of a game.
+        """Run code when this level is popped.
+
+        This event is called when a level has been popped from the :attr:`level
+        stack <earwax.Game.levels>` of a game.
         """
         self.stop_ambiances()
         self.stop_tracks()
 
     def on_cover(self, level: 'Level') -> None:
-        """This level has just been covered by a new one."""
+        """Code to run when this level has been covered by a new one."""
         pass
 
     def on_reveal(self) -> None:
-        """The event which is called when the level above this one in the stack
-        has been popped, thus revealing this level.
+        """Code to be run when this level is exposed.
+
+        This event is called when the level above this one in the stack has
+        been popped, thus revealing this level.
         """
         pass
 
 
 @attrs(auto_attribs=True)
 class IntroLevel(Level):
-    """A level that plays some audio, before optionally replacing itself in the
-    level stack with :attr:`self.level <earwax.IntroLevel.level>`.
+    """An introduction level.
+
+    This class represents a level that plays some audio, before optionally
+    replacing itself in the level stack with :attr:`self.level
+    <earwax.IntroLevel.level>`.
 
     If you want it to be possible to skip this level, add a trigger for the
     :meth:`~earwax.IntroLevel.skip` action.
@@ -234,13 +248,15 @@ class IntroLevel(Level):
     source: Optional['DirectSource'] = None
 
     def __attrs_post_init__(self) -> None:
+        """Run sanity checks on the setup of this instance."""
         assert self.looping is False or self.skip_after is None
         super().__attrs_post_init__()
 
     def on_push(self) -> None:
-        """Start playing :attr:`self.sound_path
-        <earwax.IntroLevel.sound_path>`, and optionally schedule an automatic
-        skip.
+        """Run code when this level has been pushed.
+
+        Starts playing :attr:`self.sound_path <earwax.IntroLevel.sound_path>`,
+        and optionally schedule an automatic skip.
         """
         super().on_push()
         ctx: Optional[Context] = self.game.audio_context
@@ -261,7 +277,9 @@ class IntroLevel(Level):
             )
 
     def on_pop(self) -> None:
-        """Destroy :attr:`self.generator <earwax.IntroLevel.generator>`, and
+        """Destroy synthizer objects.
+
+        Destroys :attr:`self.generator <earwax.IntroLevel.generator>`, and
         :attr:`self.source <earwax.IntroLevel.source>`.
         """
         super().on_pop()
@@ -273,7 +291,9 @@ class IntroLevel(Level):
             self.source = None
 
     def skip(self) -> Generator[None, None, None]:
-        """Replace this level in the level stack with :attr:`self.level
+        """Skip this level.
+
+        Replaces this level in the level stack with :attr:`self.level
         <earwax.IntroLevel.level>`.
         """
         if self.game.level is self:

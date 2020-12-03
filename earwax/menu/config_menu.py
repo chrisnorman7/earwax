@@ -17,7 +17,9 @@ TitleFunc = Callable[[ConfigValue, str], str]
 
 
 class UnknownTypeError(Exception):
-    """An exception which will be thrown if a :class:`~earwax.ConfigMenu`
+    """An unknown type was encountered.
+
+    An exception which will be thrown if a :class:`~earwax.ConfigMenu`
     instance doesn't know how to handle the given type.
     """
 
@@ -59,6 +61,7 @@ class ConfigMenu(Menu):
 
     @config.default
     def earwax_config(instance: 'ConfigMenu') -> Config:
+        """Return the main earwax configuration."""
         return instance.game.config
 
     type_handlers: Dict[object, TypeHandler] = attrib(
@@ -116,7 +119,9 @@ class ConfigMenu(Menu):
         self.game.pop_level()
 
     def clear_value(self, option: ConfigValue) -> None:
-        """Sets ``option.value`` to ``None``.
+        """Clear the value.
+
+        Sets ``option.value`` to ``None``.
 
         Used by the default :class:`~earwax.TypeHandler` that
         handles nullable values.
@@ -236,7 +241,9 @@ class ConfigMenu(Menu):
     def type_handler(self, type_: object, title: TitleFunc) -> Callable[
         [TypeHandlerFunc], TypeHandlerFunc
     ]:
-        """A decorator for adding type handlers::
+        """Add a type handler.
+
+        Decorate a function to be used as a type handler::
 
             from datetime import datetime, timedelta
             from earwax import ConfigMenu, tts
@@ -260,8 +267,9 @@ class ConfigMenu(Menu):
         """
 
         def inner(func: TypeHandlerFunc) -> TypeHandlerFunc:
-            """Create and store the
-            :class:`earwax.TypeHandler` instance.
+            """Add the handler.
+
+            Create and store the :class:`earwax.TypeHandler` instance.
             """
             self.type_handlers[type_] = TypeHandler(title, func)
             return func
@@ -269,7 +277,7 @@ class ConfigMenu(Menu):
         return inner
 
     def get_subsection_name(self, subsection: Config, name: str) -> str:
-        """Gets the name for the given subsection.
+        """Get the name for the given subsection.
 
         The provided ``name`` argument will be the attribute name, so should
         only be used if the subsection has no ``__section_name__``
@@ -285,7 +293,7 @@ class ConfigMenu(Menu):
         return name
 
     def get_option_name(self, option: ConfigValue, name: str) -> str:
-        """Gets the name for the given option.
+        """Get the name for the given option.
 
         The provided ``name`` argument will be the attribute name, so should
         only be used if the option has no ``__section_name__`` attribute.
@@ -302,7 +310,7 @@ class ConfigMenu(Menu):
     def subsection_menu(self, subsection: Config, name: str) -> Callable[
         [], Generator[None, None, None]
     ]:
-        """Used to add a menu for the given subsection.
+        """Add a menu for the given subsection.
 
         By default, creates a new :class:`earwax.ConfigMenu` instance, and
         returns a function that - when called - will push it onto the stack.
@@ -325,7 +333,7 @@ class ConfigMenu(Menu):
     def option_menu(self, option: ConfigValue, name: str) -> Callable[
         [], Generator[None, None, None]
     ]:
-        """Used to add a menu for the given option.
+        """Add a menu for the given option.
 
         If the type of the provided option is a ``Union`` type (like
         ``Optional[str]``), then an entry for editing each type will be added
@@ -387,7 +395,9 @@ class ConfigMenu(Menu):
     def set_value(
         self, option: ConfigValue, value: Any, message: str = 'Done.'
     ) -> Callable[[], None]:
-        """Returns a callable that can be used to set the value of the provided
+        """Set a value.
+
+        Returns a callable that can be used to set the value of the provided
         option to the provided value.
 
         This method returns a callable because it is used extensively by

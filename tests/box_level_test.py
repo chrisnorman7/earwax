@@ -1,3 +1,5 @@
+"""Test the BoxLevel class."""
+
 from math import dist
 from typing import Callable, Optional
 
@@ -7,26 +9,27 @@ from earwax import Box, BoxLevel, Door, Game, Point, Portal
 
 
 class CollideWorks(Exception):
-    pass
+    """A test worked."""
 
 
 class ActivateWorks(Exception):
-    pass
+    """The activate test worked."""
 
 
 class MoveWorks(Exception):
-    pass
+    """Move test worked."""
 
 
 class MoveFailWorks(Exception):
-    pass
+    """Move fail test worked."""
 
 
 class TurnWorks(Exception):
-    pass
+    """Turn test worked."""
 
 
 def test_init(box: Box, box_level: BoxLevel) -> None:
+    """Test that box levels initialise properly."""
     # First test the fixtures.
     assert isinstance(box, Box)
     assert isinstance(box_level, BoxLevel)
@@ -38,6 +41,7 @@ def test_init(box: Box, box_level: BoxLevel) -> None:
 
 
 def test_set_coordinates(box_level: BoxLevel) -> None:
+    """Test that coordinates can be set."""
     p: Point = Point(3.0, 4.0, 5.0)
     box_level.set_coordinates(p)
     assert box_level.coordinates == p
@@ -47,6 +51,7 @@ def test_set_coordinates(box_level: BoxLevel) -> None:
 
 
 def test_set_bearing(box_level: BoxLevel) -> None:
+    """Test that the player's bearing can be set properly."""
     box_level.set_bearing(45)
     assert box_level.bearing == 45
     box_level.set_bearing(23)
@@ -54,6 +59,7 @@ def test_set_bearing(box_level: BoxLevel) -> None:
 
 
 def test_collide(box_level: BoxLevel, box: Box) -> None:
+    """Test collisions."""
     box_level.collide(box)
 
     @box.event
@@ -65,6 +71,7 @@ def test_collide(box_level: BoxLevel, box: Box) -> None:
 
 
 def test_move(box: Box, box_level: BoxLevel) -> None:
+    """Test movement."""
     # Let's make sure we've got pytest configured properly.
     assert box_level.coordinates == Point(0.0, 0.0, 0.0)
     assert box_level.box.top_right.z == 0.0
@@ -97,6 +104,7 @@ def test_move(box: Box, box_level: BoxLevel) -> None:
 
 
 def test_turn(box_level: BoxLevel) -> None:
+    """Test turning."""
     t: Callable[[], None] = box_level.turn(90)
     t()
     assert box_level.bearing == 90
@@ -118,6 +126,7 @@ def test_turn(box_level: BoxLevel) -> None:
 
 
 def test_activate(game: Game, box: Box, box_level: BoxLevel) -> None:
+    """Test the enter key."""
     a: Callable[[], None] = box_level.activate()
     a()
 
@@ -161,6 +170,7 @@ def test_activate(game: Game, box: Box, box_level: BoxLevel) -> None:
 
 
 def test_move_fail(box_level: BoxLevel) -> None:
+    """Test moves that should fail."""
 
     @box_level.event
     def on_move_fail(

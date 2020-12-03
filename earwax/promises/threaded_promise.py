@@ -76,6 +76,7 @@ class ThreadedPromise(Promise):
     future: Optional[Future] = None
 
     def __attrs_post_init__(self) -> None:
+        """Set the proper default state."""
         super().__attrs_post_init__()
         if self.func is None:
             self.state = PromiseStates.not_ready
@@ -83,7 +84,9 @@ class ThreadedPromise(Promise):
     def register_func(
         self, func: ThreadedPromiseFunctionType
     ) -> ThreadedPromiseFunctionType:
-        """Register the function to be called by the
+        """Register promise function.
+
+        Registers the function to be called by the
         :meth:`~earwax.ThreadedPromise.run` method.
 
         :param func: The function to use. Will be stored in :attr:`self.func
@@ -94,7 +97,9 @@ class ThreadedPromise(Promise):
         return func
 
     def check(self, dt: float) -> None:
-        """Check to see if :attr:`self.future <earwax.ThreadedPromise.future>`
+        """Check state and react accordingly.
+
+        Checks to see if :attr:`self.future <earwax.ThreadedPromise.future>`
         has finished or not.
 
         If it has, dispatch the :meth:`~earwax.Promise.on_done` event

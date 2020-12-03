@@ -1,3 +1,5 @@
+"""Test the classes in earwax.config."""
+
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -14,12 +16,16 @@ class ServerConfig(Config):
 
 
 class AccountConfig(Config):
+    """Test account configuration."""
+
     username = ConfigValue('test')
     password = ConfigValue('test123!')
     server: ServerConfig = ServerConfig()
 
 
 class RecursiveConfig(Config):
+    """Another configuration page, this one with a subsection."""
+
     data_dir = ConfigValue('.')
     account: AccountConfig = AccountConfig()
 
@@ -32,6 +38,7 @@ class GameConfig(Config):
 
 
 def test_init() -> None:
+    """Test initialisation."""
     c: Config = Config()
     assert c.dump() == {}
     assert c.__config_subsections__ == {}
@@ -39,6 +46,7 @@ def test_init() -> None:
 
 
 def test_dump() -> None:
+    """Test that configuration sections can be dumped."""
     c: GameConfig = GameConfig()
     d: Dict[str, Any] = c.dump()
     assert d['server'] == c.server.dump()
@@ -51,6 +59,7 @@ def test_dump() -> None:
 
 
 def test_recursive_dump() -> None:
+    """Test dumping with subsections."""
     c = RecursiveConfig()
     d: Dict[str, Any] = c.dump()
     assert d['account']['server'] == ServerConfig().dump()
@@ -59,6 +68,7 @@ def test_recursive_dump() -> None:
 
 
 def test_set_value() -> None:
+    """Test setting values."""
     c = ServerConfig()
     c.hostname.value = 'microsoft.com'
     c.port.value = 8080
@@ -69,6 +79,7 @@ def test_set_value() -> None:
 
 
 def test_populate_from_dict() -> None:
+    """Test Config.populate_from_dict."""
     s = ServerConfig()
     s.populate_from_dict({'hostname': 'google.com', 'port': 9000})
     assert s.hostname.value == 'google.com'
@@ -76,6 +87,7 @@ def test_populate_from_dict() -> None:
 
 
 def test_save() -> None:
+    """Test config.save."""
     c = RecursiveConfig()
     p = Path('config.yaml')
     try:
@@ -90,6 +102,7 @@ def test_save() -> None:
 
 
 def test_load() -> None:
+    """Test Config.load."""
     p = Path('config.yaml')
     username: str = 'chrisnorman7'
     c: RecursiveConfig = RecursiveConfig()
@@ -111,6 +124,7 @@ def test_load() -> None:
 
 
 def test_name_() -> None:
+    """Test section name."""
     class SecondConfig(Config):
         __section_name__ = 'Second Configuration Page'
 

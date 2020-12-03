@@ -1,3 +1,5 @@
+"""Test the Box class."""
+
 from typing import List
 
 from pytest import raises
@@ -7,6 +9,7 @@ from earwax import (Box, BoxLevel, Door, FittedBox, NotADoor, OutOfBounds,
 
 
 def test_init() -> None:
+    """Test that boxes initialise properly."""
     b: Box = Box(Point(0, 0, 0), Point(3, 3, 0))
     assert b.bottom_left == Point(0, 0, 0)
     assert b.top_right == Point(3, 3, 0)
@@ -17,6 +20,7 @@ def test_init() -> None:
 
 
 def test_add_child() -> None:
+    """Test adding child boxes."""
     b: Box = Box(Point(0, 0, 0), Point(3, 3, 0))
     c: Box = Box(Point(1, 1, 0), Point(1, 1, 0), parent=b)
     assert c.parent is b
@@ -35,6 +39,7 @@ def test_add_child() -> None:
 
 
 def test_contains_point() -> None:
+    """Test Box.contains_point."""
     b: Box = Box(Point(0, 0, 0), Point(0, 0, 0))
     assert b.contains_point(Point(0, 0, 0))
     b.top_right = Point(5, 5, 0)
@@ -46,6 +51,7 @@ def test_contains_point() -> None:
 
 
 def test_get_containing_child() -> None:
+    """Test Box.get_containing_box."""
     parent: Box = Box(Point(0, 0, 0), Point(100, 100, 5))
     # Draw 2 parallel lines, like train tracks.
     southern_rail: Box = Box(Point(0, 0, 0), Point(100, 0, 0), parent=parent)
@@ -57,6 +63,7 @@ def test_get_containing_child() -> None:
 
 
 def test_fitted_box() -> None:
+    """Test the FittedBox class."""
     southwest_box: Box = Box(Point(3, 5, 0), Point(8, 2, 0))
     northeast_box: Box = Box(Point(32, 33, 0), Point(80, 85, 5))
     middle_box: Box = Box(Point(14, 15, 2), Point(18, 22, 2))
@@ -66,6 +73,7 @@ def test_fitted_box() -> None:
 
 
 def test_row() -> None:
+    """Test the box_row function."""
     start: Point = Point(1, 1, 0)
     boxes: List[Box] = box_row(start, Point(5, 5, 1), 3, Point(1, 0, 0))
     assert len(boxes) == 3
@@ -98,21 +106,25 @@ def test_row() -> None:
 
 
 def test_width() -> None:
+    """Test box.width."""
     b: Box = Box(Point(0, 1, 2), Point(5, 4, 3))
     assert b.width == 5
 
 
 def test_depth() -> None:
+    """Test box depth."""
     b: Box = Box(Point(0, 1, 2), Point(5, 4, 3))
     assert b.depth == 3
 
 
 def test_height() -> None:
+    """Test box height."""
     b: Box = Box(Point(0, 1, 2), Point(5, 4, 3))
     assert b.height == 1
 
 
 def test_area() -> None:
+    """Test box area."""
     b: Box = Box(Point(0, 0, 0), Point(5, 5, 5))
     assert b.area == 25
     b = Box(Point(5, 6, 0), Point(9, 12, 7))
@@ -120,11 +132,13 @@ def test_area() -> None:
 
 
 def test_volume() -> None:
+    """Test box volume."""
     b: Box = Box(Point(1, 2, 3), Point(10, 9, 8))
     assert b.volume == 315
 
 
 def test_open() -> None:
+    """Test door opening."""
     b: Box = Box(Point(0, 0, 0), Point(0, 0, 0))
 
     @b.event
@@ -147,6 +161,7 @@ def test_open() -> None:
 
 
 def test_close() -> None:
+    """Test closing doors."""
     b: Box = Box(Point(0, 0, 0), Point(0, 0, 0))
 
     @b.event
@@ -170,6 +185,7 @@ def test_close() -> None:
 
 
 def test_nearest_door() -> None:
+    """Test Box.nearest_door."""
     room: Box = Box(Point(0, 0, 0), Point(3, 3, 3))
     assert room.nearest_door() is None
     d = Door()
@@ -182,6 +198,7 @@ def test_nearest_door() -> None:
 
 
 def test_nearest_portal(box_level: BoxLevel) -> None:
+    """Test Box.nearest_portal."""
     room: Box = Box(Point(0, 0, 0), Point(3, 3, 3))
     assert room.nearest_portal() is None
     p: Portal = Portal(box_level, Point(0, 0, 0))

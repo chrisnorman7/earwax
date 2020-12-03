@@ -100,7 +100,7 @@ def format_timedelta(td: timedelta, *args, **kwargs) -> str:
     For example::
 
         td = timedelta(days=400, hours=2, seconds=3)
-        format_fimedelta(
+        format_timedelta(
             td
         ) == '1 year, 1 month, 4 days, 2 hours, and 3 seconds'
 

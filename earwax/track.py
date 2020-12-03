@@ -13,7 +13,9 @@ from .sound import play_path
 
 @attrs(auto_attribs=True)
 class Track:
-    """A track that plays while a :class:`earwax.BoxLevel` object is top of the
+    """A music track.
+
+    A track that plays while a :class:`earwax.BoxLevel` object is top of the
     levels stack.
 
     No panning or fx are applied to ``Track`` instances.

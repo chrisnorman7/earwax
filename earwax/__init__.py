@@ -1,4 +1,5 @@
-"""
+"""The Earwax game engine.
+
 Earwax
 ------
 

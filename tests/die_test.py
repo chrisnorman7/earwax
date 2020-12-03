@@ -1,13 +1,16 @@
+"""Test the earwax.Die class."""
+
 from pytest import raises
 
 from earwax import Die
 
 
 class OnRollWorks(Exception):
-    pass
+    """Rolling worked."""
 
 
 def test_init() -> None:
+    """Test initialisation."""
     d: Die = Die()
     assert d.sides == 6
     d = Die(4)
@@ -15,11 +18,13 @@ def test_init() -> None:
 
 
 def test_roll() -> None:
+    """Test die rolling."""
     d: Die = Die()
     assert isinstance(d.roll(), int)
 
 
 def test_on_roll() -> None:
+    """Test the on_roll event."""
     d: Die = Die()
 
     @d.event

@@ -22,11 +22,13 @@ class Project:
     initial_level_id: Optional[str] = None
 
     def dump(self) -> WorkspaceDict:
-        """Returns this object as a dictionary."""
+        """Return this object as a dictionary."""
         return asdict(self)
 
     def save(self) -> None:
-        """Saves this workspace to the file specified in
+        """Save this project.
+
+        Saves this workspace to the file specified in
         ``constants.project_filename``.
         """
         with project_filename.absolute().open('w') as f:
@@ -34,7 +36,9 @@ class Project:
 
     @classmethod
     def load(cls) -> 'Project':
-        """Load and return an instance from the file specified in
+        """Load an instance.
+
+        Loads and returns an instance from the file specified in
         ``constants.project_filename``.
         """
         with project_filename.absolute().open('r') as f:

@@ -1,17 +1,20 @@
 """Provides the Config and ConfigValue classes."""
 
-from typing import Any, Callable, Dict, Optional, TextIO
+from typing import Any, Callable, Dict, Generic, Optional, TextIO, TypeVar
 
 from attr import Factory, attrib, attrs
 from yaml import FullLoader, dump, load
 
+T = TypeVar('T')
+
 DumpDict = Dict[str, Any]
 
-DumpLoad = Callable[[Any], Any]
+DumpFunc = Callable[[T], T]
+LoadFunc = Callable[[str], T]
 
 
 @attrs(auto_attribs=True)
-class ConfigValue:
+class ConfigValue(Generic[T]):
     """A configuration value.
 
     This class is used to make configuration values::
@@ -65,17 +68,18 @@ class ConfigValue:
         was loaded by YAML, and returns the actual value.
     """
 
-    value: Any
+    value: T
     name: Optional[str] = None
     type_: Optional[object] = None
     value_converters: Optional[
         Dict[object, Callable[['ConfigValue'], str]]
     ] = None
-    default: Optional[Any] = attrib(default=Factory(type(None)), init=False)
-    dump_func: Optional[DumpLoad] = None
-    load_func: Optional[DumpLoad] = None
+    default: Optional[T] = attrib(default=Factory(type(None)), init=False)
+    dump_func: Optional[DumpFunc] = None
+    load_func: Optional[LoadFunc] = None
 
     def __attrs_post_init__(self) -> None:
+        """Sett default type and value."""
         if self.type_ is None:
             self.type_ = type(self.value)
         self.default = self.value
@@ -88,20 +92,20 @@ class ConfigValue:
         """
         return str(self.value)
 
-    def dump(self, func: DumpLoad) -> DumpLoad:
-        """A decorator to add a dump function.
+    def dump(self, func: DumpFunc) -> DumpFunc:
+        """Add a dump function.
 
-        :param func: The function that should be used.
+        :param func: The function that will be decorated.
 
             See the description for :attr:`~earwax.ConfigValue.dump_func`.
         """
         self.dump_func = func
         return func
 
-    def load(self, func: DumpLoad) -> DumpLoad:
-        """A decorator to add a load function.
+    def load(self, func: LoadFunc) -> LoadFunc:
+        """Add a load function.
 
-        :param func: The function to be used.
+        :param func: The function that will be decorated.
 
             See the description for :attr:`~earwax.ConfigValue.load_func`.
         """
@@ -156,8 +160,11 @@ class Config:
     __config_subsections__: Dict[str, 'Config']
 
     def __init__(self) -> None:
-        """Iterate over the attributes of this class, and add configuration
-        values to __config_values__.
+        """Create the configuration object.
+
+        Iterate over all members, adding configuration values to
+        :attr:`~earwax.Config.__config_values__`, and configuration sections to
+        :attr:`~earwax.Config.__config_subsections__`.
         """
         self.__config_values__ = {}
         self.__config_subsections__ = {}
@@ -171,7 +178,9 @@ class Config:
                 self.__config_subsections__[name] = value
 
     def dump(self) -> DumpDict:
-        """Return all configuration values, recursing through subsections::
+        """Return all configuration values, recursing through subsections.
+
+        For example::
 
             c = ImaginaryConfiguration()
             d = c.dump()
@@ -195,7 +204,9 @@ class Config:
         return d
 
     def populate_from_dict(self, data: DumpDict) -> None:
-        """Populate values from a dictionary, probably provided by
+        """Populate values from a dictionary.
+
+        This function is compatible with (and used by)
         :meth:`~earwax.Config.dump`::
 
             c = Config()
@@ -236,14 +247,16 @@ class Config:
         dump(data, stream=f)
 
     def load(self, f: TextIO) -> None:
-        """Uses the :meth:`~earwax.Config.populate_from_dict` method on
-        dataloaded from the given file::
+        """Load data from a file.
+
+        Uses the :meth:`~earwax.Config.populate_from_dict` method on dataloaded
+        from the given file::
 
             c = ImaginaryConfigSection()
             with open('config.yaml', 'r'):
                 c.load(f)
 
-        To save the data in the furst place, use the
+        To save the data in the first place, use the
         :meth:`~earwax.Config.save` method.
 
         :param f: A file-like object to load data from.

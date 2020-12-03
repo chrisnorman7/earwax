@@ -49,7 +49,7 @@ This event will be dispatched when the promise has been completed, whether or no
 
 If you want to cancel, there is a :meth:`~earwax.Promise.cancel` method to do it with, and of course a :meth:`~earwax.Promise.on_cancel` event which will be dispatched.
 
-It is unlikely that the actual function will be cancelled, but you can rest assured that no futher events will be dispatched.
+It is unlikely that the actual function will be cancelled, but you can rest assured that no further events will be dispatched.
 
 When you have created all of your events, you should use the :meth:`~earwax.ThreadedPromise.run` method to start your promise running.
 

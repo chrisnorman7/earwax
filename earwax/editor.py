@@ -69,7 +69,9 @@ class Editor(Level, DismissibleMixin):
         return super().__attrs_post_init__()
 
     def submit(self) -> None:
-        """Dispatch the :attr:`~earwax.Editor.on_submit` event with the contents
+        """Submit :attr:`self.text <earwax.Editor.text>`.
+
+        Dispatch the :attr:`~earwax.Editor.on_submit` event with the contents
         of :attr:`self.text <earwax.Editor.text>`.
 
         By default, this method is called when the enter key is pressed.
@@ -88,7 +90,7 @@ class Editor(Level, DismissibleMixin):
         If the cursor is at the end of the line, append the text. Otherwise,
         insert it.
 
-        :param text: The text that has been enetered.
+        :param text: The text that has been entered.
         """
         if self.cursor_position is None:
             self.text += text
@@ -98,7 +100,9 @@ class Editor(Level, DismissibleMixin):
         self.echo(text)
 
     def on_submit(self, text: str) -> None:
-        """The event which is dispatched if the enter key is pressed.
+        """Code to be run when this editor is submitted.
+
+        The event which is dispatched if the enter key is pressed.
 
         :param text: The contents of :attr:`self.text <earwax.Editor.text>`.
         """
@@ -237,7 +241,9 @@ class Editor(Level, DismissibleMixin):
         self.set_cursor_position(None)
 
     def motion_up(self) -> None:
-        """Since we're not bothering with multiline text fields at this stage,
+        """Arrow up.
+
+        Since we're not bothering with multiline text fields at this stage,
         just move the cursor to the start of the line, and read the whole
         thing.
 
@@ -247,11 +253,13 @@ class Editor(Level, DismissibleMixin):
         self.echo(self.text)
 
     def motion_down(self) -> None:
-        """Since we're not bothering with multiline text fields at this stage,
+        """Arrow down.
+
+        Since we're not bothering with multiline text fields at this stage,
         just move the cursor to the end of the line, and read the whole
         thing.
 
-        By default, this method is called when the down arrow key ispressed.
+        By default, this method is called when the down arrow key is pressed.
         """
         self.cursor_position = None
         self.echo(self.text)

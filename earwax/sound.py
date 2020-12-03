@@ -1,4 +1,4 @@
-"""Provides the sound subsystem."""
+"""Provides sound-related functions and classes."""
 
 from pathlib import Path
 from random import choice
@@ -142,7 +142,9 @@ class SimpleInterfaceSoundPlayer:
     gain: float = 1.0
 
     def play(self) -> None:
-        """Play :attr:`self.generator
+        """Play the sound that is attached to this instance.
+
+        Plays :attr:`self.generator
         <earwax.SimpleInterfaceSoundPlayer.generator>`.
         """
         if self.source is None:
@@ -188,7 +190,9 @@ class AdvancedInterfaceSoundPlayer:
     def get_generator(
         instance: 'AdvancedInterfaceSoundPlayer'
     ) -> BufferGenerator:
-        """Make a ``BufferGenerator`` instance, bound to :attr:`self.context
+        """Return the default value.
+
+        Makes a ``BufferGenerator`` instance, bound to :attr:`self.context
         <earwax.AdvancedInterfaceSoundPlayer.context>`.
 
         :param instance: The instance to use.
@@ -200,7 +204,9 @@ class AdvancedInterfaceSoundPlayer:
 
     @source.default
     def get_source(instance: 'AdvancedInterfaceSoundPlayer') -> Source:
-        """Get a ``DirectSource`` instance, bound to :attr:`self.cntext
+        """Return a default value.
+
+        Gets a ``DirectSource`` instance, bound to :attr:`self.context
         <earwax.AdvancedInterfaceSoundPlayer>`, with a gain value of
         :attr:`self.gain <earwax.AdvancedInterfaceSoundPlayer>`.
         """
@@ -209,7 +215,9 @@ class AdvancedInterfaceSoundPlayer:
         return s
 
     def play_path(self, path: Path) -> None:
-        """If :attr:`self.play_directories
+        """Play the given path.
+
+        If :attr:`self.play_directories
         <earwax.AdvancedInterfaceSoundPlayer.play_directories>` evaluates to
         True, and the given path represents a directory, play a random file
         from that directory. Otherwise, if :meth:`self.play_files
@@ -232,7 +240,9 @@ class AdvancedInterfaceSoundPlayer:
 def schedule_generator_destruction(
     generator: BufferGenerator, multiplier: int = 2
 ) -> None:
-    """Using ``pyglet.clock.schedule_once``, schedules ``generator.destroy``.
+    """Schedule a generator for destruction.
+
+    Uses ``pyglet.clock.schedule_once``, schedules ``generator.destroy``.
 
     :param generator: The generator to schedule for destruction.
 
@@ -250,7 +260,9 @@ def schedule_generator_destruction(
 
 
 def play_and_destroy(*args, **kwargs) -> None:
-    """Calls :meth:`~earwax.play_path` with the given ``args`` and ``kwargs``,
+    """Play a path, cleaning up the generator afterwards.
+
+    Calls :meth:`~earwax.play_path` with the given ``args`` and ``kwargs``,
     then schedules the returned generator for destruction using
     :meth:`~earwax.schedule_generator_destruction`.
 
@@ -291,7 +303,9 @@ def play_paths(ctx: Context, paths: List[Path], gap: float = 0.1) -> None:
 
 @attrs(auto_attribs=True, frozen=True)
 class BufferDirectory:
-    """An object which holds a directory of ``synthizer.Buffer`` instances::
+    """An object which holds a directory of ``synthizer.Buffer`` instances.
+
+    For example::
 
         b: BufferDirectory = BufferDirectory(
             Path('sounds/weapons/cannons'), glob='*.wav'
@@ -330,7 +344,9 @@ class BufferDirectory:
 
     @buffers.default
     def buffers_default(instance: 'BufferDirectory') -> Dict[str, Path]:
-        """Populates the :attr:`~earwax.BufferDirectory.buffers` and
+        """Return the default value.
+
+        Populates the :attr:`~earwax.BufferDirectory.buffers` and
         :attr:`~earwax.BufferDirectory.paths` dictionaries.
         """
         g: Generator[Path]
@@ -347,13 +363,17 @@ class BufferDirectory:
         return d
 
     def random_path(self) -> Path:
-        """Returns a random path from :attr:`self.paths
+        """Return a random path.
+
+        Returns a random path from :attr:`self.paths
         <earwax.BufferDirectory.paths>`.
         """
         return choice(list(self.paths.values()))
 
     def random_buffer(self) -> Buffer:
-        """Returns a random buffer from :attr:`self.buffers
+        """Return a random buffer.
+
+        Returns a random buffer from :attr:`self.buffers
         <earwax.BufferDirectory.buffers>`.
         """
         return choice(list(self.buffers.values()))

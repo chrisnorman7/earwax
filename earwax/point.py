@@ -10,7 +10,9 @@ from .mixins import CoordinatesMixin
 
 
 class PointDirections(Enum):
-    """Most of the possible directions between two :class:`~earwax.Point`
+    """Point directions enumeration.
+
+    Most of the possible directions between two :class:`~earwax.Point`
     instances.
 
     There are no vertical directions defined, although they would be easy to
@@ -33,7 +35,7 @@ class Point(CoordinatesMixin):
     """A point in 3d space."""
 
     def directions_to(self, other: 'Point') -> PointDirections:
-        """Returns the direction between this point and ``other``.
+        """Return the direction between this point and ``other``.
 
         :param other: The point to get directions to.
         """
@@ -59,7 +61,9 @@ class Point(CoordinatesMixin):
             return PointDirections.here
 
     def copy(self) -> 'Point':
-        """Return a ``Point`` instance with duplicate ``x`` and ``y``
+        """Copy this instance.
+
+        Returns a ``Point`` instance with duplicate ``x`` and ``y``
         values.
         """
         return type(self)(self.x, self.y, self.z)
@@ -111,7 +115,9 @@ class Point(CoordinatesMixin):
             )
 
     def __neg__(self) -> 'Point':
-        """Return a copy of this instance with all its coordinates multiplied
+        """Return a negative version of this instance.
+
+        Returns a copy of this instance with all its coordinates multiplied
         by -1.
         """
         cls = type(self)

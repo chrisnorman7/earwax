@@ -51,7 +51,9 @@ class ProjectLevel(Level, TitleMixin):
         return asdict(self, filter=self.should_dump)
 
     def should_dump(self, a: Attribute, v: Any) -> bool:
-        """Returns a boolean representing whether or not a particular attribute
+        """Determine whether an attribute should be dumped or not.
+
+        Returns a boolean representing whether or not a particular attribute
         should be dumped.
 
         :param a: The ``attr.Attribute`` instance that is being tested.

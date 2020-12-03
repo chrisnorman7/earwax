@@ -12,6 +12,7 @@ from pathlib import Path
 
 
 def build_surfaces(args: Namespace) -> None:
+    """Create surfaces python code."""
     s: str = header + '\n'
     surface: Path
     name: str

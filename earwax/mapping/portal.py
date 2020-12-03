@@ -18,7 +18,9 @@ if TYPE_CHECKING:
 
 @attrs(auto_attribs=True)
 class Portal(EventDispatcher):
-    """An object that can be added to a :class:`earwax.Box` to make a link
+    """A portal to another map.
+
+    An object that can be added to a :class:`earwax.Box` to make a link
     between two maps.
 
     This class implements ``pyglet.event.EventDispatcher``, so events can be
@@ -53,13 +55,14 @@ class Portal(EventDispatcher):
     exit_sound: Optional[Path] = None
 
     def __attrs_post_init__(self) -> None:
+        """Register default events."""
         self.register_event_type('on_enter')
         self.register_event_type('on_exit')
 
     def on_enter(self) -> None:
-        """An event fires when a player enters this portal."""
+        """Handle a player entering this portal."""
         pass
 
     def on_exit(self) -> None:
-        """An event that fires when a player exits this portal."""
+        """Handle a player exiting this portal."""
         pass

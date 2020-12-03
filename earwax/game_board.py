@@ -91,7 +91,9 @@ class GameBoard(Level, Generic[T]):
 
     @property
     def current_tile(self) -> Optional[T]:
-        """Gets the tile at the current coordinates.
+        """Return the current tile.
+
+        Gets the tile at the current coordinates.
 
         If no such tile is found, ``None`` is returned.
         """
@@ -101,14 +103,18 @@ class GameBoard(Level, Generic[T]):
             return None
 
     def on_move(self, direction: PointDirections) -> None:
-        """An event that is dispatched by :meth:`~earwax.GameBoard.move`.
+        """Run code when the player moves.
+
+        An event that is dispatched by :meth:`~earwax.GameBoard.move`.
 
         :param direction: The direction the player just moved.
         """
         pass
 
     def on_move_fail(self, direction: PointDirections) -> None:
-        """An event that is dispatched when a player fails to move in the given
+        """Run code when the player fails to move.
+
+        An event that is dispatched when a player fails to move in the given
         direction.
 
         :param direction: The direction the player tried to move in.
@@ -118,7 +124,7 @@ class GameBoard(Level, Generic[T]):
     def move(
         self, direction: PointDirections, wrap: bool = False
     ) -> Callable[[], None]:
-        """Returns a callable that can be used to move the player.
+        """Return a callable that can be used to move the player.
 
         For example::
 

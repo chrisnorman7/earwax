@@ -1,3 +1,5 @@
+"""Test the ThreadedPromise class."""
+
 from concurrent.futures import ThreadPoolExecutor
 from time import sleep
 from typing import Any, Tuple
@@ -11,10 +13,11 @@ from earwax import Game, Level, PromiseStates, ThreadedPromise
 
 
 class CorrectException(Exception):
-    pass
+    """Something was correct."""
 
 
 def test_init(thread_pool: ThreadPoolExecutor) -> None:
+    """Test initialisation."""
     p: ThreadedPromise = ThreadedPromise(thread_pool)
     assert p.thread_pool is thread_pool
     assert p.state is PromiseStates.not_ready
@@ -26,6 +29,7 @@ def test_init(thread_pool: ThreadPoolExecutor) -> None:
 
 
 def test_run(game: Game, window: Window, level: Level) -> None:
+    """Test the ``run`` function."""
     p: ThreadedPromise = ThreadedPromise(game.thread_pool)
 
     @p.register_func
@@ -46,6 +50,7 @@ def test_run(game: Game, window: Window, level: Level) -> None:
 
 
 def test_on_done_no_args(game: Game, window: Window, level: Level) -> None:
+    """Test ``on_done`` with no arguments."""
     p: ThreadedPromise = ThreadedPromise(game.thread_pool)
 
     @p.register_func
@@ -68,6 +73,7 @@ def test_on_done_no_args(game: Game, window: Window, level: Level) -> None:
 
 
 def test_on_done_with_args(game: Game, window: Window, level: Level) -> None:
+    """Test ``on_done`` with arguments."""
     p: ThreadedPromise = ThreadedPromise(game.thread_pool)
 
     @p.register_func
@@ -89,6 +95,7 @@ def test_on_done_with_args(game: Game, window: Window, level: Level) -> None:
 
 
 def test_on_error(game: Game, window: Window) -> None:
+    """Test the ``on_error`` event."""
     p: ThreadedPromise = ThreadedPromise(game.thread_pool)
     worked: Level = Level(game)
     failed: Level = Level(game)
@@ -118,6 +125,7 @@ def test_on_error(game: Game, window: Window) -> None:
 
 
 def test_cancel(game: Game, window: Window) -> None:
+    """Test the ``cancel`` function."""
     p: ThreadedPromise = ThreadedPromise(game.thread_pool)
     worked: Level = Level(game)
     failed: Level = Level(game)
@@ -151,6 +159,7 @@ def test_cancel(game: Game, window: Window) -> None:
 
 
 def test_finally_no_error(game: Game, window: Window) -> None:
+    """Test ``on_finally`` with no error."""
     p: ThreadedPromise = ThreadedPromise(game.thread_pool)
     return_level: Level = Level(game)
     finally_level: Level = Level(game)
@@ -183,6 +192,7 @@ def test_finally_no_error(game: Game, window: Window) -> None:
 
 
 def test_finally_with_error(game: Game, window: Window) -> None:
+    """Test ``on_finally`` with an error."""
     p: ThreadedPromise = ThreadedPromise(game.thread_pool)
     return_level: Level = Level(game)
     finally_level: Level = Level(game)

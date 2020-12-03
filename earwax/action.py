@@ -40,7 +40,7 @@ class Action:
         modifiers from pyglet.window.key.
 
     :ivar ~earwax.Action.joystick_button: The button that must be pressed on a
-        game controler to trigger this action.
+        game controller to trigger this action.
 
         The button can be any integer supported by any game pad.
 
@@ -66,7 +66,7 @@ class Action:
 
         If ``None``, then it is a one-time action. One-time actions should be
         used for things like quitting the game, or passing through exits, where
-        multiple uses in a short space of time would be undesireable. If the
+        multiple uses in a short space of time would be undesirable. If the
         value is an integer, it will be the number of seconds which must elapse
         between runs.
 
@@ -88,7 +88,9 @@ class Action:
     last_run: float = attrib(default=Factory(float), init=False)
 
     def run(self, dt: Optional[float]) -> OptionalGenerator:
-        """Run this action. May be called by
+        """Run this action.
+
+        This method may be called by
         ``pyglet.clock.schedule_interval``.
 
         If you need to know how an action has been called, you can override

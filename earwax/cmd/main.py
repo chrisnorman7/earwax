@@ -51,7 +51,7 @@ subcommand(
 
 
 def cmd_help(args: Namespace) -> None:
-    """Shows all the possible subcommands."""
+    """Show all the possible subcommands."""
     print('Subcommands:')
     name: str
     parser: ArgumentParser
@@ -106,5 +106,6 @@ new_parser.add_argument(
 
 
 def cmd_main() -> None:
+    """Run the earwax client."""
     args = parser.parse_args()
     return args.func(args)

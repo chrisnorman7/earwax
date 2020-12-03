@@ -1,3 +1,4 @@
+"""Test the earwax.GameBoard class."""
 from typing import Tuple
 
 from pytest import raises
@@ -6,14 +7,15 @@ from earwax import Game, GameBoard, NoSuchTile, Point, PointDirections
 
 
 class OnMoveWorks(Exception):
-    pass
+    """Movement works."""
 
 
 class OnMoveFailWorks(Exception):
-    pass
+    """Movement fail works."""
 
 
 def test_init(game: Game) -> None:
+    """Test initialisation."""
 
     def tile_builder(p: Point) -> Point:
         return p
@@ -31,6 +33,7 @@ def test_init(game: Game) -> None:
 
 
 def test_get_tile(game: Game) -> None:
+    """Test GameBoard.get_tile."""
     b: GameBoard = GameBoard(game, Point(2, 2, 2), lambda p: 0)
     assert b.get_tile(Point(0, 0, 0)) == 0
     with raises(NoSuchTile):
@@ -38,6 +41,7 @@ def test_get_tile(game: Game) -> None:
 
 
 def test_move(board: GameBoard[int]) -> None:
+    """Test GameBoard.move."""
     assert board.coordinates == Point(0, 0, 0)  # Just checking.
     board.move(PointDirections.north)()
     assert board.coordinates == Point(0, 1, 0)
@@ -46,6 +50,7 @@ def test_move(board: GameBoard[int]) -> None:
 
 
 def get_board(game: Game) -> GameBoard[Tuple[float, float, float]]:
+    """Get a board for future tests."""
 
     def tile_builder(p: Point) -> Tuple[float, float, float]:
         return p.coordinates
@@ -66,6 +71,7 @@ def get_board(game: Game) -> GameBoard[Tuple[float, float, float]]:
 
 
 def test_on_move(game: Game) -> None:
+    """Test the on_move event."""
     b: GameBoard[Tuple[float, float, float]] = get_board(game)
     with raises(OnMoveWorks) as exc:
         b.move(PointDirections.northeast)()
@@ -73,6 +79,7 @@ def test_on_move(game: Game) -> None:
 
 
 def test_on_move_fail(game: Game) -> None:
+    """Test the on_move_fail event."""
     b: GameBoard[Tuple[float, float, float]] = get_board(game)
     assert b.coordinates == Point(0, 0, 0)
     with raises(OnMoveFailWorks) as exc:
@@ -81,6 +88,7 @@ def test_on_move_fail(game: Game) -> None:
 
 
 def test_move_wrap(game: Game) -> None:
+    """Test movement with wrap around."""
     b: GameBoard[Tuple[float, float, float]] = get_board(game)
     b.coordinates = Point(0, 0, 0)
     with raises(OnMoveWorks):
@@ -93,6 +101,7 @@ def test_move_wrap(game: Game) -> None:
 
 
 def test_current_tile(game: Game) -> None:
+    """Test getting the current tile."""
     b: GameBoard[Tuple[float, float, float]] = get_board(game)
     assert b.current_tile == (0, 0, 0)
     b.coordinates = Point(1, 2, 3)
@@ -102,6 +111,7 @@ def test_current_tile(game: Game) -> None:
 
 
 def test_populated_points(game: Game) -> None:
+    """Test the populated_points list."""
     b: GameBoard[None] = GameBoard(game, Point(2, 2, 0), lambda P: None)
     assert len(b.populated_points) == 9
     assert Point(0, 0, 0) in b.populated_points

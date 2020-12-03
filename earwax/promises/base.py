@@ -66,35 +66,43 @@ class Promise(Generic[T], EventDispatcher):
     state: PromiseStates = attrib(default=PromiseStates.ready, init=False)
 
     def __attrs_post_init__(self) -> None:
+        """Register default events."""
         for func in (
             self.on_done, self.on_error, self.on_cancel, self.on_finally
         ):
             self.register_event_type(func.__name__)
 
     def on_done(self, result: T) -> None:
-        """The event that is dispatched when this promise completes with no
-        error.
+        """Handle return value.
+
+        This event is dispatched when this promise completes with no error.
 
         :param result: The value returned by the function.
         """
         pass
 
     def on_error(self, e: Exception) -> None:
-        """The event that is dispatched when this promise raises an error.
+        """Handle an error.
+
+        This event is dispatched when this promise raises an error.
 
         :param e: The exception that was raised.
         """
         raise e
 
     def on_cancel(self) -> None:
-        """The event that is dispatched when this instance has its
+        """Handle cancellation.
+
+        This event is dispatched when this instance has its
         :meth:`~earwax.Promise.cancel` method called.
         """
         pass
 
     def on_finally(self) -> None:
-        """The event that is dispatched when this promise completes, whether or
-        not it raises an error.
+        """Handle this promise comise completing.
+
+        This event is dispatched when this promise completes, whether or not it
+        raises an error.
         """
         pass
 
@@ -108,7 +116,9 @@ class Promise(Generic[T], EventDispatcher):
         self.dispatch_event('on_cancel')
 
     def done(self, value: T) -> None:
-        """Dispatch the :meth:`~earwax.Promise.on_done` event with the given
+        """Finish up.
+
+        Dispatches the :meth:`~earwax.Promise.on_done` event with the given
         ``value``, and set :attr:`self.state <earwax.Promise.state>` to
         :attr:`earwax.PromiseStates.done`.
 
@@ -120,8 +130,10 @@ class Promise(Generic[T], EventDispatcher):
         self.state = PromiseStates.done
 
     def error(self, e: Exception) -> None:
-        """Dispatch the :meth:`~earwax.Promise.on_error` event with the passed
-        exception.
+        """Handle an error.
+
+        This event dispatches the :meth:`~earwax.Promise.on_error` event with
+        the passed exception.
 
         :param e: The exception that was raised.
         """

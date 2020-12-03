@@ -154,6 +154,7 @@ class Game(RegisterEventMixin):
     )
 
     def __attrs_post_init__(self) -> None:
+        """Register default events."""
         for func in (
             self.before_run, self.after_run, self.on_close,
             self.on_joyhat_motion, self.on_joybutton_press,
@@ -163,7 +164,9 @@ class Game(RegisterEventMixin):
             self.register_event_type(func.__name__)
 
     def start_action(self, a: Action) -> OptionalGenerator:
-        """Start an action. If the action has no interval, it will be ran
+        """Start an action.
+
+        If the action has no interval, it will be ran
         straight away. Otherwise, it will be added to
         :attr:`self.triggered_actions <earwax.Game.triggered_actions>`, and
         only ran if enough time has elapsed since the last run.
@@ -179,8 +182,10 @@ class Game(RegisterEventMixin):
         return a.run(None)
 
     def stop_action(self, a: Action) -> None:
-        """Unschedule an action, and remove it from :attr:`triggered_actions
-        <earwax.Game.triggered_actions>`.
+        """Unschedule an action.
+
+        The provided action will be removed from
+        :attr:`~earwax.Game.triggered_actions`.
 
         This method is called when the user stops doing something that
         previously triggered an action, such as releasing a key or a mouse
@@ -192,7 +197,7 @@ class Game(RegisterEventMixin):
         clock.unschedule(a.run)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool:
-        """A key has been pressed down.
+        """Handle a pressed key.
 
         This is the default event that is used by ``pyglet.window.Window``.
 
@@ -222,7 +227,7 @@ class Game(RegisterEventMixin):
         return False
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool:
-        """A key has been released.
+        """Handle a released key.
 
         This is the default event that is used by ``pyglet.window.Window``.
 
@@ -252,8 +257,11 @@ class Game(RegisterEventMixin):
         self, symbol: int, modifiers: int, string: Optional[str] = None,
         motion: Optional[int] = None
     ) -> None:
-        """A method for use in tests. First presses the given key combination,
-        then releases it.
+        """Simulate a key press.
+
+        This method is used in tests.
+
+        First presses the given key combination, then releases it.
 
         If string and motion are not None, then on_text, and on_text_motion
         events will also be fired.
@@ -282,7 +290,7 @@ class Game(RegisterEventMixin):
     def on_mouse_press(
         self, x: int, y: int, button: int, modifiers: int
     ) -> bool:
-        """A mouse button has been pressed down.
+        """Handle a mouse button press.
 
         This is the default event that is used by ``pyglet.window.Window``.
 
@@ -318,7 +326,7 @@ class Game(RegisterEventMixin):
     def on_mouse_release(
         self, x: int, y: int, button: int, modifiers: int
     ) -> bool:
-        """A mouse button has been released.
+        """Handle a mouse button release.
 
         This is the default event that is used by ``pyglet.window.Window``.
 
@@ -353,8 +361,10 @@ class Game(RegisterEventMixin):
         return True
 
     def click_mouse(self, button: int, modifiers: int) -> None:
-        """Used for testing, to simulate pressing and releasing a mouse
-        button.
+        """Simulate a mouse click.
+
+        This method is used for testing, to simulate first pressing, then
+        releasing a mouse button.
 
         :param button: One of the mouse button constants from
             `pyglet.window.mouse <https://pythonhosted.org/pyglet/api/
@@ -368,9 +378,12 @@ class Game(RegisterEventMixin):
         self.on_mouse_release(0, 0, button, modifiers)
 
     def on_joybutton_press(self, joystick: Joystick, button: int) -> bool:
-        """The default handler that fires when a joystick button is pressed.
+        """Handle the press of a joystick button.
 
-        :param joystick: The joystick that emited the event.
+        This is the default handler that fires when a joystick button is
+        pressed.
+
+        :param joystick: The joystick that emitted the event.
 
         : param button: The button that was pressed.
         """
@@ -390,6 +403,15 @@ class Game(RegisterEventMixin):
         return False
 
     def on_joybutton_release(self, joystick: Joystick, button: int) -> bool:
+        """Handle the release of a joystick button.
+
+        This is the default handler that fires when a joystick button is
+        released.
+
+        :param joystick: The joystick that emitted the event.
+
+        : param button: The button that was pressed.
+        """
         t: Tuple[str, int] = (joystick.device.name, button)
         a: Action
         for a in self.triggered_actions:
@@ -406,12 +428,14 @@ class Game(RegisterEventMixin):
         return True
 
     def on_joyhat_motion(self, joystick: Joystick, x: int, y: int) -> bool:
-        """The default handler that fires when a hat is moved.
+        """Handle joyhat motions.
+
+        This is the default handler that fires when a hat is moved.
 
         If the given position is the default position ``(0, 0)``, then any
         actions started by hat motions are stopped.
 
-        :param joystick: The joystick that emited the event.
+        :param joystick: The joystick that emitted the event.
 
         : param x: The left / right position of the hat.
 
@@ -443,7 +467,9 @@ class Game(RegisterEventMixin):
         return False
 
     def before_run(self) -> None:
-        """This hook is used by the run method, just before pyglet.app.run is
+        """Do stuff before starting the main event loop.
+
+        This event is used by the run method, just before pyglet.app.run is
         called.
 
         By this point, default events have been decorated, such as
@@ -454,7 +480,9 @@ class Game(RegisterEventMixin):
         pass
 
     def after_run(self) -> None:
-        """An event which is dispatched after the main game loop has ended.
+        """Run code before the game exits.
+
+        This event is dispatched after the main game loop has ended.
 
         By this point, synthizer has been shutdown, and there is nothing else
         to be done.
@@ -610,17 +638,21 @@ class Game(RegisterEventMixin):
         return None
 
     def on_close(self) -> None:
-        """Called when the window is closing.
+        """Run code when closing the window.
+
+        Called when the window is closing.
 
         This is the default event that is used by ``pyglet.window.Window``.
 
         By default, this method calls :meth:`self.clear_levels()
-        <earwax.Game.clear_levels>`, to ensure any cleanup code is called.
+        <earwax.Game.clear_levels>`, to ensure any clean up code is called.
         """
         self.clear_levels()
 
     def get_settings_path(self) -> Path:
-        """Uses ``pyglet.resource.get_settings_path`` to get an appropriate
+        """Get a path to store game settings.
+
+        Uses ``pyglet.resource.get_settings_path`` to get an appropriate
         settings path for this game.
         """
         return Path(get_settings_path(self.name))
@@ -630,7 +662,7 @@ class Game(RegisterEventMixin):
 
         The earwax configuration is used to determine what should be outputted.
 
-        :param text: The text to be spoken or brailled.
+        :param text: The text to be spoken or output to a braille display.
 
         :param interrupt: If Whether or not to silence speech before outputting
             anything else.

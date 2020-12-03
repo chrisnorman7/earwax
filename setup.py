@@ -1,3 +1,5 @@
+"""The setup script for the Earwax module."""
+
 from setuptools import setup
 
 setup(

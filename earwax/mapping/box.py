@@ -33,7 +33,9 @@ class OutOfBounds(BoxError):
 
 
 class NotADoor(BoxError):
-    """Tried to call :meth:`~earwax.Box.open`, or :meth:`~earwax.Box.close`
+    """Not a door.
+
+    sTried to call :meth:`~earwax.Box.open`, or :meth:`~earwax.Box.close`
     on a :class:`~earwax.Box` instance that has its :attr:`~earwax.Box.door`
     attribute set to ``None``.
     """
@@ -106,6 +108,7 @@ class Box(EventDispatcher):
     wall_sound: Optional[Path] = None
 
     def __attrs_post_init__(self) -> None:
+        """Configure parents and children."""
         if self.parent is not None:
             self.parent.add_child(self)
         child: Box
@@ -134,7 +137,9 @@ class Box(EventDispatcher):
         pass
 
     def on_activate(self) -> None:
-        """An event which is dispatched when the player presses the enter key.
+        """Handle the enter key.
+
+        This event is dispatched when the player presses the enter key.
 
         It is guaranteed that the instance this event is dispatched on is the
         one the player is stood on.
@@ -142,20 +147,24 @@ class Box(EventDispatcher):
         pass
 
     def on_open(self) -> None:
-        """An event that id dispatched when the :meth:`~earwax.Box.open` method is
+        """Handle a door being opened on this box.
+
+        An event that id dispatched when the :meth:`~earwax.Box.open` method is
         successfully called on this instance.
         """
         pass
 
     def on_close(self) -> None:
-        """An event which is dispatched when :meth:`~earwax.Box.close` is
+        """Handle a door being closed on this box.
+
+        An event which is dispatched when :meth:`~earwax.Box.close` is
         successfully called on this instance.
         """
         pass
 
     @property
     def width(self) -> float:
-        """Returns the width of this box."""
+        """Return the width of this box."""
         return self.top_right.x - self.bottom_left.x
 
     @property
@@ -165,12 +174,12 @@ class Box(EventDispatcher):
 
     @property
     def height(self) -> float:
-        """Returns the height of this box."""
+        """Return the height of this box."""
         return self.top_right.z - self.bottom_left.z
 
     @property
     def area(self) -> float:
-        """Returns the area of the box."""
+        """Return the area of the box."""
         return self.width * self.depth
 
     @property
@@ -179,7 +188,9 @@ class Box(EventDispatcher):
         return self.width * self.depth * self.height
 
     def add_child(self, box: 'Box') -> None:
-        """Adds the given box to :attr:`self.children
+        """Add a child box.
+
+        Adds the given box to :attr:`self.children
         <~earwax.Box.children>`.
 
         :param box: The box to add as a child.
@@ -190,7 +201,9 @@ class Box(EventDispatcher):
         box.parent = self
 
     def contains_point(self, coordinates: Point) -> bool:
-        """Returns ``True`` if this box spans the given coordinates, ``False``
+        """Return whether or not this box contains the given point.
+
+        Returns ``True`` if this box spans the given coordinates, ``False``
         otherwise.
 
         :param coordinates: The coordinates to check.
@@ -207,7 +220,9 @@ class Box(EventDispatcher):
         )
 
     def could_fit(self, box: 'Box') -> bool:
-        """Returns ``True`` if the given box could be contained by this box,
+        """Return whether or not the given box could be contained by this one.
+
+        Returns ``True`` if the given box could be contained by this box,
         ``False`` otherwise.
 
         This method behaves like the :meth:`~earwax.Box.contains_point` method,
@@ -228,11 +243,11 @@ class Box(EventDispatcher):
         )
 
     def sort_children(self) -> List['Box']:
-        """Returns a sorted version of :attr:`~earwax.Box.children`."""
+        """Return :attr:`~earwax.Box.children` sorted by area."""
         return sorted(self.children, key=lambda c: c.area)
 
     def get_containing_box(self, coordinates: Point) -> Optional['Box']:
-        """Returns the box that spans the given coordinates.
+        """Return the box that spans the given coordinates.
 
         If no child box is found, one of two things will occur:
 
@@ -272,7 +287,9 @@ class Box(EventDispatcher):
             )
 
     def open(self, ctx: Optional['Context']) -> None:
-        """If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
+        """Open a door on this box.
+
+        If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
         :attr:`.open <earwax.Door.open>` attribute to ``True``, and play the
         appropriate sound. Otherwise, raise :class:`earwax.NotADoor`.
         """
@@ -291,7 +308,9 @@ class Box(EventDispatcher):
         schedule_once(self.scheduled_close, when, ctx)
 
     def close(self, ctx: Optional['Context']) -> None:
-        """If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
+        """Close a door on this box.
+
+        If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
         :attr:`.open <earwax.Door.open>` attribute to ``False``, and play the
         appropriate sound. Otherwise, raise :class:`earwax.NotADoor`.
         """
@@ -307,7 +326,9 @@ class Box(EventDispatcher):
         self.close(ctx)
 
     def nearest_door(self, same_z: bool = True) -> Optional['Box']:
-        """Returns the nearest :class:`earwax.Box` instance whose
+        """Get the nearest door.
+
+        Returns the nearest :class:`earwax.Box` instance whose
         :attr:`~earwax.Box.door` attribute is not ``None``.
 
         :param same_z: If ``True``, then doors on different levels will not be
@@ -329,7 +350,9 @@ class Box(EventDispatcher):
         return box
 
     def nearest_portal(self, same_z: bool = True) -> Optional['Box']:
-        """Returns the nearest :class:`earwax.Box` instance whose
+        """Get the nearest portal.
+
+        Returns the nearest :class:`earwax.Box` instance whose
         :attr:`~earwax.Box.portal` attribute is not ``None``.
 
         :param same_z: If ``True``, then portals on different levels will not
@@ -398,7 +421,7 @@ class FittedBox(Box):
 def box_row(
     start: Point, size: Point, count: int, offset: Point, **kwargs
 ) -> List[Box]:
-    """Generates a list of boxes.
+    """Generate a list of boxes.
 
     This method is useful for creating rows of buildings, or rooms on a
     corridor to name a couple of examples.
