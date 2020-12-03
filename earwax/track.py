@@ -1,14 +1,15 @@
 """Provides the Track class."""
 
-from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
-from attr import attrs
+from attr import Factory, attrib, attrs
 
-if TYPE_CHECKING:
-    from synthizer import BufferGenerator, Context, Source
-
-from .sound import play_path
+try:
+    from synthizer import Context, Source, StreamingGenerator
+except ModuleNotFoundError:
+    StreamingGenerator = None
+    Context = None
+    Source = None
 
 
 @attrs(auto_attribs=True)
@@ -18,47 +19,42 @@ class Track:
     A track that plays while a :class:`earwax.BoxLevel` object is top of the
     levels stack.
 
-    No panning or fx are applied to ``Track`` instances.
+    :ivar ~earwax.Track.protocol: The ``protocol`` argument to pass to
+        ``synthizer.StreamingGenerator````.
 
-    :ivar ~earwax.Track.sound_path: The track to play.
-
-    :ivar ~earwax.Track.gain: The volume (gain) of the playing sound.
+    :ivar ~earwax.Track.path: The ``path`` argument to pass to
+        ``synthizer.StreamingGenerator``.
 
     :ivar ~earwax.Track.generator: The ``synthizer.BufferGenerator`` instance
         to play through.
 
-    :ivar ~earwax.Track.source: The source to route :attr:`self.generator
-        <earwax.Track.generator>` through.
+        This value is initialised as part of the :meth:`~earwax.Track.play`
+        method.
     """
 
-    sound_path: Path
-    gain: float = 0.25
-    generator: Optional['BufferGenerator'] = None
-    source: Optional['Source'] = None
+    protocol: str
+    path: str
+    generator: Optional[StreamingGenerator] = attrib(
+        default=Factory(type(None)), init=False
+    )
 
-    def load_sound(self, ctx: 'Context') -> None:
-        """Load :attr:`self.sound_path <earwax.Track.sound_path>`."""
-        self.generator, self.source = play_path(ctx, self.sound_path)
-
-    def play(self, ctx: 'Context') -> None:
+    def play(self, ctx: Context, source: Source) -> None:
         """Play this track on a loop.
 
         To alter how ``sound_path`` is played, override
         :meth:`earwax.Track.load_sound`.
 
         :param ctx: The ``synthizer.Context`` instance to play through.
+
+        :param source: The source to connect :attr:`self.generator
+            <earwax.Track.generator>` to.
         """
-        self.load_sound(ctx)
-        if self.source is not None:
-            self.source.gain = self.gain
-        if self.generator is not None:
-            self.generator.looping = True
+        self.generator = StreamingGenerator(ctx, self.protocol, self.path)
+        source.add_generator(self.generator)
+        self.generator.looping = True
 
     def stop(self) -> None:
         """Stop this track playing."""
         if self.generator is not None:
             self.generator.destroy()
             self.generator = None
-        if self.source is not None:
-            self.source.destroy()
-            self.source = None
