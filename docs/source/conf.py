@@ -63,7 +63,7 @@ html_static_path: List[str] = ['_static']
 apidoc_module_dir: str = os.path.abspath('../../earwax')
 apidoc_excluded_paths: List[str] = ['tests']
 apidoc_separate_modules: bool = True
-autodoc_mock_imports = ['synthizer']
+autodoc_mock_imports = []
 
 
 def setup(app):
