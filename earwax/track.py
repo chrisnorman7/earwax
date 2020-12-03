@@ -13,6 +13,10 @@ class TrackTypes(Enum):
     :ivar ~earwax.TrackTypes.ambiance: An ambiance which will never moved, such
         as the background sound for a map.
 
+        This type should not be confused with the :class:`earwax.Ambiance`
+        class, which describes an ambiance which can be moved around the sound
+        field.
+
     :ivar ~earwax.TrackTypes.music: A piece of background music.
     """
 
