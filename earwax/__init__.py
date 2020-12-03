@@ -70,7 +70,7 @@ if True:
                         play_and_destroy, play_path, play_paths,
                         schedule_generator_destruction)
     from .speech import tts
-    from .track import Track
+    from .track import Track, TrackTypes
     from .walking_directions import walking_directions
 
 # The below imports are intentionally separated from those above, to avoid
@@ -94,5 +94,5 @@ __all__ = [
     'PromiseStates', 'ThreadedPromise', 'StaggeredPromise',
     'staggered_promise', 'Promise', 'types', 'utils', 'GameNotRunning',
     'NetworkConnection', 'ConnectionStates', 'ConnectionError',
-    'AlreadyConnected', 'AlreadyConnecting', 'NotConnectedYet'
+    'AlreadyConnected', 'AlreadyConnecting', 'NotConnectedYet', 'TrackTypes'
 ]

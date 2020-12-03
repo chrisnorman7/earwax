@@ -1,15 +1,23 @@
 """Provides the Track class."""
 
+from enum import Enum
 from typing import Optional
 
 from attr import Factory, attrib, attrs
+from synthizer import Context, Source, StreamingGenerator
 
-try:
-    from synthizer import Context, Source, StreamingGenerator
-except ModuleNotFoundError:
-    StreamingGenerator = None
-    Context = None
-    Source = None
+
+class TrackTypes(Enum):
+    """The type of a :class:`~earwax.Track` instance.
+
+    :ivar ~earwax.TrackTypes.ambiance: An ambiance which will never moved, such
+        as the background sound for a map.
+
+    :ivar ~earwax.TrackTypes.music: A piece of background music.
+    """
+
+    ambiance = 0
+    music = 1
 
 
 @attrs(auto_attribs=True)
@@ -25,6 +33,10 @@ class Track:
     :ivar ~earwax.Track.path: The ``path`` argument to pass to
         ``synthizer.StreamingGenerator``.
 
+    :ivar ~earwax.Track.track_type: The type of this track.
+
+        This value determines which source an instance will be connected to.
+
     :ivar ~earwax.Track.generator: The ``synthizer.BufferGenerator`` instance
         to play through.
 
@@ -34,6 +46,7 @@ class Track:
 
     protocol: str
     path: str
+    track_type: TrackTypes
     generator: Optional[StreamingGenerator] = attrib(
         default=Factory(type(None)), init=False
     )

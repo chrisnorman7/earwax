@@ -16,7 +16,7 @@ from .action import Action, ActionFunctionType
 from .ambiance import Ambiance
 from .mixins import RegisterEventMixin
 from .sound import get_buffer
-from .track import Track
+from .track import Track, TrackTypes
 
 if TYPE_CHECKING:
     from .game import Game
@@ -77,7 +77,7 @@ class Level(RegisterEventMixin):
             raise RuntimeError('Cannot start ambiances with no audio context.')
         ambiance: Ambiance
         for ambiance in self.ambiances:
-            ambiance.play(ctx)
+            ambiance.play(ctx, self.game.config.sound.ambiance_volume.value)
 
     def stop_ambiances(self) -> None:
         """Stop all the ambiances on this instance."""
@@ -91,9 +91,17 @@ class Level(RegisterEventMixin):
         if ctx is None:
             raise RuntimeError('Cannot start tracks with no audio context.')
         track: Track
-        if self.game.audio_context is not None:
-            for track in self.tracks:
-                track.play(ctx)
+        source: Optional[DirectSource] = None
+        for track in self.tracks:
+            if track.track_type is TrackTypes.ambiance:
+                source = self.game.ambiance_source
+            elif track.track_type is TrackTypes.music:
+                source = self.game.music_source
+            if source is None:
+                raise RuntimeError(
+                    'Unknown track type: %r.' % track.track_type
+                )
+            track.play(ctx, source)
 
     def stop_tracks(self) -> None:
         """Stop all the tracks on this instance."""

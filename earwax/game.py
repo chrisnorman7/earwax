@@ -3,10 +3,11 @@
 from concurrent.futures import Executor, ThreadPoolExecutor
 from inspect import isgenerator
 from pathlib import Path
-from typing import Dict, Generator, Iterator, List, Optional, Tuple, cast
+from typing import Dict, Generator, Iterator, List, Optional, Tuple, Type, cast
 from warnings import warn
 
 from attr import Factory, attrib, attrs
+from synthizer import Context, DirectSource, initialized
 
 try:
     from cytolk.tolk import detect_screen_reader, load, unload
@@ -14,7 +15,6 @@ try:
     from pyglet.input import Joystick, get_joysticks
     from pyglet.resource import get_settings_path
     from pyglet.window import Window
-    from synthizer import Context, initialized
 except ModuleNotFoundError:
     detect_screen_reader = None
     load = None
@@ -25,8 +25,6 @@ except ModuleNotFoundError:
     get_joysticks = None
     get_settings_path = None
     Window = None
-    Context = None
-    initialized = None
 
 from .action import Action, HatDirection, OptionalGenerator
 from .configuration import EarwaxConfig
@@ -38,6 +36,8 @@ from .sound import AdvancedInterfaceSoundPlayer
 from .speech import tts
 from .types import (ActionListType, JoyButtonReleaseGeneratorDictType,
                     ReleaseGeneratorDictType)
+
+NoneType: Type[None] = type(None)
 
 
 class GameNotRunning(Exception):
@@ -75,6 +75,12 @@ class Game(RegisterEventMixin):
     :ivar ~earwax.Game.interface_sound_player: An
         :class:`earwax.AdvancedInterfaceSoundPlayer` instance, used for playing
         interface sounds.
+
+    :ivar ~earwax.Game.music_source: A ``DirectSource`` instance to play music
+        through.
+
+    :ivar ~earwax.Game.ambiance_source: A ``DirectSource`` instance to play
+        ambiances through.
 
     :ivar ~earwax.Game.levels: All the pushed :class:`earwax.Level` instances.
 
@@ -118,7 +124,15 @@ class Game(RegisterEventMixin):
     )
 
     interface_sound_player: Optional[AdvancedInterfaceSoundPlayer] = attrib(
-        default=Factory(type(None)), init=False
+        default=Factory(NoneType), init=False
+    )
+
+    music_source: Optional[DirectSource] = attrib(
+        default=Factory(NoneType), init=False
+    )
+
+    ambiance_source: Optional[DirectSource] = attrib(
+        default=Factory(NoneType), init=False
     )
 
     levels: List[Level] = attrib(default=Factory(list), init=False)
@@ -512,7 +526,10 @@ class Game(RegisterEventMixin):
         * Enter a ``synthizer.initialized`` contextmanager.
 
         * populate :attr:`~earwax.Game.audio_context`, and
-            :attr:`~earwax.Game.interface_sound_player`.
+            :attr:`~earwax.Game.interface_sound_player`, as well as
+            :attr:`~earwax.Game.music_source` and
+            :attr:`~earwax.Game.ambiance_source`. The latter pair will have
+            their gains set according to :attr:`~earwax.Game.config`.
 
         * if ``initial_level`` is not ``None``, push the given level.
 
@@ -548,6 +565,10 @@ class Game(RegisterEventMixin):
             self.interface_sound_player = AdvancedInterfaceSoundPlayer(
                 self.audio_context, gain=self.config.sound.sound_volume.value
             )
+            self.music_source = DirectSource(self.audio_context)
+            self.music_source.gain = self.config.sound.music_volume.value
+            self.ambiance_source = DirectSource(self.audio_context)
+            self.ambiance_source.gain = self.config.sound.ambiance_volume.value
             if initial_level is not None:
                 self.push_level(initial_level)
             self.dispatch_event('before_run')
