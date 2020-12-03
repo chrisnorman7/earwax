@@ -4,7 +4,11 @@ from enum import Enum
 from typing import Optional
 
 from attr import Factory, attrib, attrs
-from synthizer import Context, Source, StreamingGenerator
+
+try:
+    from synthizer import Context, Source, StreamingGenerator
+except ModuleNotFoundError:
+    Context, Source, StreamingGenerator = (None, None, None)
 
 
 class TrackTypes(Enum):
@@ -26,9 +30,9 @@ class TrackTypes(Enum):
 
 @attrs(auto_attribs=True)
 class Track:
-    """A music track.
+    """A looping sound or piece of music.
 
-    A track that plays while a :class:`earwax.BoxLevel` object is top of the
+    A track that plays while a :class:`earwax.Level` object is top of the
     levels stack.
 
     :ivar ~earwax.Track.protocol: The ``protocol`` argument to pass to

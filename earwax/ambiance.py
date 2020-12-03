@@ -3,7 +3,11 @@
 from typing import Optional
 
 from attr import Factory, attrib, attrs
-from synthizer import Context, Source3D, StreamingGenerator
+
+try:
+    from synthizer import Context, Source3D, StreamingGenerator
+except ModuleNotFoundError:
+    Context, Source3D, StreamingGenerator = (None, None, None)
 
 from .point import Point
 

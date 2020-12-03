@@ -7,7 +7,11 @@ from typing import Dict, Generator, Iterator, List, Optional, Tuple, Type, cast
 from warnings import warn
 
 from attr import Factory, attrib, attrs
-from synthizer import Context, DirectSource, initialized
+
+try:
+    from synthizer import Context, DirectSource, initialized
+except ModuleNotFoundError:
+    Context, DirectSource, initialized = (None, None, None)
 
 try:
     from cytolk.tolk import detect_screen_reader, load, unload

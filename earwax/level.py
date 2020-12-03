@@ -7,10 +7,10 @@ from attr import Factory, attrib, attrs
 
 try:
     from pyglet.clock import schedule_once
-except ModuleNotFoundError:
-    pass
-if TYPE_CHECKING:
     from synthizer import Buffer, BufferGenerator, Context, DirectSource
+except ModuleNotFoundError:
+    schedule_once = None
+    Buffer, BufferGenerator, Context, DirectSource = (None, None, None, None)
 
 from .action import Action, ActionFunctionType
 from .ambiance import Ambiance
