@@ -97,7 +97,7 @@ def play_path(
             source = DirectSource(context)
         else:
             source = Source3D(context)
-    if isinstance(source, Source3D):
+    if isinstance(source, Source3D) and position is not None:
         source.position = position
     source.add_generator(generator)
     return (generator, source)
