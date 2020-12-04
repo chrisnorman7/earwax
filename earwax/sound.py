@@ -14,11 +14,10 @@ try:
     from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
                            Generator, Source, Source3D)
 except ModuleNotFoundError:
-    Buffer = None
-    Context = None
-    Generator = None
-    Source = None
-    BufferGenerator = None
+    (
+        Buffer, BufferGenerator, Context, DirectSource, Generator, Source,
+        Source3D
+    ) = (None, None, None, None, None, None, None)
 
 buffers: Dict[str, Buffer] = {}
 
@@ -86,7 +85,10 @@ def play_path(
     """
     if path.is_dir():
         path = choice(list(path.iterdir()))
-        return play_path(context, path)
+        return play_path(
+            context, path, generator=generator, source=source,
+            position=position
+        )
     if generator is None:
         generator = BufferGenerator(context)
     generator.buffer = get_buffer('file', str(path))
@@ -95,7 +97,7 @@ def play_path(
             source = DirectSource(context)
         else:
             source = Source3D(context)
-    if position is not None:
+    if isinstance(source, Source3D):
         source.position = position
     source.add_generator(generator)
     return (generator, source)
