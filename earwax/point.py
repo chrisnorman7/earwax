@@ -5,6 +5,7 @@ from math import dist, floor
 from typing import Any, Union
 
 from attr import attrs
+from movement_2d import angle_between
 
 from .mixins import CoordinatesMixin
 
@@ -66,6 +67,21 @@ class Point(CoordinatesMixin):
         :param other: The point to measure the distance to.
         """
         return dist(self.coordinates, other.coordinates)
+
+    def angle_between(self, other: 'Point') -> float:
+        """Return the angle between two points.
+
+        :param other: The other point to get the angle to.
+        """
+        x1: float
+        y1: float
+        z1: float
+        x2: float
+        y2: float
+        z2: float
+        x1, y1, z1 = self.coordinates
+        x2, y2, z2 = other.coordinates
+        return angle_between(x1, y1, x2, y2)
 
     def copy(self) -> 'Point':
         """Copy this instance.

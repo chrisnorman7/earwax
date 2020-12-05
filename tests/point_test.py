@@ -113,3 +113,18 @@ def test_distance() -> None:
     a = Point(1, 1, 1)
     b = Point(1, 1, 3)
     assert a.distance_between(b) == 2
+
+
+def test_angle_between() -> None:
+    """Test getting the angle between two points."""
+    a: Point = Point(0, 0, 0)
+    b: Point = Point(0, 1, 0)
+    assert a.angle_between(b) == 0
+    assert b.angle_between(a) == 180
+    b = Point(1, 0, 0)
+    assert a.angle_between(b) == 90
+    assert b.angle_between(a) == 270
+    a = Point(1, 1, 3)
+    b = Point(3, 3, 6)
+    assert a.angle_between(b) == 45
+    assert b.angle_between(a) == 225
