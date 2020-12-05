@@ -5,7 +5,7 @@ from math import dist, floor
 from typing import Any, Union
 
 from attr import attrs
-from movement_2d import angle_between
+from movement_2d import angle_between, coordinates_in_direction
 
 from .mixins import CoordinatesMixin
 
@@ -82,6 +82,20 @@ class Point(CoordinatesMixin):
         x1, y1, z1 = self.coordinates
         x2, y2, z2 = other.coordinates
         return angle_between(x1, y1, x2, y2)
+
+    def in_direction(self, angle: float, distance: float = 1.0) -> 'Point':
+        """Return the coordinates in the given direction.
+
+        :param angle: The direction of travel.
+
+        :param distance: The distance to travel.
+        """
+        x: float
+        y: float
+        x, y = coordinates_in_direction(
+            self.x, self.y, angle, distance=distance
+        )
+        return Point(x, y, self.z)
 
     def copy(self) -> 'Point':
         """Copy this instance.

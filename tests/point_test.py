@@ -3,6 +3,7 @@
 from pytest import raises
 
 from earwax import Point
+from movement_2d import coordinates_in_direction
 
 
 def test_init() -> None:
@@ -128,3 +129,16 @@ def test_angle_between() -> None:
     b = Point(3, 3, 6)
     assert a.angle_between(b) == 45
     assert b.angle_between(a) == 225
+
+
+def test_in_direction() -> None:
+    """Test getting coordinates in a direction."""
+    a: Point = Point(1, 1, 1)
+    b: Point = a.in_direction(180)
+    x: float
+    y: float
+    x, y = coordinates_in_direction(a.x, a.y, 180)
+    assert isinstance(b, Point)
+    assert b.x == x
+    assert b.y == y
+    assert b.z == a.z
