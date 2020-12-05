@@ -1,7 +1,7 @@
 """Provides the Point class."""
 
 from enum import Enum
-from math import floor
+from math import dist, floor
 from typing import Any, Union
 
 from attr import attrs
@@ -59,6 +59,13 @@ class Point(CoordinatesMixin):
             return PointDirections.north
         else:
             return PointDirections.here
+
+    def distance_between(self, other: 'Point') -> float:
+        """Return the distance between two points.
+
+        :param other: The point to measure the distance to.
+        """
+        return dist(self.coordinates, other.coordinates)
 
     def copy(self) -> 'Point':
         """Copy this instance.
