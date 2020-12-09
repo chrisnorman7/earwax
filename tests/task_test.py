@@ -45,6 +45,7 @@ def test_start(level: Level, game: Game, window: Window) -> None:
 
     game.run(window)
     assert game.level is level
+    t.stop()
 
 
 def test_start_immediately() -> None:
@@ -61,7 +62,7 @@ def test_start_immediately() -> None:
     with raises(Works):
         task.start(immediately=True)
     assert task.running is True
-    task.stop()  # Make sure future tests don't raise an error.
+    task.stop()
 
 
 def test_stop() -> None:
@@ -102,3 +103,24 @@ def test_remove_task(game: Game) -> None:
     game.remove_task(task)
     assert task.running is False
     assert task not in game.tasks
+
+
+def test_run_multiple(game: Game, window: Window) -> None:
+    """Make sure multiple runs work OK."""
+
+    @game.register_task(lambda: 0.1)
+    def task(dt: float) -> None:
+        """Add another level."""
+        game.push_level(Level(game))
+        if len(game.levels) == 5:
+            window.close()
+
+    @game.event
+    def before_run() -> None:
+        """Start the task."""
+        task.start(immediately=True)
+        assert task.running is True
+
+    game.run(window)
+    assert len(game.levels) == 5
+    task.stop()

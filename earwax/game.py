@@ -725,8 +725,8 @@ class Game(RegisterEventMixin):
     ) -> Callable[[TaskFunction], Task]:
         """Decorate a function to use as a task.
 
-        This function returns a function, which converts a function into a
-        :class:`~earwax.Task` instance, so you can add tasks like so::
+        This function allows you to convert a function into a
+        :class:`~earwax.Task` instance, so you can add tasks by decoration::
 
             @game.register_task(lambda: uniform(1.0, 5.0))
             def task(dt: float) -> None:
