@@ -70,6 +70,7 @@ if True:
                         play_and_destroy, play_path, play_paths,
                         schedule_generator_destruction)
     from .speech import tts
+    from .task import IntervalFunction, Task, TaskFunction
     from .track import Track, TrackTypes
     from .walking_directions import walking_directions
 
@@ -94,5 +95,6 @@ __all__ = [
     'PromiseStates', 'ThreadedPromise', 'StaggeredPromise',
     'staggered_promise', 'Promise', 'types', 'utils', 'GameNotRunning',
     'NetworkConnection', 'ConnectionStates', 'ConnectionError',
-    'AlreadyConnected', 'AlreadyConnecting', 'NotConnectedYet', 'TrackTypes'
+    'AlreadyConnected', 'AlreadyConnecting', 'NotConnectedYet', 'TrackTypes',
+    'Task', 'TaskFunction', 'IntervalFunction'
 ]
