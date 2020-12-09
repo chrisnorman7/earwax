@@ -3,10 +3,13 @@
 from concurrent.futures import Executor, ThreadPoolExecutor
 from inspect import isgenerator
 from pathlib import Path
-from typing import Dict, Generator, Iterator, List, Optional, Tuple, Type, cast
+from typing import (
+    Callable, Dict, Generator, Iterator, List, Optional, Tuple, Type, cast)
 from warnings import warn
 
 from attr import Factory, attrib, attrs
+
+from .task import IntervalFunction, Task, TaskFunction
 
 try:
     from synthizer import Context, DirectSource, initialized
@@ -116,6 +119,12 @@ class Game(RegisterEventMixin):
 
     :ivar ~earwax.Game.thread_pool: An instance of ``ThreadPoolExecutor`` to
         use for threaded operations.
+
+    :ivar ~earwax.Game.tasks: A list of :class:`earwax.Task` instances.
+
+        You can add tasks with the :meth:`~earwax.Game.register_task`
+        decorator, and remove them again with the
+        :meth:`~earwax.Game.remove_task` method.
     """
 
     window: Optional[Window] = attrib(default=Factory(type(None)), init=False)
@@ -170,6 +179,8 @@ class Game(RegisterEventMixin):
     thread_pool: Executor = attrib(
         default=Factory(ThreadPoolExecutor), init=False
     )
+
+    tasks: List[Task] = attrib(default=Factory(list), init=False, repr=False)
 
     def __attrs_post_init__(self) -> None:
         """Register default events."""
@@ -708,3 +719,40 @@ class Game(RegisterEventMixin):
         if self.window is None:
             raise GameNotRunning()
         self.window.dispatch_event('on_close')
+
+    def register_task(
+        self, interval: IntervalFunction
+    ) -> Callable[[TaskFunction], Task]:
+        """Decorate a function to use as a task.
+
+        This function returns a function, which converts a function into a
+        :class:`~earwax.Task` instance, so you can add tasks like so::
+
+            @game.register_task(lambda: uniform(1.0, 5.0))
+            def task(dt: float) -> None:
+                '''A task.'''
+                print('Working: %.2f.' % dt)
+            task.start()
+
+        :param interval: The function to use for the interval.
+        """
+
+        def inner(func: TaskFunction) -> Task:
+            """Decorate the function."""
+            t: Task = Task(interval, func)
+            self.tasks.append(t)
+            return t
+
+        return inner
+
+    def remove_task(self, task: Task) -> None:
+        """Stop and remove a task.
+
+        :param task: The task to be stopped.
+
+            The task will first have its :meth:`~earwax.Task.stop` method
+            called, then it will be removed from the :attr:`~earwax.Game.tasks`
+            list.
+        """
+        task.stop()
+        self.tasks.remove(task)
