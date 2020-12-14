@@ -1,6 +1,6 @@
 """Provides various mixin classes for used with other objects."""
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Tuple
 
 from attr import attrs
 
@@ -70,19 +70,12 @@ class CoordinatesMixin:
 class RegisterEventMixin(EventDispatcher):
     """Allow registering and binding events in one function."""
 
-    def register_event(self, data: Union[EventFunction, str]) -> Union[
-        EventFunction, Callable[[EventFunction], EventFunction]
-    ]:
-        """Register an event, and bind it at the same time."""
-        name: Optional[str] = None
-        if isinstance(data, str):
-            name = data
+    def register_event(self, func: EventFunction) -> str:
+        """Register an event type from a function.
 
-        def inner(func: EventFunction) -> EventFunction:
-            _name: str = name or func.__name__
-            self.register_event_type(_name)
-            return self.event(_name)(func)
+        This function simply registers the given event from its ``__name__`
+        attribute, eliminating possible typos in event names.
 
-        if callable(data):
-            return inner(data)
-        return inner
+        :param func: The function whose name will be used.
+        """
+        return self.register_event_type(func.__name__)

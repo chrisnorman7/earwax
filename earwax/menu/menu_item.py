@@ -48,10 +48,9 @@ class MenuItem(RegisterEventMixin):
     activate_sound_path: Optional[Path] = None
 
     def __attrs_post_init__(self) -> None:
+        """Register events."""
         self.register_event(self.on_selected)
 
     def on_selected(self) -> None:
-        """The function which will be called when this menu item is
-        selected.
-        """
+        """Handle this menu item being selected."""
         pass
