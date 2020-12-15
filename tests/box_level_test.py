@@ -74,8 +74,8 @@ def test_move(box: Box, box_level: BoxLevel) -> None:
     """Test movement."""
     # Let's make sure we've got pytest configured properly.
     assert box_level.coordinates == Point(0.0, 0.0, 0.0)
-    assert box_level.box.top_right.z == 0.0
-    box_level.box.top_right.z = 5.0
+    assert box_level.box.end.z == 0.0
+    box_level.box.end.z = 5.0
     m: Callable[[], None] = box_level.move()
     m()
     assert box_level.coordinates == Point(0.0, 1.0, 0.0)
@@ -143,7 +143,7 @@ def test_activate(game: Game, box: Box, box_level: BoxLevel) -> None:
     d: Door = Door()
     b: Box = Box(Point(0, 0, 0), Point(0, 0, 0), door=d, parent=box)
     assert dist(
-        box_level.coordinates.coordinates, b.bottom_left.coordinates
+        box_level.coordinates.coordinates, b.start.coordinates
     ) < 2.0
     assert box.get_containing_box(box_level.coordinates) is b
     assert b.door is d
@@ -178,7 +178,7 @@ def test_move_fail(box_level: BoxLevel) -> None:
     ) -> None:
         raise MoveFailWorks(distance, vertical, bearing)
 
-    box_level.box.top_right.y = 1
+    box_level.box.end.y = 1
     box_level.move()()
     with raises(MoveFailWorks) as exc:
         box_level.move()()

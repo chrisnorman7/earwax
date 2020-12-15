@@ -54,7 +54,7 @@ if True:
     from .game import Game, GameNotRunning
     from .game_board import GameBoard, NoSuchTile
     from .level import IntroLevel, Level
-    from .mapping import (Box, BoxLevel, Door, FittedBox, NotADoor,
+    from .mapping import (Box, BoxBounds, BoxLevel, Door, FittedBox, NotADoor,
                           OutOfBounds, Portal, box_row)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
@@ -96,5 +96,5 @@ __all__ = [
     'staggered_promise', 'Promise', 'types', 'utils', 'GameNotRunning',
     'NetworkConnection', 'ConnectionStates', 'ConnectionError',
     'AlreadyConnected', 'AlreadyConnecting', 'NotConnectedYet', 'TrackTypes',
-    'Task', 'TaskFunction', 'IntervalFunction'
+    'Task', 'TaskFunction', 'IntervalFunction', 'BoxBounds'
 ]

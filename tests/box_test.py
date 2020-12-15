@@ -4,17 +4,17 @@ from typing import List
 
 from pytest import raises
 
-from earwax import (Box, BoxLevel, Door, FittedBox, NotADoor, OutOfBounds,
-                    Point, Portal, box_row)
+from earwax import (Box, BoxBounds, BoxLevel, Door, FittedBox, NotADoor,
+                    OutOfBounds, Point, Portal, box_row)
 
 
 def test_init() -> None:
     """Test that boxes initialise properly."""
     b: Box = Box(Point(0, 0, 0), Point(3, 3, 0))
-    assert b.bottom_left == Point(0, 0, 0)
-    assert b.top_right == Point(3, 3, 0)
+    assert b.start == Point(0, 0, 0)
+    assert b.end == Point(3, 3, 0)
     assert b.surface_sound is None
-    c: Box = Box(b.bottom_left, b.top_right, parent=b)
+    c: Box = Box(b.start, b.end, parent=b)
     assert c.parent is b
     assert c in b.children
 
@@ -42,7 +42,7 @@ def test_contains_point() -> None:
     """Test Box.contains_point."""
     b: Box = Box(Point(0, 0, 0), Point(0, 0, 0))
     assert b.contains_point(Point(0, 0, 0))
-    b.top_right = Point(5, 5, 0)
+    b.end = Point(5, 5, 0)
     assert b.contains_point(Point(3, 3, 0))
     assert not b.contains_point(Point(55, 54, 52))
     assert not b.contains_point(Point(-3, -4, 0))
@@ -68,8 +68,8 @@ def test_fitted_box() -> None:
     northeast_box: Box = Box(Point(32, 33, 0), Point(80, 85, 5))
     middle_box: Box = Box(Point(14, 15, 2), Point(18, 22, 2))
     box: FittedBox = FittedBox([middle_box, northeast_box, southwest_box])
-    assert box.bottom_left == southwest_box.bottom_left
-    assert box.top_right == northeast_box.top_right
+    assert box.start == southwest_box.start
+    assert box.end == northeast_box.end
 
 
 def test_row() -> None:
@@ -81,60 +81,28 @@ def test_row() -> None:
     second: Box
     third: Box
     first, second, third = boxes
-    assert first.bottom_left == start
-    assert first.top_right == Point(5, 5, 0)
-    assert second.bottom_left == Point(6, 1, 0)
-    assert second.top_right == Point(10, 5, 0)
-    assert third.bottom_left == Point(11, 1, 0)
-    assert third.top_right == Point(15, 5, 0)
+    assert first.start == start
+    assert first.end == Point(5, 5, 0)
+    assert second.start == Point(6, 1, 0)
+    assert second.end == Point(10, 5, 0)
+    assert third.start == Point(11, 1, 0)
+    assert third.end == Point(15, 5, 0)
     first, second, third = box_row(
         Point(0, 0, 0), Point(3, 4, 1), 3, Point(0, 3, 0)
     )
-    assert first.bottom_left == Point(0, 0, 0)
-    assert first.top_right == Point(2, 3, 0)
-    assert second.bottom_left == Point(0, 6, 0)
-    assert second.top_right == Point(2, 9, 0)
-    assert third.bottom_left == Point(0, 12, 0)
-    assert third.top_right == Point(2, 15, 0)
+    assert first.start == Point(0, 0, 0)
+    assert first.end == Point(2, 3, 0)
+    assert second.start == Point(0, 6, 0)
+    assert second.end == Point(2, 9, 0)
+    assert third.start == Point(0, 12, 0)
+    assert third.end == Point(2, 15, 0)
     first, second, third = box_row(start, Point(5, 5, 1), 3, Point(0, 0, 1))
-    assert first.bottom_left == start
-    assert first.top_right == Point(5, 5, 0)
-    assert second.bottom_left == Point(1, 1, 1)
-    assert second.top_right == Point(5, 5, 1)
-    assert third.bottom_left == Point(1, 1, 2)
-    assert third.top_right == Point(5, 5, 2)
-
-
-def test_width() -> None:
-    """Test box.width."""
-    b: Box = Box(Point(0, 1, 2), Point(5, 4, 3))
-    assert b.width == 5
-
-
-def test_depth() -> None:
-    """Test box depth."""
-    b: Box = Box(Point(0, 1, 2), Point(5, 4, 3))
-    assert b.depth == 3
-
-
-def test_height() -> None:
-    """Test box height."""
-    b: Box = Box(Point(0, 1, 2), Point(5, 4, 3))
-    assert b.height == 1
-
-
-def test_area() -> None:
-    """Test box area."""
-    b: Box = Box(Point(0, 0, 0), Point(5, 5, 5))
-    assert b.area == 25
-    b = Box(Point(5, 6, 0), Point(9, 12, 7))
-    assert b.area == 24
-
-
-def test_volume() -> None:
-    """Test box volume."""
-    b: Box = Box(Point(1, 2, 3), Point(10, 9, 8))
-    assert b.volume == 315
+    assert first.start == start
+    assert first.end == Point(5, 5, 0)
+    assert second.start == Point(1, 1, 1)
+    assert second.end == Point(5, 5, 1)
+    assert third.start == Point(1, 1, 2)
+    assert third.end == Point(5, 5, 2)
 
 
 def test_open() -> None:
@@ -189,10 +157,10 @@ def test_nearest_door() -> None:
     room: Box = Box(Point(0, 0, 0), Point(3, 3, 3))
     assert room.nearest_door() is None
     d = Door()
-    doorstep: Box = Box(room.top_right, room.top_right, door=d, parent=room)
+    doorstep: Box = Box(room.end, room.end, door=d, parent=room)
     assert room.nearest_door() is None
     assert room.nearest_door(same_z=False) is doorstep
-    doorstep.bottom_left.z = room.bottom_left.z
+    doorstep.start.z = room.start.z
     assert room.nearest_door() is doorstep
     assert room.nearest_door(same_z=False) is doorstep
 
@@ -202,9 +170,56 @@ def test_nearest_portal(box_level: BoxLevel) -> None:
     room: Box = Box(Point(0, 0, 0), Point(3, 3, 3))
     assert room.nearest_portal() is None
     p: Portal = Portal(box_level, Point(0, 0, 0))
-    doorstep: Box = Box(room.top_right, room.top_right, portal=p, parent=room)
+    doorstep: Box = Box(room.end, room.end, portal=p, parent=room)
     assert room.nearest_portal() is None
     assert room.nearest_portal(same_z=False) is doorstep
-    doorstep.bottom_left.z = room.bottom_left.z
+    doorstep.start.z = room.start.z
     assert room.nearest_portal() is doorstep
     assert room.nearest_portal(same_z=False) is doorstep
+
+
+def test_bounds() -> None:
+    """Test the bounds of a box."""
+    box: Box = Box(Point(1, 2, 3), Point(4, 5, 6))
+    b: BoxBounds = box.bounds
+    assert isinstance(b, BoxBounds)
+    assert b.bottom_back_left == box.start
+    assert b.bottom_front_left == Point(1, 5, 3)
+    assert b.bottom_front_right == Point(4, 5, 3)
+    assert b.bottom_back_right == Point(4, 2, 3)
+    assert b.top_back_left == Point(1, 2, 6)
+    assert b.top_front_left == Point(1, 5, 6)
+    assert b.top_front_right == Point(4, 5, 6)
+    assert b.top_back_right == Point(4, 2, 6)
+
+
+def test_width() -> None:
+    """Test box.width."""
+    b: BoxBounds = Box(Point(0, 1, 2), Point(5, 4, 3)).bounds
+    assert b.width == 5
+
+
+def test_depth() -> None:
+    """Test box depth."""
+    b: BoxBounds = Box(Point(0, 1, 2), Point(5, 4, 3)).bounds
+    assert b.depth == 3
+
+
+def test_height() -> None:
+    """Test box height."""
+    b: BoxBounds = Box(Point(0, 1, 2), Point(5, 4, 3)).bounds
+    assert b.height == 1
+
+
+def test_area() -> None:
+    """Test box area."""
+    b: BoxBounds = Box(Point(0, 0, 0), Point(5, 5, 5)).bounds
+    assert b.area == 25
+    b = Box(Point(5, 6, 0), Point(9, 12, 7)).bounds
+    assert b.area == 24
+
+
+def test_volume() -> None:
+    """Test box volume."""
+    b: BoxBounds = Box(Point(1, 2, 3), Point(10, 9, 8)).bounds
+    assert b.volume == 315

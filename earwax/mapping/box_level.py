@@ -347,7 +347,7 @@ class BoxLevel(Level, EventDispatcher):
             child: Box
             for child in self.box.children:
                 if child.door is not None and dist(
-                    self.coordinates.coordinates, child.bottom_left.coordinates
+                    self.coordinates.coordinates, child.start.coordinates
                 ) <= door_distance:
                     return self.handle_door(child)
             if box is not None:

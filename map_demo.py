@@ -39,7 +39,7 @@ for index, box in enumerate(box_row(
     box.surface_sound = surfaces_directory / 'concrete'
     box.name = f'Office {index + 1}'
     boxes.append(box)
-    door_coordinates: Point = box.bottom_left + Point(1, -1, 0)
+    door_coordinates: Point = box.start + Point(1, -1, 0)
     door: Box = Box(
         door_coordinates, door_coordinates, name='Office Entrance',
         surface_sound=surfaces_directory / 'concrete', door=Door(
@@ -77,7 +77,7 @@ back_office: Box = Box(
     Point(100, 100, 100), Point(125, 125, 102), name='Back Office'
 )
 back_portal_box: Box = Box(
-    back_office.bottom_left, back_office.bottom_left, name=back_office.name
+    back_office.start, back_office.start, name=back_office.name
 )
 
 boxes.extend(
@@ -93,7 +93,7 @@ window: Window = Window(caption='Map Demo')
 main_level: BoxLevel = BoxLevel(game, main_box)
 
 main_portal_box.portal = Portal(
-    main_level, back_office.bottom_left,
+    main_level, back_office.start,
     enter_sound=door_sounds_directory / 'open.wav'
 )
 back_portal_box.portal = Portal(

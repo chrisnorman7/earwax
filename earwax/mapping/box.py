@@ -24,6 +24,79 @@ from .door import Door
 from .portal import Portal
 
 
+@attrs(auto_attribs=True)
+class BoxBounds:
+    """Bounds for a :class:`earwax.Box` instance.
+
+    :ivar ~earwax.BoxBounds.bottom_back_left: The bottom back left point.
+
+    :ivar ~earwax.BoxBounds.top_front_right: The top front right point.
+
+    :ivar ~earwax.BoxBounds.bottom_front_left: The bottom front left point.
+
+    :ivar ~earwax.BoxBounds.bottom_front_right: The bottom front right point.
+
+    :ivar ~earwax.BoxBounds.bottom_back_right: The bottom back right point.
+
+    :ivar ~earwax.BoxBounds.top_back_left: The top back left point.
+
+    :ivar ~earwax.BoxBounds.top_front_left: The top front left point.
+
+    :ivar ~earwax.BoxBounds.top_back_right: The top back right point.
+    """
+
+    bottom_back_left: Point
+    top_front_right: Point
+    bottom_front_left: Point = attrib(init=False, repr=False)
+    bottom_front_right: Point = attrib(init=False, repr=False)
+    bottom_back_right: Point = attrib(init=False, repr=False)
+    top_back_left: Point = attrib(init=False, repr=False)
+    top_front_left: Point = attrib(init=False, repr=False)
+    top_back_right: Point = attrib(init=False, repr=False)
+
+    def __attrs_post_init__(self) -> None:
+        """Set all other points."""
+        start_x: float
+        start_y: float
+        start_z: float
+        end_x: float
+        end_y: float
+        end_z: float
+        start_x, start_y, start_z = self.bottom_back_left.coordinates
+        end_x, end_y, end_z = self.top_front_right.coordinates
+        self.bottom_front_left = Point(start_x, end_y, start_z)
+        self.bottom_front_right = Point(end_x, end_y, start_z)
+        self.bottom_back_right = Point(end_x, start_y, start_z)
+        self.top_back_left = Point(start_x, start_y, end_z)
+        self.top_front_left = Point(start_x, end_y, end_z)
+        self.top_back_right = Point(end_x, start_y, end_z)
+
+    @property
+    def width(self) -> float:
+        """Return the width of this box."""
+        return self.top_front_right.x - self.bottom_back_left.x
+
+    @property
+    def depth(self) -> float:
+        """Get the depth of this box (front to back)."""
+        return self.top_front_right.y - self.bottom_back_left.y
+
+    @property
+    def height(self) -> float:
+        """Return the height of this box."""
+        return self.top_front_right.z - self.bottom_back_left.z
+
+    @property
+    def area(self) -> float:
+        """Return the area of the box."""
+        return self.width * self.depth
+
+    @property
+    def volume(self) -> float:
+        """Return the volume of this box."""
+        return self.width * self.depth * self.height
+
+
 class BoxError(Exception):
     """The base exception for all box errors."""
 
@@ -48,19 +121,18 @@ class Box(EventDispatcher):
     You can create instances of this class either singly, or by using the
     :meth:`earwax.box_row` method.
 
-    In addition to the coordinates supplied to this class's constructor,
-    properties are also generated for :attr:`~earwax.Box.rop_left`, and
-    :attr:`~earwax.Box.bottom_right`.
+    In addition to the coordinates supplied to this class's constructor, a
+    :class:`earwax.BoxBounds` instance is created as :attr:`earwax.Box.bounds`.
 
     This class uses the `pyglet.event
     <https://pyglet.readthedocs.io/en/latest/modules/event.html>`__ framework,
     so you can register and dispatch events in the same way you would with
     ``pyglet.window.Window``, or any other ``EventDispatcher`` subclass.
 
-    :ivar ~earwax.Box.bottom_left: The coordinates at the bottom left corner of
+    :ivar ~earwax.Box.start: The coordinates at the bottom rear left corner of
         this box.
 
-    :ivar ~earwax.Box.top_right: The coordinates at the top right corner of
+    :ivar ~earwax.Box.end: The coordinates at the top front right corner of
         this box.
 
     :ivar ~earwax.Box.name: An optional name for this box.
@@ -90,10 +162,12 @@ class Box(EventDispatcher):
     :ivar ~earwax.Box.wall_sound: A path to either the sound that should be
         heard when a player collides with this box, or the path of a directory
         from which a random file should be chosen.
+
+    :ivar ~earwax.Box.bounds: The bounds of this box.
     """
 
-    bottom_left: Point
-    top_right: Point
+    start: Point
+    end: Point
 
     name: Optional[str] = None
 
@@ -106,9 +180,11 @@ class Box(EventDispatcher):
 
     surface_sound: Optional[Path] = None
     wall_sound: Optional[Path] = None
+    bounds: BoxBounds = attrib(repr=False, init=False)
 
     def __attrs_post_init__(self) -> None:
-        """Configure parents and children."""
+        """Configure bounds, parents and children."""
+        self.bounds = BoxBounds(self.start, self.end)
         if self.parent is not None:
             self.parent.add_child(self)
         child: Box
@@ -162,31 +238,6 @@ class Box(EventDispatcher):
         """
         pass
 
-    @property
-    def width(self) -> float:
-        """Return the width of this box."""
-        return self.top_right.x - self.bottom_left.x
-
-    @property
-    def depth(self) -> float:
-        """Get the depth of this box (front to back)."""
-        return self.top_right.y - self.bottom_left.y
-
-    @property
-    def height(self) -> float:
-        """Return the height of this box."""
-        return self.top_right.z - self.bottom_left.z
-
-    @property
-    def area(self) -> float:
-        """Return the area of the box."""
-        return self.width * self.depth
-
-    @property
-    def volume(self) -> float:
-        """Return the volume of this box."""
-        return self.width * self.depth * self.height
-
     def add_child(self, box: 'Box') -> None:
         """Add a child box.
 
@@ -210,12 +261,12 @@ class Box(EventDispatcher):
         """
         return all(
             (
-                coordinates.x >= self.bottom_left.x,
-                coordinates.y >= self.bottom_left.y,
-                coordinates.z >= self.bottom_left.z,
-                coordinates.x <= self.top_right.x,
-                coordinates.y <= self.top_right.y,
-                coordinates.z <= self.top_right.z
+                coordinates.x >= self.start.x,
+                coordinates.y >= self.start.y,
+                coordinates.z >= self.start.z,
+                coordinates.x <= self.end.x,
+                coordinates.y <= self.end.y,
+                coordinates.z <= self.end.z
             )
         )
 
@@ -237,14 +288,14 @@ class Box(EventDispatcher):
         :param box: The box whose bounds will be checked.
         """
         return self.contains_point(
-            box.bottom_left
+            box.start
         ) and self.contains_point(
-            box.top_right
+            box.end
         )
 
     def sort_children(self) -> List['Box']:
         """Return :attr:`~earwax.Box.children` sorted by area."""
-        return sorted(self.children, key=lambda c: c.area)
+        return sorted(self.children, key=lambda c: c.bounds.area)
 
     def get_containing_box(self, coordinates: Point) -> Optional['Box']:
         """Return the box that spans the given coordinates.
@@ -283,7 +334,7 @@ class Box(EventDispatcher):
         if ctx is not None and path is not None:
             play_and_destroy(
                 ctx, path,
-                position=(self.bottom_left.x, self.bottom_left.y, 0.0)
+                position=(self.start.x, self.start.y, 0.0)
             )
 
     def open(self, ctx: Optional['Context']) -> None:
@@ -339,10 +390,10 @@ class Box(EventDispatcher):
         child: 'Box'
         for child in self.children:
             if child.door is not None and (
-                not same_z or child.bottom_left.z == self.bottom_left.z
+                not same_z or child.start.z == self.start.z
             ):
                 d: float = dist(
-                    self.bottom_left.coordinates, child.bottom_left.coordinates
+                    self.start.coordinates, child.start.coordinates
                 )
                 if distance is None or d < distance:
                     box = child
@@ -363,10 +414,10 @@ class Box(EventDispatcher):
         child: 'Box'
         for child in self.children:
             if child.portal is not None and (
-                not same_z or child.bottom_left.z == self.bottom_left.z
+                not same_z or child.start.z == self.start.z
             ):
                 d: float = dist(
-                    self.bottom_left.coordinates, child.bottom_left.coordinates
+                    self.start.coordinates, child.start.coordinates
                 )
                 if distance is None or d < distance:
                     box = child
@@ -392,18 +443,18 @@ class FittedBox(Box):
         top_right_z: Optional[float] = None
         child: Box
         for child in children:
-            if bottom_left_x is None or child.bottom_left.x < bottom_left_x:
-                bottom_left_x = child.bottom_left.x
-            if bottom_left_y is None or child.bottom_left.y < bottom_left_y:
-                bottom_left_y = child.bottom_left.y
-            if bottom_left_z is None or child.bottom_left.z < bottom_left_z:
-                bottom_left_z = child.bottom_left.z
-            if top_right_x is None or child.top_right.x > top_right_x:
-                top_right_x = child.top_right.x
-            if top_right_y is None or child.top_right.y > top_right_y:
-                top_right_y = child.top_right.y
-            if top_right_z is None or child.top_right.z > top_right_z:
-                top_right_z = child.top_right.z
+            if bottom_left_x is None or child.start.x < bottom_left_x:
+                bottom_left_x = child.start.x
+            if bottom_left_y is None or child.start.y < bottom_left_y:
+                bottom_left_y = child.start.y
+            if bottom_left_z is None or child.start.z < bottom_left_z:
+                bottom_left_z = child.start.z
+            if top_right_x is None or child.end.x > top_right_x:
+                top_right_x = child.end.x
+            if top_right_y is None or child.end.y > top_right_y:
+                top_right_y = child.end.y
+            if top_right_z is None or child.end.z > top_right_z:
+                top_right_z = child.end.z
         if (
             bottom_left_x is not None and bottom_left_y is not None and
             bottom_left_z is not None and top_right_x is not None and
