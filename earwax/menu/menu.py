@@ -34,7 +34,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
 
     Here is an example of both methods::
 
-        from earwax import Game, Level, Menu, tts
+        from earwax import Game, Level, Menu
         from pyglet.window import key, Window
         w = Window(caption='Test Game')
         g = Game()
@@ -42,15 +42,15 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         @l.action('Show menu', symbol=key.M)
         def menu():
             '''Show a menu with 2 items.'''
-            m = Menu('Menu', g)
-            @m.item('First Item')
+            m = Menu(g, 'Menu')
+            @m.item(title='First Item')
             def first_item():
-                tts.speak('First menu item.')
+                g.output('First menu item.')
                 g.pop_level()
             def second_item():
-                tts.speak('Second menu item.')
+                g.output('Second menu item.')
                 g.pop_level()
-            m.add_item('Second Item', second_item)
+            m.add_item(second_item, title='Second Item')
             g.push_level(m)
 
         g.push_level(l)
@@ -117,25 +117,21 @@ class Menu(Level, TitleMixin, DismissibleMixin):
             return self.items[self.position]
         return None
 
-    def item(self, title: str, **kwargs) -> Callable[
-        [ActionFunctionType], MenuItem
-    ]:
+    def item(self, **kwargs) -> Callable[[ActionFunctionType], MenuItem]:
         """Decorate a function to be used as a menu item.
 
         For example::
 
-            @menu.item('Title')
+            @menu.item(title='Title')
             def func():
                 pass
 
-            @menu.item('Item with sound', sound_path=Path('sound.wav'))
+            @menu.item(sound_path=Path('sound.wav'))
             def item_with_sound():
                 pass
 
         If you don't want to use a decorator, you can use the
         :meth:`~earwax.Menu.add_item` method instead.
-
-        :param title: The title of the newly created menu item.
 
         :param kwargs: Extra arguments to be passed to the constructor of
             :class:`earwax.MenuItem`.
@@ -143,13 +139,11 @@ class Menu(Level, TitleMixin, DismissibleMixin):
 
         def inner(func: ActionFunctionType) -> MenuItem:
             """Actually add the function."""
-            return self.add_item(title, func, **kwargs)
+            return self.add_item(func, **kwargs)
 
         return inner
 
-    def add_item(
-        self, title: str, func: 'ActionFunctionType', **kwargs
-    ) -> MenuItem:
+    def add_item(self, func: 'ActionFunctionType', **kwargs) -> MenuItem:
         """Add an item to this menu.
 
         For example::
@@ -157,13 +151,11 @@ class Menu(Level, TitleMixin, DismissibleMixin):
             m = Menu('Example Menu')
             def f():
                 tts.speak('Menu item activated.')
-            m.add_item('Test Item', f)
-            m.add_item('Item with sound', f, sound_path=Path('sound.wav'))
+            m.add_item(f, title='Test Item')
+            m.add_item(f, sound_path=Path('sound.wav'))
 
         If you would rather use decorators, use the :meth:`~earwax.Menu.item`
         method instead.
-
-        :param title: The title of the newly created menu item.
 
         :param func: The function which will be called when the menu item is
             selected.
@@ -171,7 +163,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         :param kwargs: Extra arguments to be passed to the constructor of
             :class:`earwax.MenuItem`.
         """
-        menu_item: MenuItem = MenuItem(title, func, **kwargs)
+        menu_item: MenuItem = MenuItem(func, **kwargs)
         self.items.append(menu_item)
         return menu_item
 

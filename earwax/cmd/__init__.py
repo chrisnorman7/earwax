@@ -1,6 +1,7 @@
-"""
-Earwax Script
-=============
+"""Earwax Script.
+
+Command Line
+============
 
 This program allows you to create games with very little actual coding.
 

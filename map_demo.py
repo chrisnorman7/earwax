@@ -1,10 +1,12 @@
+"""Map demo."""
+
 from pathlib import Path
 from typing import Generator, List
 
 from pyglet.window import Window, key, mouse
 
 from earwax import (Ambiance, Box, BoxLevel, Door, Editor, FittedBox, Game,
-                    Point, Portal, box_row, tts)
+                    Point, Portal, box_row)
 from earwax.cmd.constants import sounds_directory, surfaces_directory
 
 wall_sounds = sounds_directory / 'walls'
@@ -100,7 +102,10 @@ back_portal_box.portal = Portal(
 )
 
 main_level.ambiances.append(
-    Ambiance(sounds_directory / 'exit.wav', coordinates=Point(41.5, 3, 2))
+    Ambiance(
+        'file', str(sounds_directory / 'exit.wav'),
+        coordinates=Point(41.5, 3, 2)
+    )
 )
 
 main_level.action(
@@ -129,39 +134,40 @@ def do_quit() -> None:
 def goto() -> Generator[None, None, None]:
     """Jump to some coordinates."""
     dest: Point = main_level.coordinates.floor()
+    y_editor: Editor = Editor(game, text='%d' % main_level.coordinates.y)
 
+    @y_editor.event('on_submit')
     def y_inner(value: str) -> None:
         """Set the y coordinate, and jump the player."""
         try:
             dest.y = int(value)
             if dest == main_level.coordinates:
-                tts.speak('Coordinates unchanged.')
+                game.output('Coordinates unchanged.')
                 return None
             main_level.set_coordinates(dest)
-            tts.speak('Moved.')
+            game.output('Moved.')
         except ValueError:
-            tts.speak('Invalid coordinate.')
+            game.output('Invalid coordinate.')
         finally:
             game.pop_level()
 
+    x_editor: Editor = Editor(game, text='%d' % main_level.coordinates.x)
+
+    @x_editor.event('on_submit')
     def x_inner(value: str) -> Generator[None, None, None]:
         """Set the x coordinate."""
         try:
             dest.x = int(value)
             yield
-            game.replace_level(
-                Editor(game, y_inner, text='%d' % main_level.coordinates.y)
-            )
-            tts.speak('Y coordinate: %d' % main_level.coordinates.y)
+            game.replace_level(y_editor)
+            game.output('Y coordinate: %d' % main_level.coordinates.y)
         except ValueError:
-            tts.speak('Invalid coordinate.')
+            game.output('Invalid coordinate.')
             game.pop_level()
 
     yield
-    game.push_level(
-        Editor(game, x_inner, text='%d' % main_level.coordinates.x)
-    )
-    tts.speak('X coordinate: %d' % main_level.coordinates.x)
+    game.push_level(x_editor)
+    game.output('X coordinate: %d' % main_level.coordinates.x)
 
 
 if __name__ == '__main__':

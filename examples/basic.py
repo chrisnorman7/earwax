@@ -90,6 +90,7 @@ def do_beep() -> None:
 
 @level.action('Mouse thing', mouse_button=mouse.LEFT)
 def mouse_thing():
+    """Alert the player they pressed their left mouse button."""
     g.output('Mouse down.')
     yield
     g.output('Mouse up.')

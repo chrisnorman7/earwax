@@ -1,6 +1,7 @@
-"""The below script uses a for loop to create actions bound to a series of
-keys, to simulate the keys you might use for reviewing game messages for
-example.
+"""A pretend log viewer.
+
+The below script uses a for loop to create actions bound to a series of keys,
+to simulate the keys you might use for reviewing game messages for example.
 
 You could do this with a class with a custom ``__call__`` method if you wanted
 to, but this way is less typing.
@@ -11,7 +12,7 @@ that menu would look like.
 
 from pyglet.window import Window, key
 
-from earwax import ActionMenu, Game, Level, tts
+from earwax import ActionMenu, Game, Level
 
 game = Game()
 
@@ -25,11 +26,13 @@ for i, x in enumerate(
 ):
     @level.action(f'Read message {i + 1}', symbol=x)
     def speak(pos=i):
-        tts.speak(f'Position {pos}.')
+        """Read the message at the given position."""
+        game.output(f'Position {pos}.')
 
 
 @level.action('Show help', symbol=key.SLASH, modifiers=key.MOD_SHIFT)
 def get_help():
+    """Show an action menu."""
     game.push_level(ActionMenu(game, 'Actions'))
 
 

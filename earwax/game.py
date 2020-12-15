@@ -9,6 +9,7 @@ from warnings import warn
 
 from attr import Factory, attrib, attrs
 
+from .menu.action_menu import ActionMenu
 from .task import IntervalFunction, Task, TaskFunction
 from .types import EventType
 
@@ -757,3 +758,23 @@ class Game(RegisterEventMixin):
         """
         task.stop()
         self.tasks.remove(task)
+
+    def push_action_menu(self, title: str = 'Actions', **kwargs) -> ActionMenu:
+        """Push and return an action menu.
+
+        This method reduces the amount of code required to create a help menu::
+
+            @level.action(
+                'Help Menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT
+            )
+            def help_menu() -> None:
+                game.push_action_menu()
+
+        :param title: The title of the new menu.
+
+        :param kwargs: The extra keyword arguments to pass to the ActionMenu
+            constructor.
+        """
+        menu: ActionMenu = ActionMenu(self, title, **kwargs)
+        self.push_level(menu)
+        return menu

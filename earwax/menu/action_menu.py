@@ -31,7 +31,7 @@ class ActionMenu(Menu):
         @l.action('Show actions', symbol=key.SLASH, modifiers=key.MOD_SHIFT)
         def actions_menu():
             '''Show an actions menu.'''
-            a = ActionMenu('Actions', g)
+            a = ActionMenu(g, 'Actions')
             g.push_level(a)
 
         g.push_level(l)
@@ -39,6 +39,13 @@ class ActionMenu(Menu):
 
     Now, if you press shift and slash (a question mark on english keyboards),
     you will get an action menu.
+
+    This code can be shortened to::
+
+        @l.action('Show actions', symbol=key.SLASH, modifiers=key.MOD_SHIFT)
+        def actions_menu():
+            '''Show an actions menu.'''
+            game.push_action_menu()
 
     If you want to override how triggers appear in the menu, then you can
     override :meth:`~ActionMenu.symbol_to_string` and
@@ -51,7 +58,7 @@ class ActionMenu(Menu):
         if self.game.level is not None:
             a: Action
             for a in self.game.level.actions:
-                self.add_item(a.title, self.action_menu(a))
+                self.add_item(self.action_menu(a), title=a.title)
 
     def symbol_to_string(self, action: Action) -> str:
         """Describe how to trigger the given action with the keyboard.
@@ -127,15 +134,17 @@ class ActionMenu(Menu):
             s: str
             if action.symbol is not None:
                 s = self.symbol_to_string(action)
-                m.add_item('Keyboard: ' + s, func)
+                m.add_item(func, title='Keyboard: ' + s)
             if action.mouse_button is not None:
                 s = self.mouse_to_string(action)
-                m.add_item('Mouse: ' + s, func)
+                m.add_item(func, title='Mouse: ' + s)
             if action.joystick_button is not None:
-                m.add_item(f'Joystick: Button {action.joystick_button}', func)
+                m.add_item(
+                    func, title=f'Joystick: Button {action.joystick_button}'
+                )
             if action.hat_direction is not None:
                 d: str = self.hat_direction_to_string(action.hat_direction)
-                m.add_item(f'Joystick: {d} hat', func)
+                m.add_item(func, title=f'Joystick: {d} hat')
             self.game.push_level(m)
 
         return inner

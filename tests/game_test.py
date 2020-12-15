@@ -8,7 +8,7 @@ from pyglet.resource import get_settings_path
 from pyglet.window import Window, key
 from pytest import raises
 
-from earwax import Game, GameNotRunning, Level, Menu
+from earwax import ActionMenu, Game, GameNotRunning, Level, Menu
 
 
 class WorksWithoutYield(Exception):
@@ -200,3 +200,17 @@ def test_stop(game: Game, window: Window) -> None:
         schedule_once(lambda dt: game.stop(), 0.5)
 
     game.run(window)
+
+
+def test_push_action_menu(game: Game, level: Level) -> None:
+    """Test the push_action_menu method."""
+
+    @level.action('Test', symbol=key.T)
+    def do_test() -> None:
+        pass
+
+    game.push_level(level)
+    menu: ActionMenu = game.push_action_menu()
+    assert game.level is menu
+    assert menu.game is game
+    assert len(menu.items) == 1

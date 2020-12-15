@@ -1,3 +1,5 @@
+"""An example server."""
+
 import logging
 
 from earwax_server import Server
@@ -7,6 +9,7 @@ s = Server()
 
 @s.event
 def on_data(ctx, data):
+    """Handle incoming data."""
     ctx.send_raw(data)
 
 

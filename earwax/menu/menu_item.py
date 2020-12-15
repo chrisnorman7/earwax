@@ -16,10 +16,10 @@ class MenuItem(RegisterEventMixin):
     This class is rarely used directly, instead
     :meth:`earwax.menu.Menu.add_item` can be used to return an instance.
 
-    :ivar ~earwax.MenuItem.title: The title of this menu item.
-
     :ivar ~earwax.MenuItem.func: The function which will be called when this
         item is activated.
+
+    :ivar ~earwax.MenuItem.title: The title of this menu item.
 
     :ivar ~earwax.MenuItem.select_sound_path: The path to a sound which should
         play when this menu item is selected.
@@ -42,8 +42,8 @@ class MenuItem(RegisterEventMixin):
         ``None``.
     """
 
-    title: Optional[str]
     func: ActionFunctionType
+    title: Optional[str]
     select_sound_path: Optional[Path] = None
     activate_sound_path: Optional[Path] = None
 

@@ -81,11 +81,13 @@ class ConfigMenu(Menu):
             if name in self.config.__config_subsections__:
                 subsection = self.config.__config_subsections__[name]
                 name = self.get_subsection_name(subsection, name)
-                self.item(f'{name}...')(self.subsection_menu(subsection, name))
+                self.add_item(
+                    self.subsection_menu(subsection, name), title=f'{name}...'
+                )
             elif name in self.config.__config_values__:
                 value = self.config.__config_values__[name]
                 name = self.get_option_name(value, name)
-                self.add_item(name, self.option_menu(value, name))
+                self.add_item(self.option_menu(value, name), title=name)
         # Now, let's add us some type handlers.
         self.type_handler(
             bool, lambda o, n: 'Disable' if o.value else 'Enable'

@@ -11,7 +11,7 @@ from .menu import Menu
 
 @attrs(auto_attribs=True)
 class FileMenu(Menu):
-    """A menu for slecting a file.
+    """A menu for selecting a file.
 
     File menus can be used as follows::
 
@@ -89,16 +89,20 @@ class FileMenu(Menu):
         """
         self.items.clear()
         if self.empty_label is not None:
-            self.add_item(self.empty_label, self.select_item(None))
+            self.add_item(self.select_item(None), title=self.empty_label)
         if self.directory_label is not None:
-            self.add_item(self.directory_label, self.select_item(self.path))
+            self.add_item(
+                self.select_item(self.path), title=self.directory_label
+            )
         if self.path != self.root and self.up_label is not None:
-            self.add_item(self.up_label, self.navigate_to(self.path.parent))
+            self.add_item(
+                self.navigate_to(self.path.parent), title=self.up_label
+            )
         for child in self.path.iterdir():
             if child.is_file() and self.show_files:
-                self.add_item(child.name, self.select_item(child))
+                self.add_item(self.select_item(child), title=child.name)
             elif child.is_dir() and self.show_directories:
-                self.add_item(child.name, self.navigate_to(child))
+                self.add_item(self.navigate_to(child), title=child.name)
 
     def navigate_to(self, path: Path) -> Callable[[], None]:
         """Navigate to a different path.
@@ -117,7 +121,9 @@ class FileMenu(Menu):
     def select_item(self, path: Optional[Path]) -> Callable[
         [], OptionalGenerator
     ]:
-        """Used as the menu handler in place of a lambda.
+        """Select an item.
+
+        Used as the menu handler in place of a lambda.
 
         :param path: The path that has been selected. Could be a file or a
             directory.

@@ -20,7 +20,7 @@ def test_init(game: Game, menu: Menu) -> None:
 def test_add_item(menu: Menu) -> None:
     """Test the add_item method."""
     assert isinstance(menu, Menu)
-    i: MenuItem = menu.add_item('Test', print)
+    i: MenuItem = menu.add_item(print, title='Test')
     assert isinstance(i, MenuItem)
     assert i.title == 'Test'
     assert i.func is print
