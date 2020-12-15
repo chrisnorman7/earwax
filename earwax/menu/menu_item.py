@@ -42,7 +42,7 @@ class MenuItem(RegisterEventMixin):
         ``None``.
     """
 
-    title: str
+    title: Optional[str]
     func: ActionFunctionType
     select_sound_path: Optional[Path] = None
     activate_sound_path: Optional[Path] = None

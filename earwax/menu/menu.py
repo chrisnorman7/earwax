@@ -20,8 +20,9 @@ from .menu_item import MenuItem
 
 @attrs(auto_attribs=True)
 class Menu(Level, TitleMixin, DismissibleMixin):
-    """A menu which holds multiple menu items which can be activated using
-    actions.
+    """A menu of :class:`~earwax.MenuItem` instances.
+
+    Menus hold multiple menu items which can be activated using actions.
 
     As menus are simply :class:`~earwax.level.Level` subclasses, they can be
     :meth:`pushed <earwax.game.Game.push_level>`, :meth:`popped
@@ -102,12 +103,14 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         )
         self.motion(key.MOTION_BEGINNING_OF_LINE)(self.home)
         self.motion(key.MOTION_END_OF_LINE)(self.end)
-        self.register_event_type(self.on_text.__name__)
+        self.register_event(self.on_text)
         super().__attrs_post_init__()
 
     @property
     def current_item(self) -> Optional[MenuItem]:
-        """Return the currently selected menu item. If position is -1, return
+        """Return the currently selected menu item.
+
+        If position is -1, return
         ``None``.
         """
         if self.position != -1:
@@ -173,9 +176,10 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         return menu_item
 
     def show_selection(self) -> None:
-        """Speak the menu item at the current position, or :attr:`self.title
-        <earwax.level.TitleMixin.title>`, if :attr:`self.position
-        <earwax.Menu.position>` is -1.
+        """Speak the menu item at the current position.
+
+        If :attr:`self.position <earwax.Menu.position>` is -1, this method
+        speaks :attr:`self.title <earwax.level.TitleMixin.title>`.
 
         This function performs no error checking, so it will happily throw
         errors if :attr:`position` is something stupid.
@@ -184,7 +188,8 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         if item is None:
             self.game.output(self.title)
         else:
-            self.game.output(item.title)
+            if item.title is not None:
+                self.game.output(item.title)
             item.dispatch_event('on_selected')
             sound_path: Optional[Path] = item.select_sound_path or \
                 self.item_select_sound_path or \
@@ -257,16 +262,21 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         index: int
         item: MenuItem
         for index, item in enumerate(self.items):
-            if item.title.lower().startswith(self.search_string):
+            if item.title is not None and item.title.lower().startswith(
+                self.search_string
+            ):
                 self.position = index
                 self.show_selection()
                 break
 
     def on_push(self) -> None:
-        """This object has been pushed onto a :class:`~earwax.game.Game` instance.
+        """Handle this menu being pushed.
+
+        This method is called when this object has been pushed onto a
+        :class:`~earwax.game.Game` instance.
 
         By default, show the current selection. That will be the same as
         speaking the title, unless :attr:`self.position <earwax.Menu.position>`
-        has been set to anything other than -1..
+        has been set to something other than -1..
         """
         self.show_selection()
