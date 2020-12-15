@@ -12,26 +12,27 @@ from earwax import Game, GameNotRunning, Level, Menu
 
 
 class WorksWithoutYield(Exception):
-    pass
+    """A menu item that doesn't yield worked."""
 
 
 class WorksFirstYield(Exception):
-    pass
+    """Works after the first yield."""
 
 
 class WorksSecondYield(Exception):
-    pass
+    """Works after the second yield."""
 
 
 class BeforeRunWorks(Exception):
-    pass
+    """The before_run event worked."""
 
 
 class AfterRunWorks(Exception):
-    pass
+    """The after_run event worked."""
 
 
 def test_init(game: Game) -> None:
+    """Test initialisation."""
     assert isinstance(game, Game)
     assert game.levels == []
     assert game.window is None
@@ -43,6 +44,7 @@ def test_init(game: Game) -> None:
 
 
 def test_on_key_press(game: Game, level: Level) -> None:
+    """Test pressing keys."""
     game.push_level(level)
 
     @level.action('Test without yield', symbol=key.T)
@@ -65,6 +67,7 @@ def test_on_key_press(game: Game, level: Level) -> None:
 
 
 def test_on_key_release(game: Game, level: Level) -> None:
+    """Test the on_key_press event."""
     game.push_level(level)
 
     @level.action('Second yield', symbol=key._2)
@@ -78,6 +81,7 @@ def test_on_key_release(game: Game, level: Level) -> None:
 
 
 def test_push_level(game: Game, level: Level) -> None:
+    """Test the push_level method."""
     game.push_level(level)
     assert game.levels == [level]
     level_2 = Level(game)
@@ -86,6 +90,7 @@ def test_push_level(game: Game, level: Level) -> None:
 
 
 def test_replace_level(game: Game, level: Level, menu: Menu) -> None:
+    """Test the replace_level method."""
     game.push_level(level)
     assert game.levels == [level]
     game.replace_level(menu)
@@ -98,6 +103,7 @@ def test_replace_level(game: Game, level: Level, menu: Menu) -> None:
 
 
 def test_pop_level(game: Game, level: Level, menu: Menu) -> None:
+    """Test the pop_level method."""
     game.push_level(level)
     assert game.levels == [level]
     game.pop_level()
@@ -111,6 +117,7 @@ def test_pop_level(game: Game, level: Level, menu: Menu) -> None:
 
 
 def test_clear_levels(game: Game, level: Level, menu: Menu) -> None:
+    """Test the clear_levels method."""
     assert game.levels == []
     game.clear_levels()
     assert game.levels == []
@@ -122,6 +129,7 @@ def test_clear_levels(game: Game, level: Level, menu: Menu) -> None:
 
 
 def test_level(game: Game, level: Level, menu: Menu) -> None:
+    """Test the level property."""
     assert game.level is None
     game.push_level(level)
     assert game.level is level
@@ -135,6 +143,7 @@ def test_level(game: Game, level: Level, menu: Menu) -> None:
 
 
 def test_before_run(game: Game, window: Window) -> None:
+    """Test the before_run event."""
 
     @game.event
     def before_run() -> None:
@@ -146,6 +155,7 @@ def test_before_run(game: Game, window: Window) -> None:
 
 
 def test_run(game: Game, level: Level, window: Window) -> None:
+    """Test the run method."""
 
     @level.event
     def on_push() -> None:
@@ -157,6 +167,7 @@ def test_run(game: Game, level: Level, window: Window) -> None:
 
 
 def test_get_settings_path() -> None:
+    """Test the get_settings_path method."""
     g: Game = Game()
     assert g.get_settings_path() == Path(get_settings_path('earwax.game'))
     g = Game(name='testing')
@@ -164,6 +175,7 @@ def test_get_settings_path() -> None:
 
 
 def test_after_run(game: Game, level: Level, window: Window) -> None:
+    """Test the after_run event."""
 
     @level.event
     def on_push() -> None:
@@ -179,6 +191,7 @@ def test_after_run(game: Game, level: Level, window: Window) -> None:
 
 
 def test_stop(game: Game, window: Window) -> None:
+    """Test the stop method."""
     with raises(GameNotRunning):
         game.stop()
 
