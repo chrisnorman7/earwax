@@ -73,8 +73,8 @@ class RegisterEventMixin(EventDispatcher):
     def register_event(self, func: EventType) -> str:
         """Register an event type from a function.
 
-        This function simply registers the given event from its ``__name__`
-        attribute, eliminating possible typos in event names.
+        This function uses ``func.__name__`` to register an event type,
+        eliminating possible typos in event names.
 
         :param func: The function whose name will be used.
         """
