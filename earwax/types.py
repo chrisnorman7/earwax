@@ -1,7 +1,7 @@
 """Provides various type classes used by Earwax."""
 
-from typing import (TYPE_CHECKING, Callable, Dict, Generator, List, Optional,
-                    Tuple)
+from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List,
+                    Optional, Tuple)
 
 from .promises.staggered_promise import (StaggeredPromiseFunctionType,
                                          StaggeredPromiseGeneratorType)
@@ -23,3 +23,4 @@ MotionsType = Dict[int, MotionFunctionType]
 StaggeredPromiseFunctionType = StaggeredPromiseFunctionType
 StaggeredPromiseGeneratorType = StaggeredPromiseGeneratorType
 ThreadedPromiseFunctionType = ThreadedPromiseFunctionType
+EventType = Callable[..., Any]

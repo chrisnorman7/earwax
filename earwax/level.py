@@ -1,10 +1,11 @@
 """Provides classes for working with levels."""
 
 from pathlib import Path
-from typing import (TYPE_CHECKING, Any, Callable, Generator, List, Optional,
-                    cast)
+from typing import TYPE_CHECKING, Callable, Generator, List, Optional, cast
 
 from attr import Factory, attrib, attrs
+
+from .types import EventType
 
 try:
     from pyglet.clock import schedule_once
@@ -69,7 +70,7 @@ class Level(RegisterEventMixin):
             self.on_pop, self.on_push, self.on_reveal, self.on_text_motion,
             self.on_cover
         ):
-            self.register_event(cast(Callable[..., Any], func))
+            self.register_event(cast(EventType, func))
 
     def start_ambiances(self) -> None:
         """Start all the ambiances on this instance."""

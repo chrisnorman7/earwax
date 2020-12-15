@@ -10,6 +10,7 @@ from warnings import warn
 from attr import Factory, attrib, attrs
 
 from .task import IntervalFunction, Task, TaskFunction
+from .types import EventType
 
 try:
     from synthizer import Context, DirectSource, initialized
@@ -190,7 +191,7 @@ class Game(RegisterEventMixin):
             self.on_joybutton_release, self.on_key_press, self.on_key_release,
             self.on_mouse_press, self.on_mouse_release
         ):
-            self.register_event_type(func.__name__)
+            self.register_event(cast(EventType, func))
 
     def start_action(self, a: Action) -> OptionalGenerator:
         """Start an action.
