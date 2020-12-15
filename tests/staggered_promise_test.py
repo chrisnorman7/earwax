@@ -3,10 +3,11 @@
 from time import time
 from typing import Any, List
 
-from earwax import Game, Level, PromiseStates, StaggeredPromise
-from earwax.types import StaggeredPromiseGeneratorType
 from pyglet.event import EVENT_HANDLED
 from pyglet.window import Window
+
+from earwax import Game, Level, PromiseStates, StaggeredPromise
+from earwax.types import StaggeredPromiseGeneratorType
 
 
 class Works(Exception):
