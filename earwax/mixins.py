@@ -1,6 +1,6 @@
 """Provides various mixin classes for used with other objects."""
 
-from typing import TYPE_CHECKING, Any, Callable, Tuple
+from typing import TYPE_CHECKING, Tuple
 
 from attr import attrs
 
@@ -12,14 +12,14 @@ except ModuleNotFoundError:
 if TYPE_CHECKING:
     from .game import Game
 
-EventFunction = Callable[..., Any]
+from .types import EventType
 
 
 @attrs(auto_attribs=True)
 class DismissibleMixin:
     """Make any :class:`Level` subclass dismissible.
 
-    :ivar ~earwax.level.DismissibleMixin.dismissible: Whether or not it should
+    :ivar ~earwax.mixins.DismissibleMixin.dismissible: Whether or not it should
         be possible to dismiss this level.
     """
 
@@ -70,7 +70,7 @@ class CoordinatesMixin:
 class RegisterEventMixin(EventDispatcher):
     """Allow registering and binding events in one function."""
 
-    def register_event(self, func: EventFunction) -> str:
+    def register_event(self, func: EventType) -> str:
         """Register an event type from a function.
 
         This function simply registers the given event from its ``__name__`

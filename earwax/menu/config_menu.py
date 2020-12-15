@@ -387,8 +387,8 @@ class ConfigMenu(Menu):
                 else:
                     raise UnknownTypeError(type_)
             m.add_item(
-                f'Restore Default ({repr(option.default)})',
-                self.set_value(option, option.default)
+                self.set_value(option, option.default),
+                title=f'Restore Default ({repr(option.default)})'
             )
             self.game.push_level(m)
 

@@ -26,14 +26,14 @@ def configure_earwax(args: Namespace) -> None:
         game.config.load(f)
     menu: ConfigMenu = ConfigMenu(game, 'Configure Earwax', dismissible=False)
 
-    @menu.item('Save and Exit')
+    @menu.item(title='Save and Exit')
     def save_and_exit() -> None:
         """Save the configuration before exiting."""
         with path.open('w') as f:
             game.config.save(f)
         window.close()
 
-    @menu.item('Exit Without Saving')
+    @menu.item(title='Exit Without Saving')
     def exit_without_saving() -> None:
         """Exit without saving the configuration."""
         window.close()
