@@ -3,11 +3,10 @@
 from time import time
 from typing import Any, List
 
-from pyglet.event import EVENT_HANDLED
-from pyglet.window import Window
-
 from earwax import Game, Level, PromiseStates, StaggeredPromise
 from earwax.types import StaggeredPromiseGeneratorType
+from pyglet.event import EVENT_HANDLED
+from pyglet.window import Window
 
 
 class Works(Exception):
@@ -43,9 +42,9 @@ def test_run_no_args(game: Game, window: Window) -> None:
     def promise() -> StaggeredPromiseGeneratorType:
         started: float = time()
         yield 0.5
-        assert (time() - started) >= 0.4  # Pyglet's timing is slightly short.
+        assert (time() - started) >= 0.3  # Pyglet's timing is slightly short.
         yield 0.2
-        assert (time() - started) >= 0.6  # Pyglet's timing is slight short.
+        assert (time() - started) >= 0.5  # Pyglet's timing is slight short.
         window.close()
 
     @game.event
