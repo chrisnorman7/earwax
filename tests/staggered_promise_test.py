@@ -1,3 +1,5 @@
+"""Tests for the StaggeredPromise class."""
+
 from time import time
 from typing import Any, List
 
@@ -9,10 +11,11 @@ from earwax.types import StaggeredPromiseGeneratorType
 
 
 class Works(Exception):
-    pass
+    """Something worked."""
 
 
 def test_staggered_promise() -> None:
+    """Test the decorate function."""
     @StaggeredPromise.decorate
     def promise() -> StaggeredPromiseGeneratorType:
         yield 1.0
@@ -24,6 +27,7 @@ def test_staggered_promise() -> None:
 
 
 def test_init() -> None:
+    """Test initialization."""
     @StaggeredPromise.decorate
     def promise() -> StaggeredPromiseGeneratorType:
         yield 3.0
@@ -34,6 +38,7 @@ def test_init() -> None:
 
 
 def test_run_no_args(game: Game, window: Window) -> None:
+    """Test running with no arguments."""
     @StaggeredPromise.decorate
     def promise() -> StaggeredPromiseGeneratorType:
         started: float = time()
@@ -52,6 +57,7 @@ def test_run_no_args(game: Game, window: Window) -> None:
 
 
 def test_run_args(game: Game, window: Window) -> None:
+    """Test running with arguments."""
     @StaggeredPromise.decorate
     def promise(a, b, c=1) -> StaggeredPromiseGeneratorType:
         started = time()
@@ -72,6 +78,7 @@ def test_run_args(game: Game, window: Window) -> None:
 
 
 def test_on_done(game: Game, window: Window) -> None:
+    """Test the on_done event."""
     @StaggeredPromise.decorate
     def promise() -> StaggeredPromiseGeneratorType:
         yield 0.1
@@ -91,6 +98,7 @@ def test_on_done(game: Game, window: Window) -> None:
 
 
 def test_on_error(game: Game, window: Window) -> None:
+    """Test the on_error event."""
     @StaggeredPromise.decorate
     def promise() -> StaggeredPromiseGeneratorType:
         yield 0.1
@@ -115,6 +123,7 @@ def test_on_error(game: Game, window: Window) -> None:
 
 
 def test_on_finally(game: Game, window: Window) -> None:
+    """Test the on_finally event."""
     should_raise = True
     return_level: Level = Level(game)
     error_level: Level = Level(game)
@@ -157,6 +166,7 @@ def test_on_finally(game: Game, window: Window) -> None:
 
 
 def test_on_cancel(game: Game, window: Window) -> None:
+    """Test the on_cancel event."""
     return_level: Level = Level(game)
     error_level: Level = Level(game)
 
@@ -194,6 +204,7 @@ def test_on_cancel(game: Game, window: Window) -> None:
 
 
 def test_on_next(game: Game, level: Level, window: Window) -> None:
+    """Test the on_next event."""
     numbers: List[float] = [0.1, 0.2, 0.3, 0.4]
 
     @StaggeredPromise.decorate

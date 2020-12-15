@@ -7,16 +7,18 @@ from earwax.game import OptionalGenerator
 
 
 class Works(Exception):
-    pass
+    """Something worked."""
 
 
 def test_init(game: Game, menu: Menu) -> None:
+    """Test initialisation."""
     assert menu.game is game
     assert menu.items == []
     assert menu.title == 'Test Menu'
 
 
 def test_add_item(menu: Menu) -> None:
+    """Test the add_item method."""
     assert isinstance(menu, Menu)
     i: MenuItem = menu.add_item('Test', print)
     assert isinstance(i, MenuItem)
@@ -25,6 +27,7 @@ def test_add_item(menu: Menu) -> None:
 
 
 def test_yield(game: Game, menu: Menu, level: Level) -> None:
+    """Ensure a menu title can be set after yielding."""
     new_title: str = 'Worked'
     game.push_level(menu)
     game.push_level(level)
@@ -42,6 +45,7 @@ def test_yield(game: Game, menu: Menu, level: Level) -> None:
 def test_yield_replaces_menu(
     game: Game, menu: Menu, level: Level, editor: Editor
 ) -> None:
+    """Ensure a menu can be replaced after yielding."""
     game.push_level(menu)
     game.push_level(level)
 
@@ -56,6 +60,7 @@ def test_yield_replaces_menu(
 
 
 def test_action_menu(game: Game, level: Level, menu: Menu) -> None:
+    """Test the ActionMenu class."""
     game.push_level(level)
     a: ActionMenu = ActionMenu(game, 'Actions')
     assert a.items == []

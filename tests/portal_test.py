@@ -1,17 +1,20 @@
+"""Provides tests for the Portal class."""
+
 from pytest import raises
 
 from earwax import BoxLevel, Point, Portal
 
 
 class EnterWorks(Exception):
-    pass
+    """The enter key worked."""
 
 
 class ExitWorks(Exception):
-    pass
+    """Exiting worked."""
 
 
 def test_init(box_level: BoxLevel) -> None:
+    """Test initialization."""
     p: Portal = Portal(box_level, Point(3, 3, 3))
     assert p.level is box_level
     assert p.coordinates == Point(3, 3, 3)
@@ -21,6 +24,7 @@ def test_init(box_level: BoxLevel) -> None:
 
 
 def test_on_enter(box_level: BoxLevel) -> None:
+    """Test the on_enter event."""
     p: Portal = Portal(box_level, Point(1, 1, 1))
 
     @p.event
@@ -32,6 +36,7 @@ def test_on_enter(box_level: BoxLevel) -> None:
 
 
 def test_on_exit(box_level: BoxLevel) -> None:
+    """Test the on_exit event."""
     p: Portal = Portal(box_level, Point(3, 3, 3))
 
     @p.event

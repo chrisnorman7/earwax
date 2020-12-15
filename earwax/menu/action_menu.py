@@ -54,7 +54,9 @@ class ActionMenu(Menu):
                 self.add_item(a.title, self.action_menu(a))
 
     def symbol_to_string(self, action: Action) -> str:
-        """Returns a string representing the symbol and modifiers needed to
+        """Describe how to trigger the given action with the keyboard.
+
+        Returns a string representing the symbol and modifiers needed to
         trigger the provided action.
 
         You can be certain that ``action.symbol is not None``.
@@ -74,7 +76,9 @@ class ActionMenu(Menu):
         return s
 
     def mouse_to_string(self, action: Action) -> str:
-        """Returns a string representing the mouse button and modifiers needed
+        """Describe how to trigger the given action with the mouse.
+
+        Returns a string representing the mouse button and modifiers needed
         to trigger the provided action.
 
         You can be certain that ``action.mouse_button is not None``.
@@ -94,7 +98,7 @@ class ActionMenu(Menu):
         return s
 
     def hat_direction_to_string(self, direction: Tuple[int, int]) -> str:
-        """Returns the given hat direction as a string."""
+        """Return the given hat direction as a string."""
         if direction == DEFAULT:
             return 'Default'
         elif direction == UP:

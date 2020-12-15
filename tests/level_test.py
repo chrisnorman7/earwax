@@ -6,16 +6,18 @@ from earwax import Action, Game, Level
 
 
 class OnCoverWorks(Exception):
-    pass
+    """The on_cover event worked."""
 
 
 def test_init(level: Level, game: Game) -> None:
+    """Test initialisation."""
     assert isinstance(level, Level)
     assert level.actions == []
     assert level.motions == {}
 
 
 def test_action(game: Game, level: Level) -> None:
+    """Test the game.action method."""
     game.push_level(level)
     a = level.action('Print')(print)
     assert isinstance(a, Action)
@@ -29,6 +31,7 @@ def test_action(game: Game, level: Level) -> None:
 
 
 def test_on_cover(game: Game, level: Level) -> None:
+    """Test the on_cover event."""
     l: Level = Level(game)
 
     @level.event

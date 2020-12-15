@@ -14,6 +14,7 @@ from earwax import (
 
 
 def test_get_buffer():
+    """Test the get_buffer method."""
     b = get_buffer('file', 'sound.wav')
     assert isinstance(b, Buffer)
     # Try to get a non existant file.
@@ -28,6 +29,7 @@ def test_get_buffer():
 
 
 def test_buffer_directory():
+    """Test the BufferDirectory class."""
     with raises(SynthizerError):
         BufferDirectory(Path())  # Errors because of non sound files.
     b: BufferDirectory = BufferDirectory(Path.cwd(), glob='*.wav')
@@ -50,6 +52,7 @@ def test_buffer_directory():
 
 
 def test_gain(game: Game, window: Window, level: Level) -> None:
+    """Test the gain of game.advanced_interface_sound_player."""
 
     def do_test(dt: float) -> None:
         i: Optional[AdvancedInterfaceSoundPlayer] = game.interface_sound_player
