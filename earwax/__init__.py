@@ -54,7 +54,7 @@ if True:
     from .game import Game, GameNotRunning
     from .game_board import GameBoard, NoSuchTile
     from .level import IntroLevel, Level
-    from .mapping import (Box, BoxBounds, BoxLevel, Door, FittedBox, NotADoor,
+    from .mapping import (Box, BoxBounds, BoxLevel, BoxTypes, Door, NotADoor,
                           OutOfBounds, Portal, box_row)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
@@ -87,7 +87,7 @@ __all__ = [
     'AdvancedInterfaceSoundPlayer', 'Level', 'EventMatcher', 'Config',
     'ConfigValue', 'ConfigMenu', 'TypeHandler', 'UnknownTypeError',
     'EarwaxConfig', 'ProjectLevel', 'cmd_main', 'Project', 'Box', 'Point',
-    'OutOfBounds', 'PointDirections', 'walking_directions', 'FittedBox',
+    'OutOfBounds', 'PointDirections', 'walking_directions', 'BoxTypes',
     'box_row', 'play_path', 'schedule_generator_destruction', 'BoxLevel',
     'Ambiance', 'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track',
     'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel',

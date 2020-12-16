@@ -6,12 +6,12 @@ This module is inspired by Camlorn's post at `this link
 All credit goes to him for the idea.
 """
 
-from .box import Box, BoxBounds, FittedBox, NotADoor, OutOfBounds, box_row
+from .box import Box, BoxBounds, BoxTypes, NotADoor, OutOfBounds, box_row
 from .box_level import BoxLevel
 from .door import Door
 from .portal import Portal
 
 __all__ = [
-    'Box', 'OutOfBounds', 'FittedBox', 'box_row', 'BoxLevel', 'Door',
+    'Box', 'OutOfBounds', 'BoxTypes', 'box_row', 'BoxLevel', 'Door',
     'NotADoor', 'Portal', 'BoxBounds'
 ]

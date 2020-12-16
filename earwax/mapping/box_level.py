@@ -93,7 +93,7 @@ class BoxLevel(Level, EventDispatcher):
 
     def on_move_fail(
         self, distance: float, vertical: Optional[float],
-        bearing: Optional[int]
+        bearing: Optional[int], coordinates: Point
     ) -> None:
         """Handle a move failure.
 
@@ -198,12 +198,16 @@ class BoxLevel(Level, EventDispatcher):
                 self.game.output(str(box.name))
             self.current_box = box
 
-    def collide(self, box: Box) -> None:
+    def collide(self, box: Box, coordinates: Point) -> None:
         """Handle collitions.
 
         Called to run collision code on a box.
+
+        :param box: The box the player collided with.
+
+        :param coordinates: The coordinates the player was trying to reach.
         """
-        box.dispatch_event('on_collide')
+        box.dispatch_event('on_collide', coordinates)
 
     def move(
         self, distance: float = 1.0, vertical: Optional[float] = None,
@@ -240,12 +244,11 @@ class BoxLevel(Level, EventDispatcher):
             box: Optional[Box] = self.box.get_containing_box(p.floor())
             if box is not None:
                 ctx: Optional['Context'] = self.game.audio_context
-                if box.wall:
-                    self.collide(box)
+                if box.is_wall(p) or (
+                    box.door is not None and not box.door.open
+                ):
+                    self.collide(box, p)
                     box.play_sound(ctx, box.wall_sound)
-                elif box.door is not None and not box.door.open:
-                    self.collide(box)
-                    box.play_sound(ctx, box.door.closed_sound)
                 else:
                     self.set_coordinates(p)
                     box.dispatch_event('on_footstep')
@@ -253,7 +256,7 @@ class BoxLevel(Level, EventDispatcher):
                 self.dispatch_event('on_move')
             else:
                 self.dispatch_event(
-                    'on_move_fail', distance, vertical, bearing
+                    'on_move_fail', distance, vertical, bearing, p
                 )
 
         return inner

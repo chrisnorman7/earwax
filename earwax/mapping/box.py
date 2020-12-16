@@ -1,5 +1,6 @@
 """Provides box-related classes, functions, and exceptions."""
 
+from enum import Enum
 from math import dist
 from pathlib import Path
 from random import uniform
@@ -22,6 +23,28 @@ from ..point import Point
 from ..sound import play_and_destroy
 from .door import Door
 from .portal import Portal
+
+
+class BoxTypes(Enum):
+    """The type of a box.
+
+    :ivar ~earwax.BoxTypes.empty: Empty space.
+
+        Boxes of this type can be traversed wit no barriers.
+
+    :ivar ~earwax.BoxTypes.room: An open room with walls around the edge.
+
+        Boxes of this type can be entered by means of a door. The programmer
+        must provide some means of exit.
+
+    :ivar ~earwax.BoxTypes.solid: Signifies a solid, impassible barrier.
+
+        Boxes of this type cannot be traversed.
+    """
+
+    empty = 0
+    room = 1
+    solid = 2
 
 
 @attrs(auto_attribs=True)
@@ -70,6 +93,12 @@ class BoxBounds:
         self.top_back_left = Point(start_x, start_y, end_z)
         self.top_front_left = Point(start_x, end_y, end_z)
         self.top_back_right = Point(end_x, start_y, end_z)
+
+    def is_edge(self, p: Point) -> bool:
+        """Return ``True`` if ``p`` represents an edge.
+
+        :param p: The point to interrogate.
+        """
 
     @property
     def width(self) -> float:
@@ -146,8 +175,7 @@ class Box(EventDispatcher):
 
         To add a child, use the :meth:`~earwax.Box.add_child` method.
 
-    :ivar ~earwax.Box.wall: A flag to specify whether or not this instance is a
-        wall.
+    :ivar ~earwax.Box.type: The type of this box.
 
     :ivar ~earwax.Box.door: If this attribute is not ``None``, then this
         instance is considered a door.
@@ -173,8 +201,7 @@ class Box(EventDispatcher):
 
     parent: Optional['Box'] = None
     children: List['Box'] = attrib(Factory(list), repr=False)
-
-    wall: bool = False
+    type: BoxTypes = Factory(lambda: BoxTypes.empty)
     door: Optional[Door] = None
     portal: Optional[Portal] = None
 
@@ -196,6 +223,47 @@ class Box(EventDispatcher):
         self.register_event_type('on_open')
         self.register_event_type('on_close')
 
+    @classmethod
+    def get_fitted(cls, children: List['Box'], **kwargs) -> 'Box':
+        """Return a box that fits all of ``children`` in.
+
+        Pass a list of :class:`~earwax.Box` instances, and you'll get a box
+        with its :attr:`~earwax.Box.start`, and :attr:`~earwax.Box.end`
+        attributes set to match the outer bounds of the provided children.
+        """
+        start_x: Optional[float] = None
+        start_y: Optional[float] = None
+        start_z: Optional[float] = None
+        end_x: Optional[float] = None
+        end_y: Optional[float] = None
+        end_z: Optional[float] = None
+        child: Box
+        for child in children:
+            if start_x is None or child.start.x < start_x:
+                start_x = child.start.x
+            if start_y is None or child.start.y < start_y:
+                start_y = child.start.y
+            if start_z is None or child.start.z < start_z:
+                start_z = child.start.z
+            if end_x is None or child.end.x > end_x:
+                end_x = child.end.x
+            if end_y is None or child.end.y > end_y:
+                end_y = child.end.y
+            if end_z is None or child.end.z > end_z:
+                end_z = child.end.z
+        if (
+            start_x is not None and start_y is not None and
+            start_z is not None and end_x is not None and
+            end_y is not None and end_z is not None
+        ):
+            return cls(
+                Point(start_x, start_y, start_z),
+                Point(end_x, end_y, end_z),
+                children=children, **kwargs
+            )
+        else:
+            raise ValueError('Invalid children: %r.' % children)
+
     def on_footstep(self) -> None:
         """Play an appropriate surface sound.
 
@@ -204,7 +272,7 @@ class Box(EventDispatcher):
         """
         pass
 
-    def on_collide(self) -> None:
+    def on_collide(self, coordinates: Point) -> None:
         """Play an appropriate wall sound.
 
         This function will be called by the Pyglet event framework, and should
@@ -282,16 +350,12 @@ class Box(EventDispatcher):
 
         This method doesn't care about the :attr:`~earwax.Box.parent` attribute
         on the given box. This method simply checks that the
-        :attr:`~earwax.Box.bottom_left` and :attr:`~earwax.Box.top_right`
-        points would fit inside this box.
+        :attr:`~earwax.Box.start` and :attr:`~earwax.Box.end` points would fit
+        inside this box.
 
         :param box: The box whose bounds will be checked.
         """
-        return self.contains_point(
-            box.start
-        ) and self.contains_point(
-            box.end
-        )
+        return self.contains_point(box.start) and self.contains_point(box.end)
 
     def sort_children(self) -> List['Box']:
         """Return :attr:`~earwax.Box.children` sorted by area."""
@@ -332,10 +396,7 @@ class Box(EventDispatcher):
             does nothing.
         """
         if ctx is not None and path is not None:
-            play_and_destroy(
-                ctx, path,
-                position=(self.start.x, self.start.y, 0.0)
-            )
+            play_and_destroy(ctx, path, position=self.start.coordinates)
 
     def open(self, ctx: Optional['Context']) -> None:
         """Open a door on this box.
@@ -424,49 +485,14 @@ class Box(EventDispatcher):
                     distance = d
         return box
 
+    def is_wall(self, p: Point) -> bool:
+        """Return ``True`` if the provided point is inside a wall.
 
-class FittedBox(Box):
-    """A box that fits all its children in.
-
-    Pass a list of :class:`~earwax.Box` instances, and you'll get a box with
-    its :attr:`~earwax.Box.bottom_left`, and :attr:`~earwax.Box.top_right`
-    attributes set to match the outer bounds of the provided children.
-    """
-
-    def __init__(self, children: List[Box], **kwargs) -> None:
-        """Create a new instance."""
-        bottom_left_x: Optional[float] = None
-        bottom_left_y: Optional[float] = None
-        bottom_left_z: Optional[float] = None
-        top_right_x: Optional[float] = None
-        top_right_y: Optional[float] = None
-        top_right_z: Optional[float] = None
-        child: Box
-        for child in children:
-            if bottom_left_x is None or child.start.x < bottom_left_x:
-                bottom_left_x = child.start.x
-            if bottom_left_y is None or child.start.y < bottom_left_y:
-                bottom_left_y = child.start.y
-            if bottom_left_z is None or child.start.z < bottom_left_z:
-                bottom_left_z = child.start.z
-            if top_right_x is None or child.end.x > top_right_x:
-                top_right_x = child.end.x
-            if top_right_y is None or child.end.y > top_right_y:
-                top_right_y = child.end.y
-            if top_right_z is None or child.end.z > top_right_z:
-                top_right_z = child.end.z
-        if (
-            bottom_left_x is not None and bottom_left_y is not None and
-            bottom_left_z is not None and top_right_x is not None and
-            top_right_y is not None and top_right_z is not None
-        ):
-            super().__init__(
-                Point(bottom_left_x, bottom_left_y, bottom_left_z),
-                Point(top_right_x, top_right_y, top_right_z),
-                children=children, **kwargs
-            )
-        else:
-            raise ValueError('Invalid children: %r.' % children)
+        :param p: The point to interrogate.
+        """
+        return self.type is BoxTypes.solid or (
+            self.type is BoxTypes.room and self.bounds.is_edge(p)
+        )
 
 
 def box_row(

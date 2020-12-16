@@ -60,14 +60,15 @@ def test_set_bearing(box_level: BoxLevel) -> None:
 
 def test_collide(box_level: BoxLevel, box: Box) -> None:
     """Test collisions."""
-    box_level.collide(box)
+    box_level.collide(box, Point(0, 0, 0))
 
     @box.event
-    def on_collide() -> None:
+    def on_collide(coordinates: Point) -> None:
+        assert coordinates == Point(3, 4, 5)
         raise CollideWorks()
 
     with raises(CollideWorks):
-        box_level.collide(box)
+        box_level.collide(box, Point(3, 4, 5))
 
 
 def test_move(box: Box, box_level: BoxLevel) -> None:
@@ -174,15 +175,17 @@ def test_move_fail(box_level: BoxLevel) -> None:
 
     @box_level.event
     def on_move_fail(
-        distance: float, vertical: Optional[float], bearing: Optional[int]
+        distance: float, vertical: Optional[float], bearing: Optional[int],
+        coordinates: Point
     ) -> None:
-        raise MoveFailWorks(distance, vertical, bearing)
+        raise MoveFailWorks(distance, vertical, bearing, coordinates)
 
     box_level.box.end.y = 1
     box_level.move()()
     with raises(MoveFailWorks) as exc:
         box_level.move()()
-    assert exc.value.args == (1.0, None, None)
+    assert exc.value.args == (1.0, None, None, Point(0, 2, 0))
+    box_level.set_bearing(180)
     with raises(MoveFailWorks) as exc:
-        box_level.move(distance=2.0, vertical=8.0, bearing=25)()
-    assert exc.value.args == (2.0, 8.0, 25)
+        box_level.move(distance=2.0, vertical=8.0, bearing=0)()
+    assert exc.value.args == (2.0, 8.0, 0, Point(0, 3, 8))

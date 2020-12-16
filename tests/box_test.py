@@ -4,7 +4,7 @@ from typing import List
 
 from pytest import raises
 
-from earwax import (Box, BoxBounds, BoxLevel, Door, FittedBox, NotADoor,
+from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, NotADoor,
                     OutOfBounds, Point, Portal, box_row)
 
 
@@ -14,6 +14,7 @@ def test_init() -> None:
     assert b.start == Point(0, 0, 0)
     assert b.end == Point(3, 3, 0)
     assert b.surface_sound is None
+    assert b.type is BoxTypes.empty
     c: Box = Box(b.start, b.end, parent=b)
     assert c.parent is b
     assert c in b.children
@@ -67,7 +68,7 @@ def test_fitted_box() -> None:
     southwest_box: Box = Box(Point(3, 5, 0), Point(8, 2, 0))
     northeast_box: Box = Box(Point(32, 33, 0), Point(80, 85, 5))
     middle_box: Box = Box(Point(14, 15, 2), Point(18, 22, 2))
-    box: FittedBox = FittedBox([middle_box, northeast_box, southwest_box])
+    box: Box = Box.get_fitted([middle_box, northeast_box, southwest_box])
     assert box.start == southwest_box.start
     assert box.end == northeast_box.end
 
