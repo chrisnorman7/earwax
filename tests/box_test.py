@@ -224,3 +224,24 @@ def test_volume() -> None:
     """Test box volume."""
     b: BoxBounds = Box(Point(1, 2, 3), Point(10, 9, 8)).bounds
     assert b.volume == 315
+
+
+def test_is_edge() -> None:
+    """Test the is_edge method."""
+    b: BoxBounds = Box(Point(0, 0, 0), Point(3, 3, 3)).bounds
+    assert b.is_edge(Point(0, 0, 0))
+    assert b.is_edge(Point(0, 1, 2))
+    assert b.is_edge(Point(2, 0, 0))
+
+
+def test_is_wall() -> None:
+    """Test the is_wall method."""
+    b: Box = Box(Point(1, 2, 3), Point(4, 5, 6))
+    assert not b.is_wall(Point(1, 2, 3))
+    assert not b.is_wall(Point(2, 3, 4))
+    b.type = BoxTypes.solid
+    assert b.is_wall(Point(1, 2, 3))
+    assert b.is_wall(Point(2, 3, 4))
+    b.type = BoxTypes.room
+    assert b.is_wall(Point(1, 2, 3))
+    assert not b.is_wall(Point(2, 3, 4))

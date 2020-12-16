@@ -4,7 +4,7 @@ from enum import Enum
 from math import dist
 from pathlib import Path
 from random import uniform
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Tuple, cast
 
 from attr import Factory, attrib, attrs
 
@@ -23,6 +23,8 @@ from ..point import Point
 from ..sound import play_and_destroy
 from .door import Door
 from .portal import Portal
+
+IntCoordinates = Tuple[int, int, int]
 
 
 class BoxTypes(Enum):
@@ -99,6 +101,28 @@ class BoxBounds:
 
         :param p: The point to interrogate.
         """
+        x: int
+        y: int
+        z: int
+        x, y, z = cast(IntCoordinates, p.floor().coordinates)
+        start_x: int
+        start_y: int
+        start_z: int
+        end_x: int
+        end_y: int
+        end_z: int
+        start_x, start_y, start_z = cast(
+            Tuple[int, int, int],
+            self.bottom_back_left.floor().coordinates
+        )
+        end_x, end_y, end_z = cast(
+            IntCoordinates, self.top_front_right.floor().coordinates
+        )
+        return (
+            x == start_x or x == end_x or
+            y == start_y or y == end_y or
+            z == start_z or z == end_z
+        )
 
     @property
     def width(self) -> float:
@@ -149,6 +173,9 @@ class Box(EventDispatcher):
 
     You can create instances of this class either singly, or by using the
     :meth:`earwax.box_row` method.
+
+    If you already have a list of boxes, you can fit them all onto one map with
+    the :meth:`earwax.Box.get_fitted` method.
 
     In addition to the coordinates supplied to this class's constructor, a
     :class:`earwax.BoxBounds` instance is created as :attr:`earwax.Box.bounds`.
