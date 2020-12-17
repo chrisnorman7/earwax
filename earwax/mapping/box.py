@@ -4,23 +4,22 @@ from enum import Enum
 from math import dist
 from pathlib import Path
 from random import uniform
-from typing import TYPE_CHECKING, List, Optional, Tuple, cast
+from typing import List, Optional, Tuple, cast
 
 from attr import Factory, attrib, attrs
 
 try:
     from pyglet.clock import schedule_once, unschedule
     from pyglet.event import EventDispatcher
+    from synthizer import Context, Generator, Source3D
 except ModuleNotFoundError:
     schedule_once = None
     unschedule = None
     EventDispatcher = object
-
-if TYPE_CHECKING:
-    from synthizer import Context
+    Context, Generator, Source3D = (None, None, None)
 
 from ..point import Point
-from ..sound import play_and_destroy
+from ..sound import play_path, stream_sound
 from .door import Door
 from .portal import Portal
 
@@ -150,6 +149,27 @@ class BoxBounds:
         return self.width * self.depth * self.height
 
 
+@attrs(auto_attribs=True)
+class BoxSound:
+    """A sound in a box.
+
+    :ivar ~earwax.BoxSound.box: The box that contains this sound.
+
+    :ivar ~earwax.BoxSound.context: The synthizer context to play through.
+
+    :ivar ~earwax.BoxSound.generator: The synthizer generator.
+    """
+
+    box: 'Box'
+    generator: Generator
+    source: Source3D
+
+    def stop(self) -> None:
+        """Stop this sound, and remove it from its box."""
+        self.box.sounds.remove(self)
+        self.generator.destroy()
+
+
 class BoxError(Exception):
     """The base exception for all box errors."""
 
@@ -210,6 +230,11 @@ class Box(EventDispatcher):
     :ivar ~earwax.Box.portal: If this attribute is not ``None``, then this
         instance is considered a portal.
 
+    :ivar ~earwax.Box.sounds: A list of :class:`earwax.BoxSound` instances that
+        are currently playing.
+
+        This list is used so that filters can be applied when players move.
+
     :ivar ~earwax.Box.surface_sound: A path to either the sound that should be
         heard when a player enters this box, or the path of a directory from
         which a random file should be chosen.
@@ -232,6 +257,7 @@ class Box(EventDispatcher):
     door: Optional[Door] = None
     portal: Optional[Portal] = None
 
+    sounds: List[BoxSound] = Factory(list)
     surface_sound: Optional[Path] = None
     wall_sound: Optional[Path] = None
     bounds: BoxBounds = attrib(repr=False, init=False)
@@ -412,18 +438,76 @@ class Box(EventDispatcher):
         return None
 
     def play_sound(
-        self, ctx: Optional['Context'], path: Optional[Path]
-    ) -> None:
+        self, ctx: Optional['Context'], path: Optional[Path],
+        looping: bool = False
+    ) -> Optional[BoxSound]:
         """Play a sound at the same position as this box.
+
+        The resulting sound will be added to the list of sounds for the oldest
+        parent, as retrieved by :class:`~earwax.Box.get_oldest_parent`.
 
         :param ctx: The ``synthizer.Context`` instance to play the sound
             through. If this value is ``None``, this method does nothing.
 
         :param path: A path to play. Can be None, in which case this method
             does nothing.
+
+        :param looping: Whether ot not to loop the resulting sound.
+
+            If this value does not evaluate to ``True``, then the sound will be
+            destroyed when it has finished playing.
         """
         if ctx is not None and path is not None:
-            play_and_destroy(ctx, path, position=self.start.coordinates)
+            top_level: 'Box' = self.get_oldest_parent()
+            sound: BoxSound = BoxSound(
+                top_level, *play_path(
+                    ctx, path, position=self.start.coordinates
+                )
+            )
+            sound.generator.looping = looping
+            top_level.sounds.append(sound)
+
+            def destroy_sound(dt: float) -> None:
+                """Destroy the created sound."""
+                if sound in top_level.sounds:
+                    sound.stop()
+
+            if not looping:
+                schedule_once(
+                    destroy_sound,
+                    sound.generator.buffer.get_length_in_seconds() * 2
+                )
+            return sound
+        return None
+
+    def stream_sound(
+        self, ctx: Context, protocol: str, path: str, looping: bool = False
+    ) -> BoxSound:
+        """Stream a sound.
+
+        The resulting sound will be added to the :attr:`~earwax.Box.sounds`
+        list of the oldest parent, as returned by :attr:`self.get_oldest_parent
+        <earwax.Box.get_oldest_parent>`.
+
+        :param ctx: The synthizer audio context to play through.
+
+        :param protocol: The protocol value to pass to
+            ``synthizer.StreamingGenerator``.
+
+        :param path: The path value to pass to
+            ``synthizer.StreamingGenerator``.
+
+        :param looping: Whether ot not to loop the resulting sound.
+        """
+        top_level: 'Box' = self.get_oldest_parent()
+        sound: BoxSound = BoxSound(
+            top_level, *stream_sound(
+                ctx, protocol, path, position=self.start.coordinates
+            )
+        )
+        sound.generator.looping = looping
+        top_level.sounds.append(sound)
+        return sound
 
     def open(self, ctx: Optional['Context']) -> None:
         """Open a door on this box.
@@ -520,6 +604,19 @@ class Box(EventDispatcher):
         return self.type is BoxTypes.solid or (
             self.type is BoxTypes.room and self.bounds.is_edge(p)
         )
+
+    def get_oldest_parent(self) -> 'Box':
+        """Return the oldest parent.
+
+        This function returns the box whose parent is ``None``, thus returning
+        the oldest parent.
+
+        The returned value could be the same instance on which this method was
+        called.
+        """
+        if self.parent is None:
+            return self
+        return self.parent.get_oldest_parent()
 
 
 def box_row(

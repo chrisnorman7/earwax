@@ -245,3 +245,17 @@ def test_is_wall() -> None:
     b.type = BoxTypes.room
     assert b.is_wall(Point(1, 2, 3))
     assert not b.is_wall(Point(2, 3, 4))
+
+
+def test_get_oldest_parent() -> None:
+    """Tes the get_oldest_parent method."""
+    start: Point = Point(0, 0, 0)
+    end: Point = Point(3, 3, 3)
+    a: Box = Box(start, end)
+    b: Box = Box(start, end, parent=a)
+    c: Box = Box(start, end, parent=b)
+    assert a.get_oldest_parent() is a
+    assert b.get_oldest_parent() is a
+    assert c.get_oldest_parent() is a
+    d: Box = Box(start, end)
+    assert d.get_oldest_parent() is d

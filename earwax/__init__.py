@@ -54,8 +54,8 @@ if True:
     from .game import Game, GameNotRunning
     from .game_board import GameBoard, NoSuchTile
     from .level import IntroLevel, Level
-    from .mapping import (Box, BoxBounds, BoxLevel, BoxTypes, Door, NotADoor,
-                          OutOfBounds, Portal, box_row)
+    from .mapping import (Box, BoxBounds, BoxLevel, BoxSound, BoxTypes, Door,
+                          NotADoor, OutOfBounds, Portal, box_row)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
@@ -96,5 +96,5 @@ __all__ = [
     'staggered_promise', 'Promise', 'types', 'utils', 'GameNotRunning',
     'NetworkConnection', 'ConnectionStates', 'ConnectionError',
     'AlreadyConnected', 'AlreadyConnecting', 'NotConnectedYet', 'TrackTypes',
-    'Task', 'TaskFunction', 'IntervalFunction', 'BoxBounds'
+    'Task', 'TaskFunction', 'IntervalFunction', 'BoxBounds', 'BoxSound'
 ]
