@@ -12,14 +12,16 @@ except ModuleNotFoundError:
     pass
 try:
     from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
-                           Generator, Source, Source3D)
+                           Generator, Source, Source3D, StreamingGenerator)
 except ModuleNotFoundError:
     (
         Buffer, BufferGenerator, Context, DirectSource, Generator, Source,
-        Source3D
-    ) = (None, None, None, None, None, None, None)
+        Source3D, StreamingGenerator
+    ) = (None, None, None, None, None, None, None, None)
 
 buffers: Dict[str, Buffer] = {}
+
+PositionTuple = Tuple[float, float, float]
 
 
 def get_buffer(protocol: str, path: str) -> Buffer:
@@ -53,7 +55,7 @@ def get_buffer(protocol: str, path: str) -> Buffer:
 def play_path(
     context: Context, path: Path,
     generator: Optional[Generator] = None, source: Optional[Source] = None,
-    position: Optional[Tuple[float, float, float]] = None
+    position: Optional[PositionTuple] = None
 ) -> Tuple[BufferGenerator, Source]:
     """Plays the given sound file (or selects one from the given directory).
 
@@ -92,6 +94,47 @@ def play_path(
     if generator is None:
         generator = BufferGenerator(context)
     generator.buffer = get_buffer('file', str(path))
+    if source is None:
+        if position is None:
+            source = DirectSource(context)
+        else:
+            source = Source3D(context)
+    if isinstance(source, Source3D) and position is not None:
+        source.position = position
+    source.add_generator(generator)
+    return (generator, source)
+
+
+def stream_sound(
+    context: Context, protocol: str, path: str,
+    source: Optional[Source] = None, position: Optional[PositionTuple] = None
+) -> Tuple[StreamingGenerator, Source]:
+    """Stream a sound.
+
+    Using this method, you can stream a sound using Synthizer's streaming API.
+
+    :param context: The synthizer context to play through.
+
+    :param protocol: The protocol parameter to pass to
+        ``synthizer.StreamingGenerator``.
+
+    :param path: The path parameter to pass to
+        ``synthizer.StreamingGenerator``.
+
+    :param source: A ready-to-use source.
+
+        If ``None`` is provided, an appropriate ``Source`` instance will be
+        used.
+
+    :param position: The position the new sound should play at.
+
+        If ``None`` is provided, then no position will be set. If ``source`` is
+        ``None``, then a ``DirectSource`` object will be created for you.
+
+        If position is not ``None``, then it will be applied to the source. If
+        ``source`` is ``None``, then a ``Source3D`` instance will be created.
+    """
+    generator: StreamingGenerator = StreamingGenerator(context, protocol, path)
     if source is None:
         if position is None:
             source = DirectSource(context)
