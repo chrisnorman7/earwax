@@ -16,6 +16,7 @@ some other help system for just those keys.
 """
 
 from typing import Optional
+
 from pyglet.event import EVENT_HANDLED, EVENT_UNHANDLED
 from pyglet.window import Window, key
 
