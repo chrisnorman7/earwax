@@ -89,6 +89,8 @@ def test_create_row() -> None:
     first, second, third = boxes
     assert first.start == start
     assert first.end == Point(5, 5, 0)
+    assert first.name is None
+    assert first.type is BoxTypes.empty
     assert second.start == Point(6, 1, 0)
     assert second.end == Point(10, 5, 0)
     assert third.start == Point(11, 1, 0)
@@ -111,6 +113,16 @@ def test_create_row() -> None:
     assert second.end == Point(5, 5, 1)
     assert third.start == Point(1, 1, 2)
     assert third.end == Point(5, 5, 2)
+
+
+def test_create_row_named() -> None:
+    """Test creating a row of named rooms."""
+    first, second = Box.create_row(
+        Point(0, 0, 0), Point(3, 3, 3), 2, Point(1, 0, 0),
+        get_name=lambda i: f'Room {i + 1}'
+    )
+    assert first.name == 'Room 1'
+    assert second.name == 'Room 2'
 
 
 def test_open() -> None:

@@ -4,7 +4,7 @@ from enum import Enum
 from math import dist
 from pathlib import Path
 from random import uniform
-from typing import Callable, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 from attr import Factory, attrib, attrs
 
@@ -331,7 +331,8 @@ class Box(EventDispatcher):
 
     @classmethod
     def create_row(
-        cls, start: Point, size: Point, count: int, offset: Point, **kwargs
+        cls, start: Point, size: Point, count: int, offset: Point,
+        get_name: Optional[Callable[[int], str]] = None, **kwargs
     ) -> List['Box']:
         """Generate a list of boxes.
 
@@ -346,7 +347,11 @@ class Box(EventDispatcher):
                 3,  # The number of boxes to build.
                 # The next argument is how far to move from the top right
                 # corner of each created box:
-                Point(1, 0, 0)
+                Point(1, 0, 0),
+                # We want to name each room. For that, there is a function!
+                get_name=lambda i: f'Room {i + 1}',
+                # Let's make them all rooms.
+                type=RoomTypes.room
             )
 
         This will result in a list containing 3 rooms:
@@ -374,6 +379,12 @@ class Box(EventDispatcher):
             If no coordinate of the given value is ``>= 1``, overlaps will
             occur.
 
+        :param get_name: A function which should return an appropriate name.
+
+            This function will be called with the current position in the loop.
+
+            0 for the first room, 1 for the second, and so on.
+
         :param kwargs: Extra keyword arguments to be passed to
             ``Box.__init__``.
         """
@@ -384,7 +395,10 @@ class Box(EventDispatcher):
         boxes: List[Box] = []
         n: int = 0
         while n < count:
-            boxes.append(cls(start.copy(), start + size, **kwargs))
+            kw: Dict[str, Any] = kwargs.copy()
+            if get_name is not None:
+                kw['name'] = get_name(n)
+            boxes.append(cls(start.copy(), start + size, **kw))
             if offset.x:
                 start.x += offset.x + size.x
             if offset.y:
