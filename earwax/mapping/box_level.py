@@ -3,7 +3,7 @@
 from math import cos, dist, sin
 from typing import TYPE_CHECKING, Callable, List, Optional, Tuple
 
-from attr import Factory, attrs
+from attr import attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
 
 try:
@@ -59,7 +59,17 @@ class BoxLevel(Level, EventDispatcher):
 
     box: Box
 
-    coordinates: Point = Factory(lambda: Point(0.0, 0.0, 0.0))
+    coordinates: Point = attrib()
+
+    @coordinates.default
+    def get_default_coordinates(instance: 'BoxLevel') -> Point:
+        """Return the start coordinates for the contained box.
+
+        :param instance: The instance whose ``box`` attribute's start
+            coordinates will be returned.
+        """
+        return instance.box.start
+
     bearing: int = 0
     current_box: Optional[Box] = None
 
@@ -256,7 +266,7 @@ class BoxLevel(Level, EventDispatcher):
                 self.dispatch_event('on_move')
             else:
                 self.dispatch_event(
-                    'on_move_fail', distance, vertical, bearing, p
+                    'on_move_fail', distance, vertical, _bearing, p
                 )
 
         return inner

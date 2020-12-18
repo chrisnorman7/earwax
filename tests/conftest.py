@@ -7,7 +7,8 @@ from typing import Generator, Optional
 from _pytest.fixtures import FixtureRequest
 from pyglet.window import Window
 from pytest import fixture
-from synthizer import Context, initialize, shutdown
+from synthizer import (Context, Source3D, StreamingGenerator, initialize,
+                       shutdown)
 
 from earwax import (Box, BoxLevel, ConnectionStates, Editor, Game, GameBoard,
                     Level, Menu, NetworkConnection, Point)
@@ -121,12 +122,13 @@ def get_context() -> Context:
 @fixture(name='box')
 def get_box() -> Box:
     """Get a new ``Box`` instance."""
-    return Box(Point(0, 0, 0), Point(5, 5, 0))
+    return Box(Point(1, 2, 3), Point(4, 5, 6))
 
 
 @fixture(name='box_level')
-def box_level(game: Game, box) -> BoxLevel:
+def get_box_level(game: Game) -> BoxLevel:
     """Get a new ``BoxLevel`` instance."""
+    box: Box = Box(Point(1, 1, 1), Point(5, 5, 5))
     return BoxLevel(game, box)
 
 
@@ -155,3 +157,15 @@ def get_network_connection() -> NetworkConnection:
 def get_socket() -> PretendSocket:
     """Get a pretend socket."""
     return PretendSocket(AF_INET, SOCK_STREAM)
+
+
+@fixture(name='generator')
+def get_streaming_generator(context: Context) -> StreamingGenerator:
+    """Return a new ``StreamingGenerator`` instance."""
+    return StreamingGenerator(context, 'file', 'sound.wav')
+
+
+@fixture(name='source')
+def get_source_3d(context: Context) -> Source3D:
+    """Get a new ``Source3D`` instance."""
+    return Source3D(context)

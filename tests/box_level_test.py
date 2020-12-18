@@ -5,7 +5,7 @@ from typing import Callable, Optional
 
 from pytest import raises
 
-from earwax import Box, BoxLevel, Door, Game, Point, Portal
+from earwax import Box, BoxLevel, BoxTypes, Door, Game, Point, Portal
 
 
 class CollideWorks(Exception):
@@ -33,8 +33,8 @@ def test_init(box: Box, box_level: BoxLevel) -> None:
     # First test the fixtures.
     assert isinstance(box, Box)
     assert isinstance(box_level, BoxLevel)
-    assert box_level.box is box
-    assert box_level.coordinates == Point(0, 0, 0)
+    assert isinstance(box_level.box, Box)
+    assert box_level.coordinates == Point(1, 1, 1)
     assert box_level.bearing == 0
     assert box_level.current_box is None
     assert box_level.ambiances == []
@@ -73,24 +73,20 @@ def test_collide(box_level: BoxLevel, box: Box) -> None:
 
 def test_move(box: Box, box_level: BoxLevel) -> None:
     """Test movement."""
-    # Let's make sure we've got pytest configured properly.
-    assert box_level.coordinates == Point(0.0, 0.0, 0.0)
-    assert box_level.box.end.z == 0.0
-    box_level.box.end.z = 5.0
     m: Callable[[], None] = box_level.move()
     m()
-    assert box_level.coordinates == Point(0.0, 1.0, 0.0)
+    assert box_level.coordinates == Point(1.0, 2.0, 1.0)
     m()
-    assert box_level.coordinates == Point(0.0, 2.0, 0.0)
+    assert box_level.coordinates == Point(1.0, 3.0, 1.0)
     box_level.set_bearing(90)
     m()
-    assert box_level.coordinates == Point(1.0, 2.0, 0.0)
+    assert box_level.coordinates == Point(2.0, 3.0, 1.0)
     m()
-    assert box_level.coordinates == Point(2.0, 2.0, 0.0)
+    assert box_level.coordinates == Point(3.0, 3.0, 1.0)
     box_level.move(bearing=180)()
-    assert box_level.coordinates == Point(2.0, 1.0, 0.0)
+    assert box_level.coordinates == Point(3.0, 2.0, 1.0)
     box_level.move(distance=0.0, vertical=1.0)()
-    assert box_level.coordinates == Point(2.0, 1.0, 1.0)
+    assert box_level.coordinates == Point(3.0, 2.0, 2.0)
 
     @box_level.event
     def on_move() -> None:
@@ -100,7 +96,7 @@ def test_move(box: Box, box_level: BoxLevel) -> None:
         box_level.move()()
     # Shouldn't raise this time, because the target coordinates will be
     # invalid.
-    box_level.coordinates.y = 0
+    box_level.coordinates.y = 1
     box_level.move(bearing=180)()
 
 
@@ -126,8 +122,9 @@ def test_turn(box_level: BoxLevel) -> None:
     assert box_level.bearing == 90
 
 
-def test_activate(game: Game, box: Box, box_level: BoxLevel) -> None:
+def test_activate(game: Game, box_level: BoxLevel) -> None:
     """Test the enter key."""
+    box: Box = box_level.box
     a: Callable[[], None] = box_level.activate()
     a()
 
@@ -137,12 +134,12 @@ def test_activate(game: Game, box: Box, box_level: BoxLevel) -> None:
 
     with raises(ActivateWorks):
         a()
-    box.wall = True
+    box.type = BoxTypes.solid
     with raises(ActivateWorks):
         a()
-    box.wall = False
+    box.type = BoxTypes.empty
     d: Door = Door()
-    b: Box = Box(Point(0, 0, 0), Point(0, 0, 0), door=d, parent=box)
+    b: Box = Box(box.start, box.start, door=d, parent=box)
     assert dist(
         box_level.coordinates.coordinates, b.start.coordinates
     ) < 2.0
@@ -165,6 +162,8 @@ def test_activate(game: Game, box: Box, box_level: BoxLevel) -> None:
     assert l.coordinates == Point(14, 15, 0)
     assert l.bearing == 55
     game.replace_level(box_level)
+    # No need to reset coordinates, since each box level maintains its own
+    # coordinates.
     p.bearing = 32
     a()
     assert l.bearing == 32
@@ -180,12 +179,26 @@ def test_move_fail(box_level: BoxLevel) -> None:
     ) -> None:
         raise MoveFailWorks(distance, vertical, bearing, coordinates)
 
-    box_level.box.end.y = 1
+    box_level.coordinates.y = box_level.box.end.y - 1
+    distance: float
+    vertical: Optional[float]
+    bearing: int
+    point: Point
     box_level.move()()
+    expected: Point = box_level.box.bounds.bottom_front_left + Point(0, 1, 0)
     with raises(MoveFailWorks) as exc:
         box_level.move()()
-    assert exc.value.args == (1.0, None, None, Point(0, 2, 0))
+    distance, vertical, bearing, point = exc.value.args
+    assert distance == 1.0
+    assert vertical is None
+    assert bearing == box_level.bearing
+    assert point == expected
     box_level.set_bearing(180)
+    expected = box_level.box.bounds.bottom_front_left + Point(0, 2, 8)
     with raises(MoveFailWorks) as exc:
         box_level.move(distance=2.0, vertical=8.0, bearing=0)()
-    assert exc.value.args == (2.0, 8.0, 0, Point(0, 3, 8))
+    distance, vertical, bearing, point = exc.value.args
+    assert distance == 2.0
+    assert vertical == 8.0
+    assert bearing == 0
+    assert point == expected

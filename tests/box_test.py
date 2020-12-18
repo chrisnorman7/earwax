@@ -1,23 +1,28 @@
 """Test the Box class."""
 
-from typing import List
+from pathlib import Path
+from typing import List, Optional
 
+from pyglet.clock import schedule_interval
+from pyglet.window import Window
 from pytest import raises
+from synthizer import (BufferGenerator, Context, Source3D, StreamingGenerator,
+                       SynthizerError)
 
-from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, NotADoor,
-                    OutOfBounds, Point, Portal, box_row)
+from earwax import (Box, BoxBounds, BoxLevel, BoxSound, BoxTypes, Door, Game,
+                    NotADoor, OutOfBounds, Point, Portal, get_buffer)
 
 
-def test_init() -> None:
+def test_init(box: Box) -> None:
     """Test that boxes initialise properly."""
-    b: Box = Box(Point(0, 0, 0), Point(3, 3, 0))
-    assert b.start == Point(0, 0, 0)
-    assert b.end == Point(3, 3, 0)
-    assert b.surface_sound is None
-    assert b.type is BoxTypes.empty
-    c: Box = Box(b.start, b.end, parent=b)
-    assert c.parent is b
-    assert c in b.children
+    assert isinstance(box, Box)
+    assert box.start == Point(1, 2, 3)
+    assert box.end == Point(4, 5, 6)
+    assert box.surface_sound is None
+    assert box.type is BoxTypes.empty
+    b: Box = Box(box.start, box.end, parent=box)
+    assert b.parent is box
+    assert b in box.children
 
 
 def test_add_child() -> None:
@@ -68,15 +73,15 @@ def test_fitted_box() -> None:
     southwest_box: Box = Box(Point(3, 5, 0), Point(8, 2, 0))
     northeast_box: Box = Box(Point(32, 33, 0), Point(80, 85, 5))
     middle_box: Box = Box(Point(14, 15, 2), Point(18, 22, 2))
-    box: Box = Box.get_fitted([middle_box, northeast_box, southwest_box])
+    box: Box = Box.create_fitted([middle_box, northeast_box, southwest_box])
     assert box.start == southwest_box.start
     assert box.end == northeast_box.end
 
 
-def test_row() -> None:
-    """Test the box_row function."""
+def test_create_row() -> None:
+    """Test the create_row constructor."""
     start: Point = Point(1, 1, 0)
-    boxes: List[Box] = box_row(start, Point(5, 5, 1), 3, Point(1, 0, 0))
+    boxes: List[Box] = Box.create_row(start, Point(5, 5, 1), 3, Point(1, 0, 0))
     assert len(boxes) == 3
     first: Box
     second: Box
@@ -88,7 +93,7 @@ def test_row() -> None:
     assert second.end == Point(10, 5, 0)
     assert third.start == Point(11, 1, 0)
     assert third.end == Point(15, 5, 0)
-    first, second, third = box_row(
+    first, second, third = Box.create_row(
         Point(0, 0, 0), Point(3, 4, 1), 3, Point(0, 3, 0)
     )
     assert first.start == Point(0, 0, 0)
@@ -97,7 +102,9 @@ def test_row() -> None:
     assert second.end == Point(2, 9, 0)
     assert third.start == Point(0, 12, 0)
     assert third.end == Point(2, 15, 0)
-    first, second, third = box_row(start, Point(5, 5, 1), 3, Point(0, 0, 1))
+    first, second, third = Box.create_row(
+        start, Point(5, 5, 1), 3, Point(0, 0, 1)
+    )
     assert first.start == start
     assert first.end == Point(5, 5, 0)
     assert second.start == Point(1, 1, 1)
@@ -259,3 +266,115 @@ def test_get_oldest_parent() -> None:
     assert c.get_oldest_parent() is a
     d: Box = Box(start, end)
     assert d.get_oldest_parent() is d
+
+
+def test_box_sound(
+    context: Context, source: Source3D, generator: StreamingGenerator, box: Box
+) -> None:
+    """Test the BoxSound constructor."""
+    s: BoxSound = BoxSound(box, generator, source)
+    assert s.box is box
+    assert s.generator is generator
+    assert s.source
+    assert s.on_destroy is None
+
+
+def test_play_sound(
+    context: Context, box: Box, window: Window, game: Game
+) -> None:
+    """Test the play_sound method."""
+    s: Optional[BoxSound] = box.play_sound(context, Path('sound.wav'))
+    assert isinstance(s, BoxSound)
+    assert s.box is box
+    assert isinstance(s.generator, BufferGenerator)
+    assert s.generator.looping is False
+    assert s.generator.buffer is get_buffer('file', 'sound.wav')
+    assert isinstance(s.source, Source3D)
+    assert s.source.position == box.start.coordinates
+    assert s in box.sounds
+    assert s.on_destroy is None
+    s.on_destroy = lambda: window.close()
+    game.run(window)
+    assert s not in box.sounds
+    with raises(SynthizerError):
+        s.generator.destroy()
+    with raises(SynthizerError):
+        s.source.destroy()
+
+
+def test_play_sound_looping(
+    context: Context, box: Box, window: Window, game: Game
+) -> None:
+    """Test the play_sound method."""
+    s: Optional[BoxSound] = box.play_sound(
+        context, Path('sound.wav'), looping=True
+    )
+    assert isinstance(s, BoxSound)
+    assert s.box is box
+    assert isinstance(s.generator, BufferGenerator)
+    assert s.generator.looping is True
+    assert s.generator.buffer is get_buffer('file', 'sound.wav')
+    assert isinstance(s.source, Source3D)
+    assert s.source.position == box.start.coordinates
+    assert s in box.sounds
+
+    def on_destroy() -> None:
+        """Raise an error.
+
+        This method should never be called, because the sound should never
+        automatically be destroyed while looping.
+        """
+        window.close()
+        raise RuntimeError(
+            'A looping sound was automatically destroyed. This IS an error.'
+        )
+
+    s.on_destroy = on_destroy
+    schedule_interval(
+        lambda dt: window.close(),
+        s.generator.buffer.get_length_in_seconds() * 3
+    )
+    game.run(window)
+    assert s in box.sounds
+    s.on_destroy = None
+    s.stop()
+
+
+def test_stream_sound(
+    context: Context, box: Box, window: Window, game: Game
+) -> None:
+    """Test the stream_sound method."""
+    s: BoxSound = box.stream_sound(context, 'file', 'sound.wav')
+    assert s.box is box
+    assert isinstance(s.generator, StreamingGenerator)
+    assert s.generator.looping is False
+    assert isinstance(s.source, Source3D)
+    assert s.source.position == box.start.coordinates
+    assert s in box.sounds
+    schedule_interval(
+        lambda dt: window.close(),
+        get_buffer('file', 'sound.wav').get_length_in_seconds() * 3
+    )
+    game.run(window)
+    assert s in box.sounds
+    s.stop()
+
+
+def test_stream_sound_looping(
+    context: Context, box: Box, window: Window, game: Game
+) -> None:
+    """Test the stream_sound method."""
+    s: BoxSound = box.stream_sound(context, 'file', 'sound.wav', looping=True)
+    assert s.box is box
+    assert isinstance(s.generator, StreamingGenerator)
+    assert s.generator.looping is True
+    assert isinstance(s.source, Source3D)
+    assert s.source.position == box.start.coordinates
+    assert s in box.sounds
+    schedule_interval(
+        lambda dt: window.close(),
+        get_buffer('file', 'sound.wav').get_length_in_seconds() * 3
+    )
+    game.run(window)
+    assert s in box.sounds
+    s.stop()

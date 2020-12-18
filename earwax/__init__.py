@@ -55,7 +55,7 @@ if True:
     from .game_board import GameBoard, NoSuchTile
     from .level import IntroLevel, Level
     from .mapping import (Box, BoxBounds, BoxLevel, BoxSound, BoxTypes, Door,
-                          NotADoor, OutOfBounds, Portal, box_row)
+                          NotADoor, OutOfBounds, Portal)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
@@ -88,13 +88,13 @@ __all__ = [
     'ConfigValue', 'ConfigMenu', 'TypeHandler', 'UnknownTypeError',
     'EarwaxConfig', 'ProjectLevel', 'cmd_main', 'Project', 'Box', 'Point',
     'OutOfBounds', 'PointDirections', 'walking_directions', 'BoxTypes',
-    'box_row', 'play_path', 'schedule_generator_destruction', 'BoxLevel',
-    'Ambiance', 'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track',
-    'play_paths', 'DismissibleMixin', 'TitleMixin', 'IntroLevel',
-    'CoordinatesMixin', 'GameBoard', 'NoSuchTile', 'Die', 'BufferDirectory',
-    'PromiseStates', 'ThreadedPromise', 'StaggeredPromise',
-    'staggered_promise', 'Promise', 'types', 'utils', 'GameNotRunning',
-    'NetworkConnection', 'ConnectionStates', 'ConnectionError',
-    'AlreadyConnected', 'AlreadyConnecting', 'NotConnectedYet', 'TrackTypes',
-    'Task', 'TaskFunction', 'IntervalFunction', 'BoxBounds', 'BoxSound'
+    'play_path', 'schedule_generator_destruction', 'BoxLevel', 'Ambiance',
+    'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track', 'play_paths',
+    'DismissibleMixin', 'TitleMixin', 'IntroLevel', 'CoordinatesMixin',
+    'GameBoard', 'NoSuchTile', 'Die', 'BufferDirectory', 'PromiseStates',
+    'ThreadedPromise', 'StaggeredPromise', 'staggered_promise', 'Promise',
+    'types', 'utils', 'GameNotRunning', 'NetworkConnection',
+    'ConnectionStates', 'ConnectionError', 'AlreadyConnected',
+    'AlreadyConnecting', 'NotConnectedYet', 'TrackTypes', 'Task',
+    'TaskFunction', 'IntervalFunction', 'BoxBounds', 'BoxSound'
 ]

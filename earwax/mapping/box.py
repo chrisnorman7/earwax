@@ -4,7 +4,7 @@ from enum import Enum
 from math import dist
 from pathlib import Path
 from random import uniform
-from typing import List, Optional, Tuple, cast
+from typing import Callable, List, Optional, Tuple, cast
 
 from attr import Factory, attrib, attrs
 
@@ -155,19 +155,26 @@ class BoxSound:
 
     :ivar ~earwax.BoxSound.box: The box that contains this sound.
 
-    :ivar ~earwax.BoxSound.context: The synthizer context to play through.
-
     :ivar ~earwax.BoxSound.generator: The synthizer generator.
+
+    :ivar ~earwax.BoxSound.source: The source this sound is routed through.
+
+    :ivar ~earwax.BoxSound.on_destroy: A function to be called when this sound
+        is destroyed.
     """
 
     box: 'Box'
     generator: Generator
     source: Source3D
+    on_destroy: Optional[Callable[[], None]] = None
 
     def stop(self) -> None:
         """Stop this sound, and remove it from its box."""
         self.box.sounds.remove(self)
         self.generator.destroy()
+        self.source.destroy()
+        if self.on_destroy is not None:
+            self.on_destroy()
 
 
 class BoxError(Exception):
@@ -192,10 +199,10 @@ class Box(EventDispatcher):
     """A box on a map.
 
     You can create instances of this class either singly, or by using the
-    :meth:`earwax.box_row` method.
+    :meth:`earwax.Box.create_row` method.
 
     If you already have a list of boxes, you can fit them all onto one map with
-    the :meth:`earwax.Box.get_fitted` method.
+    the :meth:`earwax.Box.create_fitted` method.
 
     In addition to the coordinates supplied to this class's constructor, a
     :class:`earwax.BoxBounds` instance is created as :attr:`earwax.Box.bounds`.
@@ -277,12 +284,17 @@ class Box(EventDispatcher):
         self.register_event_type('on_close')
 
     @classmethod
-    def get_fitted(cls, children: List['Box'], **kwargs) -> 'Box':
+    def create_fitted(cls, children: List['Box'], **kwargs) -> 'Box':
         """Return a box that fits all of ``children`` in.
 
         Pass a list of :class:`~earwax.Box` instances, and you'll get a box
         with its :attr:`~earwax.Box.start`, and :attr:`~earwax.Box.end`
         attributes set to match the outer bounds of the provided children.
+
+        :param children: The list of :class:`~earwax.Box` instances to
+            encapsulate.
+
+        :param kwargs: The extra keyword arguments to pass to ``Box.__init__``.
         """
         start_x: Optional[float] = None
         start_y: Optional[float] = None
@@ -316,6 +328,71 @@ class Box(EventDispatcher):
             )
         else:
             raise ValueError('Invalid children: %r.' % children)
+
+    @classmethod
+    def create_row(
+        cls, start: Point, size: Point, count: int, offset: Point, **kwargs
+    ) -> List['Box']:
+        """Generate a list of boxes.
+
+        This method is useful for creating rows of buildings, or rooms on a
+        corridor to name a couple of examples.
+
+        It can be used like so::
+
+            offices = Box.create_row(
+                Point(0, 0),  # The bottom_left corner of the first box.
+                Point(3, 2, 0),  # The size of each box.
+                3,  # The number of boxes to build.
+                # The next argument is how far to move from the top right
+                # corner of each created box:
+                Point(1, 0, 0)
+            )
+
+        This will result in a list containing 3 rooms:
+
+        * The first from (0, 0, 0) to (2, 1, 0)
+
+        * The second from (3, 0, 0) to (5, 1, 0)
+
+        * And the third from (6, 0, 0) to (8, 1, 0)
+
+        **PLEASE NOTE:**
+        If none of the size coordinates are ``>= 1``, the top right coordinate
+        will be less than the bottom left, so
+        :meth:`~earwax.Box.get_containing_box` won't ever find it.
+
+        :param start: The :attr:`~earwax.Box.start` coordinate of the first
+            box.
+
+        :param size: The size of each box.
+
+        :param count: The number of boxes to build.
+
+        :param offset: The distance between the boxes.
+
+            If no coordinate of the given value is ``>= 1``, overlaps will
+            occur.
+
+        :param kwargs: Extra keyword arguments to be passed to
+            ``Box.__init__``.
+        """
+        start = start.copy()
+        # In the next line, we subtract 1 from all size values, otherwise we
+        # end up with a box that is too large by 1 on each axis.
+        size -= 1
+        boxes: List[Box] = []
+        n: int = 0
+        while n < count:
+            boxes.append(cls(start.copy(), start + size, **kwargs))
+            if offset.x:
+                start.x += offset.x + size.x
+            if offset.y:
+                start.y += offset.y + size.y
+            if offset.z:
+                start.z += offset.z + size.z
+            n += 1
+        return boxes
 
     def on_footstep(self) -> None:
         """Play an appropriate surface sound.
@@ -617,67 +694,3 @@ class Box(EventDispatcher):
         if self.parent is None:
             return self
         return self.parent.get_oldest_parent()
-
-
-def box_row(
-    start: Point, size: Point, count: int, offset: Point, **kwargs
-) -> List[Box]:
-    """Generate a list of boxes.
-
-    This method is useful for creating rows of buildings, or rooms on a
-    corridor to name a couple of examples.
-
-    It can be used like so::
-
-        offices = row(
-            Point(0, 0),  # The bottom_left corner of the first box.
-            Point(3, 2, 0),  # The size of each box.
-            3,  # The number of boxes to build.
-            # The next argument is how far to move from the top right corner of
-            # each created box:
-            Point(1, 0, 0)
-        )
-
-    This will result in a list containing 3 rooms:
-
-    * The first from (0, 0, 0) to (2, 1, 0)
-
-    * The second from (3, 0, 0) to (5, 1, 0)
-
-    * And the third from (6, 0, 0) to (8, 1, 0)
-
-    **PLEASE NOTE:**
-    If none of the size coordinates are ``>= 1``, the top right coordinate will
-    be less than the bottom left, so :meth:`~earwax.Box.get_containing_box`
-    won't ever find it.
-
-    :param start: The :attr:`~earwax.Box.bottom_left` coordinate of the first
-        box.
-
-    :param size: The size of each box.
-
-    :param count: The number of boxes to build.
-
-    :param offset: The distance between the boxes.
-
-        If no coordinate of the given value is ``>= 1``, overlaps will occur.
-
-    :param kwargs: Extra keyword arguments to be passed to ``Box.__init__``.
-    """
-    start = start.copy()
-    # In the next line, we subtract 1 from all size values, otherwise we end up
-    # with a box that is too large by 1 on each axis.
-    size -= 1
-    boxes: List[Box] = []
-    n: int = 0
-    while n < count:
-        box: Box = Box(start.copy(), start + size, **kwargs)
-        boxes.append(box)
-        if offset.x:
-            start.x += offset.x + size.x
-        if offset.y:
-            start.y += offset.y + size.y
-        if offset.z:
-            start.z += offset.z + size.z
-        n += 1
-    return boxes
