@@ -60,13 +60,20 @@ def test_get_containing_child() -> None:
     """Test Box.get_containing_box."""
     parent: Box = Box(Point(0, 0, 0), Point(100, 100, 5))
     # Make a base for tracks to sit on.
-    tracks: Box = Box(parent.start, parent.bounds.bottom_back_right + Point(0, 2, 0), parent=parent)
+    tracks: Box = Box(
+        parent.start, parent.bounds.bottom_back_right + Point(0, 2, 0),
+        parent=parent
+    )
     assert parent.get_containing_box(Point(0, 0, 0)) is tracks
     assert parent.get_containing_box(Point(5, 5, 1)) is parent
     # Draw 2 parallel lines, like train tracks.
     b: BoxBounds = tracks.bounds
-    southern_rail: Box = Box(b.bottom_back_left, b.bottom_back_right, parent=tracks)
-    northern_rail = Box(b.bottom_front_left, b.bottom_front_right, parent=tracks)
+    southern_rail: Box = Box(
+        b.bottom_back_left, b.bottom_back_right, parent=tracks
+    )
+    northern_rail = Box(
+        b.bottom_front_left, b.bottom_front_right, parent=tracks
+    )
     assert parent.get_containing_box(Point(5, 5, 0)) is parent
     assert parent.get_containing_box(Point(0, 0, 0)) is southern_rail
     assert parent.get_containing_box(Point(3, 2, 0)) is northern_rail
