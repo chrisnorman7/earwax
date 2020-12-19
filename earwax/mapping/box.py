@@ -264,7 +264,9 @@ class Box(EventDispatcher):
     door: Optional[Door] = None
     portal: Optional[Portal] = None
 
-    sounds: List[BoxSound] = Factory(list)
+    sounds: List[BoxSound] = attrib(
+        default=Factory(list), init=False, repr=False
+    )
     surface_sound: Optional[Path] = None
     wall_sound: Optional[Path] = None
     bounds: BoxBounds = attrib(repr=False, init=False)
@@ -413,6 +415,10 @@ class Box(EventDispatcher):
 
         This function will be called by the Pyglet event framework, and should
         be called when a player is walking on this box.
+
+        It is worth noting that this event is not dispatched by earwax at this
+        time. As such, it is up to the programmer when - and in deed if - it is
+        dispatched.
         """
         pass
 
