@@ -286,15 +286,25 @@ class Box(EventDispatcher):
         self.register_event_type('on_close')
 
     @classmethod
-    def create_fitted(cls, children: List['Box'], **kwargs) -> 'Box':
+    def create_fitted(
+        cls, children: List['Box'], pad_start: Optional[Point] = None,
+        pad_end: Optional[Point] = None, **kwargs
+    ) -> 'Box':
         """Return a box that fits all of ``children`` in.
 
         Pass a list of :class:`~earwax.Box` instances, and you'll get a box
         with its :attr:`~earwax.Box.start`, and :attr:`~earwax.Box.end`
         attributes set to match the outer bounds of the provided children.
 
+        You can use ``pad_start``, and ``pad_end`` to add or subtract from the
+        calculated start and end coordinates.
+
         :param children: The list of :class:`~earwax.Box` instances to
             encapsulate.
+
+        :param pad_start: A point to add to the calculated start coordinates.
+
+        :param pad_end: A point to add to the calculated end coordinates.
 
         :param kwargs: The extra keyword arguments to pass to ``Box.__init__``.
         """
@@ -323,11 +333,13 @@ class Box(EventDispatcher):
             start_z is not None and end_x is not None and
             end_y is not None and end_z is not None
         ):
-            return cls(
-                Point(start_x, start_y, start_z),
-                Point(end_x, end_y, end_z),
-                children=children, **kwargs
-            )
+            start: Point = Point(start_x, start_y, start_z)
+            if pad_start is not None:
+                start += pad_start
+            end: Point = Point(end_x, end_y, end_z)
+            if pad_end is not None:
+                end += pad_end
+            return cls(start, end, children=children, **kwargs)
         else:
             raise ValueError('Invalid children: %r.' % children)
 

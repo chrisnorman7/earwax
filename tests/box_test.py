@@ -91,6 +91,21 @@ def test_fitted_box() -> None:
     assert box.end == northeast_box.end
 
 
+def test_create_fitted_padded() -> None:
+    """Ensure the pad_start and pad_end parameters work as expected."""
+    a: Box = Box(Point(0, 0, 0), Point(3, 3, 3))
+    b: Box = Box(
+        a.bounds.bottom_back_right + Point(1, 0, 0), a.end + Point(3, 0, 0)
+    )
+    c: Box = Box.create_fitted(
+        [a, b],
+        pad_start=Point(-1, -2, -3),
+        pad_end=Point(1, 2, 3)
+    )
+    assert c.start == Point(-1, -2, -3)
+    assert c.end == Point(7, 5, 6)
+
+
 def test_create_row() -> None:
     """Test the create_row constructor."""
     start: Point = Point(1, 1, 0)
