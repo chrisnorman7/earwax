@@ -153,6 +153,26 @@ def test_create_row_named() -> None:
     assert second.name == 'Room 2'
 
 
+def test_create_row_on_create() -> None:
+    """Test the on_create parameter."""
+    a: Box
+    b: Box
+
+    def on_create(b: Box) -> None:
+        """Set a name."""
+        if b.start == Point(0, 0, 0):
+            b.name = 'First Box'
+        else:
+            b.name = 'Second Box'
+
+    a, b = Box.create_row(
+        Point(0, 0, 0), Point(1, 1, 1), 2, Point(1, 0, 0),
+        on_create=on_create
+    )
+    assert a.name == 'First Box'
+    assert b.name == 'Second Box'
+
+
 def test_open() -> None:
     """Test door opening."""
     b: Box = Box(Point(0, 0, 0), Point(0, 0, 0))

@@ -346,7 +346,9 @@ class Box(EventDispatcher):
     @classmethod
     def create_row(
         cls, start: Point, size: Point, count: int, offset: Point,
-        get_name: Optional[Callable[[int], str]] = None, **kwargs
+        get_name: Optional[Callable[[int], str]] = None,
+        on_create: Optional[Callable[['Box'], None]] = None,
+        **kwargs
     ) -> List['Box']:
         """Generate a list of boxes.
 
@@ -399,6 +401,11 @@ class Box(EventDispatcher):
 
             0 for the first room, 1 for the second, and so on.
 
+        :param on_create: A function which will be called after each box is
+            created.
+
+            The only provided argument will be the box that was just created.
+
         :param kwargs: Extra keyword arguments to be passed to
             ``Box.__init__``.
         """
@@ -412,7 +419,10 @@ class Box(EventDispatcher):
             kw: Dict[str, Any] = kwargs.copy()
             if get_name is not None:
                 kw['name'] = get_name(n)
-            boxes.append(cls(start.copy(), start + size, **kw))
+            box: Box = cls(start.copy(), start + size, **kw)
+            if on_create is not None:
+                on_create(box)
+            boxes.append(box)
             if offset.x:
                 start.x += offset.x + size.x
             if offset.y:
