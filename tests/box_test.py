@@ -211,6 +211,16 @@ def test_bounds() -> None:
     assert b.top_front_left == Point(1, 5, 6)
     assert b.top_front_right == Point(4, 5, 6)
     assert b.top_back_right == Point(4, 2, 6)
+    box = Box(Point(0, 0, 0), Point(5, 5, 5))
+    b = box.bounds
+    assert b.bottom_back_left == Point(0, 0, 0)
+    assert b.bottom_front_left == Point(0, 5, 0)
+    assert b.bottom_front_right == Point(5, 5, 0)
+    assert b.bottom_back_right == Point(5, 0, 0)
+    assert b.top_back_left == Point(0, 0, 5)
+    assert b.top_front_left == Point(0, 5, 5)
+    assert b.top_front_right == Point(5, 5, 5)
+    assert b.top_back_right == Point(5, 0, 5)
 
 
 def test_width() -> None:
