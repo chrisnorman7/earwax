@@ -367,3 +367,7 @@ class BoxLevel(Level, EventDispatcher):
                 box.dispatch_event('on_activate')
 
         return inner
+
+    def get_current_box(self) -> Optional[Box]:
+        """Get the box that lies at the current coordinates."""
+        return self.box.get_containing_box(self.coordinates.floor())

@@ -202,3 +202,23 @@ def test_move_fail(box_level: BoxLevel) -> None:
     assert vertical == 8.0
     assert bearing == 0
     assert point == expected
+
+
+def test_get_current_box(game: Game) -> None:
+    """Test the get_current_box method."""
+    first: Box
+    second: Box
+    third: Box
+    first, second, third = Box.create_row(
+        Point(0, 0, 0), Point(5, 5, 5), 3, Point(1, 0, 0)
+    )
+    box: Box = Box.create_fitted([first, second, third])
+    l: BoxLevel = BoxLevel(game, box)
+    assert l.get_current_box() is first
+    l.set_coordinates(second.start)
+    assert l.get_current_box() is second
+    door: Box = Box(third.start, third.end, door=Door(), parent=third)
+    assert door in third.children
+    assert door.parent is third
+    l.set_coordinates(door.start)
+    assert l.get_current_box() is door

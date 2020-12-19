@@ -529,7 +529,7 @@ class Box(EventDispatcher):
         box: Box
         for box in self.sort_children():
             if box.contains_point(coordinates):
-                return box
+                return box.get_containing_box(coordinates)
         if self.contains_point(coordinates):
             return self
         return None
