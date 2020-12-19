@@ -47,9 +47,9 @@ def test_add_child() -> None:
 def test_contains_point() -> None:
     """Test Box.contains_point."""
     b: Box = Box(Point(0, 0, 0), Point(0, 0, 0))
-    assert b.contains_point(Point(0, 0, 0))
+    assert b.contains_point(Point(0, 0, 0)) is True
     b.end = Point(5, 5, 0)
-    assert b.contains_point(Point(3, 3, 0))
+    assert b.contains_point(Point(3, 3, 0)) is True
     assert not b.contains_point(Point(55, 54, 52))
     assert not b.contains_point(Point(-3, -4, 0))
     assert not b.contains_point(Point(-1, 4, 5))
@@ -81,38 +81,38 @@ def test_fitted_box() -> None:
 def test_create_row() -> None:
     """Test the create_row constructor."""
     start: Point = Point(1, 1, 0)
-    boxes: List[Box] = Box.create_row(start, Point(5, 5, 1), 3, Point(1, 0, 0))
+    boxes: List[Box] = Box.create_row(start, Point(5, 5, 4), 3, Point(1, 0, 0))
     assert len(boxes) == 3
     first: Box
     second: Box
     third: Box
     first, second, third = boxes
     assert first.start == start
-    assert first.end == Point(5, 5, 0)
+    assert first.end == Point(5, 5, 3)
     assert first.name is None
     assert first.type is BoxTypes.empty
     assert second.start == Point(6, 1, 0)
-    assert second.end == Point(10, 5, 0)
+    assert second.end == Point(10, 5, 3)
     assert third.start == Point(11, 1, 0)
-    assert third.end == Point(15, 5, 0)
+    assert third.end == Point(15, 5, 3)
     first, second, third = Box.create_row(
-        Point(0, 0, 0), Point(3, 4, 1), 3, Point(0, 3, 0)
+        Point(0, 0, 0), Point(3, 4, 5), 3, Point(0, 3, 0)
     )
     assert first.start == Point(0, 0, 0)
-    assert first.end == Point(2, 3, 0)
+    assert first.end == Point(2, 3, 4)
     assert second.start == Point(0, 6, 0)
-    assert second.end == Point(2, 9, 0)
+    assert second.end == Point(2, 9, 4)
     assert third.start == Point(0, 12, 0)
-    assert third.end == Point(2, 15, 0)
+    assert third.end == Point(2, 15, 4)
     first, second, third = Box.create_row(
-        start, Point(5, 5, 1), 3, Point(0, 0, 1)
+        start, Point(5, 5, 4), 3, Point(0, 0, 1)
     )
     assert first.start == start
-    assert first.end == Point(5, 5, 0)
-    assert second.start == Point(1, 1, 1)
-    assert second.end == Point(5, 5, 1)
-    assert third.start == Point(1, 1, 2)
-    assert third.end == Point(5, 5, 2)
+    assert first.end == Point(5, 5, 3)
+    assert second.start == Point(1, 1, 4)
+    assert second.end == Point(5, 5, 7)
+    assert third.start == Point(1, 1, 8)
+    assert third.end == Point(5, 5, 11)
 
 
 def test_create_row_named() -> None:
