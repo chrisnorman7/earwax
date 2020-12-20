@@ -58,7 +58,7 @@ def play_path(
     generator: Optional[BufferGenerator] = None,
     source: Optional[Source] = None, position: Optional[PositionTuple] = None,
     reverb: Optional[GlobalFdnReverb] = None,
-    pitch_bend: Optional[float] = None
+    pitch_bend: Optional[float] = None, gain: Optional[float] = None
 ) -> Tuple[BufferGenerator, Source]:
     """Plays the given sound file (or selects one from the given directory).
 
@@ -95,12 +95,14 @@ def play_path(
     :param pitch_bend: The value for pitch bending in Synthizer.
 
         If this value is ``None``, then no pitch bending will be applied.
+
+    :param gain: The gain you want ``source`` to play at.
     """
     if path.is_dir():
         path = choice(list(path.iterdir()))
         return play_path(
             context, path, generator=generator, source=source,
-            position=position, reverb=reverb, pitch_bend=pitch_bend
+            position=position, reverb=reverb, pitch_bend=pitch_bend, gain=gain
         )
     if generator is None:
         generator = BufferGenerator(context)
@@ -114,6 +116,8 @@ def play_path(
             source = Source3D(context)
     if isinstance(source, Source3D) and position is not None:
         source.position = position
+    if gain is not None:
+        source.gain = gain
     if reverb is not None:
         context.config_route(source, reverb)
     source.add_generator(generator)
@@ -123,7 +127,7 @@ def play_path(
 def stream_sound(
     context: Context, protocol: str, path: str,
     source: Optional[Source] = None, position: Optional[PositionTuple] = None,
-    reverb: Optional[GlobalFdnReverb] = None
+    reverb: Optional[GlobalFdnReverb] = None, gain: Optional[float] = None
 ) -> Tuple[StreamingGenerator, Source]:
     """Stream a sound.
 
@@ -153,6 +157,8 @@ def stream_sound(
     :param reverb: A reverb instance to connect ``source`` to.
 
         If ``None`` is provided, no connection will be performed.
+
+    :param gain: The gain you want ``source`` to play at.
     """
     generator: StreamingGenerator = StreamingGenerator(context, protocol, path)
     if source is None:
@@ -162,6 +168,8 @@ def stream_sound(
             source = Source3D(context)
     if isinstance(source, Source3D) and position is not None:
         source.position = position
+    if gain is not None:
+        source.gain = gain
     if reverb is not None:
         context.config_route(source, reverb)
     source.add_generator(generator)
