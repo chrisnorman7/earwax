@@ -1,7 +1,6 @@
 """Provides box-related classes, functions, and exceptions."""
 
 from enum import Enum
-from math import dist
 from pathlib import Path
 from random import uniform
 from typing import Any, Callable, Dict
@@ -691,55 +690,60 @@ class Box(EventDispatcher):
         """
         return filter(f, self.get_descendants())
 
-    def nearest_door(self, same_z: bool = True) -> Optional['Box']:
+    def nearest_door(
+        self, start: Point, same_z: bool = True
+    ) -> Optional['Box']:
         """Get the nearest door.
 
-        Iterates recursively over :attr:`self.children <earwax.Box.children>`,
-        and returns the nearest :class:`earwax.Box` instance whose
-        :attr:`~earwax.Box.door` attribute is not ``None``.
+        Iterates over all descendants, and returns the one whose
+        :attr:`~earwax.Box.door` attribute is not ``None``, and lies nearest to
+        ``start``.
 
-        If this instance is itself a door, then it will be returned.
+        :param start: The coordinates to start from.
 
         :param same_z: If ``True``, then doors on different levels will not be
             considered.
         """
         box: Optional['Box'] = None
         distance: Optional[float] = None
-        child: 'Box'
-        for child in self.children:
-            if child.door is not None and (
-                not same_z or child.start.z == self.start.z
-            ):
-                d: float = dist(
-                    self.start.coordinates, child.start.coordinates
-                )
-                if distance is None or d < distance:
-                    box = child
-                    distance = d
+        descendant: 'Box'
+        for descendant in self.filter_descendants(
+            lambda b: b.door is not None and (
+                b.start.z == self.start.z or not same_z
+            )
+        ):
+            d: float = start.distance_between(descendant.start)
+            if distance is None or d < distance:
+                box = descendant
+                distance = d
         return box
 
-    def nearest_portal(self, same_z: bool = True) -> Optional['Box']:
+    def nearest_portal(
+        self, start: Point, same_z: bool = True
+    ) -> Optional['Box']:
         """Get the nearest portal.
 
-        Returns the nearest :class:`earwax.Box` instance whose
-        :attr:`~earwax.Box.portal` attribute is not ``None``.
+        Iterates over all descendants, and returns the one whose
+        :attr:`~earwax.Box.portal` attribute is not ``None``, and lies nearest
+        to ``start``.
+
+        :param start: The coordinates to start from.
 
         :param same_z: If ``True``, then portals on different levels will not
             be considered.
         """
         box: Optional['Box'] = None
         distance: Optional[float] = None
-        child: 'Box'
-        for child in self.children:
-            if child.portal is not None and (
-                not same_z or child.start.z == self.start.z
-            ):
-                d: float = dist(
-                    self.start.coordinates, child.start.coordinates
-                )
-                if distance is None or d < distance:
-                    box = child
-                    distance = d
+        descendant: 'Box'
+        for descendant in self.filter_descendants(
+            lambda b: b.portal is not None and (
+                b.start.z == self.start.z or not same_z
+            )
+        ):
+            d: float = start.distance_between(descendant.start)
+            if distance is None or d < distance:
+                box = descendant
+                distance = d
         return box
 
     def is_wall(self, p: Point) -> bool:

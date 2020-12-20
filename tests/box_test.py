@@ -222,27 +222,51 @@ def test_close() -> None:
 def test_nearest_door() -> None:
     """Test Box.nearest_door."""
     room: Box = Box(Point(0, 0, 0), Point(3, 3, 3))
-    assert room.nearest_door() is None
+    assert room.nearest_door(room.start) is None
     d = Door()
     doorstep: Box = Box(room.end, room.end, door=d, parent=room)
-    assert room.nearest_door() is None
-    assert room.nearest_door(same_z=False) is doorstep
+    assert room.nearest_door(room.start) is None
+    assert room.nearest_door(room.start, same_z=False) is doorstep
     doorstep.start.z = room.start.z
-    assert room.nearest_door() is doorstep
-    assert room.nearest_door(same_z=False) is doorstep
+    assert room.nearest_door(room.start) is doorstep
+    assert room.nearest_door(room.start, same_z=False) is doorstep
+
+
+def test_nearest_door_with_descendants() -> None:
+    """Test that we can get the nearest door when the door isn't a child."""
+    foundation: Box = Box(Point(0, 0, 0), Point(5, 5, 5))
+    office: Box = Box(Point(3, 3, 0), foundation.end, parent=foundation)
+    door: Box = Box(
+        office.start, office.start + Point(0, 0, office.end.z), door=Door(),
+        parent=office
+    )
+    assert foundation.nearest_door(foundation.start) is door
 
 
 def test_nearest_portal(box_level: BoxLevel) -> None:
     """Test Box.nearest_portal."""
     room: Box = Box(Point(0, 0, 0), Point(3, 3, 3))
-    assert room.nearest_portal() is None
+    assert room.nearest_portal(room.start) is None
     p: Portal = Portal(box_level, Point(0, 0, 0))
     doorstep: Box = Box(room.end, room.end, portal=p, parent=room)
-    assert room.nearest_portal() is None
-    assert room.nearest_portal(same_z=False) is doorstep
+    assert room.nearest_portal(room.start) is None
+    assert room.nearest_portal(room.start, same_z=False) is doorstep
     doorstep.start.z = room.start.z
-    assert room.nearest_portal() is doorstep
-    assert room.nearest_portal(same_z=False) is doorstep
+    assert room.nearest_portal(room.start) is doorstep
+    assert room.nearest_portal(room.start, same_z=False) is doorstep
+
+
+def test_nearest_portal_with_descendants(game: Game, box: Box) -> None:
+    """Test that we can get the nearest door when the door isn't a child."""
+    level: BoxLevel = BoxLevel(game, box)
+    foundation: Box = Box(Point(0, 0, 0), Point(5, 5, 5))
+    office: Box = Box(Point(3, 3, 0), foundation.end, parent=foundation)
+    portal: Box = Box(
+        office.start, office.start + Point(0, 0, office.end.z), portal=Portal(
+            level, Point(0, 0, 0)
+        ), parent=office
+    )
+    assert foundation.nearest_portal(foundation.start) is portal
 
 
 def test_bounds() -> None:
@@ -475,5 +499,5 @@ def test_filter_descendants() -> None:
     parent: Box = Box(start, end, parent=grandparent, name='Parent')
     assert list(grandparent.filter_descendants(filter_descendant)) == []
     child_1: Box = Box(start, end, parent=parent, name='Child 1')
-    child_2: Box = Box(start, end, parent=parent, name='Child 2')
+    Box(start, end, parent=parent, name='Child 2')
     assert list(grandparent.filter_descendants(filter_descendant)) == [child_1]
