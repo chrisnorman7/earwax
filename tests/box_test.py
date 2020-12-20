@@ -447,3 +447,16 @@ def test_stream_sound_looping(
     game.run(window)
     assert s in box.sounds
     s.stop()
+
+
+def test_get_descendants() -> None:
+    """Test the get_descendants method."""
+    start: Point = Point(0, 0, 0)
+    end: Point = Point(5, 5, 5)
+    grandparent: Box = Box(start, end)
+    assert list(grandparent.get_descendants()) == []
+    parent: Box = Box(start, end, parent=grandparent)
+    assert list(grandparent.get_descendants()) == [parent]
+    child_1: Box = Box(start, end, parent=parent)
+    child_2: Box = Box(start, end, parent=parent)
+    assert list(grandparent.get_descendants()) == [parent, child_1, child_2]

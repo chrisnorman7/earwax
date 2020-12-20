@@ -4,7 +4,9 @@ from enum import Enum
 from math import dist
 from pathlib import Path
 from random import uniform
-from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict
+from typing import Generator as GeneratorType
+from typing import List, Optional, Tuple, cast
 
 from attr import Factory, attrib, attrs
 
@@ -665,11 +667,23 @@ class Box(EventDispatcher):
         """Call :meth:`self.close() <earwax.Box.close>` on a schedule."""
         self.close(ctx)
 
+    def get_descendants(self) -> GeneratorType['Box', None, None]:
+        """Yield all children and grandchildren."""
+        child: Box
+        grandchild: Box
+        for child in self.children:
+            yield child
+            for grandchild in child.get_descendants():
+                yield grandchild
+
     def nearest_door(self, same_z: bool = True) -> Optional['Box']:
         """Get the nearest door.
 
-        Returns the nearest :class:`earwax.Box` instance whose
+        Iterates recursively over :attr:`self.children <earwax.Box.children>`,
+        and returns the nearest :class:`earwax.Box` instance whose
         :attr:`~earwax.Box.door` attribute is not ``None``.
+
+        If this instance is itself a door, then it will be returned.
 
         :param same_z: If ``True``, then doors on different levels will not be
             considered.
