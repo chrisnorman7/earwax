@@ -460,3 +460,20 @@ def test_get_descendants() -> None:
     child_1: Box = Box(start, end, parent=parent)
     child_2: Box = Box(start, end, parent=parent)
     assert list(grandparent.get_descendants()) == [parent, child_1, child_2]
+
+
+def test_filter_descendants() -> None:
+    """Test the filter_descendant method."""
+    start: Point = Point(0, 0, 0)
+    end: Point = Point(5, 5, 5)
+
+    def filter_descendant(descendant: Box) -> bool:
+        return descendant.name == 'Child 1'
+
+    grandparent: Box = Box(start, end, name='Grandparent')
+    assert list(grandparent.filter_descendants(filter_descendant)) == []
+    parent: Box = Box(start, end, parent=grandparent, name='Parent')
+    assert list(grandparent.filter_descendants(filter_descendant)) == []
+    child_1: Box = Box(start, end, parent=parent, name='Child 1')
+    child_2: Box = Box(start, end, parent=parent, name='Child 2')
+    assert list(grandparent.filter_descendants(filter_descendant)) == [child_1]

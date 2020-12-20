@@ -6,7 +6,7 @@ from pathlib import Path
 from random import uniform
 from typing import Any, Callable, Dict
 from typing import Generator as GeneratorType
-from typing import List, Optional, Tuple, cast
+from typing import Iterator, List, Optional, Tuple, cast
 
 from attr import Factory, attrib, attrs
 
@@ -675,6 +675,21 @@ class Box(EventDispatcher):
             yield child
             for grandchild in child.get_descendants():
                 yield grandchild
+
+    def filter_descendants(
+        self, f: Callable[['Box'], bool]
+    ) -> Iterator['Box']:
+        """Return a subset of descendants.
+
+        All descendants will be iterated over, and checked with the provided
+        function.
+
+        If ``f(descendant)`` returns ``True``, then the descendant will be
+        yielded.
+
+        :param f: A function to check descendants with.
+        """
+        return filter(f, self.get_descendants())
 
     def nearest_door(self, same_z: bool = True) -> Optional['Box']:
         """Get the nearest door.
