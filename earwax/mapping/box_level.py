@@ -255,7 +255,7 @@ class BoxLevel(Level, EventDispatcher):
                     self.set_coordinates(p)
                     box.dispatch_event('on_footstep', _bearing, p)
                     self.handle_box(box)
-                self.dispatch_event('on_move')
+                    self.dispatch_event('on_move')
             else:
                 self.dispatch_event(
                     'on_move_fail', distance, vertical, _bearing, p
