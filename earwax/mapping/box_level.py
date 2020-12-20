@@ -253,7 +253,7 @@ class BoxLevel(Level, EventDispatcher):
                     self.collide(box, p)
                 else:
                     self.set_coordinates(p)
-                    box.dispatch_event('on_footstep', p)
+                    box.dispatch_event('on_footstep', _bearing, p)
                     self.handle_box(box)
                 self.dispatch_event('on_move')
             else:

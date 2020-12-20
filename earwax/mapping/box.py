@@ -423,7 +423,7 @@ class Box(EventDispatcher):
             n += 1
         return boxes
 
-    def on_footstep(self, coordinates: Point) -> None:
+    def on_footstep(self, bearing: float, coordinates: Point) -> None:
         """Play an appropriate surface sound.
 
         This function will be called by the Pyglet event framework, and should
