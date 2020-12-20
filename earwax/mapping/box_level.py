@@ -376,5 +376,4 @@ class BoxLevel(Level, EventDispatcher):
         :param other: The target coordinates.
         """
         angle: float = self.coordinates.angle_between(other)
-        print(angle)
         return normalise_angle(angle - self.bearing)
