@@ -678,11 +678,9 @@ class Box(EventDispatcher):
     def get_descendants(self) -> GeneratorType['Box', None, None]:
         """Yield all children and grandchildren."""
         child: Box
-        grandchild: Box
         for child in self.children:
             yield child
-            for grandchild in child.get_descendants():
-                yield grandchild
+            yield from child.get_descendants()
 
     def filter_descendants(
         self, f: Callable[['Box'], bool]
