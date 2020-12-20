@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from attr import Factory, attrs
 from pyglet.window import Window, key
-from synthizer import GlobalFdnReverb
+from synthizer import Context, GlobalFdnReverb
 
 from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, Game, Point,
                     play_and_destroy)
@@ -50,22 +50,27 @@ class MyBox(Box):
     surface_sound: Optional[Path] = None
     wall_sound: Path = Factory(lambda: sounds_directory / 'collide.wav')
 
-    def on_collide(self, coordinates: Point) -> None:
-        """Play the right sound."""
-        if game.audio_context is not None and self.wall_sound is not None:
-            play_and_destroy(
-                game.audio_context, self.wall_sound,
-                position=coordinates.coordinates, reverb=self.reverb
-            )
-        return super().on_collide(coordinates)
 
-    def on_footstep(self) -> None:
-        """Play a footstep sound."""
-        if game.audio_context is not None and self.surface_sound is not None:
+class MyBoxLevel(BoxLevel):
+    """Override a couple of methods."""
+
+    def collide(self, box: Box, coordinates: Point) -> None:
+        """Play the appropriate sound."""
+        if self.game.audio_context is not None and box.wall_sound is not None:
             play_and_destroy(
-                game.audio_context, self.surface_sound, reverb=self.reverb
+                self.game.audio_context, box.wall_sound,
+                position=coordinates.coordinates, reverb=box.reverb
             )
-        return super().on_footstep()
+        return super().collide(box, coordinates)
+
+    def on_move(self) -> None:
+        """Play a footstep sound."""
+        box: Optional[Box] = self.get_current_box()
+        if box is not None:
+            ctx: Optional[Context] = self.game.audio_context
+            if ctx is not None and box.surface_sound is not None:
+                play_and_destroy(ctx, box.surface_sound, reverb=box.reverb)
+        return super().on_move()
 
 
 game: Game = Game(name='Map Demo')
@@ -77,22 +82,31 @@ def before_run() -> None:
     office_reverb: OfficeReverb = OfficeReverb(game.audio_context)
 
     def finalise_office(office: MyBox):
-        """Add a wall and a door."""
+        """Add walls and a door."""
         door: Door = Door()
-        start: Point = office.start + Point(3, -1, 0)
+        start: Point = office.start + Point(3, 0, 0)
         end: Point = Point(start.x, start.y, office.end.z)
         doors.append(
             MyBox(
                 start, end, door=door, name=f'Door to {office.name}',
-                surface_sound=office.surface_sound, reverb=office_reverb
+                surface_sound=office.surface_sound, reverb=office_reverb,
+                parent=office
             )
         )
-        walls.append(
-            MyBox(
-                office.bounds.bottom_back_right + Point(1, 0, 0),
-                office.end + Point(1, 0, 0),
-                type=BoxTypes.solid
-            )
+        walls.extend(
+            [
+                MyBox(
+                    office.bounds.bottom_back_right + Point(1, 0, 0),
+                    office.end + Point(1, 0, 0),
+                    type=BoxTypes.solid
+                ), MyBox(
+                    office.start, end - Point(1, 0, 0), parent=office,
+                    type=BoxTypes.solid
+                ), MyBox(
+                    start + Point(1, 0, 0), office.bounds.top_back_right,
+                    parent=office, type=BoxTypes.solid
+                )
+            ]
         )
 
     offices: List[MyBox] = MyBox.create_row(
@@ -108,16 +122,12 @@ def before_run() -> None:
         name='Corridor', surface_sound=footsteps_directory / 'corridor',
         reverb=corridor_reverb
     )
-    MyBox(
-        corridor.bounds.bottom_front_left, corridor.end, type=BoxTypes.solid,
-        parent=corridor
-    )
-    boxes: List[MyBox] = offices + walls + doors + [corridor]
+    boxes: List[MyBox] = offices + walls + [corridor]
     box = MyBox.create_fitted(
         boxes, name='Main Box', type=BoxTypes.solid,
         pad_start=Point(-1, -1, -1), pad_end=Point(1, 1, 1)
     )
-    level: BoxLevel = BoxLevel(game, box, coordinates=corridor.start)
+    level: MyBoxLevel = MyBoxLevel(game, box, coordinates=corridor.start)
     level.action('Show coordinates', symbol=key.C)(level.show_coordinates())
     level.action('Show facing direction', symbol=key.F)(level.show_facing())
     level.action('Walk forwards', symbol=key.W, interval=0.5)(level.move())
