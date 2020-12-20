@@ -423,15 +423,16 @@ class Box(EventDispatcher):
             n += 1
         return boxes
 
-    def on_footstep(self) -> None:
+    def on_footstep(self, coordinates: Point) -> None:
         """Play an appropriate surface sound.
 
         This function will be called by the Pyglet event framework, and should
         be called when a player is walking on this box.
 
-        It is worth noting that this event is not dispatched by earwax at this
-        time. As such, it is up to the programmer when - and in deed if - it is
-        dispatched.
+        This event is dispatched by :class:`earwax.BoxLevel.move` upon a
+        successful move.
+
+        :param coordinates: The coordinates the player has just moved to.
         """
         pass
 

@@ -1,7 +1,7 @@
 """Provides the BoxLevel class."""
 
 from math import cos, sin
-from typing import TYPE_CHECKING, Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 from attr import attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
@@ -11,8 +11,6 @@ try:
 except ModuleNotFoundError:
     EventDispatcher = object
 
-if TYPE_CHECKING:
-    from synthizer import Context
 
 from ..level import Level
 from ..point import Point, PointDirections
@@ -249,15 +247,13 @@ class BoxLevel(Level, EventDispatcher):
             p: Point = Point(x, y, z)
             box: Optional[Box] = self.box.get_containing_box(p.floor())
             if box is not None:
-                ctx: Optional['Context'] = self.game.audio_context
                 if box.is_wall(p) or (
                     box.door is not None and not box.door.open
                 ):
                     self.collide(box, p)
-                    box.play_sound(ctx, box.wall_sound)
                 else:
                     self.set_coordinates(p)
-                    box.dispatch_event('on_footstep')
+                    box.dispatch_event('on_footstep', p)
                     self.handle_box(box)
                 self.dispatch_event('on_move')
             else:
