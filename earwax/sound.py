@@ -55,9 +55,10 @@ def get_buffer(protocol: str, path: str) -> Buffer:
 
 def play_path(
     context: Context, path: Path,
-    generator: Optional[Generator] = None, source: Optional[Source] = None,
-    position: Optional[PositionTuple] = None,
-    reverb: Optional[GlobalFdnReverb] = None
+    generator: Optional[BufferGenerator] = None,
+    source: Optional[Source] = None, position: Optional[PositionTuple] = None,
+    reverb: Optional[GlobalFdnReverb] = None,
+    pitch_bend: Optional[float] = None
 ) -> Tuple[BufferGenerator, Source]:
     """Plays the given sound file (or selects one from the given directory).
 
@@ -90,16 +91,22 @@ def play_path(
     :param reverb: A reverb instance to connect ``source`` to.
 
         If ``None`` is provided, no connection will be performed.
+
+    :param pitch_bend: The value for pitch bending in Synthizer.
+
+        If this value is ``None``, then no pitch bending will be applied.
     """
     if path.is_dir():
         path = choice(list(path.iterdir()))
         return play_path(
             context, path, generator=generator, source=source,
-            position=position, reverb=reverb
+            position=position, reverb=reverb, pitch_bend=pitch_bend
         )
     if generator is None:
         generator = BufferGenerator(context)
     generator.buffer = get_buffer('file', str(path))
+    if pitch_bend is not None:
+        generator.pitch_bend = pitch_bend
     if source is None:
         if position is None:
             source = DirectSource(context)
