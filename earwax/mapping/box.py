@@ -11,12 +11,12 @@ from attr import Factory, attrib, attrs
 try:
     from pyglet.clock import schedule_once, unschedule
     from pyglet.event import EventDispatcher
-    from synthizer import Context, Generator, Source3D
+    from synthizer import Context, Generator, GlobalFdnReverb, Source3D
 except ModuleNotFoundError:
     schedule_once = None
     unschedule = None
     EventDispatcher = object
-    Context, Generator, Source3D = (None, None, None)
+    Context, Generator, GlobalFdnReverb, Source3D = (None, None, None, None)
 
 from ..point import Point
 from ..sound import play_path, stream_sound
@@ -255,7 +255,7 @@ class Box(EventDispatcher):
     type: BoxTypes = Factory(lambda: BoxTypes.empty)
     door: Optional[Door] = None
     portal: Optional[Portal] = None
-
+    reverb: Optional[GlobalFdnReverb] = None
     sounds: List[BoxSound] = attrib(
         default=Factory(list), init=False, repr=False
     )
@@ -555,6 +555,9 @@ class Box(EventDispatcher):
         The resulting sound will be added to the list of sounds for the oldest
         parent, as retrieved by :class:`~earwax.Box.get_oldest_parent`.
 
+        if :attr:`self.reverb <earwax.Box.reverb>` is not ``None``, then the
+        sound will have that reverb applied.
+
         :param ctx: The ``synthizer.Context`` instance to play the sound
             through. If this value is ``None``, this method does nothing.
 
@@ -573,6 +576,8 @@ class Box(EventDispatcher):
                     ctx, path, position=self.start.coordinates
                 )
             )
+            if self.reverb is not None:
+                ctx.config_route(sound.source, self.reverb)
             sound.generator.looping = looping
             top_level.sounds.append(sound)
 
