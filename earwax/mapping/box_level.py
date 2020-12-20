@@ -1,6 +1,6 @@
 """Provides the BoxLevel class."""
 
-from math import cos, dist, sin
+from math import cos, sin
 from typing import TYPE_CHECKING, Callable, List, Optional, Tuple
 
 from attr import attrib, attrs
@@ -355,9 +355,12 @@ class BoxLevel(Level, EventDispatcher):
                 return self.handle_portal(box)
             child: Box
             for child in self.box.children:
-                if child.door is not None and dist(
-                    self.coordinates.coordinates, child.start.coordinates
-                ) <= door_distance:
+                if (
+                    child.door is not None and
+                    self.coordinates.distance_between(
+                        child.start
+                    ) <= door_distance
+                ):
                     return self.handle_door(child)
             if box is not None:
                 box.dispatch_event('on_activate')
