@@ -62,28 +62,10 @@ class MyBox(Box):
     def on_footstep(self) -> None:
         """Play a footstep sound."""
         if game.audio_context is not None and self.surface_sound is not None:
-            play_and_destroy(game.audio_context, self.surface_sound, reverb=self.reverb)
+            play_and_destroy(
+                game.audio_context, self.surface_sound, reverb=self.reverb
+            )
         return super().on_footstep()
-
-
-def finalise_office(office: MyBox):
-    """Add a wall and a door."""
-    door: Door = Door()
-    start: Point = office.start + Point(3, -1, 0)
-    end: Point = Point(start.x, start.y, office.end.z)
-    doors.append(
-        MyBox(
-            start, end, door=door, name=f'Door to {office.name}',
-            surface_sound=office.surface_sound
-        )
-    )
-    walls.append(
-        MyBox(
-            office.bounds.bottom_back_right + Point(1, 0, 0),
-            office.end + Point(1, 0, 0),
-            type=BoxTypes.solid
-        )
-    )
 
 
 game: Game = Game(name='Map Demo')
@@ -93,6 +75,26 @@ game: Game = Game(name='Map Demo')
 def before_run() -> None:
     """Create rooms and level."""
     office_reverb: OfficeReverb = OfficeReverb(game.audio_context)
+
+    def finalise_office(office: MyBox):
+        """Add a wall and a door."""
+        door: Door = Door()
+        start: Point = office.start + Point(3, -1, 0)
+        end: Point = Point(start.x, start.y, office.end.z)
+        doors.append(
+            MyBox(
+                start, end, door=door, name=f'Door to {office.name}',
+                surface_sound=office.surface_sound, reverb=office_reverb
+            )
+        )
+        walls.append(
+            MyBox(
+                office.bounds.bottom_back_right + Point(1, 0, 0),
+                office.end + Point(1, 0, 0),
+                type=BoxTypes.solid
+            )
+        )
+
     offices: List[MyBox] = MyBox.create_row(
         Point(0, 4, 0), Point(7, 10, 2), 5, Point(2, 0, 0),
         get_name=lambda i: f'Office {i + 1}', on_create=finalise_office,
@@ -103,7 +105,8 @@ def before_run() -> None:
     corridor: MyBox = MyBox(
         offices[0].bounds.bottom_back_left - Point(0, 4, 0),
         offices[-1].bounds.top_back_right - Point(0, 1, 0),
-        name='Corridor', surface_sound=footsteps_directory / 'corridor', reverb=corridor_reverb
+        name='Corridor', surface_sound=footsteps_directory / 'corridor',
+        reverb=corridor_reverb
     )
     MyBox(
         corridor.bounds.bottom_front_left, corridor.end, type=BoxTypes.solid,
