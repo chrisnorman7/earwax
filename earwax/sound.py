@@ -12,12 +12,13 @@ except ModuleNotFoundError:
     pass
 try:
     from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
-                           Generator, Source, Source3D, StreamingGenerator)
+                           Generator, GlobalFdnReverb, Source, Source3D,
+                           StreamingGenerator)
 except ModuleNotFoundError:
     (
         Buffer, BufferGenerator, Context, DirectSource, Generator, Source,
-        Source3D, StreamingGenerator
-    ) = (None, None, None, None, None, None, None, None)
+        Source3D, StreamingGenerator, GlobalFdnReverb
+    ) = (None, None, None, None, None, None, None, None, None)
 
 buffers: Dict[str, Buffer] = {}
 
@@ -55,7 +56,8 @@ def get_buffer(protocol: str, path: str) -> Buffer:
 def play_path(
     context: Context, path: Path,
     generator: Optional[Generator] = None, source: Optional[Source] = None,
-    position: Optional[PositionTuple] = None
+    position: Optional[PositionTuple] = None,
+    reverb: Optional[GlobalFdnReverb] = None
 ) -> Tuple[BufferGenerator, Source]:
     """Plays the given sound file (or selects one from the given directory).
 
@@ -84,12 +86,16 @@ def play_path(
 
         If position is not ``None``, then it will be applied to the source. If
         ``source`` is ``None``, then a ``Source3D`` instance will be created.
+
+    :param reverb: A reverb instance to connect ``source`` to.
+
+        If ``None`` is provided, no connection will be performed.
     """
     if path.is_dir():
         path = choice(list(path.iterdir()))
         return play_path(
             context, path, generator=generator, source=source,
-            position=position
+            position=position, reverb=reverb
         )
     if generator is None:
         generator = BufferGenerator(context)
@@ -101,13 +107,16 @@ def play_path(
             source = Source3D(context)
     if isinstance(source, Source3D) and position is not None:
         source.position = position
+    if reverb is not None:
+        context.config_route(source, reverb)
     source.add_generator(generator)
     return (generator, source)
 
 
 def stream_sound(
     context: Context, protocol: str, path: str,
-    source: Optional[Source] = None, position: Optional[PositionTuple] = None
+    source: Optional[Source] = None, position: Optional[PositionTuple] = None,
+    reverb: Optional[GlobalFdnReverb] = None
 ) -> Tuple[StreamingGenerator, Source]:
     """Stream a sound.
 
@@ -133,6 +142,10 @@ def stream_sound(
 
         If position is not ``None``, then it will be applied to the source. If
         ``source`` is ``None``, then a ``Source3D`` instance will be created.
+
+    :param reverb: A reverb instance to connect ``source`` to.
+
+        If ``None`` is provided, no connection will be performed.
     """
     generator: StreamingGenerator = StreamingGenerator(context, protocol, path)
     if source is None:
@@ -142,6 +155,8 @@ def stream_sound(
             source = Source3D(context)
     if isinstance(source, Source3D) and position is not None:
         source.position = position
+    if reverb is not None:
+        context.config_route(source, reverb)
     source.add_generator(generator)
     return (generator, source)
 

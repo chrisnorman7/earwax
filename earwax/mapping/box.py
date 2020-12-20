@@ -573,11 +573,10 @@ class Box(EventDispatcher):
             top_level: 'Box' = self.get_oldest_parent()
             sound: BoxSound = BoxSound(
                 top_level, *play_path(
-                    ctx, path, position=self.start.coordinates
+                    ctx, path, position=self.start.coordinates,
+                    reverb=self.reverb
                 )
             )
-            if self.reverb is not None:
-                ctx.config_route(sound.source, self.reverb)
             sound.generator.looping = looping
             top_level.sounds.append(sound)
 
@@ -603,6 +602,9 @@ class Box(EventDispatcher):
         list of the oldest parent, as returned by :attr:`self.get_oldest_parent
         <earwax.Box.get_oldest_parent>`.
 
+        if :attr:`self.reverb <earwax.Box.reverb>` is not ``None``, then the
+        sound will have that reverb applied.
+
         :param ctx: The synthizer audio context to play through.
 
         :param protocol: The protocol value to pass to
@@ -616,7 +618,8 @@ class Box(EventDispatcher):
         top_level: 'Box' = self.get_oldest_parent()
         sound: BoxSound = BoxSound(
             top_level, *stream_sound(
-                ctx, protocol, path, position=self.start.coordinates
+                ctx, protocol, path, position=self.start.coordinates,
+                reverb=self.reverb
             )
         )
         sound.generator.looping = looping
