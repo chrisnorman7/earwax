@@ -221,6 +221,12 @@ class Box(EventDispatcher):
 
     :ivar ~earwax.Box.name: An optional name for this box.
 
+    :ivar ~earwax.Box.surface_sound: The sound that should be heard when
+        walking in this box.
+
+    :ivar ~earwax.Box.wall_sound: The sound that should be heard when colliding
+        with walls in this box.
+
     :ivar ~earwax.Box.parent: The box that contains this one.
 
         If you supply a ``parent`` argument to the constructor, this box will
@@ -250,6 +256,8 @@ class Box(EventDispatcher):
     end: Point
 
     name: Optional[str] = None
+    surface_sound: Optional[Path] = None
+    wall_sound: Optional[Path] = None
 
     parent: Optional['Box'] = None
     children: List['Box'] = attrib(Factory(list), repr=False)

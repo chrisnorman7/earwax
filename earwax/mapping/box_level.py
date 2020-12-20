@@ -6,10 +6,14 @@ from typing import Callable, List, Optional, Tuple
 from attr import attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
 
+from ..sound import play_and_destroy
+
 try:
     from pyglet.event import EventDispatcher
+    from synthizer import Context
 except ModuleNotFoundError:
     EventDispatcher = object
+    Context = None
 
 
 from ..level import Level
@@ -96,7 +100,11 @@ class BoxLevel(Level, EventDispatcher):
         An event that will be dispatched when the
         :meth:`~earwax.BoxLevel.move` action is used.
         """
-        pass
+        box: Optional[Box] = self.get_current_box()
+        if box is not None:
+            ctx: Optional[Context] = self.game.audio_context
+            if ctx is not None and box.surface_sound is not None:
+                play_and_destroy(ctx, box.surface_sound, reverb=box.reverb)
 
     def on_move_fail(
         self, distance: float, vertical: Optional[float],
@@ -211,6 +219,11 @@ class BoxLevel(Level, EventDispatcher):
 
         :param coordinates: The coordinates the player was trying to reach.
         """
+        if self.game.audio_context is not None and box.wall_sound is not None:
+            play_and_destroy(
+                self.game.audio_context, box.wall_sound,
+                position=coordinates.coordinates, reverb=box.reverb
+            )
         box.dispatch_event('on_collide', coordinates)
 
     def move(
