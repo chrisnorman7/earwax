@@ -319,7 +319,7 @@ def schedule_generator_destruction(
     schedule_once(inner, generator.buffer.get_length_in_seconds() * multiplier)
 
 
-def play_and_destroy(*args, **kwargs) -> None:
+def play_and_destroy(*args, **kwargs) -> Tuple[BufferGenerator, Source]:
     """Play a path, cleaning up the generator afterwards.
 
     Calls :meth:`~earwax.play_path` with the given ``args`` and ``kwargs``,
@@ -334,6 +334,7 @@ def play_and_destroy(*args, **kwargs) -> None:
     source: Source
     generator, source = play_path(*args, **kwargs)
     schedule_generator_destruction(generator)
+    return (generator, source)
 
 
 def play_paths(ctx: Context, paths: List[Path], gap: float = 0.1) -> None:
