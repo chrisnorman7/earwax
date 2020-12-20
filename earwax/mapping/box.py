@@ -710,7 +710,7 @@ class Box(EventDispatcher):
         descendant: 'Box'
         for descendant in self.filter_descendants(
             lambda b: b.door is not None and (
-                b.start.z == self.start.z or not same_z
+                b.start.z == start.z or not same_z
             )
         ):
             d: float = start.distance_between(descendant.start)
@@ -738,7 +738,7 @@ class Box(EventDispatcher):
         descendant: 'Box'
         for descendant in self.filter_descendants(
             lambda b: b.portal is not None and (
-                b.start.z == self.start.z or not same_z
+                b.start.z == start.z or not same_z
             )
         ):
             d: float = start.distance_between(descendant.start)

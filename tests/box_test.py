@@ -241,6 +241,15 @@ def test_nearest_door_with_descendants() -> None:
         parent=office
     )
     assert foundation.nearest_door(foundation.start) is door
+    assert foundation.nearest_door(Point(0, 0, 1)) is None
+    assert foundation.nearest_door(Point(0, 0, 1), same_z=False) is door
+    second_door: Box = Box(
+        foundation.start, Point(0, 0, foundation.end.z), door=Door(),
+        parent=foundation
+    )
+    assert foundation.nearest_door(foundation.start) is second_door
+    assert foundation.nearest_door(Point(0, 0, 1)) is None
+    assert foundation.nearest_door(Point(0, 0, 1), same_z=False) is second_door
 
 
 def test_nearest_portal(box_level: BoxLevel) -> None:
@@ -267,6 +276,18 @@ def test_nearest_portal_with_descendants(game: Game, box: Box) -> None:
         ), parent=office
     )
     assert foundation.nearest_portal(foundation.start) is portal
+    assert foundation.nearest_portal(Point(0, 0, 1)) is None
+    assert foundation.nearest_portal(Point(0, 0, 1), same_z=False) is portal
+    second_portal: Box = Box(
+        foundation.start, Point(0, 0, foundation.end.z), portal=Portal(
+            level, Point(0, 0, 0)
+        ), parent=foundation
+    )
+    assert foundation.nearest_portal(foundation.start) is second_portal
+    assert foundation.nearest_portal(Point(0, 0, 1)) is None
+    assert foundation.nearest_portal(
+        Point(0, 0, 1), same_z=False
+    ) is second_portal
 
 
 def test_bounds() -> None:
