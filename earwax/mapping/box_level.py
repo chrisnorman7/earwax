@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 
 from ..level import Level
 from ..point import Point, PointDirections
-from ..sound import play_and_destroy
 from ..walking_directions import walking_directions
 from .box import Box
 from .portal import Portal
@@ -195,11 +194,8 @@ class BoxLevel(Level, EventDispatcher):
 
         The coordinates have already been set, and the ``on_footstep`` event
         dispatched, so all that is left is to speak the name of the new box, if
-        it is different to the last one, and play the ``surface_sound`` sound.
+        it is different to the last one, and store the new box.
         """
-        ctx: Optional['Context'] = self.game.audio_context
-        if box.surface_sound is not None and ctx is not None:
-            play_and_destroy(ctx, box.surface_sound)
         if box is not self.current_box:
             if (
                 self.current_box is not None and

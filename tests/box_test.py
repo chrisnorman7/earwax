@@ -18,7 +18,6 @@ def test_init(box: Box) -> None:
     assert isinstance(box, Box)
     assert box.start == Point(1, 2, 3)
     assert box.end == Point(4, 5, 6)
-    assert box.surface_sound is None
     assert box.type is BoxTypes.empty
     b: Box = Box(box.start, box.end, parent=box)
     assert b.parent is box

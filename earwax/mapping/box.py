@@ -242,14 +242,6 @@ class Box(EventDispatcher):
 
         This list is used so that filters can be applied when players move.
 
-    :ivar ~earwax.Box.surface_sound: A path to either the sound that should be
-        heard when a player enters this box, or the path of a directory from
-        which a random file should be chosen.
-
-    :ivar ~earwax.Box.wall_sound: A path to either the sound that should be
-        heard when a player collides with this box, or the path of a directory
-        from which a random file should be chosen.
-
     :ivar ~earwax.Box.bounds: The bounds of this box.
     """
 
@@ -267,8 +259,6 @@ class Box(EventDispatcher):
     sounds: List[BoxSound] = attrib(
         default=Factory(list), init=False, repr=False
     )
-    surface_sound: Optional[Path] = None
-    wall_sound: Optional[Path] = None
     bounds: BoxBounds = attrib(repr=False, init=False)
 
     def __attrs_post_init__(self) -> None:
