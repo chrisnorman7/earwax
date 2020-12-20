@@ -366,3 +366,15 @@ class BoxLevel(Level, EventDispatcher):
     def get_current_box(self) -> Optional[Box]:
         """Get the box that lies at the current coordinates."""
         return self.box.get_containing_box(self.coordinates.floor())
+
+    def get_angle_between(self, other: Point) -> float:
+        """Return the angle between the perspective and the other coordinates.
+
+        This function takes into account :attr:`self.bearing
+        <earwax.BoxLevel.bearing>`.
+
+        :param other: The target coordinates.
+        """
+        angle: float = self.coordinates.angle_between(other)
+        print(angle)
+        return normalise_angle(angle - self.bearing)

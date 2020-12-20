@@ -222,3 +222,19 @@ def test_get_current_box(game: Game) -> None:
     assert door.parent is third
     l.set_coordinates(door.start)
     assert l.get_current_box() is door
+
+
+def test_get_angle_between(game: Game) -> None:
+    """Test the get_angle_between method."""
+    l: BoxLevel = BoxLevel(game, Box(Point(0, 0, 0), Point(0, 0, 0)))
+    assert l.coordinates == Point(0, 0, 0)
+    assert l.bearing == 0
+    assert l.get_angle_between(Point(0, 1, 0)) == 0
+    assert l.get_angle_between(Point(0, -1, 0)) == 180
+    assert l.get_angle_between(Point(1, 1, 0)) == 45
+    l.set_bearing(45)
+    assert l.get_angle_between(Point(1, 1, 0)) == 0
+    l.set_bearing(180)
+    assert l.get_angle_between(Point(0, -1, 0)) == 0
+    l.set_bearing(270)
+    assert l.get_angle_between(Point(1, -1, 0)) == 225
