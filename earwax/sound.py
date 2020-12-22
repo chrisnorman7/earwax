@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from random import choice
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from attr import Factory, attrib, attrs
 
@@ -22,7 +22,13 @@ except ModuleNotFoundError:
 
 buffers: Dict[str, Buffer] = {}
 
-PositionTuple = Tuple[float, float, float]
+
+class SoundError(Exception):
+    """The base exception for all sounds exceptions."""
+
+
+class AlreadyDestroyed(SoundError):
+    """This sound has already been destroyed."""
 
 
 def get_buffer(protocol: str, path: str) -> Buffer:
@@ -53,328 +59,240 @@ def get_buffer(protocol: str, path: str) -> Buffer:
     return buffers[url]
 
 
-def play_path(
-    context: Context, path: Path,
-    generator: Optional[BufferGenerator] = None,
-    source: Optional[Source] = None, position: Optional[PositionTuple] = None,
-    reverb: Optional[GlobalFdnReverb] = None,
-    pitch_bend: Optional[float] = None, gain: Optional[float] = None
-) -> Tuple[BufferGenerator, Source]:
-    """Plays the given sound file (or selects one from the given directory).
-
-    :param ctx: The ``synthizer.Context`` to play through.
-
-    :param path: Either the path to a single sound file, or a directory
-        containing 1 or more sound files.
-
-        If ``path`` is a directory, then a random sound file will be selected
-        from it and played instead.
-
-    :param generator: A ready-to-use ``BufferGenerator``.
-
-        If ``None`` is provided, then a new ``BufferGenerator`` instance will
-        be created and returned.
-
-    :param source: A ready-to-use source.
-
-        If ``None`` is provided, an appropriate ``Source`` instance will be
-        used.
-
-    :param position: The position the new sound should play at.
-
-        If ``None`` is provided, then no position will be set. If ``source`` is
-        ``None``, then a ``DirectSource`` object will be created for you.
-
-        If position is not ``None``, then it will be applied to the source. If
-        ``source`` is ``None``, then a ``Source3D`` instance will be created.
-
-    :param reverb: A reverb instance to connect ``source`` to.
-
-        If ``None`` is provided, no connection will be performed.
-
-    :param pitch_bend: The value for pitch bending in Synthizer.
-
-        If this value is ``None``, then no pitch bending will be applied.
-
-    :param gain: The gain you want ``source`` to play at.
-    """
-    if path.is_dir():
-        path = choice(list(path.iterdir()))
-        return play_path(
-            context, path, generator=generator, source=source,
-            position=position, reverb=reverb, pitch_bend=pitch_bend, gain=gain
-        )
-    if generator is None:
-        generator = BufferGenerator(context)
-    generator.buffer = get_buffer('file', str(path))
-    if pitch_bend is not None:
-        generator.pitch_bend = pitch_bend
-    if source is None:
-        if position is None:
-            source = DirectSource(context)
-        else:
-            source = Source3D(context)
-    if isinstance(source, Source3D) and position is not None:
-        source.position = position
-    if gain is not None:
-        source.gain = gain
-    if reverb is not None:
-        context.config_route(source, reverb)
-    source.add_generator(generator)
-    return (generator, source)
-
-
-def stream_sound(
-    context: Context, protocol: str, path: str,
-    source: Optional[Source] = None, position: Optional[PositionTuple] = None,
-    reverb: Optional[GlobalFdnReverb] = None, gain: Optional[float] = None
-) -> Tuple[StreamingGenerator, Source]:
-    """Stream a sound.
-
-    Using this method, you can stream a sound using Synthizer's streaming API.
-
-    :param context: The synthizer context to play through.
-
-    :param protocol: The protocol parameter to pass to
-        ``synthizer.StreamingGenerator``.
-
-    :param path: The path parameter to pass to
-        ``synthizer.StreamingGenerator``.
-
-    :param source: A ready-to-use source.
-
-        If ``None`` is provided, an appropriate ``Source`` instance will be
-        used.
-
-    :param position: The position the new sound should play at.
-
-        If ``None`` is provided, then no position will be set. If ``source`` is
-        ``None``, then a ``DirectSource`` object will be created for you.
-
-        If position is not ``None``, then it will be applied to the source. If
-        ``source`` is ``None``, then a ``Source3D`` instance will be created.
-
-    :param reverb: A reverb instance to connect ``source`` to.
-
-        If ``None`` is provided, no connection will be performed.
-
-    :param gain: The gain you want ``source`` to play at.
-    """
-    generator: StreamingGenerator = StreamingGenerator(context, protocol, path)
-    if source is None:
-        if position is None:
-            source = DirectSource(context)
-        else:
-            source = Source3D(context)
-    if isinstance(source, Source3D) and position is not None:
-        source.position = position
-    if gain is not None:
-        source.gain = gain
-    if reverb is not None:
-        context.config_route(source, reverb)
-    source.add_generator(generator)
-    return (generator, source)
-
-
 @attrs(auto_attribs=True)
-class SimpleInterfaceSoundPlayer:
-    """An object which plays a sound whenever its play method is called.
+class Sound:
+    """The base class for all sounds.
 
-    The same sound will be used, and it will be restarted on each call to play.
+    :ivar ~earwax.Sound.context: The synthizer context to connect to.
 
-    No panning or fx are applied.
+    :ivar ~earwax.Sound.source: The synthizer source to play through.
 
-    Here is a basic example::
+    :ivar ~earwax.Sound.generator: The sound generator.
 
-        from time import sleep
-        from synthizer import Context, BufferGenerator, initialize, shutdown
-        from earwax.sound import get_buffer, SimpleInterfaceSoundPlayer
-        initialize()
-        c = Context()
-        g = BufferGenerator(c)
-        b = get_buffer('file', 'sound.wav')
-        g.buffer = b
-        p = SimpleInterfaceSoundPlayer(c, g)
-        p.play()
-        sleep(2)
-        shutdown()
+    :ivar ~earwax.Sound.buffer: The buffer that feeds
+        :attr:`~earwax.Sound.generator`.
 
-    :ivar ~earwax.SimpleInterfaceSoundPlayer.context: The audio context to use.
-
-    :ivar ~earwax.SimpleInterfaceSoundPlayer.generator: The generator to use.
-
-    :ivar ~earwax.SimpleInterfaceSoundPlayer.source: The source to play
-        through.
-
-    :ivar ~earwax.SimpleInterfaceSoundPlayer.gain: The gain to set on
-        :attr:`self.source <earwax.SimpleInterfaceSoundPlayer.source>`, if no
-        source is provided when constructing instances of this class.
+        If this value is ``None``, then this sound is a stream.
     """
 
     context: Context
+    source: Source
     generator: Generator
-    source: Optional[Source] = None
-    gain: float = 1.0
+    buffer: Optional[Buffer]
+    _valid: bool = Factory(lambda: True)
 
-    def play(self) -> None:
-        """Play the sound that is attached to this instance.
+    @classmethod
+    def from_stream(
+        cls, context: Context, source: Source, protocol: str, path: str
+    ) -> 'Sound':
+        """Create a sound that streams from the given arguments.
 
-        Plays :attr:`self.generator
-        <earwax.SimpleInterfaceSoundPlayer.generator>`.
+        :param context: The synthizer context to use.
+
+        :param source: The source to play through.
+
+        :param protocol: The protocol argument for
+            ``synthizer.StreamingGenerator``.
+
+        :param path: The path parameter for ``synthizer.StreamingGenerator``.
         """
-        if self.source is None:
-            self.source = DirectSource(self.context)
-            self.source.gain = self.gain
-            self.source.add_generator(self.generator)
-        self.generator.position = 0
+        generator: StreamingGenerator = StreamingGenerator(
+            context, protocol, path
+        )
+        source.add_generator(generator)
+        return cls(context, source, generator, None)
 
+    @classmethod
+    def from_path(
+        cls, context: Context, source: Source, path: Path
+    ) -> 'Sound':
+        """Create a sound that plays the given path.
 
-@attrs(auto_attribs=True)
-class AdvancedInterfaceSoundPlayer:
-    """An interface player that can play any sound you throw at it.
+        :param context: The synthizer context to use.
 
-    To play a sound, pass a path to the
-    :meth:`~earwax.AdvancedInterfaceSoundPlayer.play_path` method::
+        :param source: The synthizer source to play through.
 
-        from pathlib import Path
-        from time import sleep
-        from synthizer import Context, initialized
-        from earwax import AdvancedInterfaceSoundPlayer
-        with initialized():
-            c = Context()
-            p = AdvancedInterfaceSoundPlayer(c)
-            p.play_path(Path('sound.wav'))
-            sleep(2)
-            p.play_path(Path('move.wav'))
-            sleep(2)
+        :param path: The path to play.
 
-    :ivar ~earwax.AdvancedInterfaceSoundPlayer.play_files: If True, then files
-        will be played.
-
-    :ivar ~earwax.AdvancedInterfaceSoundPlayer.play_directories: If True, then
-        a random file will be picked from any directory that is passed to the
-        :meth:`~earwax.AdvancedInterfaceSoundPlayer.play_path` method.
-    """
-
-    context: Context
-    play_files: bool = True
-    play_directories: bool = False
-    generator: BufferGenerator = attrib()
-
-    @generator.default
-    def get_generator(
-        instance: 'AdvancedInterfaceSoundPlayer'
-    ) -> BufferGenerator:
-        """Return the default value.
-
-        Makes a ``BufferGenerator`` instance, bound to :attr:`self.context
-        <earwax.AdvancedInterfaceSoundPlayer.context>`.
-
-        :param instance: The instance to use.
-        """
-        return BufferGenerator(instance.context)
-
-    gain: float = 1.0
-    source: Source = attrib()
-
-    @source.default
-    def get_source(instance: 'AdvancedInterfaceSoundPlayer') -> Source:
-        """Return a default value.
-
-        Gets a ``DirectSource`` instance, bound to :attr:`self.context
-        <earwax.AdvancedInterfaceSoundPlayer>`, with a gain value of
-        :attr:`self.gain <earwax.AdvancedInterfaceSoundPlayer>`.
-        """
-        s: DirectSource = DirectSource(instance.context)
-        s.gain = instance.gain
-        return s
-
-    def play_path(self, path: Path) -> None:
-        """Play the given path.
-
-        If :attr:`self.play_directories
-        <earwax.AdvancedInterfaceSoundPlayer.play_directories>` evaluates to
-        True, and the given path represents a directory, play a random file
-        from that directory. Otherwise, if :meth:`self.play_files
-        <earwax.AdvancedInterfaceSoundPlayer.play_files>` evaluates to True,
-        play the given path.
+            If the given path is a directory, then a random file from that
+            directory will be chosen.
         """
         if path.is_dir():
-            if not self.play_directories:
-                return
-        elif path.is_file():
-            if not self.play_files:
-                return
-        else:
-            raise NotImplementedError(f'No clue how to play {path}.')
-        self.buffer, self.source = play_path(
-            self.context, path, generator=self.generator, source=self.source
-        )
+            return cls.from_path(context, source, choice(list(path.iterdir())))
+        buffer: Buffer = get_buffer('file', str(path))
+        generator: BufferGenerator = BufferGenerator(context)
+        generator.buffer = buffer
+        source.add_generator(generator)
+        return cls(context, source, generator, buffer)
+
+    @property
+    def is_stream(self) -> bool:
+        """Return ``True`` if this sound is being streamed.
+
+        To determine whether or not a sound is being streamed, we check if
+        :attr:`self.buffer <earwax.Sound.buffer>` is ``None``.
+        """
+        return self.buffer is None
+
+    def destroy(self) -> None:
+        """Destroy this sound.
+
+        This method will destroy the attached :attr:`~earwax.Sound.generator`,
+        but you must destroy the :attr:`~earwax.Sound.source` yourself.
+
+        If this sound has already been destroyed, then
+        :class:`~earwax.Sound.AlreadyDestroyed` will be raised.
+        """
+        if not self._valid:
+            raise AlreadyDestroyed(self)
+        self.generator.destroy()
+        self._valid = False
+
+    def _destroy(self, dt: float) -> None:
+        """Call :meth:`self.destroy <earwax.Sound.destroy>`.
+
+        This method will be called by pyglet. To schedule destruction, use the
+        :meth:`~earwax.Sound.schedule_destruction` method.
+
+        :param dt: The ``dt`` parameter expected by the pyglet schedule
+            functions.
+        """
+        return self.destroy()
+
+    def schedule_destruction(self) -> None:
+        """Schedule this sound for destruction.
+
+        If this instance's :attr:`~earwax.Sound.buffer` attribute is ``None``,
+        then ``RuntimeError`` will be raised.
+        """
+        if self.buffer is None:
+            raise RuntimeError('This sound has no buffer to destroy.')
+        schedule_once(self._destroy, self.buffer.get_length_in_seconds() * 2)
+
+    def connect_reverb(self, reverb: GlobalFdnReverb) -> None:
+        """Connect a reverb to the source of this sound.
+
+        :param reverb: The reverb object to connect.
+        """
+        self.context.config_route(self.source, reverb)
+
+    def restart(self) -> None:
+        """Start this sound playing from the beginning."""
+        self.generator.position = 0.0
 
 
-def schedule_generator_destruction(
-    generator: BufferGenerator, multiplier: int = 2
-) -> None:
-    """Schedule a generator for destruction.
+@attrs(auto_attribs=True)
+class SoundManager:
+    """An object to hold sounds.
 
-    Uses ``pyglet.clock.schedule_once``, schedules ``generator.destroy``.
+    :ivar ~earwax.SoundManager.context: The synthizer context to use.
 
-    :param generator: The generator to schedule for destruction.
+    :ivar ~earwax.SoundManager.source: The synthizer source to play sounds
+        through.
 
-    :param multiplier: The number to multiply the length of the buffer by.
+    :ivar ~earwax.SoundManager.should_loop: Whether or not to start new
+        generators looping when using the various play methods.
 
-        If this number is set to 1 (which would have been the obvious choice),
-        the audio seems to stop prematurely.
+    :ivar ~earwax.SoundManager.sounds: A list of sounds that are playing.
+
+    :ivar ~earwax.SoundManager.gain: The gain of the connected
+        :attr:`~earwax.SoundManager.source`.
     """
 
-    def inner(dt: float) -> None:
-        """Perform the destruction."""
-        generator.destroy()
-
-    schedule_once(inner, generator.buffer.get_length_in_seconds() * multiplier)
-
-
-def play_and_destroy(*args, **kwargs) -> Tuple[BufferGenerator, Source]:
-    """Play a path, cleaning up the generator afterwards.
-
-    Calls :meth:`~earwax.play_path` with the given ``args`` and ``kwargs``,
-    then schedules the returned generator for destruction using
-    :meth:`~earwax.schedule_generator_destruction`.
-
-    :param args: The positional arguments to pass to ``play_path``.
-
-    :param kwargs: The keyword arguments to pass to ``play_path``.
-    """
-    generator: BufferGenerator
+    context: Context
     source: Source
-    generator, source = play_path(*args, **kwargs)
-    schedule_generator_destruction(generator)
-    return (generator, source)
+    should_loop: bool = Factory(bool)
 
+    sounds: List[Sound] = attrib(Factory(list), init=False, repr=False)
+    _gain: float = attrib(init=False)
 
-def play_paths(ctx: Context, paths: List[Path], gap: float = 0.1) -> None:
-    """Play every path in the list, one after another.
+    @_gain.default
+    def get_default_gain(instance: 'SoundManager') -> float:
+        """Get the default rain."""
+        return instance.source.gain
 
-    :param paths: The paths to play in order.
+    @property
+    def gain(self) -> float:
+        """Get the current gain."""
+        return self._gain
 
-    :param gap: The number of seconds to add to the scheduling.
-    """
-    delay: Optional[float] = None
-    p: Path
-    for p in paths:
-        buffer: Buffer = get_buffer('file', str(p))
-        duration: float = buffer.get_length_in_seconds()
+    @gain.setter
+    def gain(self, value: float) -> None:
+        """Set the gain.
 
-        def inner(dt: float) -> None:
-            """Actually play the path."""
-            play_and_destroy(ctx, p)
+        :param value: The new gain.
+        """
+        self._gain = value
+        self.source.gain = value
 
-        if delay is None:
-            delay = 0
-            inner(0.0)
-        else:
-            delay += duration + gap
-            schedule_once(inner, delay)
+    def register_sound(self, sound: Sound) -> None:
+        """Register a sound with this instance.
+
+        :param sound: The sound to register.
+        """
+        self.sounds.append(sound)
+
+    def remove_sound(self, sound: Sound) -> None:
+        """Remove a sound from the :attr:`~earwax.SoundManager.sounds` list."""
+        self.sounds.remove(sound)
+
+    def destroy_sound(self, sound: Sound) -> None:
+        """Destroy the given sound.
+
+        This method will call the given sound's :meth:`~earwax.Sound.destroy`
+        method, and remove it from the :attr:`~earwax.SoundManager.sounds`
+        list.
+
+        :param sound: The sound to be destroyed.
+        """
+        sound.destroy()
+        self.remove_sound(sound)
+
+    def destroy_all(self) -> None:
+        """Destroy all the sounds associated with this manager."""
+        sound: Sound
+        for sound in self.sounds:
+            self.destroy_sound(sound)
+
+    def play_path(self, path: Path, schedule_destruction: bool) -> Sound:
+        """Play a sound from a path.
+
+        The resulting sound will be added to
+        :attr:`~earwax.SoundManager.sounds` and returned.
+
+        The created generator will have its ``looping`` property set to the
+        value of :attr:`~earwax.SoundManager.should_loop`.
+
+        :param path: The path to play.
+
+        :param schedule_destruction: Whether or not to schedule the newly
+            created sound for destruction when it has finished playing.
+        """
+        sound: Sound = Sound.from_path(self.context, self.source, path)
+        sound.generator.looping = self.should_loop
+        self.sounds.append(sound)
+        if schedule_destruction:
+            sound.schedule_destruction()
+        return sound
+
+    def play_stream(self, protocol: str, path: str) -> Sound:
+        """Stream a sound.
+
+        The resulting sound will be added to
+        :attr:`~earwax.SoundManager.sounds` and returned.
+
+        For full descriptions of the ``protocol``, and ``path`` arguments,
+        check the synthizer documentation for ``StreamingGenerator``.
+
+        :param protocol: The protocol to use.
+
+        :param path: The path to use.
+        """
+        sound: Sound = Sound.from_stream(
+            self.context, self.source, protocol, path
+        )
+        self.sounds.append(sound)
+        return sound
 
 
 @attrs(auto_attribs=True, frozen=True)

@@ -12,15 +12,13 @@ from attr import Factory, attrib, attrs
 try:
     from pyglet.clock import schedule_once, unschedule
     from pyglet.event import EventDispatcher
-    from synthizer import Context, Generator, GlobalFdnReverb, Source3D
 except ModuleNotFoundError:
     schedule_once = None
     unschedule = None
     EventDispatcher = object
-    Context, Generator, GlobalFdnReverb, Source3D = (None, None, None, None)
 
 from ..point import Point
-from ..sound import play_path, stream_sound
+from ..sound import SoundManager
 from .door import Door
 from .portal import Portal
 
@@ -150,34 +148,6 @@ class BoxBounds:
         return self.width * self.depth * self.height
 
 
-@attrs(auto_attribs=True)
-class BoxSound:
-    """A sound in a box.
-
-    :ivar ~earwax.BoxSound.box: The box that contains this sound.
-
-    :ivar ~earwax.BoxSound.generator: The synthizer generator.
-
-    :ivar ~earwax.BoxSound.source: The source this sound is routed through.
-
-    :ivar ~earwax.BoxSound.on_destroy: A function to be called when this sound
-        is destroyed.
-    """
-
-    box: 'Box'
-    generator: Generator
-    source: Source3D
-    on_destroy: Optional[Callable[[], None]] = None
-
-    def stop(self) -> None:
-        """Stop this sound, and remove it from its box."""
-        self.box.sounds.remove(self)
-        self.generator.destroy()
-        self.source.destroy()
-        if self.on_destroy is not None:
-            self.on_destroy()
-
-
 class BoxError(Exception):
     """The base exception for all box errors."""
 
@@ -244,11 +214,6 @@ class Box(EventDispatcher):
     :ivar ~earwax.Box.portal: If this attribute is not ``None``, then this
         instance is considered a portal.
 
-    :ivar ~earwax.Box.sounds: A list of :class:`earwax.BoxSound` instances that
-        are currently playing.
-
-        This list is used so that filters can be applied when players move.
-
     :ivar ~earwax.Box.bounds: The bounds of this box.
     """
 
@@ -264,10 +229,6 @@ class Box(EventDispatcher):
     type: BoxTypes = Factory(lambda: BoxTypes.empty)
     door: Optional[Door] = None
     portal: Optional[Portal] = None
-    reverb: Optional[GlobalFdnReverb] = None
-    sounds: List[BoxSound] = attrib(
-        default=Factory(list), init=False, repr=False
-    )
     bounds: BoxBounds = attrib(repr=False, init=False)
 
     def __attrs_post_init__(self) -> None:
@@ -556,98 +517,21 @@ class Box(EventDispatcher):
             return self
         return None
 
-    def play_sound(
-        self, ctx: Optional['Context'], path: Optional[Path],
-        looping: bool = False
-    ) -> Optional[BoxSound]:
-        """Play a sound at the same position as this box.
-
-        The resulting sound will be added to the list of sounds for the oldest
-        parent, as retrieved by :class:`~earwax.Box.get_oldest_parent`.
-
-        if :attr:`self.reverb <earwax.Box.reverb>` is not ``None``, then the
-        sound will have that reverb applied.
-
-        :param ctx: The ``synthizer.Context`` instance to play the sound
-            through. If this value is ``None``, this method does nothing.
-
-        :param path: A path to play. Can be None, in which case this method
-            does nothing.
-
-        :param looping: Whether ot not to loop the resulting sound.
-
-            If this value does not evaluate to ``True``, then the sound will be
-            destroyed when it has finished playing.
-        """
-        if ctx is not None and path is not None:
-            top_level: 'Box' = self.get_oldest_parent()
-            sound: BoxSound = BoxSound(
-                top_level, *play_path(
-                    ctx, path, position=self.start.coordinates,
-                    reverb=self.reverb
-                )
-            )
-            sound.generator.looping = looping
-            top_level.sounds.append(sound)
-
-            def destroy_sound(dt: float) -> None:
-                """Destroy the created sound."""
-                if sound in top_level.sounds:
-                    sound.stop()
-
-            if not looping:
-                schedule_once(
-                    destroy_sound,
-                    sound.generator.buffer.get_length_in_seconds() * 2
-                )
-            return sound
-        return None
-
-    def stream_sound(
-        self, ctx: Context, protocol: str, path: str, looping: bool = False
-    ) -> BoxSound:
-        """Stream a sound.
-
-        The resulting sound will be added to the :attr:`~earwax.Box.sounds`
-        list of the oldest parent, as returned by :attr:`self.get_oldest_parent
-        <earwax.Box.get_oldest_parent>`.
-
-        if :attr:`self.reverb <earwax.Box.reverb>` is not ``None``, then the
-        sound will have that reverb applied.
-
-        :param ctx: The synthizer audio context to play through.
-
-        :param protocol: The protocol value to pass to
-            ``synthizer.StreamingGenerator``.
-
-        :param path: The path value to pass to
-            ``synthizer.StreamingGenerator``.
-
-        :param looping: Whether ot not to loop the resulting sound.
-        """
-        top_level: 'Box' = self.get_oldest_parent()
-        sound: BoxSound = BoxSound(
-            top_level, *stream_sound(
-                ctx, protocol, path, position=self.start.coordinates,
-                reverb=self.reverb
-            )
-        )
-        sound.generator.looping = looping
-        top_level.sounds.append(sound)
-        return sound
-
-    def open(self, ctx: Optional['Context']) -> None:
+    def open(self, sound_manager: SoundManager) -> None:
         """Open a door on this box.
 
         If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
         :attr:`.open <earwax.Door.open>` attribute to ``True``, and play the
         appropriate sound. Otherwise, raise :class:`earwax.NotADoor`.
+
+        :param sound_manager: The sound manager to use to play the open sound.
         """
         if self.door is None:
             raise NotADoor(self)
         self.door.open = True
         self.dispatch_event('on_open')
-        self.play_sound(ctx, self.door.open_sound)
+        if self.door.open_sound is not None:
+            sound_manager.play_path(self.door.open_sound, True)
         when: float
         if isinstance(self.door.close_after, tuple):
             when = uniform(*self.door.close_after)
@@ -655,25 +539,35 @@ class Box(EventDispatcher):
             when = self.door.close_after
         else:
             return None
-        schedule_once(self.scheduled_close, when, ctx)
+        schedule_once(self.scheduled_close, when, sound_manager)
 
-    def close(self, ctx: Optional['Context']) -> None:
+    def close(self, sound_manager: SoundManager) -> None:
         """Close a door on this box.
 
         If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
         :attr:`.open <earwax.Door.open>` attribute to ``False``, and play the
         appropriate sound. Otherwise, raise :class:`earwax.NotADoor`.
+
+        :param sound_manager: The sound manager to use to play the close sound.
         """
-        unschedule(self.scheduled_close)
         if self.door is None:
             raise NotADoor(self)
+        unschedule(self.scheduled_close)
         self.door.open = False
         self.dispatch_event('on_close')
-        self.play_sound(ctx, self.door.close_sound)
+        if self.door.close_sound is not None:
+            sound_manager.play_path(self.door.close_sound, True)
 
-    def scheduled_close(self, dt: float, ctx: Optional['Context']) -> None:
-        """Call :meth:`self.close() <earwax.Box.close>` on a schedule."""
-        self.close(ctx)
+    def scheduled_close(self, dt: float, sound_manager: SoundManager) -> None:
+        """Call :meth:`self.close() <earwax.Box.close>` on a schedule.
+
+        :param dt: The ``dt`` parameter expected by Pyglet's schedule
+            functions.
+
+        :param sound_manager: The sound manager to pass to
+            :meth:`~earwax.Box.close`.
+        """
+        self.close(sound_manager)
 
     def get_descendants(self) -> GeneratorType['Box', None, None]:
         """Yield all children and grandchildren."""

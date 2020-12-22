@@ -40,7 +40,7 @@ try:
     import pyglet
     pyglet.options['shadow_window'] = False
 except (ImportError, TypeError):
-    pass  # Docs are building.
+    pyglet = None  # Docs are building.
 
 if True:
     from . import types, utils
@@ -54,8 +54,8 @@ if True:
     from .game import Game, GameNotRunning
     from .game_board import GameBoard, NoSuchTile
     from .level import IntroLevel, Level
-    from .mapping import (Box, BoxBounds, BoxLevel, BoxSound, BoxTypes, Door,
-                          NotADoor, OutOfBounds, Portal)
+    from .mapping import (Box, BoxBounds, BoxLevel, BoxTypes, Door, NotADoor,
+                          OutOfBounds, Portal)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
@@ -65,10 +65,8 @@ if True:
     from .point import Point, PointDirections
     from .promises import (Promise, PromiseStates, StaggeredPromise,
                            ThreadedPromise, staggered_promise)
-    from .sound import (AdvancedInterfaceSoundPlayer, BufferDirectory,
-                        SimpleInterfaceSoundPlayer, get_buffer,
-                        play_and_destroy, play_path, play_paths,
-                        schedule_generator_destruction)
+    from .sound import (AlreadyDestroyed, BufferDirectory, Sound, SoundError,
+                        SoundManager, get_buffer)
     from .speech import tts
     from .task import IntervalFunction, Task, TaskFunction
     from .track import Track, TrackTypes
@@ -83,18 +81,17 @@ if True:
 
 __all__ = [
     'Game', 'tts', 'Action', 'Menu', 'MenuItem', 'FileMenu', 'ActionMenu',
-    'get_buffer', 'Editor', 'SimpleInterfaceSoundPlayer',
-    'AdvancedInterfaceSoundPlayer', 'Level', 'EventMatcher', 'Config',
-    'ConfigValue', 'ConfigMenu', 'TypeHandler', 'UnknownTypeError',
-    'EarwaxConfig', 'ProjectLevel', 'cmd_main', 'Project', 'Box', 'Point',
-    'OutOfBounds', 'PointDirections', 'walking_directions', 'BoxTypes',
-    'play_path', 'schedule_generator_destruction', 'BoxLevel', 'Ambiance',
-    'Door', 'NotADoor', 'play_and_destroy', 'Portal', 'Track', 'play_paths',
-    'DismissibleMixin', 'TitleMixin', 'IntroLevel', 'CoordinatesMixin',
-    'GameBoard', 'NoSuchTile', 'Die', 'BufferDirectory', 'PromiseStates',
-    'ThreadedPromise', 'StaggeredPromise', 'staggered_promise', 'Promise',
-    'types', 'utils', 'GameNotRunning', 'NetworkConnection',
-    'ConnectionStates', 'ConnectionError', 'AlreadyConnected',
-    'AlreadyConnecting', 'NotConnectedYet', 'TrackTypes', 'Task',
-    'TaskFunction', 'IntervalFunction', 'BoxBounds', 'BoxSound'
+    'get_buffer', 'Editor', 'Level', 'EventMatcher', 'Config', 'ConfigValue',
+    'ConfigMenu', 'TypeHandler', 'UnknownTypeError', 'EarwaxConfig',
+    'ProjectLevel', 'cmd_main', 'Project', 'Box', 'Point', 'OutOfBounds',
+    'PointDirections', 'walking_directions', 'BoxTypes', 'BoxLevel',
+    'Ambiance', 'Door', 'NotADoor', 'Portal', 'Track', 'DismissibleMixin',
+    'TitleMixin', 'IntroLevel', 'CoordinatesMixin', 'GameBoard', 'NoSuchTile',
+    'Die', 'BufferDirectory', 'PromiseStates', 'ThreadedPromise',
+    'StaggeredPromise', 'staggered_promise', 'Promise', 'types', 'utils',
+    'GameNotRunning', 'NetworkConnection', 'ConnectionStates',
+    'ConnectionError', 'AlreadyConnected', 'AlreadyConnecting',
+    'NotConnectedYet', 'TrackTypes', 'Task', 'TaskFunction',
+    'IntervalFunction', 'BoxBounds', 'Sound', 'SoundManager',
+    'AlreadyDestroyed', 'SoundError'
 ]

@@ -1,6 +1,7 @@
 """Setup for tests."""
 
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from socket import AF_INET, SOCK_STREAM, socket
 from typing import Generator, Optional
 
@@ -11,7 +12,7 @@ from synthizer import (Context, Source3D, StreamingGenerator, initialize,
                        shutdown)
 
 from earwax import (Box, BoxLevel, ConnectionStates, Editor, Game, GameBoard,
-                    Level, Menu, NetworkConnection, Point)
+                    Level, Menu, NetworkConnection, Point, Sound, SoundManager)
 
 
 class PretendSocket(socket):
@@ -169,3 +170,15 @@ def get_streaming_generator(context: Context) -> StreamingGenerator:
 def get_source_3d(context: Context) -> Source3D:
     """Get a new ``Source3D`` instance."""
     return Source3D(context)
+
+
+@fixture(name='sound_manager')
+def get_sound_manager(context: Context, source: Source3D) -> SoundManager:
+    """Get a new sound manager instance."""
+    return SoundManager(context, source)
+
+
+@fixture(name='sound')
+def get_sound(context: Context, source: Source3D) -> Sound:
+    """Get a new sound."""
+    return Sound.from_path(context, source, Path('sound.wav'))

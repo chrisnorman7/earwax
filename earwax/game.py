@@ -14,9 +14,9 @@ from .task import IntervalFunction, Task, TaskFunction
 from .types import EventType
 
 try:
-    from synthizer import Context, DirectSource, initialized
+    from synthizer import Context, DirectSource, Source, initialized
 except ModuleNotFoundError:
-    Context, DirectSource, initialized = (None, None, None)
+    Context, DirectSource, Source, initialized = (None, None, None, None)
 
 try:
     from cytolk.tolk import detect_screen_reader, load, unload
@@ -41,7 +41,7 @@ from .event_matcher import EventMatcher
 from .hat_directions import DEFAULT
 from .level import Level
 from .mixins import RegisterEventMixin
-from .sound import AdvancedInterfaceSoundPlayer
+from .sound import SoundManager
 from .speech import tts
 from .types import (ActionListType, JoyButtonReleaseGeneratorDictType,
                     ReleaseGeneratorDictType)
@@ -77,19 +77,16 @@ class Game(RegisterEventMixin):
     :ivar ~earwax.game.name: The name of this game. Used by
         :meth:`~earwax.Game.get_settings_path`.
 
-    :ivar ~earwax.Game.audio_context`: The audio context, created by the
-        :meth:`~earwax.Game.run` method, after :meth:`~earwax.Game.before_run`
-        has been called.
-
-    :ivar ~earwax.Game.interface_sound_player: An
-        :class:`earwax.AdvancedInterfaceSoundPlayer` instance, used for playing
-        interface sounds.
-
-    :ivar ~earwax.Game.music_source: A ``DirectSource`` instance to play music
+    :ivar ~earwax.Game.audio_context: The Synthizer context to route audio
         through.
 
-    :ivar ~earwax.Game.ambiance_source: A ``DirectSource`` instance to play
-        ambiances through.
+    :ivar ~earwax.Game.interface_sound_manager: A sound manager for playing
+        interface sounds.
+
+    :ivar ~earwax.Game.music_sound_manager: A sound manager for playing music.
+
+    :ivar ~earwax.Game.ambiance_sound_manager: A sound manager for playing
+        ambiances.
 
     :ivar ~earwax.Game.levels: All the pushed :class:`earwax.Level` instances.
 
@@ -129,25 +126,26 @@ class Game(RegisterEventMixin):
         :meth:`~earwax.Game.remove_task` method.
     """
 
-    window: Optional[Window] = attrib(default=Factory(type(None)), init=False)
-
-    config: EarwaxConfig = attrib(default=Factory(EarwaxConfig), init=False)
     name: str = __name__
 
+    window: Optional[Window] = attrib(
+        default=Factory(NoneType), init=False, repr=False
+    )
+    config: EarwaxConfig = attrib(
+        default=Factory(EarwaxConfig), init=False, repr=False
+    )
     audio_context: Optional[Context] = attrib(
-        default=Factory(type(None)), init=False
+        default=Factory(NoneType), repr=False
     )
 
-    interface_sound_player: Optional[AdvancedInterfaceSoundPlayer] = attrib(
-        default=Factory(NoneType), init=False
+    interface_sound_manager: SoundManager = attrib(
+        default=Factory(NoneType), init=False, repr=False
     )
-
-    music_source: Optional[DirectSource] = attrib(
-        default=Factory(NoneType), init=False
+    music_sound_manager: SoundManager = attrib(
+        default=Factory(NoneType), init=False, repr=False
     )
-
-    ambiance_source: Optional[DirectSource] = attrib(
-        default=Factory(NoneType), init=False
+    ambiance_sound_manager: SoundManager = attrib(
+        default=Factory(NoneType), init=False, repr=False
     )
 
     levels: List[Level] = attrib(default=Factory(list), init=False)
@@ -520,6 +518,25 @@ class Game(RegisterEventMixin):
         """
         pass
 
+    def do_run(self, initial_level: Optional[Level]) -> None:
+        """Really run the game."""
+        source: Source = DirectSource(self.audio_context)
+        manager: SoundManager = SoundManager(self.audio_context, source)
+        manager.gain = self.config.sound.sound_volume.value
+        self.interface_sound_manager = manager
+        source = DirectSource(self.audio_context)
+        manager = SoundManager(self.audio_context, source)
+        manager.gain = self.config.sound.music_volume.value
+        self.music_sound_manager = manager
+        source = DirectSource(self.audio_context)
+        manager = SoundManager(self.audio_context, source)
+        manager.gain = self.config.sound.ambiance_volume.value
+        self.ambiance_sound_manager = manager
+        if initial_level is not None:
+            self.push_level(initial_level)
+        self.dispatch_event('before_run')
+        app.run()
+
     def run(
         self, window: Window, mouse_exclusive: bool = True,
         initial_level: Optional[Level] = None
@@ -542,15 +559,14 @@ class Game(RegisterEventMixin):
 
         * Enter a ``synthizer.initialized`` contextmanager.
 
-        * populate :attr:`~earwax.Game.audio_context`, and
-            :attr:`~earwax.Game.interface_sound_player`, as well as
-            :attr:`~earwax.Game.music_source` and
-            :attr:`~earwax.Game.ambiance_source`. The latter pair will have
-            their gains set according to :attr:`~earwax.Game.config`.
+        * populate :attr:`~earwax.Game.interface_sound_manager`,
+        :attr:`~earwax.Game.music_sound_manager`, and
+        :attr:`~earwax.Game.ambiance_sound_manager`, and set the appropriate
+        gains from :attr:`~earwax.Game.config`.
 
         * if ``initial_level`` is not ``None``, push the given level.
 
-        * Call the :meth:`~earwax.Game.before_run` method.
+        * Dispatch the :meth:`~earwax.Game.before_run` event.
 
         * Start the pyglet event loop.
 
@@ -573,23 +589,13 @@ class Game(RegisterEventMixin):
         self.open_joysticks()
         load()
         if detect_screen_reader() is None:
-            warn(
-                'No screen reader detected.\n\n'
-                'Try typing `python -m cytolk -p`.'
-                )
-        with initialized():
-            self.audio_context = Context()
-            self.interface_sound_player = AdvancedInterfaceSoundPlayer(
-                self.audio_context, gain=self.config.sound.sound_volume.value
-            )
-            self.music_source = DirectSource(self.audio_context)
-            self.music_source.gain = self.config.sound.music_volume.value
-            self.ambiance_source = DirectSource(self.audio_context)
-            self.ambiance_source.gain = self.config.sound.ambiance_volume.value
-            if initial_level is not None:
-                self.push_level(initial_level)
-            self.dispatch_event('before_run')
-            app.run()
+            warn('No screen reader detected.')
+        if self.audio_context is None:
+            with initialized():
+                self.audio_context = Context()
+                self.do_run(initial_level)
+        else:
+            self.do_run(initial_level)
         unload()
         self.dispatch_event('after_run')
 
