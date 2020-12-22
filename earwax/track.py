@@ -5,10 +5,7 @@ from typing import Optional
 
 from attr import Factory, attrib, attrs
 
-try:
-    from synthizer import Context, Source, StreamingGenerator
-except ModuleNotFoundError:
-    Context, Source, StreamingGenerator = (None, None, None)
+from .sound import Sound, SoundManager
 
 
 class TrackTypes(Enum):
@@ -43,10 +40,15 @@ class Track:
 
     :ivar ~earwax.Track.track_type: The type of this track.
 
-        This value determines which source an instance will be connected to.
+        This value determines which sound manager an instance will be connected
+        to.
 
-    :ivar ~earwax.Track.generator: The ``synthizer.BufferGenerator`` instance
-        to play through.
+    :ivar ~earwax.Track.sound_manager: sound manager to play sounds with.
+
+        This value is initialised as part of the :meth:`~earwax.Track.play`
+        method.
+
+    :ivar ~earwax.Track.sound: The currently playing sound instance.
 
         This value is initialised as part of the :meth:`~earwax.Track.play`
         method.
@@ -55,27 +57,29 @@ class Track:
     protocol: str
     path: str
     track_type: TrackTypes
-    generator: Optional[StreamingGenerator] = attrib(
-        default=Factory(type(None)), init=False
+
+    sound_manager: Optional[SoundManager] = attrib(
+        default=Factory(type(None)), init=False, repr=False
+    )
+    sound: Optional[Sound] = attrib(
+        default=Factory(type(None)), init=False, repr=False
     )
 
-    def play(self, ctx: Context, source: Source) -> None:
+    def play(self, manager: SoundManager) -> None:
         """Play this track on a loop.
 
         To alter how ``sound_path`` is played, override
         :meth:`earwax.Track.load_sound`.
 
-        :param ctx: The ``synthizer.Context`` instance to play through.
-
-        :param source: The source to connect :attr:`self.generator
-            <earwax.Track.generator>` to.
+        :param manager: The sound manager to play through.
         """
-        self.generator = StreamingGenerator(ctx, self.protocol, self.path)
-        source.add_generator(self.generator)
-        self.generator.looping = True
+        self.sound_manager = manager
+        self.sound = manager.play_stream(self.protocol, self.path)
 
     def stop(self) -> None:
         """Stop this track playing."""
-        if self.generator is not None:
-            self.generator.destroy()
-            self.generator = None
+        if self.sound_manager is not None:
+            if self.sound is not None:
+                self.sound_manager.destroy_sound(self.sound)
+                self.sound = None
+            self.sound_manager = None

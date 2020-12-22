@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Callable, Generator, List, Optional, cast
 
 from attr import Factory, attrib, attrs
 
+from .sound import SoundManager
 from .types import EventType
 
 try:
@@ -76,10 +77,10 @@ class Level(RegisterEventMixin):
         """Start all the ambiances on this instance."""
         ctx: Optional[Context] = self.game.audio_context
         if ctx is None:
-            raise RuntimeError('Cannot start ambiances with no audio context.')
+            raise RuntimeError('Unable to start ambiances with no context.')
         ambiance: Ambiance
         for ambiance in self.ambiances:
-            ambiance.play(ctx, self.game.config.sound.ambiance_volume.value)
+            ambiance.play(ctx)
 
     def stop_ambiances(self) -> None:
         """Stop all the ambiances on this instance."""
@@ -89,28 +90,24 @@ class Level(RegisterEventMixin):
 
     def start_tracks(self) -> None:
         """Start all the tracks on this instance."""
-        ctx: Optional[Context] = self.game.audio_context
-        if ctx is None:
-            raise RuntimeError('Cannot start tracks with no audio context.')
+        manager: SoundManager
         track: Track
-        source: Optional[DirectSource] = None
         for track in self.tracks:
             if track.track_type is TrackTypes.ambiance:
-                source = self.game.ambiance_source
+                manager = self.game.ambiance_sound_manager
             elif track.track_type is TrackTypes.music:
-                source = self.game.music_source
-            if source is None:
+                manager = self.game.music_sound_manager
+            else:
                 raise RuntimeError(
                     'Unknown track type: %r.' % track.track_type
                 )
-            track.play(ctx, source)
+            track.play(manager)
 
     def stop_tracks(self) -> None:
         """Stop all the tracks on this instance."""
         track: Track
-        if self.game.audio_context is not None:
-            for track in self.tracks:
-                track.stop()
+        for track in self.tracks:
+            track.stop()
 
     def on_text_motion(self, motion: int) -> None:
         """Call the appropriate motion.
