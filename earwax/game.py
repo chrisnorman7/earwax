@@ -560,9 +560,9 @@ class Game(RegisterEventMixin):
         * Enter a ``synthizer.initialized`` contextmanager.
 
         * populate :attr:`~earwax.Game.interface_sound_manager`,
-        :attr:`~earwax.Game.music_sound_manager`, and
-        :attr:`~earwax.Game.ambiance_sound_manager`, and set the appropriate
-        gains from :attr:`~earwax.Game.config`.
+            :attr:`~earwax.Game.music_sound_manager`, and
+            :attr:`~earwax.Game.ambiance_sound_manager`, and set the
+            appropriate gains from :attr:`~earwax.Game.config`.
 
         * if ``initial_level`` is not ``None``, push the given level.
 
