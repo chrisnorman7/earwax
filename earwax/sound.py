@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from random import choice
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 from attr import Factory, attrib, attrs
 
@@ -21,6 +21,7 @@ except ModuleNotFoundError:
     ) = (None, None, None, None, None, None, None, None, None)
 
 buffers: Dict[str, Buffer] = {}
+OnDestroyFunction = Callable[[], None]
 
 
 class SoundError(Exception):
@@ -148,7 +149,9 @@ class Sound:
         self.generator.destroy()
         self._valid = False
 
-    def _destroy(self, dt: float) -> None:
+    def _destroy(
+        self, dt: float, on_destroy: Optional[OnDestroyFunction]
+    ) -> None:
         """Call :meth:`self.destroy <earwax.Sound.destroy>`.
 
         This method will be called by pyglet. To schedule destruction, use the
@@ -156,18 +159,30 @@ class Sound:
 
         :param dt: The ``dt`` parameter expected by the pyglet schedule
             functions.
-        """
-        return self.destroy()
 
-    def schedule_destruction(self) -> None:
+        :param on_destroy: A function to be called after this sound has been
+            destroyed.
+        """
+        self.destroy()
+        if on_destroy is not None:
+            on_destroy()
+
+    def schedule_destruction(
+        self, on_destroy: Optional[OnDestroyFunction] = None
+    ) -> None:
         """Schedule this sound for destruction.
 
         If this instance's :attr:`~earwax.Sound.buffer` attribute is ``None``,
         then ``RuntimeError`` will be raised.
+
+        :param on_destroy: A function to be called after this sound has been
+            destroyed.
         """
         if self.buffer is None:
             raise RuntimeError('This sound has no buffer to destroy.')
-        schedule_once(self._destroy, self.buffer.get_length_in_seconds() * 2)
+        schedule_once(
+            self._destroy, self.buffer.get_length_in_seconds() * 2, on_destroy
+        )
 
     def connect_reverb(self, reverb: GlobalFdnReverb) -> None:
         """Connect a reverb to the source of this sound.
@@ -250,9 +265,8 @@ class SoundManager:
 
     def destroy_all(self) -> None:
         """Destroy all the sounds associated with this manager."""
-        sound: Sound
-        for sound in self.sounds:
-            self.destroy_sound(sound)
+        while self.sounds:
+            self.destroy_sound(self.sounds[0])
 
     def play_path(self, path: Path, schedule_destruction: bool) -> Sound:
         """Play a sound from a path.
