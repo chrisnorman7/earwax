@@ -5,9 +5,9 @@ from typing import Optional
 from attr import Factory, attrib, attrs
 
 try:
-    from synthizer import Context, Source3D
+    from synthizer import Context, GlobalFdnReverb, Source3D
 except ModuleNotFoundError:
-    Context, Source3d = (None, None)
+    Context, GlobalFdnReverb, Source3d = (None, None, None)
 
 from .point import Point
 from .sound import Sound, SoundManager
@@ -43,6 +43,7 @@ class Ambiance:
     protocol: str
     path: str
     coordinates: Point = Point(0, 0, 0)
+
     sound_manager: Optional[SoundManager] = attrib(
         default=Factory(type(None)), init=False, repr=False
     )
@@ -50,20 +51,30 @@ class Ambiance:
         default=Factory(type(None)), init=False, repr=False
     )
 
-    def play(self, ctx: Context) -> None:
+    def play(
+        self, ctx: Context, gain: float,
+        reverb: Optional[GlobalFdnReverb] = None
+    ) -> None:
         """Load and position the sound.
 
         :param ctx: The Synthizer context to use.
+
+        :param gain: The volume to play this ambiance at.
+
+        :param reverb: An optional reverb to attach.
         """
         if self.sound_manager is None:
             self.sound_manager = SoundManager(
                 ctx, Source3D(ctx), should_loop=True
             )
+            self.sound_manager.gain = gain
             self.set_position(self.coordinates)
         if self.sound is None:
             self.sound = self.sound_manager.play_stream(
                 self.protocol, self.path
             )
+        if reverb is not None:
+            self.sound.connect_reverb(reverb)
 
     def stop(self) -> None:
         """Stop this ambiance playing."""

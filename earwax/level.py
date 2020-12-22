@@ -80,7 +80,7 @@ class Level(RegisterEventMixin):
             raise RuntimeError('Unable to start ambiances with no context.')
         ambiance: Ambiance
         for ambiance in self.ambiances:
-            ambiance.play(ctx)
+            ambiance.play(ctx, self.game.config.sound.ambiance_volume.value)
 
     def stop_ambiances(self) -> None:
         """Stop all the ambiances on this instance."""
