@@ -6,7 +6,7 @@ from pyglet.window import Window
 
 from earwax import ConnectionStates, Game, Level, NetworkConnection
 
-from .conftest import PretendSocket
+from .pretend_socket import PretendSocket
 
 
 class TooSlow(Exception):

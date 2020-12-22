@@ -4,7 +4,7 @@ from socket import AF_INET, SOCK_STREAM
 
 from pytest import raises
 
-from .conftest import PretendSocket
+from .pretend_socket import PretendSocket
 
 
 def test_init(socket: PretendSocket) -> None:
@@ -28,7 +28,7 @@ def test_sendall(socket: PretendSocket) -> None:
 
 
 def test_recv(socket: PretendSocket) -> None:
-    """Test that pretend data is pretendedly received."""
+    """Test that pretend data has been received."""
     with raises(BlockingIOError):
         socket.recv(1024)
     socket.sendall(b'Hello world.')
