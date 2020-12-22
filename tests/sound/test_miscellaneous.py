@@ -51,7 +51,7 @@ def test_buffer_directory():
         b.path = Path.cwd()
 
 
-def test_gain(game: Game, window: Window, level: Level) -> None:
+def test_gains(game: Game, window: Window, level: Level) -> None:
     """Test the gain of the various sound managers."""
 
     def do_test(dt: float) -> None:

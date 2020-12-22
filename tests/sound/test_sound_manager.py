@@ -7,7 +7,7 @@ from synthizer import Context, Source3D
 from earwax import Sound, SoundManager
 
 
-def test_sound_manager_init(sound_manager: SoundManager) -> None:
+def test_init(sound_manager: SoundManager) -> None:
     """Test sound manager initialisation."""
     assert isinstance(sound_manager, SoundManager)
     assert isinstance(sound_manager.context, Context)
@@ -16,7 +16,7 @@ def test_sound_manager_init(sound_manager: SoundManager) -> None:
     assert sound_manager.sounds == []
 
 
-def test_sound_manager_gain(sound_manager: SoundManager) -> None:
+def test_gain(sound_manager: SoundManager) -> None:
     """Test SoundManager.gain."""
     assert sound_manager.gain == 1.0
     assert sound_manager._gain == 1.0
@@ -30,7 +30,7 @@ def test_sound_manager_gain(sound_manager: SoundManager) -> None:
     assert sound_manager.source.gain == 0.5
 
 
-def test_sound_manager_register_sound(
+def test_register_sound(
     sound_manager: SoundManager, sound: Sound
 ) -> None:
     """Check we can register a sound properly."""
@@ -39,7 +39,7 @@ def test_sound_manager_register_sound(
     assert sound_manager.sounds == [sound]
 
 
-def test_sound_manager_remove_sound(
+def test_remove_sound(
     sound_manager: SoundManager, sound: Sound
 ) -> None:
     """Make sure we can remove a sound."""

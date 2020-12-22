@@ -9,7 +9,7 @@ from synthizer import (Buffer, BufferGenerator, Context, Source, Source3D,
 from earwax import AlreadyDestroyed, Sound, get_buffer
 
 
-def test_sound_init(context: Context, source: Source3D) -> None:
+def test_init(context: Context, source: Source3D) -> None:
     """Test initialisation."""
     buffer: Buffer = get_buffer('file', 'sound.wav')
     generator: BufferGenerator = BufferGenerator(context)
@@ -32,7 +32,7 @@ def test_from_stream(context: Context, source: Source3D) -> None:
     assert sound.is_stream is True
 
 
-def test_sound_from_path(context: Context, source: Source3D) -> None:
+def test_from_path(context: Context, source: Source3D) -> None:
     """Test the Sound.from_path method."""
     sound: Sound = Sound.from_path(context, source, Path('sound.wav'))
     assert isinstance(sound, Sound)
@@ -44,7 +44,7 @@ def test_sound_from_path(context: Context, source: Source3D) -> None:
     assert sound.is_stream is False
 
 
-def test_sound_destroy(context: Context, source: Source) -> None:
+def test_destroy(context: Context, source: Source) -> None:
     """Make sure we can destroy sounds."""
     sound: Sound = Sound.from_path(context, source, Path('sound.wav'))
     sound.destroy()
