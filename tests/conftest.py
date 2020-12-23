@@ -12,7 +12,8 @@ from synthizer import (Context, Source3D, StreamingGenerator, initialize,
                        shutdown)
 
 from earwax import (Box, BoxLevel, Editor, Game, GameBoard, Level, Menu,
-                    NetworkConnection, Point, Sound, SoundManager)
+                    NetworkConnection, Point, Sound, SoundManager, Track,
+                    TrackTypes)
 
 from .networking.pretend_socket import PretendSocket
 
@@ -136,3 +137,9 @@ def get_sound_manager(context: Context, source: Source3D) -> SoundManager:
 def get_sound(context: Context, source: Source3D) -> Sound:
     """Get a new sound."""
     return Sound.from_path(context, source, Path('sound.wav'))
+
+
+@fixture(name='track')
+def get_track() -> Track:
+    """Get a new track instance."""
+    return Track('file', 'sound.wav', TrackTypes.ambiance)
