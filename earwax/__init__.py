@@ -55,7 +55,7 @@ if True:
     from .game_board import GameBoard, NoSuchTile
     from .level import IntroLevel, Level
     from .mapping import (Box, BoxBounds, BoxLevel, BoxTypes, Door, NotADoor,
-                          OutOfBounds, Portal)
+                          OutOfBounds, Portal, ReverbSettingsDict)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
@@ -93,5 +93,5 @@ __all__ = [
     'ConnectionError', 'AlreadyConnected', 'AlreadyConnecting',
     'NotConnectedYet', 'TrackTypes', 'Task', 'TaskFunction',
     'IntervalFunction', 'BoxBounds', 'Sound', 'SoundManager',
-    'AlreadyDestroyed', 'SoundError'
+    'AlreadyDestroyed', 'SoundError', 'ReverbSettingsDict'
 ]

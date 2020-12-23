@@ -5,10 +5,9 @@ from typing import List, Optional
 
 from pyglet.window import Window, key
 from synthizer import DirectSource, GlobalFdnReverb, Source3D
-from synthizer_fx.reverb import ReverbDict
 
 from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, Game, Point,
-                    SoundManager)
+                    ReverbSettingsDict, SoundManager)
 
 sounds_directory: Path = Path('sounds')
 wall_sound: Path = sounds_directory / 'collide.wav'
@@ -17,12 +16,12 @@ footsteps_directory: Path = sounds_directory / 'footsteps'
 walls: List[Box] = []
 doors: List[Box] = []
 
-office_reverb: ReverbDict = {
+office_reverb: ReverbSettingsDict = {
     'gain': 0.25,
     't60': 0.9
 }
 
-corridor_reverb: ReverbDict = {
+corridor_reverb: ReverbSettingsDict = {
     'gain': 0.25,
     't60': 1.0
 }

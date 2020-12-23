@@ -272,3 +272,15 @@ def test_handle_box(context: Context, box_level: BoxLevel) -> None:
     box_level.handle_box(b)
     sleep(0.5)
     assert r.gain == 0.5
+
+
+def test_update_reverb(box_level: BoxLevel, reverb: GlobalFdnReverb) -> None:
+    """Make sure we can update the reverb."""
+    box_level.connect_reverb(reverb)
+    box_level.update_reverb({'gain': 0.5})
+    sleep(0.5)
+    assert reverb.gain == 0.5
+    box_level.update_reverb({'gain': 0.75, 't60': 0.5})
+    sleep(0.5)
+    assert reverb.gain == 0.75
+    assert reverb.t60 == 0.5

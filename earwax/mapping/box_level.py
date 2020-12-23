@@ -9,17 +9,15 @@ from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
 try:
     from pyglet.event import EventDispatcher
     from synthizer import Context, GlobalFdnReverb, Source3D
-    from synthizer_fx.reverb import update_reverb
 except ModuleNotFoundError:
     EventDispatcher = object
     Context, Source3D, GlobalFdnReverb = (None, None, None)
-    update_reverb = None
 
 from ..level import Level
 from ..point import Point, PointDirections
 from ..sound import SoundManager
 from ..walking_directions import walking_directions
-from .box import Box
+from .box import Box, ReverbSettingsDict
 from .portal import Portal
 
 
@@ -191,6 +189,18 @@ class BoxLevel(Level, EventDispatcher):
             self.coordinates.x, self.coordinates.y, bearing, distance=distance
         )
 
+    def update_reverb(self, data: ReverbSettingsDict) -> None:
+        """Update :attr:`self.reverb <earwax.BoxLevel.reverb>` from ``data``.
+
+        :param data: The data to update reverb settings from.
+        """
+        if self.reverb is None:
+            raise RuntimeError('No reverb has been set.')
+        name: str
+        value: float
+        for name, value in data.items():
+            setattr(self.reverb, name, value)
+
     def handle_portal(self, box: Box) -> None:
         """Activate a portal.
 
@@ -227,7 +237,7 @@ class BoxLevel(Level, EventDispatcher):
         """
         if box is not self.current_box:
             if self.reverb is not None:
-                update_reverb(self.reverb, box.reverb_settings)
+                self.update_reverb(box.reverb_settings)
             if (
                 self.current_box is not None and
                 box.name != self.current_box.name
