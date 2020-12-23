@@ -254,11 +254,15 @@ class BoxLevel(Level, EventDispatcher):
 
         :param coordinates: The coordinates the player was trying to reach.
         """
-        if (
-            self.player_sound_manager is not None and
-            box.wall_sound is not None
-        ):
-            self.player_sound_manager.play_path(box.wall_sound, True)
+        if self.player_sound_manager is not None:
+            if box.door is not None and not box.door.open:
+                # Play a closed door sound, instead of a wall sound.
+                if box.door.closed_sound is not None:
+                    self.player_sound_manager.play_path(
+                        box.door.closed_sound, True
+                    )
+            elif box.wall_sound is not None:
+                self.player_sound_manager.play_path(box.wall_sound, True)
         box.dispatch_event('on_collide', coordinates)
 
     def move(
