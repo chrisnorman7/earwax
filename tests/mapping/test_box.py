@@ -17,6 +17,9 @@ def test_init(box: Box) -> None:
     b: Box = Box(box.start, box.end, parent=box)
     assert b.parent is box
     assert b in box.children
+    assert b.reverb_settings == {}
+    b = Box(box.start, box.end, reverb_settings={'gain': 0.5})
+    assert b.reverb_settings == {'gain': 0.5}
 
 
 def test_add_child() -> None:

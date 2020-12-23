@@ -1,6 +1,7 @@
 """Test the BoxLevel class."""
 
 from math import dist
+from time import sleep
 from typing import Callable, Optional
 
 from pytest import raises
@@ -255,3 +256,19 @@ def test_disconnect_reverb(box_level: BoxLevel, context: Context) -> None:
     box_level.connect_reverb(r)
     box_level.disconnect_reverb()
     assert box_level.reverb is None
+
+
+def test_handle_box(context: Context, box_level: BoxLevel) -> None:
+    """Make sure boxes are handled properly."""
+    start: Point = Point(0, 0, 0)
+    end: Point = Point(3, 3, 3)
+    a: Box = Box(start, end, reverb_settings={'gain': 0.1})
+    b: Box = Box(start, end, reverb_settings={'gain': 0.5})
+    r: GlobalFdnReverb = GlobalFdnReverb(context)
+    box_level.connect_reverb(r)
+    box_level.handle_box(a)
+    sleep(0.5)
+    assert r.gain == 0.1
+    box_level.handle_box(b)
+    sleep(0.5)
+    assert r.gain == 0.5

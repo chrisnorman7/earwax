@@ -9,9 +9,11 @@ from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
 try:
     from pyglet.event import EventDispatcher
     from synthizer import Context, GlobalFdnReverb, Source3D
+    from synthizer_fx.reverb import update_reverb
 except ModuleNotFoundError:
     EventDispatcher = object
     Context, Source3D, GlobalFdnReverb = (None, None, None)
+    update_reverb = None
 
 from ..level import Level
 from ..point import Point, PointDirections
@@ -88,7 +90,7 @@ class BoxLevel(Level, EventDispatcher):
     player_sound_manager: Optional[SoundManager] = None
     external_sound_manager: Optional[SoundManager] = None
     reverb: Optional[GlobalFdnReverb] = attrib(
-        default=Factory(type(None)), repr=False
+        default=Factory(type(None)), repr=False, init=False
     )
 
     def __attrs_post_init__(self) -> None:
@@ -116,6 +118,8 @@ class BoxLevel(Level, EventDispatcher):
 
         An event that will be dispatched when the
         :meth:`~earwax.BoxLevel.move` action is used.
+
+        By default, this method plays the correct footstep sound.
         """
         box: Optional[Box] = self.get_current_box()
         if (
@@ -218,9 +222,12 @@ class BoxLevel(Level, EventDispatcher):
 
         The coordinates have already been set, and the ``on_footstep`` event
         dispatched, so all that is left is to speak the name of the new box, if
-        it is different to the last one, and store the new box.
+        it is different to the last one, update :attr:`self.reverb
+        <earwax.BoxLevel.reverb>` if necessary, and store the new box.
         """
         if box is not self.current_box:
+            if self.reverb is not None:
+                update_reverb(self.reverb, box.reverb_settings)
             if (
                 self.current_box is not None and
                 box.name != self.current_box.name

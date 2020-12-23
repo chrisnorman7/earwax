@@ -12,10 +12,12 @@ from attr import Factory, attrib, attrs
 try:
     from pyglet.clock import schedule_once, unschedule
     from pyglet.event import EventDispatcher
+    from synthizer_fx.reverb import ReverbDict
 except ModuleNotFoundError:
     schedule_once = None
     unschedule = None
     EventDispatcher = object
+    ReverbDict = Dict[str, float]
 
 from ..point import Point
 from ..sound import SoundManager
@@ -230,6 +232,7 @@ class Box(EventDispatcher):
     door: Optional[Door] = None
     portal: Optional[Portal] = None
     bounds: BoxBounds = attrib(repr=False, init=False)
+    reverb_settings: ReverbDict = Factory(dict)
 
     def __attrs_post_init__(self) -> None:
         """Configure bounds, parents and children."""

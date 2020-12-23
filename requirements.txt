@@ -1,5 +1,6 @@
 pyglet
 synthizer
+synthizer-fx
 cytolk
 attrs
 pyyaml
