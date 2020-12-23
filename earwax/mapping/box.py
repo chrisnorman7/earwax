@@ -517,7 +517,7 @@ class Box(EventDispatcher):
             return self
         return None
 
-    def open(self, sound_manager: SoundManager) -> None:
+    def open(self, sound_manager: Optional[SoundManager]) -> None:
         """Open a door on this box.
 
         If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
@@ -530,7 +530,7 @@ class Box(EventDispatcher):
             raise NotADoor(self)
         self.door.open = True
         self.dispatch_event('on_open')
-        if self.door.open_sound is not None:
+        if self.door.open_sound is not None and sound_manager is not None:
             sound_manager.play_path(self.door.open_sound, True)
         when: float
         if isinstance(self.door.close_after, tuple):
@@ -541,7 +541,7 @@ class Box(EventDispatcher):
             return None
         schedule_once(self.scheduled_close, when, sound_manager)
 
-    def close(self, sound_manager: SoundManager) -> None:
+    def close(self, sound_manager: Optional[SoundManager]) -> None:
         """Close a door on this box.
 
         If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
@@ -555,7 +555,7 @@ class Box(EventDispatcher):
         unschedule(self.scheduled_close)
         self.door.open = False
         self.dispatch_event('on_close')
-        if self.door.close_sound is not None:
+        if self.door.close_sound is not None and sound_manager is not None:
             sound_manager.play_path(self.door.close_sound, True)
 
     def scheduled_close(self, dt: float, sound_manager: SoundManager) -> None:
