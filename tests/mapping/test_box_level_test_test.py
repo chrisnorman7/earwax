@@ -242,36 +242,33 @@ def test_get_angle_between(game: Game) -> None:
     assert l.get_angle_between(Point(1, -1, 0)) == 225
 
 
-def test_connect_reverb(context: Context, box_level: BoxLevel) -> None:
+def test_connect_reverb(reverb: GlobalFdnReverb, box_level: BoxLevel) -> None:
     """Test the connect_reverb method."""
-    r: GlobalFdnReverb = GlobalFdnReverb(context)
     assert box_level.reverb is None
-    box_level.connect_reverb(r)
-    assert box_level.reverb is r
+    box_level.connect_reverb(reverb)
+    assert box_level.reverb is reverb
 
 
-def test_disconnect_reverb(box_level: BoxLevel, context: Context) -> None:
+def test_disconnect_reverb(box_level: BoxLevel, reverb: GlobalFdnReverb) -> None:
     """Test the disconnect_reverb method."""
-    r: GlobalFdnReverb = GlobalFdnReverb(context)
-    box_level.connect_reverb(r)
+    box_level.connect_reverb(reverb)
     box_level.disconnect_reverb()
     assert box_level.reverb is None
 
 
-def test_handle_box(context: Context, box_level: BoxLevel) -> None:
+def test_handle_box(reverb: GlobalFdnReverb, box_level: BoxLevel) -> None:
     """Make sure boxes are handled properly."""
     start: Point = Point(0, 0, 0)
     end: Point = Point(3, 3, 3)
     a: Box = Box(start, end, reverb_settings={'gain': 0.1})
     b: Box = Box(start, end, reverb_settings={'gain': 0.5})
-    r: GlobalFdnReverb = GlobalFdnReverb(context)
-    box_level.connect_reverb(r)
+    box_level.connect_reverb(reverb)
     box_level.handle_box(a)
     sleep(0.5)
-    assert r.gain == 0.1
+    assert reverb.gain == 0.1
     box_level.handle_box(b)
     sleep(0.5)
-    assert r.gain == 0.5
+    assert reverb.gain == 0.5
 
 
 def test_update_reverb(box_level: BoxLevel, reverb: GlobalFdnReverb) -> None:

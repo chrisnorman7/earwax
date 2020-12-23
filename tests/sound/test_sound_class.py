@@ -99,9 +99,10 @@ def test_schedule_destruction(
         sound.generator.destroy()
 
 
-def test_connect_reverb(context: Context, sound: Sound) -> None:
+def test_connect_reverb(reverb: GlobalFdnReverb, sound: Sound) -> None:
     """Make sure we can easily attach reverb."""
-    reverb: GlobalFdnReverb = GlobalFdnReverb(context)
+    # First make sure we've not messed up the fixture.
+    assert isinstance(reverb, GlobalFdnReverb)
     sound.connect_reverb(reverb)
 
 
