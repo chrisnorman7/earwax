@@ -4,6 +4,7 @@ from math import dist
 from typing import Callable, Optional
 
 from pytest import raises
+from synthizer import Context, GlobalFdnReverb
 
 from earwax import Box, BoxLevel, BoxTypes, Door, Game, Point, Portal
 
@@ -238,3 +239,19 @@ def test_get_angle_between(game: Game) -> None:
     assert l.get_angle_between(Point(0, -1, 0)) == 0
     l.set_bearing(270)
     assert l.get_angle_between(Point(1, -1, 0)) == 225
+
+
+def test_connect_reverb(context: Context, box_level: BoxLevel) -> None:
+    """Test the connect_reverb method."""
+    r: GlobalFdnReverb = GlobalFdnReverb(context)
+    assert box_level.reverb is None
+    box_level.connect_reverb(r)
+    assert box_level.reverb is r
+
+
+def test_disconnect_reverb(box_level: BoxLevel, context: Context) -> None:
+    """Test the disconnect_reverb method."""
+    r: GlobalFdnReverb = GlobalFdnReverb(context)
+    box_level.connect_reverb(r)
+    box_level.disconnect_reverb()
+    assert box_level.reverb is None
