@@ -51,6 +51,33 @@ def test_contains_point() -> None:
     assert not b.contains_point(Point(-3, -4, 0))
     assert not b.contains_point(Point(-1, 4, 5))
     assert not b.contains_point(Point(3, 7, 2))
+    b = Box(Point(0, 0, 0), Point(5, 5, 5))
+    assert b.contains_point(b.bounds.bottom_back_left)
+    assert b.contains_point(b.bounds.bottom_front_left)
+    assert b.contains_point(b.bounds.bottom_front_right)
+    assert b.contains_point(b.bounds.top_back_left)
+    assert b.contains_point(b.bounds.top_front_left)
+    assert b.contains_point(b.bounds.top_front_right)
+    assert b.contains_point(b.bounds.top_back_right)
+
+
+def test_could_fit() -> None:
+    """Test the could_fit method."""
+    c: Box = Box(Point(0, 0, 0), Point(5, 5, 5))
+    b: Box = Box(c.start, c.end)
+    assert c.could_fit(b) is True
+    b = Box(c.start, c.bounds.top_back_left)
+    assert c.could_fit(b) is True
+    b = Box(c.bounds.bottom_front_left, c.bounds.top_front_left)
+    assert c.could_fit(b) is True
+    b = Box(c.bounds.bottom_front_right, c.bounds.top_front_right)
+    assert c.could_fit(b) is True
+    b = Box(c.bounds.bottom_back_right, c.bounds.top_back_right)
+    assert c.could_fit(b) is True
+    b = Box(c.start - Point(1, 1, 1), c.end)
+    assert c.could_fit(b) is False
+    b = Box(c.start, c.end + Point(1, 1, 1))
+    assert c.could_fit(b) is False
 
 
 def test_get_containing_child() -> None:
@@ -170,7 +197,7 @@ def test_create_row_on_create() -> None:
     assert b.name == 'Second Box'
 
 
-def test_open(sound_manager: SoundManager) -> None:
+def test_open(door: Door, sound_manager: SoundManager) -> None:
     """Test door opening."""
     b: Box = Box(Point(0, 0, 0), Point(0, 0, 0))
 
@@ -180,20 +207,20 @@ def test_open(sound_manager: SoundManager) -> None:
 
     with raises(NotADoor):
         b.open(sound_manager)
-    d = Door(open=False)
-    b.door = d
+    door.open = False
+    b.door = door
     b.open(sound_manager)
-    assert d.open is True
+    assert door.open is True
 
     @b.event
     def on_open() -> None:
-        d.open = False
+        door.open = False
 
     b.open(sound_manager)
-    assert d.open is False
+    assert door.open is False
 
 
-def test_close(sound_manager: SoundManager) -> None:
+def test_close(door: Door, sound_manager: SoundManager) -> None:
     """Test closing doors."""
     b: Box = Box(Point(0, 0, 0), Point(0, 0, 0))
 
@@ -203,25 +230,23 @@ def test_close(sound_manager: SoundManager) -> None:
 
     with raises(NotADoor):
         b.close(sound_manager)
-    d = Door(open=True)
-    b.door = d
+    b.door = door
     b.close(sound_manager)
-    assert d.open is False
+    assert door.open is False
 
     @b.event
     def on_close() -> None:
-        d.open = True
+        door.open = True
 
     b.close(sound_manager)
-    assert d.open is True
+    assert door.open is True
 
 
-def test_nearest_door() -> None:
+def test_nearest_door(door: Door) -> None:
     """Test Box.nearest_door."""
     room: Box = Box(Point(0, 0, 0), Point(3, 3, 3))
     assert room.nearest_door(room.start) is None
-    d = Door()
-    doorstep: Box = Box(room.end, room.end, door=d, parent=room)
+    doorstep: Box = Box(room.end, room.end, door=door, parent=room)
     assert room.nearest_door(room.start) is None
     assert room.nearest_door(room.start, same_z=False) is doorstep
     doorstep.start.z = room.start.z
@@ -229,24 +254,31 @@ def test_nearest_door() -> None:
     assert room.nearest_door(room.start, same_z=False) is doorstep
 
 
-def test_nearest_door_with_descendants() -> None:
+def test_nearest_door_with_descendants(door: Door) -> None:
     """Test that we can get the nearest door when the door isn't a child."""
     foundation: Box = Box(Point(0, 0, 0), Point(5, 5, 5))
     office: Box = Box(Point(3, 3, 0), foundation.end, parent=foundation)
-    door: Box = Box(
-        office.start, office.start + Point(0, 0, office.end.z), door=Door(),
-        parent=office
+    doorstep: Box = Box(
+        office.start, office.bounds.top_back_left, door=door, parent=office,
+        name='Doorstep'
     )
-    assert foundation.nearest_door(foundation.start) is door
+    assert foundation.nearest_door(foundation.start) is doorstep
     assert foundation.nearest_door(Point(0, 0, 1)) is None
-    assert foundation.nearest_door(Point(0, 0, 1), same_z=False) is door
+    assert foundation.nearest_door(Point(0, 0, 1), same_z=False) is doorstep
     second_door: Box = Box(
-        foundation.start, Point(0, 0, foundation.end.z), door=Door(),
-        parent=foundation
+        foundation.start, foundation.bounds.top_back_left, door=Door(),
+        parent=foundation, name='Second Door'
     )
     assert foundation.nearest_door(foundation.start) is second_door
     assert foundation.nearest_door(Point(0, 0, 1)) is None
     assert foundation.nearest_door(Point(0, 0, 1), same_z=False) is second_door
+    third_door: Box = Box(
+        foundation.bounds.bottom_front_right,
+        foundation.bounds.top_front_right,
+        door=door, name='Third Box', parent=foundation
+    )
+    assert foundation.nearest_door(foundation.start) is second_door
+    assert foundation.nearest_door(third_door.start) is third_door
 
 
 def test_nearest_portal(box_level: BoxLevel) -> None:
@@ -254,12 +286,19 @@ def test_nearest_portal(box_level: BoxLevel) -> None:
     room: Box = Box(Point(0, 0, 0), Point(3, 3, 3))
     assert room.nearest_portal(room.start) is None
     p: Portal = Portal(box_level, Point(0, 0, 0))
-    doorstep: Box = Box(room.end, room.end, portal=p, parent=room)
     assert room.nearest_portal(room.start) is None
+    doorstep: Box = Box(
+        room.end.copy(), room.end.copy(), portal=p, parent=room
+    )
     assert room.nearest_portal(room.start, same_z=False) is doorstep
     doorstep.start.z = room.start.z
     assert room.nearest_portal(room.start) is doorstep
     assert room.nearest_portal(room.start, same_z=False) is doorstep
+    second_doorstep: Box = Box(
+        room.start.copy(), room.bounds.top_back_left.copy(), portal=p,
+        parent=room
+    )
+    assert room.nearest_portal(room.start) is second_doorstep
 
 
 def test_nearest_portal_with_descendants(game: Game, box: Box) -> None:

@@ -225,7 +225,7 @@ class BoxLevel(Level, EventDispatcher):
             if box.door.open:
                 box.close(self.external_sound_manager)
             else:
-                box.open(self.game.audio_context)
+                box.open(self.external_sound_manager)
 
     def handle_box(self, box: Box) -> None:
         """Handle a bulk standard box.
@@ -398,11 +398,12 @@ class BoxLevel(Level, EventDispatcher):
         """
 
         def inner() -> None:
-            box: Optional[Box] = self.box.get_containing_box(self.coordinates)
+            """Activate."""
+            box: Optional[Box] = self.get_current_box()
             if box is not None and box.portal is not None:
                 return self.handle_portal(box)
             child: Box
-            for child in self.box.children:
+            for child in self.box.get_descendants():
                 if (
                     child.door is not None and
                     self.coordinates.distance_between(

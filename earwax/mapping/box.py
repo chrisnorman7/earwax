@@ -226,7 +226,7 @@ class Box(EventDispatcher):
     surface_sound: Optional[Path] = None
     wall_sound: Optional[Path] = None
 
-    parent: Optional['Box'] = None
+    parent: Optional['Box'] = attrib(default=Factory(type(None)), repr=False)
     children: List['Box'] = attrib(Factory(list), repr=False)
     type: BoxTypes = Factory(lambda: BoxTypes.empty)
     door: Optional[Door] = None

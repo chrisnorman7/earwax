@@ -124,7 +124,7 @@ def test_turn(box_level: BoxLevel) -> None:
     assert box_level.bearing == 90
 
 
-def test_activate(game: Game, box_level: BoxLevel) -> None:
+def test_activate(game: Game, box_level: BoxLevel, door: Door) -> None:
     """Test the enter key."""
     box: Box = box_level.box
     a: Callable[[], None] = box_level.activate()
@@ -140,17 +140,16 @@ def test_activate(game: Game, box_level: BoxLevel) -> None:
     with raises(ActivateWorks):
         a()
     box.type = BoxTypes.empty
-    d: Door = Door()
-    b: Box = Box(box.start, box.start, door=d, parent=box)
+    b: Box = Box(box.start, box.start, door=door, parent=box)
     assert dist(
         box_level.coordinates.coordinates, b.start.coordinates
     ) < 2.0
     assert box.get_containing_box(box_level.coordinates) is b
-    assert b.door is d
+    assert b.door is door
     a()
-    assert d.open is False
+    assert door.open is False
     a()
-    assert d.open is True
+    assert door.open is True
     destination: Box = Box(Point(0, 0, 0), Point(15, 15, 0))
     l: BoxLevel = BoxLevel(game, destination)
     b.door = None
@@ -206,7 +205,7 @@ def test_move_fail(box_level: BoxLevel) -> None:
     assert point == expected
 
 
-def test_get_current_box(game: Game) -> None:
+def test_get_current_box(game: Game, door: Door) -> None:
     """Test the get_current_box method."""
     first: Box
     second: Box
@@ -219,11 +218,11 @@ def test_get_current_box(game: Game) -> None:
     assert l.get_current_box() is first
     l.set_coordinates(second.start)
     assert l.get_current_box() is second
-    door: Box = Box(third.start, third.end, door=Door(), parent=third)
-    assert door in third.children
-    assert door.parent is third
-    l.set_coordinates(door.start)
-    assert l.get_current_box() is door
+    doorstep: Box = Box(third.start, third.end, door=door, parent=third)
+    assert doorstep in third.children
+    assert doorstep.parent is third
+    l.set_coordinates(doorstep.start)
+    assert l.get_current_box() is doorstep
 
 
 def test_get_angle_between(game: Game) -> None:

@@ -9,9 +9,9 @@ from _pytest.fixtures import FixtureRequest
 from pyglet.window import Window
 from pytest import fixture
 from synthizer import (Context, GlobalFdnReverb, Source3D, StreamingGenerator,
-                       initialize, shutdown)
+                       initialized)
 
-from earwax import (Box, BoxLevel, Editor, Game, GameBoard, Level, Menu,
+from earwax import (Box, BoxLevel, Door, Editor, Game, GameBoard, Level, Menu,
                     NetworkConnection, Point, Sound, SoundManager, Track,
                     TrackTypes)
 
@@ -64,9 +64,8 @@ def get_editor(game: Game, window: Window) -> Editor:
 @fixture(scope='session', autouse=True)
 def initialise_tests() -> Generator[None, None, None]:
     """Initialise and shutdown Synthizer."""
-    initialize()
-    yield
-    shutdown()
+    with initialized():
+        yield
 
 
 @fixture(name='context', scope='session')
@@ -149,3 +148,10 @@ def get_track() -> Track:
 def get_reverb(context: Context) -> GlobalFdnReverb:
     """Get a new reverb object."""
     return GlobalFdnReverb(context)
+
+
+@fixture(name='door')
+def get_door() -> Door:
+    """Get a door object."""
+    p: Path = Path('sound.wav')
+    return Door(open_sound=p, close_sound=p, closed_sound=p)
