@@ -5,7 +5,7 @@ from time import sleep
 from typing import Callable, Optional
 
 from pytest import raises
-from synthizer import Context, GlobalFdnReverb
+from synthizer import GlobalFdnReverb
 
 from earwax import Box, BoxLevel, BoxTypes, Door, Game, Point, Portal
 
@@ -249,7 +249,9 @@ def test_connect_reverb(reverb: GlobalFdnReverb, box_level: BoxLevel) -> None:
     assert box_level.reverb is reverb
 
 
-def test_disconnect_reverb(box_level: BoxLevel, reverb: GlobalFdnReverb) -> None:
+def test_disconnect_reverb(
+    box_level: BoxLevel, reverb: GlobalFdnReverb
+) -> None:
     """Test the disconnect_reverb method."""
     box_level.connect_reverb(reverb)
     box_level.disconnect_reverb()
