@@ -1,5 +1,9 @@
 """Map demo."""
 
+if True:
+    import sys
+    sys.path.insert(0, '../..')
+
 from pathlib import Path
 from typing import List, Optional
 
@@ -12,6 +16,7 @@ from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, Game, Point,
 sounds_directory: Path = Path('sounds')
 wall_sound: Path = sounds_directory / 'collide.wav'
 footsteps_directory: Path = sounds_directory / 'footsteps'
+doors_directory: Path = sounds_directory / 'doors'
 
 walls: List[Box] = []
 doors: List[Box] = []
@@ -41,7 +46,12 @@ def before_run() -> None:
 
     def finalise_office(office: Box):
         """Add walls and a door."""
-        door: Door = Door()
+        door: Door = Door(
+            open_sound=doors_directory / 'open.wav',
+            close_sound=doors_directory / 'close.wav',
+            closed_sound=doors_directory / 'closed.wav',
+            open=False
+        )
         start: Point = office.start + Point(3, 0, 0)
         end: Point = Point(start.x, start.y, office.end.z)
         doors.append(
