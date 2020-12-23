@@ -8,8 +8,8 @@ from typing import Generator
 from _pytest.fixtures import FixtureRequest
 from pyglet.window import Window
 from pytest import fixture
-from synthizer import (Context, Source3D, StreamingGenerator, initialize,
-                       shutdown)
+from synthizer import (Context, GlobalFdnReverb, Source3D, StreamingGenerator,
+                       initialize, shutdown)
 
 from earwax import (Box, BoxLevel, Editor, Game, GameBoard, Level, Menu,
                     NetworkConnection, Point, Sound, SoundManager, Track,
@@ -143,3 +143,9 @@ def get_sound(context: Context, source: Source3D) -> Sound:
 def get_track() -> Track:
     """Get a new track instance."""
     return Track('file', 'sound.wav', TrackTypes.ambiance)
+
+
+@fixture(name='reverb')
+def get_reverb(context: Context) -> GlobalFdnReverb:
+    """Get a new reverb object."""
+    return GlobalFdnReverb(context)
