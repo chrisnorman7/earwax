@@ -38,7 +38,6 @@ There are ready made :class:`~earwax.Level` classes for creating :class:`menus
 
 from typing import List
 
-
 try:
     import pyglet
     pyglet.options['shadow_window'] = False
@@ -51,6 +50,7 @@ if True:
     from .ambiance import Ambiance
     from .config import Config, ConfigValue
     from .configuration import EarwaxConfig
+    from .dialogue_tree import DialogueLine, DialogueTree
     from .die import Die
     from .editor import Editor
     from .event_matcher import EventMatcher
@@ -93,6 +93,8 @@ __all__: List[str] = [
     'Config', 'ConfigValue',
     # configuration.py:
     'EarwaxConfig',
+    # dialogue_tree.py:
+    'DialogueLine', 'DialogueTree',
     # die.py:
     'Die',
     # editor.py:
