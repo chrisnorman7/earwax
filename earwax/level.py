@@ -59,11 +59,15 @@ class Level(RegisterEventMixin):
 
     game: 'Game'
 
-    actions: 'ActionListType' = attrib(default=Factory(list), init=False)
-    motions: 'MotionsType' = attrib(Factory(dict), init=False)
+    actions: 'ActionListType' = attrib(
+        default=Factory(list), init=False, repr=False
+    )
+    motions: 'MotionsType' = attrib(Factory(dict), init=False, repr=False)
 
-    ambiances: List['Ambiance'] = attrib(default=Factory(list), init=False)
-    tracks: List[Track] = attrib(default=Factory(list), init=False)
+    ambiances: List['Ambiance'] = attrib(
+        default=Factory(list), init=False, repr=False
+    )
+    tracks: List[Track] = attrib(default=Factory(list), init=False, repr=False)
 
     def __attrs_post_init__(self) -> None:
         """Register default events."""
