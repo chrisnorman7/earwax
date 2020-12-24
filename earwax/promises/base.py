@@ -1,14 +1,14 @@
 """Provides the base Promise class, and the PromisesStates enumeration."""
 
 from enum import Enum
-from typing import Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from attr import attrib, attrs
 
-try:
-    from pyglet.event import EventDispatcher
-except ModuleNotFoundError:
-    EventDispatcher = object
+from ..mixins import RegisterEventMixin
+
+if TYPE_CHECKING:
+    from ..types import EventType
 
 T = TypeVar('T')
 
@@ -53,7 +53,7 @@ class PromiseStates(Enum):
 
 
 @attrs(auto_attribs=True)
-class Promise(Generic[T], EventDispatcher):
+class Promise(Generic[T], RegisterEventMixin):
     """The base class for promises.
 
     Instances of this class have a few possible states which are contained in
@@ -70,7 +70,7 @@ class Promise(Generic[T], EventDispatcher):
         for func in (
             self.on_done, self.on_error, self.on_cancel, self.on_finally
         ):
-            self.register_event_type(func.__name__)
+            self.register_event(cast('EventType', func))
 
     def on_done(self, result: T) -> None:
         """Handle return value.

@@ -1,16 +1,16 @@
 """Provides the BoxLevel class."""
 
 from math import cos, sin
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, cast
 
 from attr import Factory, attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
 
+from ..types import EventType
+
 try:
-    from pyglet.event import EventDispatcher
     from synthizer import Context, GlobalFdnReverb, Source3D
 except ModuleNotFoundError:
-    EventDispatcher = object
     Context, Source3D, GlobalFdnReverb = (None, None, None)
 
 from ..level import Level
@@ -22,7 +22,7 @@ from .portal import Portal
 
 
 @attrs(auto_attribs=True)
-class BoxLevel(Level, EventDispatcher):
+class BoxLevel(Level):
     """A level that deals with sound generation for boxes.
 
     This level can be used in your games. Simply bind the various action
@@ -94,9 +94,8 @@ class BoxLevel(Level, EventDispatcher):
     def __attrs_post_init__(self) -> None:
         """Register default events."""
         super().__attrs_post_init__()
-        self.register_event_type('on_move')
-        self.register_event_type('on_move_fail')
-        self.register_event_type('on_turn')
+        for func in (self.on_move, self.on_move_fail, self.on_turn):
+            self.register_event(cast(EventType, func))
 
     def on_push(self) -> None:
         """Set listener orientation, and start ambiances and tracks."""

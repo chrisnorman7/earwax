@@ -4,14 +4,11 @@ from random import randint
 
 from attr import attrs
 
-try:
-    from pyglet.event import EventDispatcher
-except ModuleNotFoundError:
-    EventDispatcher = object
+from .mixins import RegisterEventMixin
 
 
 @attrs(auto_attribs=True)
-class Die(EventDispatcher):
+class Die(RegisterEventMixin):
     """A single dice.
 
     :ivar ~earwax.Die.sides: The number of sides this die has.
@@ -21,7 +18,7 @@ class Die(EventDispatcher):
 
     def __attrs_post_init__(self) -> None:
         """Register default events."""
-        self.register_event_type('on_roll')
+        self.register_event(self.on_roll)
 
     def on_roll(self, value: int) -> None:
         """Code to be run when a die is rolled.

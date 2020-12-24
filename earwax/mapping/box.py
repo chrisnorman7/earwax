@@ -11,14 +11,13 @@ from attr import Factory, attrib, attrs
 
 try:
     from pyglet.clock import schedule_once, unschedule
-    from pyglet.event import EventDispatcher
 except ModuleNotFoundError:
-    schedule_once = None
-    unschedule = None
-    EventDispatcher = object
+    schedule_once, unschedule = (None, None)
 
+from ..mixins import RegisterEventMixin
 from ..point import Point
 from ..sound import SoundManager
+from ..types import EventType
 from .door import Door
 from .portal import Portal
 
@@ -168,7 +167,7 @@ class NotADoor(BoxError):
 
 
 @attrs(auto_attribs=True)
-class Box(EventDispatcher):
+class Box(RegisterEventMixin):
     """A box on a map.
 
     You can create instances of this class either singly, or by using the
@@ -242,11 +241,11 @@ class Box(EventDispatcher):
         child: Box
         for child in self.children:
             child.parent = self
-        self.register_event_type('on_footstep')
-        self.register_event_type('on_collide')
-        self.register_event_type('on_activate')
-        self.register_event_type('on_open')
-        self.register_event_type('on_close')
+        for func in (
+            self.on_footstep, self.on_collide, self.on_activate, self.on_open,
+            self.on_close
+        ):
+            self.register_event(cast(EventType, func))
 
     @classmethod
     def create_fitted(

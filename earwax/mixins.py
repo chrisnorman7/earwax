@@ -11,8 +11,7 @@ except ModuleNotFoundError:
 
 if TYPE_CHECKING:
     from .game import Game
-
-from .types import EventType
+    from .types import EventType
 
 
 @attrs(auto_attribs=True)
@@ -70,7 +69,7 @@ class CoordinatesMixin:
 class RegisterEventMixin(EventDispatcher):
     """Allow registering and binding events in one function."""
 
-    def register_event(self, func: EventType) -> str:
+    def register_event(self, func: 'EventType') -> str:
         """Register an event type from a function.
 
         This function uses ``func.__name__`` to register an event type,

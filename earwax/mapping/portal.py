@@ -5,11 +5,7 @@ from typing import TYPE_CHECKING, Optional
 
 from attr import attrs
 
-try:
-    from pyglet.event import EventDispatcher
-except ModuleNotFoundError:
-    EventDispatcher = object
-
+from ..mixins import RegisterEventMixin
 from ..point import Point
 
 if TYPE_CHECKING:
@@ -17,7 +13,7 @@ if TYPE_CHECKING:
 
 
 @attrs(auto_attribs=True)
-class Portal(EventDispatcher):
+class Portal(RegisterEventMixin):
     """A portal to another map.
 
     An object that can be added to a :class:`earwax.Box` to make a link
