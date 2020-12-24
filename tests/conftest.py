@@ -33,9 +33,7 @@ def get_level(game: Game) -> Level:
 @fixture(name='game')
 def get_game(context: Context, thread_pool: ThreadPoolExecutor) -> Game:
     """Get a new ``Game`` instance."""
-    g: Game = Game()
-    g.audio_context = context
-    g.thread_pool = thread_pool
+    g: Game = Game(audio_context=context, thread_pool=thread_pool)
     return g
 
 

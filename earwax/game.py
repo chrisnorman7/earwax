@@ -177,7 +177,7 @@ class Game(RegisterEventMixin):
     joysticks: List[Joystick] = attrib(default=Factory(list), init=False)
 
     thread_pool: Executor = attrib(
-        default=Factory(ThreadPoolExecutor), init=False
+        default=Factory(ThreadPoolExecutor), repr=False
     )
 
     tasks: List[Task] = attrib(default=Factory(list), init=False, repr=False)
