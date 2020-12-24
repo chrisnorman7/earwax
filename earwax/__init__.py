@@ -36,6 +36,9 @@ There are ready made :class:`~earwax.Level` classes for creating :class:`menus
 <earwax.Menu>`, and :class:`editors <earwax.Editor>`.
 """
 
+from typing import List
+
+
 try:
     import pyglet
     pyglet.options['shadow_window'] = False
@@ -79,19 +82,60 @@ if True:
     from .cmd.project import Project
     from .cmd.project_level import ProjectLevel
 
-__all__ = [
-    'Game', 'tts', 'Action', 'Menu', 'MenuItem', 'FileMenu', 'ActionMenu',
-    'get_buffer', 'Editor', 'Level', 'EventMatcher', 'Config', 'ConfigValue',
-    'ConfigMenu', 'TypeHandler', 'UnknownTypeError', 'EarwaxConfig',
-    'ProjectLevel', 'cmd_main', 'Project', 'Box', 'Point', 'OutOfBounds',
-    'PointDirections', 'walking_directions', 'BoxTypes', 'BoxLevel',
-    'Ambiance', 'Door', 'NotADoor', 'Portal', 'Track', 'DismissibleMixin',
-    'TitleMixin', 'IntroLevel', 'CoordinatesMixin', 'GameBoard', 'NoSuchTile',
-    'Die', 'BufferDirectory', 'PromiseStates', 'ThreadedPromise',
-    'StaggeredPromise', 'staggered_promise', 'Promise', 'types', 'utils',
-    'GameNotRunning', 'NetworkConnection', 'ConnectionStates',
-    'ConnectionError', 'AlreadyConnected', 'AlreadyConnecting',
-    'NotConnectedYet', 'TrackTypes', 'Task', 'TaskFunction',
-    'IntervalFunction', 'BoxBounds', 'Sound', 'SoundManager',
-    'AlreadyDestroyed', 'SoundError', 'ReverbSettingsDict'
+__all__: List[str] = [
+    # General modules:
+    'types', 'utils',
+    # action.py:
+    'Action',
+    # ambiance.py:
+    'Ambiance',
+    # config.py:
+    'Config', 'ConfigValue',
+    # configuration.py:
+    'EarwaxConfig',
+    # die.py:
+    'Die',
+    # editor.py:
+    'Editor',
+    # event_matcher.py:
+    'EventMatcher',
+    # game.py:
+    'Game', 'GameNotRunning',
+    # game_board.py:
+    'GameBoard', 'NoSuchTile',
+    # level.py:
+    'IntroLevel', 'Level',
+    # mapping/__init__.py:
+    'Box', 'BoxBounds', 'BoxLevel', 'BoxTypes', 'Door', 'NotADoor',
+    'OutOfBounds', 'Portal', 'ReverbSettingsDict',
+    # menu/__init__.py:
+    'ActionMenu', 'ConfigMenu', 'FileMenu', 'Menu', 'MenuItem', 'TypeHandler',
+    'UnknownTypeError',
+    # mixins.py:
+    'CoordinatesMixin', 'DismissibleMixin', 'TitleMixin',
+    # networking.py:
+    'AlreadyConnected', 'AlreadyConnecting', 'ConnectionError',
+    'ConnectionStates', 'NetworkConnection', 'NotConnectedYet',
+    # point.py:
+    'Point', 'PointDirections',
+    # promises/__init__.py:
+    'Promise', 'PromiseStates', 'StaggeredPromise', 'ThreadedPromise',
+    'staggered_promise',
+    # sound.py:
+    'AlreadyDestroyed', 'BufferDirectory', 'Sound', 'SoundError',
+    'SoundManager', 'get_buffer',
+    # speech.py:
+    'tts',
+    # task.py:
+    'IntervalFunction', 'Task', 'TaskFunction',
+    # track.py:
+    'Track', 'TrackTypes',
+    # walking_directions.py:
+    'walking_directions',
+    # cmd/main.py:
+    'cmd_main',
+    # cmd/project.py:
+    'Project',
+    # cmd/project_level.py:
+    'ProjectLevel',
 ]
