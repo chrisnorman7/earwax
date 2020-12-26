@@ -5,6 +5,8 @@ from typing import Callable, Generic, List, Optional, TypeVar
 
 from attr import Factory, attrib, attrs
 
+from .track import Track
+
 DialogueLineDataType = TypeVar('DialogueLineDataType')
 DialogueTreeDataType = TypeVar('DialogueTreeDataType')
 
@@ -60,11 +62,16 @@ class DialogueTree(Generic[DialogueTreeDataType]):
 
     :ivar ~earwax.DialogueTree.children: The top-level dialogue lines for this
         instance.
+
+    :ivar ~earwax.DialogueTree.tracks: A list of tracks to play while this
+        dialogue tree is in focus.
     """
 
     children: List[DialogueLine] = attrib(
         default=Factory(list), init=False, repr=False
     )
+
+    tracks: List[Track] = attrib(default=Factory(list), repr=False)
 
     def get_children(self, data: DialogueTreeDataType) -> List[DialogueLine]:
         """Get a list of all the children who can be shown currently.
