@@ -1,11 +1,15 @@
 """Add a tag and upload."""
 
-from datetime import datetime
+from argparse import ArgumentParser
 from subprocess import call
 
+parser: ArgumentParser = ArgumentParser()
+
+parser.add_argument('version', help='The version number to use')
+
 if __name__ == "__main__":
-    now: datetime = datetime.now()
-    if call(['git', 'tag', now.strftime('%Y-%m-%d')]) == 0:
+    args = parser.parse_args()
+    if call(['git', 'tag', args.version]) == 0:
         print('Tag created.')
         if call(['git', 'push', '--tags']) == 0:
             print('Tag uploaded.')
