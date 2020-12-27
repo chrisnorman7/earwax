@@ -94,7 +94,7 @@ class Level(RegisterEventMixin):
 
     def start_tracks(self) -> None:
         """Start all the tracks on this instance."""
-        manager: SoundManager
+        manager: Optional[SoundManager]
         track: Track
         for track in self.tracks:
             if track.track_type is TrackTypes.ambiance:
@@ -104,6 +104,10 @@ class Level(RegisterEventMixin):
             else:
                 raise RuntimeError(
                     'Unknown track type: %r.' % track.track_type
+                )
+            if manager is None:
+                raise RuntimeError(
+                    f'Unable to play {track!r} with no sound manager.'
                 )
             track.play(manager)
 
@@ -212,6 +216,11 @@ class Level(RegisterEventMixin):
         been popped, thus revealing this level.
         """
         pass
+
+    def __del__(self) -> None:
+        """Stop tracks ETC."""
+        self.stop_ambiances()
+        self.stop_tracks()
 
 
 @attrs(auto_attribs=True)

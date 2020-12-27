@@ -141,10 +141,10 @@ class Game(RegisterEventMixin):
     interface_sound_manager: SoundManager = attrib(
         default=Factory(NoneType), init=False, repr=False
     )
-    music_sound_manager: SoundManager = attrib(
+    music_sound_manager: Optional[SoundManager] = attrib(
         default=Factory(NoneType), init=False, repr=False
     )
-    ambiance_sound_manager: SoundManager = attrib(
+    ambiance_sound_manager: Optional[SoundManager] = attrib(
         default=Factory(NoneType), init=False, repr=False
     )
 
