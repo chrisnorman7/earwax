@@ -108,8 +108,8 @@ def test_connect_reverb(reverb: GlobalFdnReverb, sound: Sound) -> None:
 
 def test_restart(sound: Sound) -> None:
     """Make sure we can restart a sound."""
-    sleep(0.5)
-    assert sound.generator.position > 4000
+    sleep(0.3)
+    assert sound.generator.position > 0.2
     sound.source.remove_generator(sound.generator)
     sound.restart()
     sleep(0.5)
