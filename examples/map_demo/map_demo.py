@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List
 
 from pyglet.window import Window, key
-from synthizer import DirectSource, GlobalFdnReverb, PannerStrategy, Source3D
+from synthizer import DirectSource, GlobalFdnReverb
 
 from earwax import (Ambiance, Box, BoxLevel, BoxTypes, Door, Game, Point,
                     ReverbSettingsDict, SoundManager, Track, TrackTypes)
@@ -40,10 +40,6 @@ def before_run() -> None:
     player_sound_manager: SoundManager = SoundManager(
         game.audio_context, DirectSource(game.audio_context)
     )
-    external_sound_manager: SoundManager = SoundManager(
-        game.audio_context, Source3D(game.audio_context)
-    )
-    external_sound_manager.source.panner_strategy = PannerStrategy.HRTF
     ambiances: List[Ambiance] = []
 
     def finalise_office(office: Box):
@@ -55,11 +51,11 @@ def before_run() -> None:
             open=False, close_after=(2.0, 5.0)
         )
         start: Point = office.start + Point(3, 0, 0)
-        end: Point = Point(start.x, start.y, office.end.z)
+        end: Point = Point(start.x + 1, start.y, office.end.z)
         b: Box = Box(
-            start, end, door=door, name=f'Door to {office.name}',
+            game, start, end, door=door, name=f'Door to {office.name}',
             surface_sound=office.surface_sound, reverb_settings=office_reverb,
-            parent=office, wall_sound=wall_sound
+            parent=office
         )
         doors.append(b)
         a: Ambiance = Ambiance.from_path(
@@ -70,34 +66,34 @@ def before_run() -> None:
         walls.extend(
             [
                 Box(
-                    office.bounds.bottom_back_right + Point(1, 0, 0),
+                    game, office.bounds.bottom_back_right + Point(1, 0, 0),
                     office.end + Point(1, 0, 0),
                     type=BoxTypes.solid, wall_sound=wall_sound
                 ), Box(
-                    office.start, end - Point(1, 0, 0), parent=office,
+                    game, office.start.copy(), start - Point(1, 0, 0), parent=office,
                     type=BoxTypes.solid, wall_sound=wall_sound
                 ), Box(
-                    start + Point(1, 0, 0), office.bounds.top_back_right,
+                    game, start + Point(2, 0, 0), office.bounds.top_back_right.copy(),
                     parent=office, type=BoxTypes.solid, wall_sound=wall_sound
                 )
             ]
         )
 
     offices: List[Box] = Box.create_row(
-        Point(0, 4, 0), Point(7, 10, 2), 3, Point(2, 0, 0),
+        game, Point(0, 4, 0), Point(7, 10, 2), 3, Point(2, 0, 0),
         get_name=lambda i: f'Office {i + 1}', on_create=finalise_office,
         surface_sound=footsteps_directory / 'office',
         reverb_settings=office_reverb, wall_sound=wall_sound
     )
     corridor: Box = Box(
-        offices[0].bounds.bottom_back_left - Point(0, 4, 0),
+        game, offices[0].bounds.bottom_back_left - Point(0, 4, 0),
         offices[-1].bounds.top_back_right - Point(0, 1, 0),
         name='Corridor', surface_sound=footsteps_directory / 'corridor',
         reverb_settings=corridor_reverb, wall_sound=wall_sound
     )
     boxes: List[Box] = offices + walls + [corridor]
     box = Box.create_fitted(
-        boxes, name='Main Box', type=BoxTypes.solid,
+        game, boxes, name='Main Box', type=BoxTypes.solid,
         pad_start=Point(-1, -1, -1), pad_end=Point(1, 1, 1),
         wall_sound=wall_sound
     )
@@ -108,7 +104,6 @@ def before_run() -> None:
     level: BoxLevel = BoxLevel(
         game, box, coordinates=corridor.start,
         player_sound_manager=player_sound_manager,
-        external_sound_manager=external_sound_manager
     )
     level.tracks.append(music)
     level.ambiances.extend(ambiances)
