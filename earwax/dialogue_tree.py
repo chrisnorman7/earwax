@@ -1,18 +1,15 @@
 """Provides the DialogueLine and DialogueTree classes."""
 
 from pathlib import Path
-from typing import Callable, Generic, List, Optional, TypeVar
+from typing import Callable, List, Optional
 
 from attr import Factory, attrib, attrs
 
 from .track import Track
 
-DialogueLineDataType = TypeVar('DialogueLineDataType')
-DialogueTreeDataType = TypeVar('DialogueTreeDataType')
-
 
 @attrs(auto_attribs=True)
-class DialogueLine(Generic[DialogueLineDataType]):
+class DialogueLine:
     """A line of dialogue.
 
     :param ~earwax.DialogueLine.parent: The dialogue tree that this line of
@@ -40,12 +37,10 @@ class DialogueLine(Generic[DialogueLineDataType]):
 
     text: Optional[str] = None
     sound: Optional[Path] = None
-    can_show: Optional[Callable[[DialogueLineDataType], bool]] = None
-    on_activate: Optional[Callable[[DialogueLineDataType], bool]] = None
+    can_show: Optional[Callable[[], bool]] = None
+    on_activate: Optional[Callable[[], bool]] = None
 
-    responses: List['DialogueLine'] = attrib(
-        default=Factory(list), init=False, repr=False
-    )
+    responses: List['DialogueLine'] = attrib(default=Factory(list), repr=False)
 
     def __attrs_post_init__(self) -> None:
         """Check that we have text or a sound."""
@@ -57,7 +52,7 @@ class DialogueLine(Generic[DialogueLineDataType]):
 
 
 @attrs(auto_attribs=True)
-class DialogueTree(Generic[DialogueTreeDataType]):
+class DialogueTree:
     """A dialogue tree object.
 
     :ivar ~earwax.DialogueTree.children: The top-level dialogue lines for this
@@ -73,16 +68,14 @@ class DialogueTree(Generic[DialogueTreeDataType]):
 
     tracks: List[Track] = attrib(default=Factory(list), repr=False)
 
-    def get_children(self, data: DialogueTreeDataType) -> List[DialogueLine]:
+    def get_children(self) -> List[DialogueLine]:
         """Get a list of all the children who can be shown currently.
 
         This method returns a list of those children for whom
-        ``child.can_show(data)`` is True.
-
-        :param data: The data to pass to :meth:`~earwax.DialogueLine.can_show`.
+        :attr:`child.can_show() <earwax.DialogueLine.can_show>` is ``True``.
         """
-        child: DialogueLine[DialogueTreeDataType]
+        child: DialogueLine
         return [
-            child for child in self.children if child.can_show is not None and
-            child.can_show(data)
+            child for child in self.children if child.can_show is None or
+            child.can_show() is True
         ]

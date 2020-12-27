@@ -11,9 +11,9 @@ from pytest import fixture
 from synthizer import (Context, GlobalFdnReverb, Source3D, StreamingGenerator,
                        initialized)
 
-from earwax import (Box, BoxLevel, Door, Editor, Game, GameBoard, Level, Menu,
-                    NetworkConnection, Point, Sound, SoundManager, Track,
-                    TrackTypes)
+from earwax import (
+    Box, BoxLevel, DialogueTree, Door, Editor, Game, GameBoard, Level, Menu,
+    NetworkConnection, Point, Sound, SoundManager, Track, TrackTypes)
 
 from .networking.pretend_socket import PretendSocket
 
@@ -153,3 +153,9 @@ def get_door() -> Door:
     """Get a door object."""
     p: Path = Path('sound.wav')
     return Door(open_sound=p, close_sound=p, closed_sound=p)
+
+
+@fixture(name='dialogue_tree')
+def get_dialogue_line() -> DialogueTree:
+    """Get a new DialogueTree instance."""
+    return DialogueTree()
