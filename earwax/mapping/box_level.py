@@ -1,12 +1,13 @@
 """Provides the BoxLevel class."""
 
-from math import cos, sin
+from math import cos, floor, sin
 from typing import Callable, List, Optional, Tuple, cast
 
 from attr import Factory, attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
 
 from ..types import EventType
+from .box import BoxBounds
 
 try:
     from synthizer import Context, GlobalFdnReverb, Source3D
@@ -42,6 +43,10 @@ class BoxLevel(Level):
     * :meth:`~earwax.BoxLevel.show_facing`
 
     * :meth:`~earwax.BoxLevel.turn`
+
+    * :meth:`~earwax.BoxLevel.show_nearest_door`
+
+    * :meth:`~earwax.BoxLevel.describe_current_box`
 
     :ivar ~earwax.BoxLevel.box: The box that this level will work with.
 
@@ -414,6 +419,46 @@ class BoxLevel(Level):
                 box.dispatch_event('on_activate')
 
         return inner
+
+    def show_nearest_door(
+        self, max_distance: Optional[float] = None
+    ) -> Callable[[], None]:
+        """Return a callable that will speak the position of the nearest door.
+
+        :param max_distance: The maximum distance between the current
+            coordinates and the nearest door where the door will still be
+            reported.
+
+            If this value is ``None``, then any door will be reported.
+        """
+
+        def inner() -> None:
+            d: Optional[Box] = self.box.nearest_door(self.coordinates)
+            if d is not None:
+                name: str = d.name or 'Untitled door'
+                angle: int = floor(self.get_angle_between(d.start))
+                distance: float = self.coordinates.distance_between(d.start)
+                directions: str
+                if not round(distance):
+                    directions = 'here'
+                else:
+                    directions = '%.1f at %d degrees' % (distance, angle)
+                if max_distance is None or distance < max_distance:
+                    return self.game.output(f'{name}: {directions}.')
+            self.game.output('There are no nearby doors.')
+
+        return inner
+
+    def describe_current_box(self) -> None:
+        """Describe the current box."""
+        box: Optional[Box] = self.get_current_box()
+        if box is None:
+            self.game.output('No box.')
+        else:
+            b: BoxBounds = box.bounds
+            self.game.output(
+                f'{box.name}: {b.width + 1} x {b.depth + 1} x {b.height + 1}.'
+            )
 
     def get_current_box(self) -> Optional[Box]:
         """Get the box that lies at the current coordinates."""
