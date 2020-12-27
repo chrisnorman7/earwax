@@ -135,7 +135,10 @@ def test_start_ambiances(game: Game, level: Level, window: Window) -> None:
             assert isinstance(a.sound, Sound)
             assert isinstance(a.sound_manager, SoundManager)
             assert a.sound_manager.context is game.audio_context
-            assert a.sound_manager.source.gain == game.config.sound.ambiance_volume.value
+            assert (
+                a.sound_manager.source.gain ==
+                game.config.sound.ambiance_volume.value
+            )
             assert a.sound.generator.looping is True
             window.close()
 
