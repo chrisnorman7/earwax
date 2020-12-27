@@ -70,10 +70,12 @@ def before_run() -> None:
                     office.end + Point(1, 0, 0),
                     type=BoxTypes.solid, wall_sound=wall_sound
                 ), Box(
-                    game, office.start.copy(), start - Point(1, 0, 0), parent=office,
+                    game, office.start.copy(), start - Point(1, 0, 0),
+                    parent=office,
                     type=BoxTypes.solid, wall_sound=wall_sound
                 ), Box(
-                    game, start + Point(2, 0, 0), office.bounds.top_back_right.copy(),
+                    game, start + Point(2, 0, 0),
+                    office.bounds.top_back_right.copy(),
                     parent=office, type=BoxTypes.solid, wall_sound=wall_sound
                 )
             ]
