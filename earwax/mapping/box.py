@@ -232,10 +232,16 @@ class Box(RegisterEventMixin):
     portal: Optional[Portal] = None
     bounds: BoxBounds = attrib(repr=False, init=False)
     reverb_settings: ReverbSettingsDict = Factory(dict)
+    centre: Point = attrib(init=False, repr=False)
 
     def __attrs_post_init__(self) -> None:
         """Configure bounds, parents and children."""
         self.bounds = BoxBounds(self.start, self.end)
+        self.centre = self.start + Point(
+            self.bounds.width / 2,
+            self.bounds.depth / 2,
+            self.bounds.height / 2
+        )
         if self.parent is not None:
             self.parent.add_child(self)
         child: Box

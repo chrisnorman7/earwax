@@ -446,3 +446,13 @@ def test_filter_descendants() -> None:
     child_1: Box = Box(start, end, parent=parent, name='Child 1')
     Box(start, end, parent=parent, name='Child 2')
     assert list(grandparent.filter_descendants(filter_descendant)) == [child_1]
+
+
+def test_centre() -> None:
+    """Test the centre of a box."""
+    b: Box = Box(Point(1, 1, 1), Point(4, 4, 4))
+    assert b.centre == Point(2.5, 2.5, 2.5)
+    b = Box(Point(0, 0, 0), Point(5, 5, 5))
+    assert b.centre == Point(2.5, 2.5, 2.5)
+    b = Box(Point(3, 4, 5), Point(7, 8, 9))
+    assert b.centre == Point(5.0, 6.0, 7.0)
