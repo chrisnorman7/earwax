@@ -7,8 +7,9 @@ from pyglet.clock import schedule_once
 from pyglet.resource import get_settings_path
 from pyglet.window import Window, key
 from pytest import raises
+from synthizer import Context
 
-from earwax import ActionMenu, Game, GameNotRunning, Level, Menu
+from earwax import ActionMenu, Game, GameNotRunning, Level, Menu, SoundManager
 
 
 class WorksWithoutYield(Exception):
@@ -154,13 +155,22 @@ def test_before_run(game: Game, window: Window) -> None:
     window.close()
 
 
-def test_run(game: Game, level: Level, window: Window) -> None:
+def test_run(
+    game: Game, level: Level, window: Window, context: Context
+) -> None:
     """Test the run method."""
 
     @level.event
     def on_push() -> None:
         assert game.level is level
-        schedule_once(lambda dt: window.close(), 1)
+        assert isinstance(game.music_sound_manager, SoundManager)
+        assert game.music_sound_manager.should_loop is True
+        assert isinstance(game.ambiance_sound_manager, SoundManager)
+        assert game.ambiance_sound_manager.should_loop is True
+        assert isinstance(game.interface_sound_manager, SoundManager)
+        assert game.interface_sound_manager.should_loop is False
+        assert game.audio_context is context
+        schedule_once(lambda dt: window.close(), 0.2)
 
     game.run(window, initial_level=level)
     assert game.level is level

@@ -525,11 +525,11 @@ class Game(RegisterEventMixin):
         manager.gain = self.config.sound.sound_volume.value
         self.interface_sound_manager = manager
         source = DirectSource(self.audio_context)
-        manager = SoundManager(self.audio_context, source)
+        manager = SoundManager(self.audio_context, source, should_loop=True)
         manager.gain = self.config.sound.music_volume.value
         self.music_sound_manager = manager
         source = DirectSource(self.audio_context)
-        manager = SoundManager(self.audio_context, source)
+        manager = SoundManager(self.audio_context, source, should_loop=True)
         manager.gain = self.config.sound.ambiance_volume.value
         self.ambiance_sound_manager = manager
         if initial_level is not None:
