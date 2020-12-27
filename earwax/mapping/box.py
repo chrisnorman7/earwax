@@ -14,7 +14,9 @@ try:
     from synthizer import Context, GlobalFdnReverb, PannerStrategy, Source3D
 except ModuleNotFoundError:
     schedule_once, unschedule = (None, None)
-    Context, GlobalFdnReverb, PannerStrategy, Source3d = (None, None, None, None)
+    Context, GlobalFdnReverb, PannerStrategy, Source3d = (
+        None, None, None, None
+    )
 
 from ..mixins import RegisterEventMixin
 from ..point import Point
@@ -604,6 +606,9 @@ class Box(RegisterEventMixin):
         ):
             if self.sound_manager is None:
                 self.make_sound_manager()
+            assert self.sound_manager is not None  # Shuts mypy up.
+            print(self.sound_manager.source.position)
+            print(self.start)
             self.sound_manager.play_path(self.door.open_sound, True)
         when: float
         if isinstance(self.door.close_after, tuple):
@@ -634,9 +639,10 @@ class Box(RegisterEventMixin):
         ):
             if self.sound_manager is None:
                 self.make_sound_manager()
+            assert self.sound_manager is not None  # Shuts mypy up.
             self.sound_manager.play_path(self.door.close_sound, True)
 
-    def scheduled_close(self, dt: float, sound_manager: SoundManager) -> None:
+    def scheduled_close(self, dt: float) -> None:
         """Call :meth:`self.close() <earwax.Box.close>` on a schedule.
 
         :param dt: The ``dt`` parameter expected by Pyglet's schedule
