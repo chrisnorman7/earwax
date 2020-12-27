@@ -50,7 +50,7 @@ def before_run() -> None:
             open_sound=doors_directory / 'open.wav',
             close_sound=doors_directory / 'close.wav',
             closed_sound=doors_directory / 'closed.wav',
-            open=False
+            open=False, close_after=(2.0, 5.0)
         )
         start: Point = office.start + Point(3, 0, 0)
         end: Point = Point(start.x, start.y, office.end.z)
