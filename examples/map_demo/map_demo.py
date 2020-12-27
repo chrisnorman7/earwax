@@ -131,6 +131,9 @@ def before_run() -> None:
     level.action(
         'Describe current box', symbol=key.X
     )(level.describe_current_box)
+    level.action(
+        'Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT
+    )(game.push_action_menu)
     game.push_level(level)
 
 
