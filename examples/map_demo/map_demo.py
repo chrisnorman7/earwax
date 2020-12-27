@@ -10,7 +10,7 @@ from typing import List
 from pyglet.window import Window, key
 from synthizer import DirectSource, GlobalFdnReverb, PannerStrategy, Source3D
 
-from earwax import (Box, BoxLevel, BoxTypes, Door, Game, Point,
+from earwax import (Ambiance, Box, BoxLevel, BoxTypes, Door, Game, Point,
                     ReverbSettingsDict, SoundManager, Track, TrackTypes)
 
 sounds_directory: Path = Path('sounds')
@@ -44,6 +44,7 @@ def before_run() -> None:
         game.audio_context, Source3D(game.audio_context)
     )
     external_sound_manager.source.panner_strategy = PannerStrategy.HRTF
+    ambiances: List[Ambiance] = []
 
     def finalise_office(office: Box):
         """Add walls and a door."""
@@ -55,14 +56,17 @@ def before_run() -> None:
         )
         start: Point = office.start + Point(3, 0, 0)
         end: Point = Point(start.x, start.y, office.end.z)
-        doors.append(
-            Box(
-                start, end, door=door, name=f'Door to {office.name}',
-                surface_sound=office.surface_sound,
-                reverb_settings=office_reverb, parent=office,
-                wall_sound=wall_sound
-            )
+        b: Box = Box(
+            start, end, door=door, name=f'Door to {office.name}',
+            surface_sound=office.surface_sound, reverb_settings=office_reverb,
+            parent=office, wall_sound=wall_sound
         )
+        doors.append(b)
+        a: Ambiance = Ambiance.from_path(
+            sounds_directory / ('buzz_%d.wav' % len(ambiances)),
+            coordinates=b.centre
+        )
+        ambiances.append(a)
         walls.extend(
             [
                 Box(
@@ -80,7 +84,7 @@ def before_run() -> None:
         )
 
     offices: List[Box] = Box.create_row(
-        Point(0, 4, 0), Point(7, 10, 2), 5, Point(2, 0, 0),
+        Point(0, 4, 0), Point(7, 10, 2), 3, Point(2, 0, 0),
         get_name=lambda i: f'Office {i + 1}', on_create=finalise_office,
         surface_sound=footsteps_directory / 'office',
         reverb_settings=office_reverb, wall_sound=wall_sound
@@ -107,6 +111,7 @@ def before_run() -> None:
         external_sound_manager=external_sound_manager
     )
     level.tracks.append(music)
+    level.ambiances.extend(ambiances)
     level.connect_reverb(reverb)
     level.action('Show coordinates', symbol=key.C)(level.show_coordinates())
     level.action('Show facing direction', symbol=key.F)(level.show_facing())
