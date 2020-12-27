@@ -5,13 +5,13 @@ if True:
     sys.path.insert(0, '../..')
 
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from pyglet.window import Window, key
-from synthizer import DirectSource, GlobalFdnReverb, Source3D
+from synthizer import DirectSource, GlobalFdnReverb, PannerStrategy, Source3D
 
-from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, Game, Point,
-                    ReverbSettingsDict, SoundManager)
+from earwax import (Box, BoxLevel, BoxTypes, Door, Game, Point,
+                    ReverbSettingsDict, SoundManager, Track, TrackTypes)
 
 sounds_directory: Path = Path('sounds')
 wall_sound: Path = sounds_directory / 'collide.wav'
@@ -43,6 +43,7 @@ def before_run() -> None:
     external_sound_manager: SoundManager = SoundManager(
         game.audio_context, Source3D(game.audio_context)
     )
+    external_sound_manager.source.panner_strategy = PannerStrategy.HRTF
 
     def finalise_office(office: Box):
         """Add walls and a door."""
@@ -97,11 +98,15 @@ def before_run() -> None:
         wall_sound=wall_sound
     )
     reverb: GlobalFdnReverb = GlobalFdnReverb(game.audio_context)
+    music: Track = Track.from_path(
+        sounds_directory / 'music.mp3', TrackTypes.music
+    )
     level: BoxLevel = BoxLevel(
         game, box, coordinates=corridor.start,
         player_sound_manager=player_sound_manager,
         external_sound_manager=external_sound_manager
     )
+    level.tracks.append(music)
     level.connect_reverb(reverb)
     level.action('Show coordinates', symbol=key.C)(level.show_coordinates())
     level.action('Show facing direction', symbol=key.F)(level.show_facing())
@@ -115,20 +120,12 @@ def before_run() -> None:
         'Activate nearby objects', symbol=key.RETURN
     )(level.activate())
 
-    @level.action('Describe current box', symbol=key.X)
-    def describe_current_box() -> None:
-        """Describe the current box."""
-        box: Optional[Box] = level.box.get_containing_box(
-            level.coordinates.floor()
-        )
-        if box is None:
-            game.output('No box.')
-        else:
-            b: BoxBounds = box.bounds
-            game.output(
-                f'{box.name}: {b.width + 1} x {b.depth + 1} x {b.height + 1}.'
-            )
-
+    level.action(
+        'Announce nearest door', symbol=key.Z
+    )(level.show_nearest_door())
+    level.action(
+        'Describe current box', symbol=key.X
+    )(level.describe_current_box)
     game.push_level(level)
 
 
