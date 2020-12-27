@@ -1,12 +1,14 @@
 """Test level instances."""
 
+from pathlib import Path
 from typing import List
 
 from pyglet.clock import schedule_once
 from pyglet.window import Window, key
 from pytest import raises
 
-from earwax import Action, Game, Level
+from earwax import (Action, Ambiance, Game, Level, Sound, SoundManager, Track,
+                    TrackTypes)
 
 
 class OnCoverWorks(Exception):
@@ -118,3 +120,49 @@ def test_on_cover(game: Game, level: Level) -> None:
     assert game.level is l
     game.push_level(level)
     assert game.level is level
+
+
+def test_start_ambiances(game: Game, level: Level, window: Window) -> None:
+    """Test that ambiances start correctly."""
+    a: Ambiance = Ambiance.from_path(Path('sound.wav'))
+    level.ambiances.append(a)
+
+    @level.event
+    def on_push() -> None:
+        """Schedule the real test method."""
+
+        def inner(dt: float) -> None:
+            assert isinstance(a.sound, Sound)
+            assert isinstance(a.sound_manager, SoundManager)
+            assert a.sound_manager.context is game.audio_context
+            assert a.sound_manager.source.gain == game.config.sound.ambiance_volume.value
+            assert a.sound.generator.looping is True
+            window.close()
+
+        schedule_once(inner, 0.25)
+
+    game.run(window, initial_level=level)
+
+
+def test_start_tracks(game: Game, level: Level, window: Window) -> None:
+    """Test that tracks start properly."""
+    music: Track = Track.from_path(Path('sound.wav'), TrackTypes.music)
+    ambiance: Track = Track.from_path(Path('sound.wav'), TrackTypes.ambiance)
+    level.tracks.extend([ambiance, music])
+
+    @level.event
+    def on_push() -> None:
+        """Schedule the real test function."""
+
+        def inner(dt: float) -> None:
+            assert ambiance.sound_manager is game.ambiance_sound_manager
+            assert isinstance(ambiance.sound, Sound)
+            assert ambiance.sound.generator.looping is True
+            assert music.sound_manager is game.music_sound_manager
+            assert isinstance(music.sound, Sound)
+            assert music.sound.generator.looping is True
+            window.close()
+
+        schedule_once(inner, 0.25)
+
+    game.run(window, initial_level=level)

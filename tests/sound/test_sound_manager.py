@@ -122,3 +122,19 @@ def test_play_stream(sound_manager: SoundManager) -> None:
     assert isinstance(sound.generator, StreamingGenerator)
     assert sound.buffer is None
     assert sound._valid is True
+
+
+def test_play_path_looping(sound_manager: SoundManager) -> None:
+    """Ensure that play path properly loops the sound."""
+    sound_manager.should_loop = True
+    s: Sound = sound_manager.play_path(Path('sound.wav'), False)
+    sleep(0.2)
+    assert s.generator.looping is True
+
+
+def test_play_stream_looping(sound_manager: SoundManager) -> None:
+    """Test that play_stream properly loops the sound."""
+    sound_manager.should_loop = True
+    s: Sound = sound_manager.play_stream('file', 'sound.wav')
+    sleep(0.2)
+    assert s.generator.looping is True

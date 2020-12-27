@@ -305,6 +305,7 @@ class SoundManager:
         sound: Sound = Sound.from_stream(
             self.context, self.source, protocol, path
         )
+        sound.generator.looping = self.should_loop
         self.sounds.append(sound)
         return sound
 
