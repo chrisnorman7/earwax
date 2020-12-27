@@ -598,26 +598,26 @@ class Box(RegisterEventMixin):
         """
         if self.door is None:
             raise NotADoor(self)
-        self.door.open = True
-        self.dispatch_event('on_open')
-        if (
-            self.door.open_sound is not None and
-            self.game.audio_context is not None
-        ):
-            if self.sound_manager is None:
-                self.make_sound_manager()
-            assert self.sound_manager is not None  # Shuts mypy up.
-            print(self.sound_manager.source.position)
-            print(self.start)
-            self.sound_manager.play_path(self.door.open_sound, True)
-        when: float
-        if isinstance(self.door.close_after, tuple):
-            when = uniform(*self.door.close_after)
-        elif isinstance(self.door.close_after, float):
-            when = self.door.close_after
-        else:
-            return None
-        schedule_once(self.scheduled_close, when)
+        d: Door = self.door
+        if d.can_open is None or d.can_open() is True:
+            d.open = True
+            self.dispatch_event('on_open')
+            if (
+                d.open_sound is not None and
+                self.game.audio_context is not None
+            ):
+                if self.sound_manager is None:
+                    self.make_sound_manager()
+                assert self.sound_manager is not None  # Shuts mypy up.
+                self.sound_manager.play_path(d.open_sound, True)
+            when: float
+            if isinstance(self.door.close_after, tuple):
+                when = uniform(*self.door.close_after)
+            elif isinstance(self.door.close_after, float):
+                when = self.door.close_after
+            else:
+                return None
+            schedule_once(self.scheduled_close, when)
 
     def close(self) -> None:
         """Close a door on this box.
@@ -630,17 +630,19 @@ class Box(RegisterEventMixin):
         """
         if self.door is None:
             raise NotADoor(self)
-        unschedule(self.scheduled_close)
-        self.door.open = False
-        self.dispatch_event('on_close')
-        if (
-            self.door.close_sound is not None and
-            self.game.audio_context is not None
-        ):
-            if self.sound_manager is None:
-                self.make_sound_manager()
-            assert self.sound_manager is not None  # Shuts mypy up.
-            self.sound_manager.play_path(self.door.close_sound, True)
+        d: Door = self.door
+        if d.can_close is None or d.can_close() is True:
+            unschedule(self.scheduled_close)
+            d.open = False
+            self.dispatch_event('on_close')
+            if (
+                d.close_sound is not None and
+                self.game.audio_context is not None
+            ):
+                if self.sound_manager is None:
+                    self.make_sound_manager()
+                assert self.sound_manager is not None  # Shuts mypy up.
+                self.sound_manager.play_path(d.close_sound, True)
 
     def scheduled_close(self, dt: float) -> None:
         """Call :meth:`self.close() <earwax.Box.close>` on a schedule.

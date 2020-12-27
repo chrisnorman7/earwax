@@ -284,3 +284,41 @@ def test_update_reverb(box_level: BoxLevel, reverb: GlobalFdnReverb) -> None:
     sleep(0.5)
     assert reverb.gain == 0.75
     assert reverb.t60 == 0.5
+
+
+def test_can_open(box_level: BoxLevel) -> None:
+    """Test the can_open method."""
+    d: Door = Door(open=False, can_open=lambda: False)
+    box: Box = box_level.box
+    box.door = d
+    box.open()
+    assert d.open is False
+    d.can_open = None
+    box.open()
+    assert d.open is True
+
+
+def test_can_close(box_level: BoxLevel) -> None:
+    """Test the can_close method."""
+    d: Door = Door(open=True, can_close=lambda: False)
+    box: Box = box_level.box
+    box.door = d
+    box.close()
+    assert d.open is True
+    d.can_close = None
+    box.close()
+    assert d.open is False
+
+
+def test_can_use(box_level: BoxLevel, game: Game, box: Box) -> None:
+    """Test the can_use method of portals."""
+    l: BoxLevel = BoxLevel(game, box)
+    p: Portal = Portal(l, Point(52, 53, 54), can_use=lambda: False)
+    box_level.box.portal = p
+    game.push_level(box_level)
+    box_level.handle_portal(box_level.box)
+    assert game.level is box_level
+    p.can_use = None
+    box_level.handle_portal(box_level.box)
+    assert game.level is l
+    assert l.coordinates == Point(52, 53, 54)

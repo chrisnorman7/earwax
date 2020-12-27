@@ -1,7 +1,7 @@
 """Provides the Door class."""
 
 from pathlib import Path
-from typing import Optional, Tuple, Union
+from typing import Callable, Optional, Tuple, Union
 
 from attr import attrs
 
@@ -49,6 +49,18 @@ class Door:
             automatically close after that time.
 
         * A float: The exact time the door will automatically close after.
+
+    :ivar ~earwax.Door.can_open: An optional method which will be used to
+        decide whether or not this door can be opened at this time.
+
+        This method must return ``True`` or ``False``, and must handle any
+        messages which should be sent to the player.
+
+    :ivar ~earwax.Door.can_close: An optional method which will be used to
+        decide whether or not this door can be closed at this time.
+
+        This method must return ``True`` or ``False``, and must handle any
+        messages which should be sent to the player.
     """
 
     open: bool = True
@@ -56,3 +68,5 @@ class Door:
     open_sound: Optional[Path] = None
     close_sound: Optional[Path] = None
     close_after: Optional[Union[float, Tuple[float, float]]] = None
+    can_open: Optional[Callable[[], bool]] = None
+    can_close: Optional[Callable[[], bool]] = None

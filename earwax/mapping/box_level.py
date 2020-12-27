@@ -19,6 +19,7 @@ from ..point import Point, PointDirections
 from ..sound import SoundManager
 from ..walking_directions import walking_directions
 from .box import Box, ReverbSettingsDict
+from .door import Door
 from .portal import Portal
 
 
@@ -206,11 +207,17 @@ class BoxLevel(Level):
 
         :param box: The box that is the portal to handle.
         """
-        if box.portal is not None:  # We know it is, but this keeps MyPy happy.
-            p: Portal = box.portal
+        assert box.portal is not None  # Keeps MyPy happy.
+        p: Portal = box.portal
+        if p.can_use is None or p.can_use() is True:
             if p.level is not self:
                 self.game.replace_level(p.level)
             p.level.set_coordinates(p.coordinates)
+            if (
+                p.level.player_sound_manager is not None and
+                p.exit_sound is not None
+            ):
+                p.level.player_sound_manager.play_path(p.exit_sound, True)
             bearing: int = self.bearing
             if p.bearing is not None:
                 bearing = p.bearing
@@ -221,11 +228,12 @@ class BoxLevel(Level):
 
         :param box: The box that is the door to handle.
         """
-        if box.door is not None:  # We know it is, but this keeps MyPy happy.
-            if box.door.open:
-                box.close()
-            else:
-                box.open()
+        assert box.door is not None  # Keeps MyPy happy.
+        d: Door = box.door
+        if d.open:
+            box.close()
+        else:
+            box.open()
 
     def handle_box(self, box: Box) -> None:
         """Handle a bulk standard box.
