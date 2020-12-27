@@ -1,5 +1,6 @@
 """Test the Ambiance class."""
 
+from pathlib import Path
 from time import sleep
 
 from synthizer import Context, Source3D
@@ -53,3 +54,16 @@ def test_set_position(context: Context) -> None:
     a.set_position(Point(1, 2, 3))
     sleep(0.5)
     assert a.sound_manager.source.position == (1, 2, 3)
+
+
+def test_from_path() -> None:
+    """Test the from_path constructor."""
+    a: Ambiance = Ambiance.from_path(Path('sound.wav'))
+    assert isinstance(a, Ambiance)
+    assert a.protocol == 'file'
+    assert a.path == 'sound.wav'
+    assert a.coordinates == Point(0, 0, 0)
+    a = Ambiance.from_path(Path('sound.wav'), coordinates=Point(4, 5, 6))
+    assert a.protocol == 'file'
+    assert a.path == 'sound.wav'
+    assert a.coordinates == Point(4, 5, 6)

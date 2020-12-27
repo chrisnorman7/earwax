@@ -1,5 +1,6 @@
 """Provides the Ambiance class."""
 
+from pathlib import Path
 from typing import Optional
 
 from attr import Factory, attrib, attrs
@@ -50,6 +51,18 @@ class Ambiance:
     sound: Optional[Sound] = attrib(
         default=Factory(type(None)), init=False, repr=False
     )
+
+    @classmethod
+    def from_path(
+        cls, path: Path, coordinates: Point = Point(0, 0, 0)
+    ) -> 'Ambiance':
+        """Return an instance from a path.
+
+        :param path: The path to load.
+
+        :param coordinates: The coordinates to use.
+        """
+        return cls('file', str(path), coordinates=coordinates)
 
     def play(
         self, ctx: Context, gain: float,

@@ -1,6 +1,7 @@
 """Provides the Track class."""
 
 from enum import Enum
+from pathlib import Path
 from typing import Optional
 
 from attr import Factory, attrib, attrs
@@ -64,6 +65,16 @@ class Track:
     sound: Optional[Sound] = attrib(
         default=Factory(type(None)), init=False, repr=False
     )
+
+    @classmethod
+    def from_path(cls, path: Path, type: TrackTypes) -> 'Track':
+        """Return a new instance from a path.
+
+        :param path: The path to build the track from.
+
+        :param type: The type of the new track.
+        """
+        return cls('file', str(path), type)
 
     def play(self, manager: SoundManager) -> None:
         """Play this track on a loop.
