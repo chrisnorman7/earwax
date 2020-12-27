@@ -140,7 +140,7 @@ def test_activate(game: Game, box_level: BoxLevel, door: Door) -> None:
     with raises(ActivateWorks):
         a()
     box.type = BoxTypes.empty
-    b: Box = Box(box.start, box.start, door=door, parent=box)
+    b: Box = Box(game, box.start, box.start, door=door, parent=box)
     assert dist(
         box_level.coordinates.coordinates, b.start.coordinates
     ) < 2.0
@@ -150,7 +150,7 @@ def test_activate(game: Game, box_level: BoxLevel, door: Door) -> None:
     assert door.open is False
     a()
     assert door.open is True
-    destination: Box = Box(Point(0, 0, 0), Point(15, 15, 0))
+    destination: Box = Box(game, Point(0, 0, 0), Point(15, 15, 0))
     l: BoxLevel = BoxLevel(game, destination)
     b.door = None
     p: Portal = Portal(l, Point(14, 15, 0))
@@ -211,14 +211,14 @@ def test_get_current_box(game: Game, door: Door) -> None:
     second: Box
     third: Box
     first, second, third = Box.create_row(
-        Point(0, 0, 0), Point(5, 5, 5), 3, Point(1, 0, 0)
+        game, Point(0, 0, 0), Point(5, 5, 5), 3, Point(1, 0, 0)
     )
-    box: Box = Box.create_fitted([first, second, third])
+    box: Box = Box.create_fitted(game, [first, second, third])
     l: BoxLevel = BoxLevel(game, box)
     assert l.get_current_box() is first
     l.set_coordinates(second.start)
     assert l.get_current_box() is second
-    doorstep: Box = Box(third.start, third.end, door=door, parent=third)
+    doorstep: Box = Box(game, third.start, third.end, door=door, parent=third)
     assert doorstep in third.children
     assert doorstep.parent is third
     l.set_coordinates(doorstep.start)
@@ -227,7 +227,7 @@ def test_get_current_box(game: Game, door: Door) -> None:
 
 def test_get_angle_between(game: Game) -> None:
     """Test the get_angle_between method."""
-    l: BoxLevel = BoxLevel(game, Box(Point(0, 0, 0), Point(0, 0, 0)))
+    l: BoxLevel = BoxLevel(game, Box(game, Point(0, 0, 0), Point(0, 0, 0)))
     assert l.coordinates == Point(0, 0, 0)
     assert l.bearing == 0
     assert l.get_angle_between(Point(0, 1, 0)) == 0
@@ -257,12 +257,14 @@ def test_disconnect_reverb(
     assert box_level.reverb is None
 
 
-def test_handle_box(reverb: GlobalFdnReverb, box_level: BoxLevel) -> None:
+def test_handle_box(
+    game: Game, reverb: GlobalFdnReverb, box_level: BoxLevel
+) -> None:
     """Make sure boxes are handled properly."""
     start: Point = Point(0, 0, 0)
     end: Point = Point(3, 3, 3)
-    a: Box = Box(start, end, reverb_settings={'gain': 0.1})
-    b: Box = Box(start, end, reverb_settings={'gain': 0.5})
+    a: Box = Box(game, start, end, reverb_settings={'gain': 0.1})
+    b: Box = Box(game, start, end, reverb_settings={'gain': 0.5})
     box_level.connect_reverb(reverb)
     box_level.handle_box(a)
     sleep(0.5)

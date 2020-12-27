@@ -3,7 +3,7 @@
 from enum import Enum
 from pathlib import Path
 from random import uniform
-from typing import Any, Callable, Dict
+from typing import TYPE_CHECKING, Any, Callable, Dict
 from typing import Generator as GeneratorType
 from typing import Iterator, List, Optional, Tuple, cast
 
@@ -11,8 +11,10 @@ from attr import Factory, attrib, attrs
 
 try:
     from pyglet.clock import schedule_once, unschedule
+    from synthizer import Context, GlobalFdnReverb, PannerStrategy, Source3D
 except ModuleNotFoundError:
     schedule_once, unschedule = (None, None)
+    Context, GlobalFdnReverb, PannerStrategy, Source3d = (None, None, None, None)
 
 from ..mixins import RegisterEventMixin
 from ..point import Point
@@ -20,6 +22,9 @@ from ..sound import SoundManager
 from ..types import EventType
 from .door import Door
 from .portal import Portal
+
+if TYPE_CHECKING:
+    from ..game import Game
 
 IntCoordinates = Tuple[int, int, int]
 
@@ -184,6 +189,8 @@ class Box(RegisterEventMixin):
     so you can register and dispatch events in the same way you would with
     ``pyglet.window.Window``, or any other ``EventDispatcher`` subclass.
 
+    :ivar ~earwax.Box.game: The game that this box will work with.
+
     :ivar ~earwax.Box.start: The coordinates at the bottom rear left corner of
         this box.
 
@@ -216,8 +223,16 @@ class Box(RegisterEventMixin):
         instance is considered a portal.
 
     :ivar ~earwax.Box.bounds: The bounds of this box.
+
+    :ivar ~earwax.Box.reverb_settings: Extra reverb settings for this box.
+
+    :ivar ~earwax.Box.centre: The point that lies at the centre of this box.
+
+    :ivar ~earwax.Box.sound_manager: A sound manager to use for playing certain
+        sounds that emanate from this box.
     """
 
+    game: 'Game'
     start: Point
     end: Point
 
@@ -233,6 +248,13 @@ class Box(RegisterEventMixin):
     bounds: BoxBounds = attrib(repr=False, init=False)
     reverb_settings: ReverbSettingsDict = Factory(dict)
     centre: Point = attrib(init=False, repr=False)
+
+    reverb: Optional[GlobalFdnReverb] = attrib(
+        default=Factory(lambda: None), repr=False
+    )
+    sound_manager: Optional[SoundManager] = attrib(
+        default=Factory(lambda: None), repr=False
+    )
 
     def __attrs_post_init__(self) -> None:
         """Configure bounds, parents and children."""
@@ -255,8 +277,10 @@ class Box(RegisterEventMixin):
 
     @classmethod
     def create_fitted(
-        cls, children: List['Box'], pad_start: Optional[Point] = None,
-        pad_end: Optional[Point] = None, **kwargs
+        cls, game: 'Game', children: List['Box'],
+        pad_start: Optional[Point] = None,
+        pad_end: Optional[Point] = None,
+        **kwargs
     ) -> 'Box':
         """Return a box that fits all of ``children`` in.
 
@@ -307,14 +331,14 @@ class Box(RegisterEventMixin):
             end: Point = Point(end_x, end_y, end_z)
             if pad_end is not None:
                 end += pad_end
-            return cls(start, end, children=children, **kwargs)
+            return cls(game, start, end, children=children, **kwargs)
         else:
             raise ValueError('Invalid children: %r.' % children)
 
     @classmethod
     def create_row(
-        cls, start: Point, size: Point, count: int, offset: Point,
-        get_name: Optional[Callable[[int], str]] = None,
+        cls, game: 'Game', start: Point, size: Point, count: int,
+        offset: Point, get_name: Optional[Callable[[int], str]] = None,
         on_create: Optional[Callable[['Box'], None]] = None,
         **kwargs
     ) -> List['Box']:
@@ -326,6 +350,7 @@ class Box(RegisterEventMixin):
         It can be used like so::
 
             offices = Box.create_row(
+                game,  # Every Box instance needs a game.
                 Point(0, 0),  # The bottom_left corner of the first box.
                 Point(3, 2, 0),  # The size of each box.
                 3,  # The number of boxes to build.
@@ -387,7 +412,7 @@ class Box(RegisterEventMixin):
             kw: Dict[str, Any] = kwargs.copy()
             if get_name is not None:
                 kw['name'] = get_name(n)
-            box: Box = cls(start.copy(), start + size, **kw)
+            box: Box = cls(game, start.copy(), start + size, **kw)
             if on_create is not None:
                 on_create(box)
             boxes.append(box)
@@ -525,21 +550,61 @@ class Box(RegisterEventMixin):
             return self
         return None
 
-    def open(self, sound_manager: Optional[SoundManager]) -> None:
+    def get_sound_manager(self) -> SoundManager:
+        """Make a sound manager suitable for this box.
+
+        The resulting sound manager will be at the correct coordinates, but
+        will need to have a reverb connected if :attr:`self.reverb_settings
+        <earwax.Box.reverb_settings>` is not ``None``.
+
+        A suitable reverb can be created with the
+        :meth:`~earwax.Box.make_reverb` method.
+        """
+        assert self.game.audio_context is not None
+        source: Source3D = Source3D(self.game.audio_context)
+        source.position = self.centre.coordinates
+        source.panner_strategy = PannerStrategy.HRTF
+        return SoundManager(self.game.audio_context, source)
+
+    def get_reverb(self) -> GlobalFdnReverb:
+        """Make a reverb suitable for this box."""
+        assert self.game.audio_context is not None
+        reverb: GlobalFdnReverb = GlobalFdnReverb(self.game.audio_context)
+        name: str
+        value: float
+        for name, value in self.reverb_settings.items():
+            setattr(reverb, name, value)
+        return reverb
+
+    def make_sound_manager(self) -> None:
+        """Make a sound manager, and reverb if necessary."""
+        assert self.game.audio_context is not None
+        if self.sound_manager is None:
+            self.sound_manager = self.get_sound_manager()
+        if self.reverb is None and self.reverb_settings != {}:
+            self.reverb = self.get_reverb()
+            self.game.audio_context.config_route(
+                self.sound_manager.source, self.reverb
+            )
+
+    def open(self) -> None:
         """Open a door on this box.
 
         If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
         :attr:`.open <earwax.Door.open>` attribute to ``True``, and play the
         appropriate sound. Otherwise, raise :class:`earwax.NotADoor`.
-
-        :param sound_manager: The sound manager to use to play the open sound.
         """
         if self.door is None:
             raise NotADoor(self)
         self.door.open = True
         self.dispatch_event('on_open')
-        if self.door.open_sound is not None and sound_manager is not None:
-            sound_manager.play_path(self.door.open_sound, True)
+        if (
+            self.door.open_sound is not None and
+            self.game.audio_context is not None
+        ):
+            if self.sound_manager is None:
+                self.make_sound_manager()
+            self.sound_manager.play_path(self.door.open_sound, True)
         when: float
         if isinstance(self.door.close_after, tuple):
             when = uniform(*self.door.close_after)
@@ -547,24 +612,29 @@ class Box(RegisterEventMixin):
             when = self.door.close_after
         else:
             return None
-        schedule_once(self.scheduled_close, when, sound_manager)
+        schedule_once(self.scheduled_close, when)
 
-    def close(self, sound_manager: Optional[SoundManager]) -> None:
+    def close(self) -> None:
         """Close a door on this box.
 
         If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
         :attr:`.open <earwax.Door.open>` attribute to ``False``, and play the
         appropriate sound. Otherwise, raise :class:`earwax.NotADoor`.
 
-        :param sound_manager: The sound manager to use to play the close sound.
+        :param context: The synthizer context to use.
         """
         if self.door is None:
             raise NotADoor(self)
         unschedule(self.scheduled_close)
         self.door.open = False
         self.dispatch_event('on_close')
-        if self.door.close_sound is not None and sound_manager is not None:
-            sound_manager.play_path(self.door.close_sound, True)
+        if (
+            self.door.close_sound is not None and
+            self.game.audio_context is not None
+        ):
+            if self.sound_manager is None:
+                self.make_sound_manager()
+            self.sound_manager.play_path(self.door.close_sound, True)
 
     def scheduled_close(self, dt: float, sound_manager: SoundManager) -> None:
         """Call :meth:`self.close() <earwax.Box.close>` on a schedule.
@@ -575,7 +645,7 @@ class Box(RegisterEventMixin):
         :param sound_manager: The sound manager to pass to
             :meth:`~earwax.Box.close`.
         """
-        self.close(sound_manager)
+        self.close()
 
     def get_descendants(self) -> GeneratorType['Box', None, None]:
         """Yield all children and grandchildren."""

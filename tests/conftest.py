@@ -73,15 +73,15 @@ def get_context() -> Context:
 
 
 @fixture(name='box')
-def get_box() -> Box:
+def get_box(game: Game) -> Box:
     """Get a new ``Box`` instance."""
-    return Box(Point(1, 2, 3), Point(4, 5, 6))
+    return Box(game, Point(1, 2, 3), Point(4, 5, 6))
 
 
 @fixture(name='box_level')
 def get_box_level(game: Game) -> BoxLevel:
     """Get a new ``BoxLevel`` instance."""
-    box: Box = Box(Point(1, 1, 1), Point(5, 5, 5))
+    box: Box = Box(game, Point(1, 1, 1), Point(5, 5, 5))
     return BoxLevel(game, box)
 
 
