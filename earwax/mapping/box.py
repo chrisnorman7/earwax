@@ -11,12 +11,14 @@ from attr import Factory, attrib, attrs
 
 try:
     from pyglet.clock import schedule_once, unschedule
-    from synthizer import Context, GlobalFdnReverb, PannerStrategy, Source3D
+    from synthizer import (Context, GlobalFdnReverb, PannerStrategy, Source3D,
+                           SynthizerError)
 except ModuleNotFoundError:
     schedule_once, unschedule = (None, None)
     Context, GlobalFdnReverb, PannerStrategy, Source3d = (
         None, None, None, None
     )
+    SynthizerError = Exception
 
 from ..mixins import RegisterEventMixin
 from ..point import Point
@@ -754,3 +756,13 @@ class Box(RegisterEventMixin):
         if self.parent is None:
             return self
         return self.parent.get_oldest_parent()
+
+    def __del__(self) -> None:
+        """Delete everything."""
+        if self.reverb is not None:
+            try:
+                self.reverb.destroy()
+            except SynthizerError:
+                pass
+            finally:
+                self.reverb = None

@@ -13,12 +13,13 @@ except ModuleNotFoundError:
 try:
     from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
                            Generator, GlobalFdnReverb, Source, Source3D,
-                           StreamingGenerator)
+                           StreamingGenerator, SynthizerError)
 except ModuleNotFoundError:
     (
         Buffer, BufferGenerator, Context, DirectSource, Generator, Source,
         Source3D, StreamingGenerator, GlobalFdnReverb
     ) = (None, None, None, None, None, None, None, None, None)
+    SynthizerError = Exception
 
 buffers: Dict[str, Buffer] = {}
 OnDestroyFunction = Callable[[], None]
@@ -308,6 +309,13 @@ class SoundManager:
         sound.generator.looping = self.should_loop
         self.sounds.append(sound)
         return sound
+
+    def __del__(self) -> None:
+        """Stop all sounds."""
+        try:
+            self.source.destroy()
+        except SynthizerError:
+            pass
 
 
 @attrs(auto_attribs=True, frozen=True)

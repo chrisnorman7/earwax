@@ -138,3 +138,13 @@ def test_play_stream_looping(sound_manager: SoundManager) -> None:
     s: Sound = sound_manager.play_stream('file', 'sound.wav')
     sleep(0.2)
     assert s.generator.looping is True
+
+
+def test_del(context: Context, source: Source3D) -> None:
+    """Ensure all sounds are destroyed when deleting a sound manager."""
+    manager: SoundManager = SoundManager(context, source)
+    manager.play_path(Path('sound.wav'), False)
+    manager.play_stream('file', 'sound.wav')
+    del manager
+    with raises(SynthizerError):
+        source.destroy()

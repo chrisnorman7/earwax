@@ -4,7 +4,7 @@ from time import sleep
 from typing import List
 
 from pytest import raises
-from synthizer import GlobalFdnReverb, PannerStrategy, Source3D
+from synthizer import GlobalFdnReverb, PannerStrategy, Source3D, SynthizerError
 
 from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, Game, NotADoor,
                     OutOfBounds, Point, Portal, SoundManager)
@@ -515,3 +515,16 @@ def test_make_reverb(game: Game, box: Box) -> None:
     assert isinstance(r, GlobalFdnReverb)
     sleep(0.2)
     assert r.gain == 0.5
+
+
+def test_del(game: Game) -> None:
+    """Test deleting boxes."""
+    b: Box = Box(
+        game, Point(0, 0, 0), Point(3, 3, 3), reverb_settings={'gain': 0.2}
+    )
+    r: GlobalFdnReverb = b.get_reverb()
+    b.reverb = r
+    assert isinstance(b.reverb, GlobalFdnReverb)
+    del b
+    with raises(SynthizerError):
+        r.destroy()
