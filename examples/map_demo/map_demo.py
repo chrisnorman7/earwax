@@ -7,11 +7,11 @@ if True:
 from pathlib import Path
 from typing import List
 
+from earwax import (ActionMenu, Ambiance, Box, BoxLevel, BoxTypes, Credit,
+                    Door, Game, Level, Menu, Point, ReverbSettingsDict,
+                    SoundManager, Track, TrackTypes)
 from pyglet.window import Window, key
 from synthizer import DirectSource, GlobalFdnReverb
-
-from earwax import (Ambiance, Box, BoxLevel, BoxTypes, Door, Game, Point,
-                    ReverbSettingsDict, SoundManager, Track, TrackTypes)
 
 sounds_directory: Path = Path('sounds')
 wall_sound: Path = sounds_directory / 'collide.wav'
@@ -31,7 +31,18 @@ corridor_reverb: ReverbSettingsDict = {
     't60': 1.0
 }
 
-game: Game = Game(name='Map Demo')
+game: Game = Game(
+    name='Map Demo', credits=[
+        Credit(
+            'Camlorn, for producing the awesome Synthizer audio library',
+            'https://github.com/synthizer',
+            sound=sounds_directory / 'keyboard.wav'
+        ), Credit(
+            'The folks over at freesound.org for making awesome free sounds',
+            'https://www.freesound.org', sound=sounds_directory / 'ukulele.wav'
+        )
+    ]
+)
 
 
 @game.event
@@ -128,9 +139,30 @@ def before_run() -> None:
     level.action(
         'Describe current box', symbol=key.X
     )(level.describe_current_box)
-    level.action(
-        'Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT
-    )(game.push_action_menu)
+
+    @level.action('Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT)
+    def help_menu() -> None:
+        """Show the help menu."""
+        m: ActionMenu = game.push_action_menu()
+
+        @m.event
+        def on_cover(new: Level) -> None:
+            """Stop the tracks playing."""
+            level.stop_ambiances()
+            level.stop_tracks()
+
+        @m.event
+        def on_reveal() -> None:
+            """Start the tracks again."""
+            level.start_ambiances()
+            level.start_tracks()
+
+        credits_menu: Menu = Menu.from_credits(game, game.credits)
+        credits_menu.tracks.append(
+            Track.from_path(sounds_directory / 'drums.wav', TrackTypes.music)
+        )
+        m.add_submenu(credits_menu, False, title='Credits')
+
     game.push_level(level)
 
 
