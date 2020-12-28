@@ -340,6 +340,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         has been set to something other than -1..
         """
         self.show_selection()
+        return super().on_push()
 
     def on_pop(self) -> None:
         """Destroy :attr:`~earwax.Menu.select_sound` if necessary."""
