@@ -1,8 +1,9 @@
 """Provides the Menu class."""
 
+import webbrowser
 from pathlib import Path
 from time import time
-from typing import Callable, Generator, List, Optional
+from typing import TYPE_CHECKING, Callable, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
 
@@ -14,11 +15,15 @@ except ModuleNotFoundError:
     DirectSource = object
 
 from ..action import ActionFunctionType, OptionalGenerator
+from ..credit import Credit
 from ..hat_directions import DOWN, LEFT, RIGHT, UP
 from ..level import Level
 from ..mixins import DismissibleMixin, TitleMixin
 from ..sound import Sound
 from .menu_item import MenuItem
+
+if TYPE_CHECKING:
+    from ..game import Game
 
 
 @attrs(auto_attribs=True)
@@ -111,6 +116,32 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         self.motion(key.MOTION_END_OF_LINE)(self.end)
         self.register_event(self.on_text)
         super().__attrs_post_init__()
+
+    @classmethod
+    def from_credits(
+        cls, game: 'Game', credits: List[Credit], title: str = 'Game Credits'
+    ) -> 'Menu':
+        """Return a menu for showing credits.
+
+        :param game: The game to use.
+
+        :param credits: The credits to show.
+
+        :param title: The title of the new menu.
+        """
+        m: Menu = cls(game, title)
+        credit: Credit
+        for credit in credits:
+
+            def func() -> None:
+                """Open the URL."""
+                webbrowser.open(credit.url)
+
+            m.add_item(
+                func, title=credit.name, select_sound_path=credit.sound,
+                loop_select_sound=credit.loop
+            )
+        return m
 
     @property
     def current_item(self) -> Optional[MenuItem]:

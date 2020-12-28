@@ -2,12 +2,13 @@
 
 from pathlib import Path
 from time import sleep
+from typing import List
 
 from pyglet.window import key
 from pytest import raises
 
-from earwax import (ActionMenu, AlreadyDestroyed, Editor, Game, Level, Menu,
-                    MenuItem, Sound)
+from earwax import (ActionMenu, AlreadyDestroyed, Credit, Editor, Game, Level,
+                    Menu, MenuItem, Sound)
 from earwax.types import OptionalGenerator
 
 
@@ -158,3 +159,24 @@ def test_menu_sound(game: Game) -> None:
     m.on_pop()
     with raises(AlreadyDestroyed):
         sound.destroy()
+
+
+def test_from_credits(game: Game) -> None:
+    """Test the from_credits constructor."""
+    c1: Credit = Credit('Test 1', 'example.org')
+    c2: Credit = Credit(
+        'Test 2', 'test.org', sound=Path('sound.wav'), loop=False
+    )
+    credits: List[Credit] = [c1, c2]
+    m: Menu = Menu.from_credits(game, credits)
+    assert isinstance(m, Menu)
+    assert len(m.items) == 2
+    assert m.title == 'Game Credits'
+    i: MenuItem = m.items[0]
+    assert i.title == c1.name
+    assert i.select_sound_path is None
+    assert i.loop_select_sound is True
+    i = m.items[1]
+    assert i.title == c2.name
+    assert i.select_sound_path == Path('sound.wav')
+    assert i.loop_select_sound is False
