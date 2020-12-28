@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from time import time
-from typing import Callable, List, Optional
+from typing import Callable, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
 
@@ -289,11 +289,13 @@ class Menu(Level, TitleMixin, DismissibleMixin):
             :meth:`~earwax.Menu.add_item`.
         """
 
-        def inner() -> None:
+        def inner() -> Generator[None, None, None]:
             """Push the menu."""
+            yield
             if replace:
                 self.game.replace_level(menu)
             else:
                 self.game.push_level(menu)
+            return None
 
-        return self.add_item(inner, **kwargs)
+        return self.item(**kwargs)(inner)

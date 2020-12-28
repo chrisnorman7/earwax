@@ -3,7 +3,7 @@
 from pyglet.window import key
 
 from earwax import ActionMenu, Editor, Game, Level, Menu, MenuItem
-from earwax.game import OptionalGenerator
+from earwax.types import OptionalGenerator
 
 
 class Works(Exception):
@@ -110,11 +110,13 @@ def test_add_submenu(game: Game) -> None:
     game.push_level(m)
     m.move_down()
     assert m.current_item is mi
-    m.activate()
+    assert game.level is m
+    game.press_key(key.RETURN, 0)
     assert game.level is sm
     assert game.levels == [m, sm]
     m.add_submenu(sm, True, title='Replace the menu')
     game.pop_level()
+    assert game.levels == [m]
     m.move_down()
-    m.activate()
+    game.press_key(key.RETURN, 0)
     assert game.levels == [sm]
