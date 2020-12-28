@@ -148,7 +148,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
 
         For example::
 
-            m = Menu('Example Menu')
+            m = Menu(game, 'Example Menu')
             def f():
                 tts.speak('Menu item activated.')
             m.add_item(f, title='Test Item')
@@ -213,11 +213,15 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         """
         item: Optional[MenuItem] = self.current_item
         if item is not None:
-            sound_path: Optional[Path] = item.activate_sound_path or \
-                self.item_activate_sound_path or \
+            sound_path: Optional[Path] = (
+                item.activate_sound_path or
+                self.item_activate_sound_path or
                 self.game.config.menus.default_item_activate_sound.value
-            if sound_path is not None and \
-               self.game.interface_sound_player is not None:
+            )
+            if (
+                sound_path is not None and
+                self.game.interface_sound_player is not None
+            ):
                 self.game.interface_sound_player.play_path(sound_path)
             return item.func()
         return None
@@ -272,3 +276,24 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         has been set to something other than -1..
         """
         self.show_selection()
+
+    def add_submenu(self, menu: 'Menu', replace: bool, **kwargs) -> MenuItem:
+        """Add a submenu to this menu.
+
+        :param menu: The menu to show when the resulting item is activated.
+
+        :param replace: If ``True``, then the new menu will replace this one in
+            the levels stack.
+
+        :param kwargs: The additional arguments to pass to
+            :meth:`~earwax.Menu.add_item`.
+        """
+
+        def inner() -> None:
+            """Push the menu."""
+            if replace:
+                self.game.replace_level(menu)
+            else:
+                self.game.push_level(menu)
+
+        return self.add_item(inner, **kwargs)

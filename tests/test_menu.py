@@ -98,3 +98,23 @@ def test_action_menu(game: Game, level: Level, menu: Menu) -> None:
     game.press_key(key.RETURN, 0, string='\n')
     assert game.levels == [level, menu]
     assert game.level is menu
+
+
+def test_add_submenu(game: Game) -> None:
+    """Test adding a submenu."""
+    m: Menu = Menu(game, 'First menu')
+    sm: Menu = Menu(game, 'Second Menu')
+    mi: MenuItem = m.add_submenu(sm, False, title='Submenu')
+    assert isinstance(mi, MenuItem)
+    assert mi.title == 'Submenu'
+    game.push_level(m)
+    m.move_down()
+    assert m.current_item is mi
+    m.activate()
+    assert game.level is sm
+    assert game.levels == [m, sm]
+    m.add_submenu(sm, True, title='Replace the menu')
+    game.pop_level()
+    m.move_down()
+    m.activate()
+    assert game.levels == [sm]
