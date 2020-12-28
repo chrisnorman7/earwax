@@ -7,11 +7,12 @@ if True:
 from pathlib import Path
 from typing import List
 
+from pyglet.window import Window, key
+from synthizer import DirectSource, GlobalFdnReverb
+
 from earwax import (ActionMenu, Ambiance, Box, BoxLevel, BoxTypes, Credit,
                     Door, Game, Level, Menu, Point, ReverbSettingsDict,
                     SoundManager, Track, TrackTypes)
-from pyglet.window import Window, key
-from synthizer import DirectSource, GlobalFdnReverb
 
 sounds_directory: Path = Path('sounds')
 wall_sound: Path = sounds_directory / 'collide.wav'
