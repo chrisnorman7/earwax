@@ -43,8 +43,9 @@ class MenuItem(RegisterEventMixin):
     """
 
     func: ActionFunctionType
-    title: Optional[str]
+    title: Optional[str] = None
     select_sound_path: Optional[Path] = None
+    loop_select_sound: bool = False
     activate_sound_path: Optional[Path] = None
 
     def __attrs_post_init__(self) -> None:

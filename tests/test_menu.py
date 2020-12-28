@@ -1,8 +1,13 @@
 """Test menus."""
 
-from pyglet.window import key
+from pathlib import Path
+from time import sleep
 
-from earwax import ActionMenu, Editor, Game, Level, Menu, MenuItem
+from pyglet.window import key
+from pytest import raises
+
+from earwax import (ActionMenu, AlreadyDestroyed, Editor, Game, Level, Menu,
+                    MenuItem, Sound)
 from earwax.types import OptionalGenerator
 
 
@@ -120,3 +125,36 @@ def test_add_submenu(game: Game) -> None:
     m.move_down()
     game.press_key(key.RETURN, 0)
     assert game.levels == [sm]
+
+
+def test_menu_sound(game: Game) -> None:
+    """Ensure that sounds change with menu items."""
+    m: Menu = Menu(game, 'Test Menu')
+    not_looping: MenuItem = m.add_item(
+        print, title='Not looping sound', select_sound_path=Path('sound.wav')
+    )
+    no_sound: MenuItem = m.add_item(print, title='No sound')
+    looping: MenuItem = m.add_item(
+        print, title='Looping sound', select_sound_path=Path('sound.wav'),
+        loop_select_sound=True
+    )
+    m.move_down()
+    assert m.current_item is not_looping
+    assert isinstance(m.select_sound, Sound)
+    sound: Sound = m.select_sound
+    sleep(0.2)
+    assert sound.generator.looping is False
+    m.move_down()
+    with raises(AlreadyDestroyed):
+        sound.destroy()
+    assert m.current_item is no_sound
+    assert m.select_sound is None
+    m.move_down()
+    assert m.current_item is looping
+    sound = m.select_sound
+    assert isinstance(sound, Sound)
+    sleep(0.2)
+    assert sound.generator.looping is True
+    m.on_pop()
+    with raises(AlreadyDestroyed):
+        sound.destroy()

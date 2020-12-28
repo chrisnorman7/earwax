@@ -8,13 +8,16 @@ from attr import Factory, attrib, attrs
 
 try:
     from pyglet.window import key
+    from synthizer import DirectSource
 except ModuleNotFoundError:
     key = None
+    DirectSource = object
 
 from ..action import ActionFunctionType, OptionalGenerator
 from ..hat_directions import DOWN, LEFT, RIGHT, UP
 from ..level import Level
 from ..mixins import DismissibleMixin, TitleMixin
+from ..sound import Sound
 from .menu_item import MenuItem
 
 
@@ -86,6 +89,9 @@ class Menu(Level, TitleMixin, DismissibleMixin):
 
     search_string: str = attrib(default=Factory(str), init=False)
     items: List[MenuItem] = attrib(default=Factory(list), init=False)
+    select_sound: Optional[Sound] = attrib(
+        default=Factory(type(None)), init=False, repr=False
+    )
 
     def __attrs_post_init__(self) -> None:
         """Initialise the menu."""
@@ -167,6 +173,26 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         self.items.append(menu_item)
         return menu_item
 
+    def make_sound(self, item: MenuItem, path: Path) -> Sound:
+        """Return a sound object.
+
+        :param item: The menu item to make the sound form.
+
+            This value is probably :attr:`~earwax.Menu.current_item`.
+
+        :param path: The path to load the sound from.
+
+            This value will have been determined by
+            :meth:`~earwax.Menu.show_selection`, and may have been loaded from
+            the menu item itself, or the main earwax configuration.
+        """
+        assert self.game.audio_context  # Keeps mypy happy.
+        source: DirectSource = DirectSource(self.game.audio_context)
+        sound: Sound = Sound.from_path(self.game.audio_context, source, path)
+        sound.generator.looping = item.loop_select_sound
+        source.gain = self.game.config.sound.ambiance_volume.value
+        return sound
+
     def show_selection(self) -> None:
         """Speak the menu item at the current position.
 
@@ -177,18 +203,25 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         errors if :attr:`position` is something stupid.
         """
         item: Optional[MenuItem] = self.current_item
+        if self.select_sound is not None:
+            self.select_sound.destroy()
+            self.select_sound = None
         if item is None:
             self.game.output(self.title)
         else:
             if item.title is not None:
                 self.game.output(item.title)
             item.dispatch_event('on_selected')
-            sound_path: Optional[Path] = item.select_sound_path or \
-                self.item_select_sound_path or \
+            sound_path: Optional[Path] = (
+                item.select_sound_path or
+                self.item_select_sound_path or
                 self.game.config.menus.default_item_select_sound.value
-            if sound_path is not None and \
-               self.game.interface_sound_player is not None:
-                self.game.interface_sound_player.play_path(sound_path)
+            )
+            if (
+                sound_path is not None and
+                self.game.audio_context is not None
+            ):
+                self.select_sound = self.make_sound(item, sound_path)
 
     def move_up(self) -> None:
         """Move up in this menu.
@@ -276,6 +309,12 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         has been set to something other than -1..
         """
         self.show_selection()
+
+    def on_pop(self) -> None:
+        """Destroy :attr:`~earwax.Menu.select_sound` if necessary."""
+        if self.select_sound is not None:
+            self.select_sound.destroy()
+        return super().on_pop()
 
     def add_submenu(self, menu: 'Menu', replace: bool, **kwargs) -> MenuItem:
         """Add a submenu to this menu.
