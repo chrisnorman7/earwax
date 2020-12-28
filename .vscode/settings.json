@@ -10,6 +10,7 @@
     "restructuredtext.confPath": "${workspaceFolder}\\docs\\source",
     "cSpell.words": [
         "Camlorn's",
+        "Fdn",
         "HRTF",
         "INET",
         "Pyglet's",
