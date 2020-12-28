@@ -24,6 +24,7 @@
         "bufsize",
         "chrooted",
         "cytolk",
+        "dt",
         "ello",
         "genindex",
         "isgenerator",
