@@ -10,6 +10,7 @@ from warnings import warn
 from attr import Factory, attrib, attrs
 
 from .credit import Credit
+from .menu import Menu
 from .menu.action_menu import ActionMenu
 from .task import IntervalFunction, Task, TaskFunction
 from .types import EventType
@@ -784,5 +785,20 @@ class Game(RegisterEventMixin):
             constructor.
         """
         menu: ActionMenu = ActionMenu(self, title, **kwargs)
+        self.push_level(menu)
+        return menu
+
+    def push_credits_menu(self, title='Game Credits') -> Menu:
+        """Push a credits menu onto the stack.
+
+        This method reduces the amount of code needed to push a credits menu::
+
+            @level.action('Show credits', symbol=key.F1)
+            def show_credits() -> None:
+                game.push_credits_menu()
+
+        :param title: The title of the new menu.
+        """
+        menu: Menu = Menu.from_credits(self, self.credits, title=title)
         self.push_level(menu)
         return menu
