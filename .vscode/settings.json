@@ -23,6 +23,7 @@
         "attribs",
         "bufsize",
         "chrooted",
+        "cls",
         "cytolk",
         "dt",
         "ello",
