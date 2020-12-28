@@ -150,7 +150,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
 
             m = Menu(game, 'Example Menu')
             def f():
-                tts.speak('Menu item activated.')
+                game.output('Menu item activated.')
             m.add_item(f, title='Test Item')
             m.add_item(f, sound_path=Path('sound.wav'))
 
