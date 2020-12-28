@@ -42,6 +42,8 @@ def test_init(game: Game) -> None:
     assert game.event_matchers == {}
     assert game.joysticks == []
     assert isinstance(game.thread_pool, ThreadPoolExecutor)
+    assert game.tasks == []
+    assert game.credits == []
 
 
 def test_on_key_press(game: Game, level: Level) -> None:

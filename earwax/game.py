@@ -9,6 +9,7 @@ from warnings import warn
 
 from attr import Factory, attrib, attrs
 
+from .credit import Credit
 from .menu.action_menu import ActionMenu
 from .task import IntervalFunction, Task, TaskFunction
 from .types import EventType
@@ -181,6 +182,7 @@ class Game(RegisterEventMixin):
     )
 
     tasks: List[Task] = attrib(default=Factory(list), init=False, repr=False)
+    credits: List[Credit] = attrib(default=Factory(list), repr=False)
 
     def __attrs_post_init__(self) -> None:
         """Register default events."""

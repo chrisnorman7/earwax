@@ -50,6 +50,7 @@ if True:
     from .ambiance import Ambiance
     from .config import Config, ConfigValue
     from .configuration import EarwaxConfig
+    from .credit import Credit
     from .dialogue_tree import DialogueLine, DialogueTree
     from .die import Die
     from .editor import Editor
@@ -93,6 +94,8 @@ __all__: List[str] = [
     'Config', 'ConfigValue',
     # configuration.py:
     'EarwaxConfig',
+    # credit.py:
+    'Credit',
     # dialogue_tree.py:
     'DialogueLine', 'DialogueTree',
     # die.py:
