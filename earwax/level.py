@@ -10,10 +10,12 @@ from .types import EventType
 
 try:
     from pyglet.clock import schedule_once
-    from synthizer import Buffer, BufferGenerator, Context, DirectSource
+    from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
+                           SynthizerError)
 except ModuleNotFoundError:
     schedule_once = None
     Buffer, BufferGenerator, Context, DirectSource = (None, None, None, None)
+    SynthizerError = Exception
 
 from .action import Action, ActionFunctionType
 from .ambiance import Ambiance
@@ -219,8 +221,14 @@ class Level(RegisterEventMixin):
 
     def __del__(self) -> None:
         """Stop tracks ETC."""
-        self.stop_ambiances()
-        self.stop_tracks()
+        try:
+            self.stop_ambiances()
+        except SynthizerError:
+            pass
+        try:
+            self.stop_tracks()
+        except SynthizerError:
+            pass
 
 
 @attrs(auto_attribs=True)
