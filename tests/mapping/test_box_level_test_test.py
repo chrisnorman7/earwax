@@ -7,8 +7,8 @@ from typing import Callable, Optional
 from pytest import raises
 from synthizer import GlobalFdnReverb
 
-from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, Game, Point,
-                    Portal)
+from earwax import (
+    Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door, Game, Point, Portal)
 
 
 class CollideWorks(Exception):
@@ -238,8 +238,19 @@ def test_get_current_box(game: Game, door: Door) -> None:
     )
     box_level: BoxLevel = BoxLevel(game, boxes=[first, second, third])
     assert box_level.get_current_box() is first
+    assert isinstance(box_level.current_box, CurrentBox)
+    cb: CurrentBox = box_level.current_box
+    assert cb.box is first
+    assert cb.coordinates == box_level.coordinates
     box_level.set_coordinates(second.start)
+    assert box_level.current_box is cb
+    assert cb.box is first
+    assert cb.coordinates == first.start
     assert box_level.get_current_box() is second
+    assert isinstance(box_level.current_box, CurrentBox)
+    cb = box_level.current_box
+    assert cb.box is second
+    assert cb.coordinates == second.start
     doorstep: Box[Door] = Box(
         game, third.bounds.bottom_front_right.copy(), third.end.copy(),
         data=door
@@ -363,3 +374,36 @@ def test_nearest_portal(game: Game) -> None:
         box_level=box_level
     )
     assert box_level.nearest_portal(room.start) is second_doorstep
+
+
+def test_add_box(game: Game, box_level: BoxLevel, box: Box) -> None:
+    """Test the add_box method."""
+    cb: CurrentBox = CurrentBox(box.start, box)
+    box_level.current_box = cb
+    box_level.add_box(box)
+    assert box.box_level is box_level
+    assert box_level.boxes == [box]
+    assert box_level.current_box is None
+    box_level.current_box = cb
+    box_2: Box = Box(
+        game, box.bounds.bottom_front_right + Point(0, 1, 0),
+        box.end + Point(0, 5, 0), box_level=box_level
+    )
+    assert box_level.boxes == [box, box_2]
+    assert box_level.current_box is cb
+
+
+def test_remove_box(box_level: BoxLevel, box: Box) -> None:
+    """Test the remove_box method."""
+    box_level.add_box(box)
+    box_level.remove_box(box)
+    assert box.box_level is None
+    assert box_level.boxes == []
+    box_level.add_box(box)
+    box_level.set_coordinates(box.start.copy())
+    box_level.get_current_box()
+    assert isinstance(box_level.current_box, CurrentBox)
+    box_level.remove_box(box)
+    assert box_level.current_box is None
+    assert box_level.boxes == []
+    assert box.box_level is None
