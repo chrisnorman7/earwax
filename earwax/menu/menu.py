@@ -133,9 +133,9 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         credit: Credit
         for credit in credits:
 
-            def func() -> None:
+            def func(url: str = credit.url) -> None:
                 """Open the URL."""
-                webbrowser.open(credit.url)
+                webbrowser.open(url)
 
             m.add_item(
                 func, title=credit.name, select_sound_path=credit.sound,
