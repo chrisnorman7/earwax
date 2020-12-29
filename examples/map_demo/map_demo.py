@@ -49,6 +49,7 @@ game: Game = Game(
 @game.event
 def before_run() -> None:
     """Create rooms and level."""
+    boxes: List[Box] = []
     player_sound_manager: SoundManager = SoundManager(
         game.audio_context, DirectSource(game.audio_context)
     )
@@ -64,18 +65,17 @@ def before_run() -> None:
         )
         start: Point = office.start + Point(3, 0, 0)
         end: Point = Point(start.x + 1, start.y, office.end.z)
-        b: Box = Box(
-            game, start, end, door=door, name=f'Door to {office.name}',
-            surface_sound=office.surface_sound, reverb_settings=office_reverb,
-            parent=office
+        b: Box[Door] = Box(
+            game, start, end, data=door, name=f'Door to {office.name}',
+            surface_sound=office.surface_sound, reverb_settings=office_reverb
         )
-        doors.append(b)
+        boxes.append(b)
         a: Ambiance = Ambiance.from_path(
             sounds_directory / ('buzz_%d.wav' % len(ambiances)),
             coordinates=b.centre
         )
         ambiances.append(a)
-        walls.extend(
+        boxes.extend(
             [
                 Box(
                     game, office.bounds.bottom_back_right + Point(1, 0, 0),
@@ -83,12 +83,11 @@ def before_run() -> None:
                     type=BoxTypes.solid, wall_sound=wall_sound
                 ), Box(
                     game, office.start.copy(), start - Point(1, 0, 0),
-                    parent=office,
                     type=BoxTypes.solid, wall_sound=wall_sound
                 ), Box(
                     game, start + Point(2, 0, 0),
                     office.bounds.top_back_right.copy(),
-                    parent=office, type=BoxTypes.solid, wall_sound=wall_sound
+                    type=BoxTypes.solid, wall_sound=wall_sound
                 )
             ]
         )
@@ -99,25 +98,28 @@ def before_run() -> None:
         surface_sound=footsteps_directory / 'office',
         reverb_settings=office_reverb, wall_sound=wall_sound
     )
-    corridor: Box = Box(
-        game, offices[0].bounds.bottom_back_left - Point(0, 4, 0),
-        offices[-1].bounds.top_back_right - Point(0, 1, 0),
-        name='Corridor', surface_sound=footsteps_directory / 'corridor',
-        reverb_settings=corridor_reverb, wall_sound=wall_sound
+    boxes.append(
+        Box(
+            game, offices[0].bounds.bottom_back_left - Point(0, 4, 0),
+            offices[-1].bounds.top_back_right - Point(0, 1, 0),
+            name='Corridor', surface_sound=footsteps_directory / 'corridor',
+            reverb_settings=corridor_reverb, wall_sound=wall_sound
+        )
     )
-    boxes: List[Box] = offices + walls + [corridor]
-    box = Box.create_fitted(
-        game, boxes, name='Main Box', type=BoxTypes.solid,
-        pad_start=Point(-1, -1, -1), pad_end=Point(1, 1, 1),
-        wall_sound=wall_sound
+    boxes.extend(offices)
+    boxes.append(
+        Box.create_fitted(
+            game, boxes, name='Main Box', type=BoxTypes.solid,
+            pad_start=Point(-1, -1, -1), pad_end=Point(1, 1, 1),
+            wall_sound=wall_sound
+        )
     )
     reverb: GlobalFdnReverb = GlobalFdnReverb(game.audio_context)
     music: Track = Track.from_path(
         sounds_directory / 'music.mp3', TrackTypes.music
     )
     level: BoxLevel = BoxLevel(
-        game, box, coordinates=corridor.start,
-        player_sound_manager=player_sound_manager,
+        game, boxes=boxes, player_sound_manager=player_sound_manager
     )
     level.tracks.append(music)
     level.ambiances.extend(ambiances)

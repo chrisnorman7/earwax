@@ -255,7 +255,10 @@ class BoxLevel(Level):
         it is different to the last one, update :attr:`self.reverb
         <earwax.BoxLevel.reverb>` if necessary, and store the new box.
         """
-        current_box: Optional[Box] = self.get_current_box()
+        current_box: Optional[Box] = None
+        if self.current_box is not None:
+            current_box = self.current_box.box
+        self.current_box = CurrentBox(self.coordinates, box)
         if box is not current_box:
             if self.reverb is not None:
                 self.update_reverb(box.reverb_settings)
@@ -264,7 +267,6 @@ class BoxLevel(Level):
                 box.name is not None
             ):
                 self.game.output(box.name)
-            self.current_box = CurrentBox(self.coordinates, box)
 
     def collide(self, box: Box[Any], coordinates: Point) -> None:
         """Handle collitions.
@@ -481,14 +483,12 @@ class BoxLevel(Level):
             self.current_box.coordinates == self.coordinates
         ):
             return self.current_box.box
+        box: Optional[Box] = self.get_containing_box(self.coordinates)
+        if box is None:
+            self.current_box = None
         else:
-            box: Optional[Box[Any]] = self.get_containing_box(self.coordinates)
-            if box is None:
-                self.current_box = None
-                return None
-            else:
-                self.current_box = CurrentBox(self.coordinates, box)
-                return box
+            self.current_box = CurrentBox(self.coordinates, box)
+        return box
 
     def get_angle_between(self, other: Point) -> float:
         """Return the angle between the perspective and the other coordinates.
