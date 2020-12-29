@@ -1,6 +1,7 @@
 """Test the general parts of the sound module."""
 
 from pathlib import Path
+from typing import Optional
 
 from attr.exceptions import FrozenInstanceError
 from pyglet.clock import schedule_once
@@ -55,7 +56,7 @@ def test_gains(game: Game, window: Window, level: Level) -> None:
     """Test the gain of the various sound managers."""
 
     def do_test(dt: float) -> None:
-        manager: SoundManager = game.interface_sound_manager
+        manager: Optional[SoundManager] = game.interface_sound_manager
         expected: float = game.config.sound.sound_volume.value
         assert isinstance(manager, SoundManager)
         assert manager.source.gain == expected

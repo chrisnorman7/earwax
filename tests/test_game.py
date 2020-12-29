@@ -229,10 +229,10 @@ def test_push_action_menu(game: Game, level: Level) -> None:
     assert len(menu.items) == 1
 
 
-def test_push_credits_menu() -> None:
+def test_push_credits_menu(context: Context) -> None:
     """Test the push_credits_menu method."""
     game: Game = Game(
-        credits=[
+        audio_context=context, credits=[
             Credit('Test 1', 'example.com'),
             Credit('Test 2', 'test.org')
         ]

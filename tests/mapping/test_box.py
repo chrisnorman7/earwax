@@ -7,10 +7,10 @@ from pytest import raises
 from synthizer import GlobalFdnReverb, PannerStrategy, Source3D, SynthizerError
 
 from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, Game, NotADoor,
-                    OutOfBounds, Point, Portal, SoundManager)
+                    Point, Portal, SoundManager)
 
 
-def test_init(game: Game, box: Box) -> None:
+def test_init(box_level: BoxLevel, game: Game, box: Box) -> None:
     """Test that boxes initialise properly."""
     assert isinstance(box, Box)
     assert box.reverb is None
@@ -19,31 +19,13 @@ def test_init(game: Game, box: Box) -> None:
     assert box.start == Point(1, 2, 3)
     assert box.end == Point(4, 5, 6)
     assert box.type is BoxTypes.empty
-    b: Box = Box(game, box.start, box.end, parent=box)
-    assert b.parent is box
-    assert b in box.children
-    assert b.reverb_settings == {}
-    b = Box(game, box.start, box.end, reverb_settings={'gain': 0.5})
-    assert b.reverb_settings == {'gain': 0.5}
-
-
-def test_add_child(game: Game) -> None:
-    """Test adding child boxes."""
-    b: Box = Box(game, Point(0, 0, 0), Point(3, 3, 0))
-    c: Box = Box(game, Point(1, 1, 0), Point(1, 1, 0), parent=b)
-    assert c.parent is b
-    assert b.children == [c]
-    gc: Box = Box(game, Point(1, 1, 0), Point(1, 1, 0), parent=c)
-    assert gc.parent is c
-    assert c.children == [gc]
-    broken: Box = Box(game, Point(-1, 0, 5), Point(-1, 0, -2))
-    with raises(OutOfBounds) as exc:
-        b.add_child(broken)
-    assert exc.value.args == (b, broken)
-    broken = Box(game, Point(10, 10, 10), Point(10, 10, 10))
-    with raises(OutOfBounds) as exc:
-        b.add_child(broken)
-    assert exc.value.args == (b, broken)
+    assert box.data is None
+    assert box.box_level is None
+    box = Box(game, box.start, box.end, reverb_settings={'gain': 0.5})
+    assert box.reverb_settings == {'gain': 0.5}
+    box = Box(game, box.start, box.end, box_level=box_level)
+    assert box.box_level is box_level
+    assert box_level.boxes == [box]
 
 
 def test_contains_point(game: Game) -> None:
@@ -83,31 +65,6 @@ def test_could_fit(game: Game) -> None:
     assert c.could_fit(b) is False
     b = Box(game, c.start, c.end + Point(1, 1, 1))
     assert c.could_fit(b) is False
-
-
-def test_get_containing_child(game: Game) -> None:
-    """Test Box.get_containing_box."""
-    parent: Box = Box(game, Point(0, 0, 0), Point(100, 100, 5))
-    # Make a base for tracks to sit on.
-    tracks: Box = Box(
-        game, parent.start, parent.bounds.bottom_back_right + Point(0, 2, 0),
-        parent=parent
-    )
-    assert parent.get_containing_box(Point(0, 0, 0)) is tracks
-    assert parent.get_containing_box(Point(5, 5, 1)) is parent
-    # Draw 2 parallel lines, like train tracks.
-    b: BoxBounds = tracks.bounds
-    southern_rail: Box = Box(
-        game, b.bottom_back_left, b.bottom_back_right, parent=tracks
-    )
-    northern_rail = Box(
-        game, b.bottom_front_left, b.bottom_front_right, parent=tracks
-    )
-    assert parent.get_containing_box(Point(5, 5, 0)) is parent
-    assert parent.get_containing_box(Point(0, 0, 0)) is southern_rail
-    assert parent.get_containing_box(Point(3, 2, 0)) is northern_rail
-    assert parent.get_containing_box(Point(1, 1, 0)) is tracks
-    assert parent.get_containing_box(Point(200, 201, 0)) is None
 
 
 def test_fitted_box(game: Game) -> None:
@@ -220,12 +177,9 @@ def test_open(game: Game, door: Door) -> None:
     with raises(NotADoor):
         b.open()
     door.open = False
-    b.door = door
+    b.data = door
     b.open()
     assert door.open is True
-    assert isinstance(b.sound_manager, SoundManager)
-    assert isinstance(b.sound_manager.source, Source3D)
-    assert b.reverb is None
 
     @b.event
     def on_open() -> None:
@@ -233,8 +187,8 @@ def test_open(game: Game, door: Door) -> None:
 
     b.open()
     assert door.open is False
-    b = Box(game, b.start, b.end, reverb_settings={'gain': 0.5}, door=b.door)
-    b.door.open = False
+    b = Box(game, b.start, b.end, reverb_settings={'gain': 0.5}, data=b.data)
+    b.data.open = False
     b.open()
     assert isinstance(b.reverb, GlobalFdnReverb)
     sleep(0.2)
@@ -251,7 +205,7 @@ def test_close(game: Game, door: Door) -> None:
 
     with raises(NotADoor):
         b.close()
-    b.door = door
+    b.data = door
     b.close()
     assert door.open is False
     assert isinstance(b.sound_manager, SoundManager)
@@ -263,97 +217,12 @@ def test_close(game: Game, door: Door) -> None:
 
     b.close()
     assert door.open is True
-    b = Box(game, b.start, b.end, reverb_settings={'gain': 0.5}, door=b.door)
-    b.door.open = True
+    b = Box(game, b.start, b.end, reverb_settings={'gain': 0.5}, data=b.data)
+    b.data.open = True
     b.close()
     assert isinstance(b.reverb, GlobalFdnReverb)
     sleep(0.2)
     assert b.reverb.gain == b.reverb_settings['gain']
-
-
-def test_nearest_door(game: Game, door: Door) -> None:
-    """Test Box.nearest_door."""
-    room: Box = Box(game, Point(0, 0, 0), Point(3, 3, 3))
-    assert room.nearest_door(room.start) is None
-    doorstep: Box = Box(game, room.end, room.end, door=door, parent=room)
-    assert room.nearest_door(room.start) is None
-    assert room.nearest_door(room.start, same_z=False) is doorstep
-    doorstep.start.z = room.start.z
-    assert room.nearest_door(room.start) is doorstep
-    assert room.nearest_door(room.start, same_z=False) is doorstep
-
-
-def test_nearest_door_with_descendants(game: Game, door: Door) -> None:
-    """Test that we can get the nearest door when the door isn't a child."""
-    foundation: Box = Box(game, Point(0, 0, 0), Point(5, 5, 5))
-    office: Box = Box(game, Point(3, 3, 0), foundation.end, parent=foundation)
-    doorstep: Box = Box(
-        game, office.start, office.bounds.top_back_left, door=door,
-        parent=office, name='Doorstep'
-    )
-    assert foundation.nearest_door(foundation.start) is doorstep
-    assert foundation.nearest_door(Point(0, 0, 1)) is None
-    assert foundation.nearest_door(Point(0, 0, 1), same_z=False) is doorstep
-    second_door: Box = Box(
-        game, foundation.start, foundation.bounds.top_back_left, door=Door(),
-        parent=foundation, name='Second Door'
-    )
-    assert foundation.nearest_door(foundation.start) is second_door
-    assert foundation.nearest_door(Point(0, 0, 1)) is None
-    assert foundation.nearest_door(Point(0, 0, 1), same_z=False) is second_door
-    third_door: Box = Box(
-        game, foundation.bounds.bottom_front_right,
-        foundation.bounds.top_front_right,
-        door=door, name='Third Box', parent=foundation
-    )
-    assert foundation.nearest_door(foundation.start) is second_door
-    assert foundation.nearest_door(third_door.start) is third_door
-
-
-def test_nearest_portal(game: Game, box_level: BoxLevel) -> None:
-    """Test Box.nearest_portal."""
-    room: Box = Box(game, Point(0, 0, 0), Point(3, 3, 3))
-    assert room.nearest_portal(room.start) is None
-    p: Portal = Portal(box_level, Point(0, 0, 0))
-    assert room.nearest_portal(room.start) is None
-    doorstep: Box = Box(
-        game, room.end.copy(), room.end.copy(), portal=p, parent=room
-    )
-    assert room.nearest_portal(room.start, same_z=False) is doorstep
-    doorstep.start.z = room.start.z
-    assert room.nearest_portal(room.start) is doorstep
-    assert room.nearest_portal(room.start, same_z=False) is doorstep
-    second_doorstep: Box = Box(
-        game, room.start.copy(), room.bounds.top_back_left.copy(), portal=p,
-        parent=room
-    )
-    assert room.nearest_portal(room.start) is second_doorstep
-
-
-def test_nearest_portal_with_descendants(game: Game, box: Box) -> None:
-    """Test that we can get the nearest door when the door isn't a child."""
-    level: BoxLevel = BoxLevel(game, box)
-    foundation: Box = Box(game, Point(0, 0, 0), Point(5, 5, 5))
-    office: Box = Box(game, Point(3, 3, 0), foundation.end, parent=foundation)
-    portal: Box = Box(
-        game, office.start, office.start + Point(0, 0, office.end.z),
-        portal=Portal(
-            level, Point(0, 0, 0)
-        ), parent=office
-    )
-    assert foundation.nearest_portal(foundation.start) is portal
-    assert foundation.nearest_portal(Point(0, 0, 1)) is None
-    assert foundation.nearest_portal(Point(0, 0, 1), same_z=False) is portal
-    second_portal: Box = Box(
-        game, foundation.start, Point(0, 0, foundation.end.z), portal=Portal(
-            level, Point(0, 0, 0)
-        ), parent=foundation
-    )
-    assert foundation.nearest_portal(foundation.start) is second_portal
-    assert foundation.nearest_portal(Point(0, 0, 1)) is None
-    assert foundation.nearest_portal(
-        Point(0, 0, 1), same_z=False
-    ) is second_portal
 
 
 def test_bounds(game: Game) -> None:
@@ -434,50 +303,6 @@ def test_is_wall(game: Game) -> None:
     assert not b.is_wall(Point(2, 3, 4))
 
 
-def test_get_oldest_parent(game: Game) -> None:
-    """Tes the get_oldest_parent method."""
-    start: Point = Point(0, 0, 0)
-    end: Point = Point(3, 3, 3)
-    a: Box = Box(game, start, end)
-    b: Box = Box(game, start, end, parent=a)
-    c: Box = Box(game, start, end, parent=b)
-    assert a.get_oldest_parent() is a
-    assert b.get_oldest_parent() is a
-    assert c.get_oldest_parent() is a
-    d: Box = Box(game, start, end)
-    assert d.get_oldest_parent() is d
-
-
-def test_get_descendants(game: Game) -> None:
-    """Test the get_descendants method."""
-    start: Point = Point(0, 0, 0)
-    end: Point = Point(5, 5, 5)
-    grandparent: Box = Box(game, start, end)
-    assert list(grandparent.get_descendants()) == []
-    parent: Box = Box(game, start, end, parent=grandparent)
-    assert list(grandparent.get_descendants()) == [parent]
-    child_1: Box = Box(game, start, end, parent=parent)
-    child_2: Box = Box(game, start, end, parent=parent)
-    assert list(grandparent.get_descendants()) == [parent, child_1, child_2]
-
-
-def test_filter_descendants(game: Game) -> None:
-    """Test the filter_descendant method."""
-    start: Point = Point(0, 0, 0)
-    end: Point = Point(5, 5, 5)
-
-    def filter_descendant(descendant: Box) -> bool:
-        return descendant.name == 'Child 1'
-
-    grandparent: Box = Box(game, start, end, name='Grandparent')
-    assert list(grandparent.filter_descendants(filter_descendant)) == []
-    parent: Box = Box(game, start, end, parent=grandparent, name='Parent')
-    assert list(grandparent.filter_descendants(filter_descendant)) == []
-    child_1: Box = Box(game, start, end, parent=parent, name='Child 1')
-    Box(game, start, end, parent=parent, name='Child 2')
-    assert list(grandparent.filter_descendants(filter_descendant)) == [child_1]
-
-
 def test_centre(game: Game) -> None:
     """Test the centre of a box."""
     b: Box = Box(game, Point(1, 1, 1), Point(4, 4, 4))
@@ -528,3 +353,60 @@ def test_del(game: Game) -> None:
     del b
     with raises(SynthizerError):
         r.destroy()
+
+
+def test_is_door(game: Game, box: Box) -> None:
+    """Test the is_door property."""
+    assert box.data is None
+    assert not box.is_door
+    b: Box[Door] = Box[Door](game, Point(0, 0, 0), Point(0, 0, 2), data=Door())
+    assert b.is_door
+
+
+def test_is_portal(game: Game, box: Box, box_level: BoxLevel) -> None:
+    """Test the is_door property."""
+    assert box.data is None
+    assert not box.is_portal
+    b: Box[Portal] = Box[Portal](
+        game, Point(0, 0, 0), Point(0, 0, 2),
+        data=Portal(box_level, Point(0, 0, 0))
+    )
+    assert b.is_portal
+
+
+def test_can_open(game: Game) -> None:
+    """Test the can_open method."""
+    d: Door = Door(open=False, can_open=lambda: False)
+    box: Box[Door] = Box(game, Point(0, 0, 0), Point(5, 5, 5), data=d)
+    box.open()
+    assert d.open is False
+    d.can_open = None
+    box.open()
+    assert d.open is True
+
+
+def test_can_close(game: Game) -> None:
+    """Test the can_close method."""
+    d: Door = Door(open=True, can_close=lambda: False)
+    box: Box[Door] = Box(game, Point(0, 0, 0), Point(5, 5, 5), data=d)
+    box.close()
+    assert d.open is True
+    d.can_close = None
+    box.close()
+    assert d.open is False
+
+
+def test_can_use(box_level: BoxLevel, game: Game, box: Box) -> None:
+    """Test the can_use method of portals."""
+    l: BoxLevel = BoxLevel(game)
+    p: Portal = Portal(l, Point(52, 53, 54), can_use=lambda: False)
+    start: Box[Portal] = Box(
+        game, Point(0, 0, 0), Point(5, 5, 5), data=p, box_level=box_level
+    )
+    game.push_level(box_level)
+    start.handle_portal()
+    assert game.level is box_level
+    p.can_use = None
+    start.handle_portal()
+    assert game.level is l
+    assert l.coordinates == Point(52, 53, 54)

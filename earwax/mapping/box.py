@@ -3,9 +3,8 @@
 from enum import Enum
 from pathlib import Path
 from random import uniform
-from typing import TYPE_CHECKING, Any, Callable, Dict
-from typing import Generator as GeneratorType
-from typing import Iterator, List, Optional, Tuple, cast
+from typing import (TYPE_CHECKING, Any, Callable, Dict, Generic, List,
+                    Optional, Tuple, TypeVar, cast)
 
 from attr import Factory, attrib, attrs
 
@@ -29,10 +28,23 @@ from .portal import Portal
 
 if TYPE_CHECKING:
     from ..game import Game
+    from .box_level import BoxLevel
 
 IntCoordinates = Tuple[int, int, int]
-
+T = TypeVar('T')
 ReverbSettingsDict = Dict[str, float]
+
+
+class BoxError(Exception):
+    """General box level error."""
+
+
+class NotADoor(BoxError):
+    """The current box is not a door."""
+
+
+class NotAPortal(BoxError):
+    """The current box is not a portal."""
 
 
 class BoxTypes(Enum):
@@ -158,25 +170,8 @@ class BoxBounds:
         return self.width * self.depth * self.height
 
 
-class BoxError(Exception):
-    """The base exception for all box errors."""
-
-
-class OutOfBounds(BoxError):
-    """The given point is beyond the bounds of a box."""
-
-
-class NotADoor(BoxError):
-    """Not a door.
-
-    sTried to call :meth:`~earwax.Box.open`, or :meth:`~earwax.Box.close`
-    on a :class:`~earwax.Box` instance that has its :attr:`~earwax.Box.door`
-    attribute set to ``None``.
-    """
-
-
 @attrs(auto_attribs=True)
-class Box(RegisterEventMixin):
+class Box(Generic[T], RegisterEventMixin):
     """A box on a map.
 
     You can create instances of this class either singly, or by using the
@@ -184,6 +179,11 @@ class Box(RegisterEventMixin):
 
     If you already have a list of boxes, you can fit them all onto one map with
     the :meth:`earwax.Box.create_fitted` method.
+
+    Boxes can be assigned arbitrary user data::
+
+        b: Box[Enemy] = Box(start, end, data=Enemy())
+        b.enemy.do_something()
 
     In addition to the coordinates supplied to this class's constructor, a
     :class:`earwax.BoxBounds` instance is created as :attr:`earwax.Box.bounds`.
@@ -209,22 +209,9 @@ class Box(RegisterEventMixin):
     :ivar ~earwax.Box.wall_sound: The sound that should be heard when colliding
         with walls in this box.
 
-    :ivar ~earwax.Box.parent: The box that contains this one.
-
-        If you supply a ``parent`` argument to the constructor, this box will
-        be added to the :attr:`~earwax.Box.children` attribute of the parent.
-
-    :ivar ~earwax.Box.children: A list of boxes that are contained by this box.
-
-        To add a child, use the :meth:`~earwax.Box.add_child` method.
-
     :ivar ~earwax.Box.type: The type of this box.
 
-    :ivar ~earwax.Box.door: If this attribute is not ``None``, then this
-        instance is considered a door.
-
-    :ivar ~earwax.Box.portal: If this attribute is not ``None``, then this
-        instance is considered a portal.
+    :ivar ~earwax.Box.data: Arbitrary data for this box.
 
     :ivar ~earwax.Box.bounds: The bounds of this box.
 
@@ -232,8 +219,8 @@ class Box(RegisterEventMixin):
 
     :ivar ~earwax.Box.centre: The point that lies at the centre of this box.
 
-    :ivar ~earwax.Box.sound_manager: A sound manager to use for playing certain
-        sounds that emanate from this box.
+    :ivar ~earwax.Box.sound_manager: A sound manager to use for playing sounds
+        that emanate from this box.
     """
 
     game: 'Game'
@@ -244,11 +231,9 @@ class Box(RegisterEventMixin):
     surface_sound: Optional[Path] = None
     wall_sound: Optional[Path] = None
 
-    parent: Optional['Box'] = attrib(default=Factory(type(None)), repr=False)
-    children: List['Box'] = attrib(Factory(list), repr=False)
     type: BoxTypes = Factory(lambda: BoxTypes.empty)
-    door: Optional[Door] = None
-    portal: Optional[Portal] = None
+    data: Optional[T] = None
+    stationary: bool = Factory(lambda: True)
     bounds: BoxBounds = attrib(repr=False, init=False)
     reverb_settings: ReverbSettingsDict = Factory(dict)
     centre: Point = attrib(init=False, repr=False)
@@ -259,6 +244,7 @@ class Box(RegisterEventMixin):
     sound_manager: Optional[SoundManager] = attrib(
         default=Factory(lambda: None), repr=False
     )
+    box_level: Optional['BoxLevel'] = None
 
     def __attrs_post_init__(self) -> None:
         """Configure bounds, parents and children."""
@@ -268,11 +254,8 @@ class Box(RegisterEventMixin):
             self.bounds.depth / 2,
             self.bounds.height / 2
         )
-        if self.parent is not None:
-            self.parent.add_child(self)
-        child: Box
-        for child in self.children:
-            child.parent = self
+        if self.box_level is not None:
+            self.box_level.add_box(self)
         for func in (
             self.on_footstep, self.on_collide, self.on_activate, self.on_open,
             self.on_close
@@ -286,7 +269,7 @@ class Box(RegisterEventMixin):
         pad_end: Optional[Point] = None,
         **kwargs
     ) -> 'Box':
-        """Return a box that fits all of ``children`` in.
+        """Return a box that fits all of ``children`` inside itself.
 
         Pass a list of :class:`~earwax.Box` instances, and you'll get a box
         with its :attr:`~earwax.Box.start`, and :attr:`~earwax.Box.end`
@@ -335,7 +318,7 @@ class Box(RegisterEventMixin):
             end: Point = Point(end_x, end_y, end_z)
             if pad_end is not None:
                 end += pad_end
-            return cls(game, start, end, children=children, **kwargs)
+            return cls(game, start, end, **kwargs)
         else:
             raise ValueError('Invalid children: %r.' % children)
 
@@ -429,6 +412,16 @@ class Box(RegisterEventMixin):
             n += 1
         return boxes
 
+    @property
+    def is_door(self) -> bool:
+        """Return ``True`` if this box is a door."""
+        return isinstance(self.data, Door)
+
+    @property
+    def is_portal(self) -> bool:
+        """Return ``True`` if this box is a portal."""
+        return isinstance(self.data, Portal)
+
     def on_footstep(self, bearing: float, coordinates: Point) -> None:
         """Play an appropriate surface sound.
 
@@ -461,33 +454,12 @@ class Box(RegisterEventMixin):
         pass
 
     def on_open(self) -> None:
-        """Handle a door being opened on this box.
-
-        An event that id dispatched when the :meth:`~earwax.Box.open` method is
-        successfully called on this instance.
-        """
+        """Handle this box being opened."""
         pass
 
     def on_close(self) -> None:
-        """Handle a door being closed on this box.
-
-        An event which is dispatched when :meth:`~earwax.Box.close` is
-        successfully called on this instance.
-        """
+        """Handle this box being closed."""
         pass
-
-    def add_child(self, box: 'Box') -> None:
-        """Add a child box.
-
-        Adds the given box to :attr:`self.children
-        <~earwax.Box.children>`.
-
-        :param box: The box to add as a child.
-        """
-        if not self.could_fit(box):
-            raise OutOfBounds(self, box)
-        self.children.append(box)
-        box.parent = self
 
     def contains_point(self, coordinates: Point) -> bool:
         """Return whether or not this box contains the given point.
@@ -527,33 +499,6 @@ class Box(RegisterEventMixin):
         """
         return self.contains_point(box.start) and self.contains_point(box.end)
 
-    def sort_children(self) -> List['Box']:
-        """Return :attr:`~earwax.Box.children` sorted by area."""
-        return sorted(self.children, key=lambda c: c.bounds.area)
-
-    def get_containing_box(self, coordinates: Point) -> Optional['Box']:
-        """Return the box that spans the given coordinates.
-
-        If no child box is found, one of two things will occur:
-
-        * If ``self`` contains the given coordinates, ``self`` will be
-            returned.
-
-        * If that is not the case, `None`` is returned.
-
-        This method scans :attr:`self.children <earwax.Box.children>` using the
-        :meth:`~earwax.Box.sort_children` method..
-
-        :param coordinates: The coordinates the child box should span.
-        """
-        box: Box
-        for box in self.sort_children():
-            if box.contains_point(coordinates):
-                return box.get_containing_box(coordinates)
-        if self.contains_point(coordinates):
-            return self
-        return None
-
     def get_sound_manager(self) -> SoundManager:
         """Make a sound manager suitable for this box.
 
@@ -591,150 +536,6 @@ class Box(RegisterEventMixin):
                 self.sound_manager.source, self.reverb
             )
 
-    def open(self) -> None:
-        """Open a door on this box.
-
-        If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
-        :attr:`.open <earwax.Door.open>` attribute to ``True``, and play the
-        appropriate sound. Otherwise, raise :class:`earwax.NotADoor`.
-        """
-        if self.door is None:
-            raise NotADoor(self)
-        d: Door = self.door
-        if d.can_open is None or d.can_open() is True:
-            d.open = True
-            self.dispatch_event('on_open')
-            if (
-                d.open_sound is not None and
-                self.game.audio_context is not None
-            ):
-                if self.sound_manager is None:
-                    self.make_sound_manager()
-                assert self.sound_manager is not None  # Shuts mypy up.
-                self.sound_manager.play_path(d.open_sound, True)
-            when: float
-            if isinstance(self.door.close_after, tuple):
-                when = uniform(*self.door.close_after)
-            elif isinstance(self.door.close_after, float):
-                when = self.door.close_after
-            else:
-                return None
-            schedule_once(self.scheduled_close, when)
-
-    def close(self) -> None:
-        """Close a door on this box.
-
-        If :attr:`self.door <earwax.Box.door>` is not ``None``, set its
-        :attr:`.open <earwax.Door.open>` attribute to ``False``, and play the
-        appropriate sound. Otherwise, raise :class:`earwax.NotADoor`.
-
-        :param context: The synthizer context to use.
-        """
-        if self.door is None:
-            raise NotADoor(self)
-        d: Door = self.door
-        if d.can_close is None or d.can_close() is True:
-            unschedule(self.scheduled_close)
-            d.open = False
-            self.dispatch_event('on_close')
-            if (
-                d.close_sound is not None and
-                self.game.audio_context is not None
-            ):
-                if self.sound_manager is None:
-                    self.make_sound_manager()
-                assert self.sound_manager is not None  # Shuts mypy up.
-                self.sound_manager.play_path(d.close_sound, True)
-
-    def scheduled_close(self, dt: float) -> None:
-        """Call :meth:`self.close() <earwax.Box.close>` on a schedule.
-
-        :param dt: The ``dt`` parameter expected by Pyglet's schedule
-            functions.
-
-        :param sound_manager: The sound manager to pass to
-            :meth:`~earwax.Box.close`.
-        """
-        self.close()
-
-    def get_descendants(self) -> GeneratorType['Box', None, None]:
-        """Yield all children and grandchildren."""
-        child: Box
-        for child in self.children:
-            yield child
-            yield from child.get_descendants()
-
-    def filter_descendants(
-        self, f: Callable[['Box'], bool]
-    ) -> Iterator['Box']:
-        """Return a subset of descendants.
-
-        All descendants will be iterated over, and checked with the provided
-        function.
-
-        If ``f(descendant)`` returns ``True``, then the descendant will be
-        yielded.
-
-        :param f: A function to check descendants with.
-        """
-        return filter(f, self.get_descendants())
-
-    def nearest_door(
-        self, start: Point, same_z: bool = True
-    ) -> Optional['Box']:
-        """Get the nearest door.
-
-        Iterates over all descendants, and returns the one whose
-        :attr:`~earwax.Box.door` attribute is not ``None``, and lies nearest to
-        ``start``.
-
-        :param start: The coordinates to start from.
-
-        :param same_z: If ``True``, then doors on different levels will not be
-            considered.
-        """
-        box: Optional['Box'] = None
-        distance: Optional[float] = None
-        descendant: 'Box'
-        for descendant in self.filter_descendants(
-            lambda b: b.door is not None and (
-                b.start.z == start.z or not same_z
-            )
-        ):
-            d: float = start.distance_between(descendant.start)
-            if distance is None or d < distance:
-                box = descendant
-                distance = d
-        return box
-
-    def nearest_portal(
-        self, start: Point, same_z: bool = True
-    ) -> Optional['Box']:
-        """Get the nearest portal.
-
-        Iterates over all descendants, and returns the one whose
-        :attr:`~earwax.Box.portal` attribute is not ``None``, and lies nearest
-        to ``start``.
-
-        :param start: The coordinates to start from.
-
-        :param same_z: If ``True``, then portals on different levels will not
-            be considered.
-        """
-        box: Optional['Box'] = None
-        distance: Optional[float] = None
-        descendant: 'Box'
-        for descendant in self.filter_descendants(
-            lambda b: b.portal is not None and (
-                b.start.z == start.z or not same_z
-            )
-        ):
-            d: float = start.distance_between(descendant.start)
-            if distance is None or d < distance:
-                box = descendant
-                distance = d
-        return box
-
     def is_wall(self, p: Point) -> bool:
         """Return ``True`` if the provided point is inside a wall.
 
@@ -744,25 +545,102 @@ class Box(RegisterEventMixin):
             self.type is BoxTypes.room and self.bounds.is_edge(p)
         )
 
-    def get_oldest_parent(self) -> 'Box':
-        """Return the oldest parent.
+    def open(self) -> None:
+        """Open the attached door.
 
-        This function returns the box whose parent is ``None``, thus returning
-        the oldest parent.
+        If this box is a door, set the :attr:`~earwax.Door.open` attribute of
+        its :attr:`~earwax.Box.data` to ``True``, and play the appropriate
+        sound. Otherwise, raise :class:`earwax.NotADoor`.
 
-        The returned value could be the same instance on which this method was
-        called.
+        :param box: The box to open.
         """
-        if self.parent is None:
-            return self
-        return self.parent.get_oldest_parent()
+        if not isinstance(self.data, Door):
+            raise NotADoor(self)
+        d: Door = self.data
+        if d.can_open is None or d.can_open() is True:
+            d.open = True
+            self.dispatch_event('on_open')
+            if d.open_sound is not None:
+                if self.sound_manager is None:
+                    self.make_sound_manager()
+                assert self.sound_manager is not None
+                self.sound_manager.play_path(d.open_sound, True)
+            when: float
+            if isinstance(d.close_after, tuple):
+                a: float
+                b: float
+                a, b = d.close_after
+                when = uniform(a, b)
+            elif isinstance(d.close_after, float):
+                when = d.close_after
+            else:
+                return None
+            schedule_once(self.scheduled_close, when)
+
+    def close(self) -> None:
+        """Close the attached door.
+
+        If this box is a door, set the :attr:`~earwax.Door.open` attribute of
+        its :attr:`~earwax.Box.data` to ``False``, and play the appropriate
+        sound. Otherwise, raise :class:`earwax.NotADoor`.
+
+        :param door: The door to close.
+        """
+        if not isinstance(self.data, Door):
+            raise NotADoor(self)
+        d: Door = self.data
+        if d.can_close is None or d.can_close() is True:
+            unschedule(self.scheduled_close)
+            d.open = False
+            self.dispatch_event('on_close')
+            if d.close_sound is not None:
+                if self.sound_manager is None:
+                    self.make_sound_manager()
+                assert self.sound_manager is not None
+                self.sound_manager.play_path(d.close_sound, True)
+
+    def scheduled_close(self, dt: float) -> None:
+        """Call :meth:`~earwax.Box.close`.
+
+        This method will be called by ``pyglet.clock.schedule_once``.
+
+        :param dt: The ``dt`` parameter expected by Pyglet's schedule
+            functions.
+        """
+        self.close()
+
+    def handle_portal(self) -> None:
+        """Activate a portal attached to this box."""
+        assert isinstance(self.data, Portal)
+        assert self.box_level is not None
+        p: Portal = self.data
+        if p.can_use is None or p.can_use() is True:
+            if p.level is not self.box_level:
+                self.game.replace_level(p.level)
+            p.level.set_coordinates(p.coordinates)
+            if (
+                p.level.player_sound_manager is not None and
+                p.exit_sound is not None
+            ):
+                p.level.player_sound_manager.play_path(p.exit_sound, True)
+            bearing: int = self.box_level.bearing
+            if p.bearing is not None:
+                bearing = p.bearing
+            p.level.set_bearing(bearing)
+
+    def handle_door(self) -> None:
+        """Open or close the door attached to this box."""
+        assert isinstance(self.data, Door)
+        assert self.box_level is not None
+        d: Door = self.data
+        if d.open:
+            self.close()
+        else:
+            self.open()
 
     def __del__(self) -> None:
         """Delete everything."""
-        if self.reverb is not None:
-            try:
-                self.reverb.destroy()
-            except SynthizerError:
-                pass
-            finally:
-                self.reverb = None
+        try:
+            self.reverb.destroy()  # type:ignore[union-attr]
+        except (SynthizerError, AttributeError):
+            pass

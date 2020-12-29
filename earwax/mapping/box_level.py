@@ -1,7 +1,7 @@
 """Provides the BoxLevel class."""
 
 from math import cos, floor, sin
-from typing import Callable, List, Optional, Tuple, cast
+from typing import Any, Callable, List, Optional, Tuple, cast
 
 from attr import Factory, attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
@@ -21,6 +21,22 @@ from ..walking_directions import walking_directions
 from .box import Box, ReverbSettingsDict
 from .door import Door
 from .portal import Portal
+
+
+@attrs(auto_attribs=True)
+class CurrentBox:
+    """Store a reference to the current box.
+
+    This class stores the position too, so that caching can be performed.
+
+    :ivar ~earwax.CurrentBox.coordinates: The coordinates that were last
+        checked.
+
+    :ivar ~earwax.CurrentBox.box: The last current box.
+    """
+
+    coordinates: Point
+    box: Box[Any]
 
 
 @attrs(auto_attribs=True)
@@ -72,21 +88,12 @@ class BoxLevel(Level):
         :meth:`~earwax.BoxLevel.disconnect_reverb` to clear.
     """
 
-    box: Box
+    boxes: List[Box[Any]] = Factory(list)
 
-    coordinates: Point = attrib()
-
-    @coordinates.default
-    def get_default_coordinates(instance: 'BoxLevel') -> Point:
-        """Return the start coordinates for the contained box.
-
-        :param instance: The instance whose ``box`` attribute's start
-            coordinates will be returned.
-        """
-        return instance.box.start
+    coordinates: Point = Factory(lambda: Point(0, 0, 0))
 
     bearing: int = 0
-    current_box: Optional[Box] = None
+    current_box: Optional[CurrentBox] = None
 
     player_sound_manager: Optional[SoundManager] = None
     reverb: Optional[GlobalFdnReverb] = attrib(
@@ -98,6 +105,40 @@ class BoxLevel(Level):
         super().__attrs_post_init__()
         for func in (self.on_move, self.on_move_fail, self.on_turn):
             self.register_event(cast(EventType, func))
+        box: Box
+        for box in self.boxes:
+            self.register_box(box)
+
+    def add_box(self, box: Box[Any]) -> None:
+        """Add a box to :attr:`self.boxes <earwax.BoxLevel.boxes>`.
+
+        :param box: The box to add.
+        """
+        self.boxes.append(box)
+        self.register_box(box)
+
+    def register_box(self, box: Box) -> None:
+        """Register a box that is already in the boxes list.
+
+        :param box: The box to register.
+        """
+        box.box_level = self
+        if self.current_box is not None and box.contains_point(
+            self.current_box.coordinates
+        ):
+            self.current_box = None
+
+    def remove_box(self, box: Box[Any]) -> None:
+        """Remove a box from :attr:`self.boxes <earwax.BoxLevel.boxes>`.
+
+        :param box: The box to remove.
+        """
+        box.box_level = None
+        self.boxes.remove(box)
+        if self.current_box is not None and box.contains_point(
+            self.current_box.coordinates
+        ):
+            self.current_box = None
 
     def on_push(self) -> None:
         """Set listener orientation, and start ambiances and tracks."""
@@ -128,8 +169,8 @@ class BoxLevel(Level):
             self.player_sound_manager.play_path(box.surface_sound, True)
 
     def on_move_fail(
-        self, distance: float, vertical: Optional[float],
-        bearing: Optional[int], coordinates: Point
+        self, distance: float, vertical: Optional[float], bearing: int,
+        coordinates: Point
     ) -> None:
         """Handle a move failure.
 
@@ -141,7 +182,8 @@ class BoxLevel(Level):
 
         :param vertical: The ``vertical`` value that was passed to ``move``.
 
-        :param bearing: The ``bearing`` argument that was passed to ``move``.
+        :param bearing: The ``bearing`` argument that was passed to ``move``,
+            or :attr:`self.bearing <earwax.BoxLevel.bearing>`.
         """
         pass
 
@@ -179,6 +221,9 @@ class BoxLevel(Level):
         Override this method if you want to change the algorithm used to
         calculate the target coordinates.
 
+        Please bear in mind however, that the coordinates this method returns
+        should always be 2d.
+
         :param distance: The distance which should be used.
 
         :param bearing: The bearing the new coordinates are in.
@@ -202,40 +247,7 @@ class BoxLevel(Level):
         for name, value in data.items():
             setattr(self.reverb, name, value)
 
-    def handle_portal(self, box: Box) -> None:
-        """Activate a portal.
-
-        :param box: The box that is the portal to handle.
-        """
-        assert box.portal is not None  # Keeps MyPy happy.
-        p: Portal = box.portal
-        if p.can_use is None or p.can_use() is True:
-            if p.level is not self:
-                self.game.replace_level(p.level)
-            p.level.set_coordinates(p.coordinates)
-            if (
-                p.level.player_sound_manager is not None and
-                p.exit_sound is not None
-            ):
-                p.level.player_sound_manager.play_path(p.exit_sound, True)
-            bearing: int = self.bearing
-            if p.bearing is not None:
-                bearing = p.bearing
-            p.level.set_bearing(bearing)
-
-    def handle_door(self, box: Box) -> None:
-        """Activate a door.
-
-        :param box: The box that is the door to handle.
-        """
-        assert box.door is not None  # Keeps MyPy happy.
-        d: Door = box.door
-        if d.open:
-            box.close()
-        else:
-            box.open()
-
-    def handle_box(self, box: Box) -> None:
+    def handle_box(self, box: Box[Any]) -> None:
         """Handle a bulk standard box.
 
         The coordinates have already been set, and the ``on_footstep`` event
@@ -243,17 +255,18 @@ class BoxLevel(Level):
         it is different to the last one, update :attr:`self.reverb
         <earwax.BoxLevel.reverb>` if necessary, and store the new box.
         """
-        if box is not self.current_box:
+        current_box: Optional[Box] = self.get_current_box()
+        if box is not current_box:
             if self.reverb is not None:
                 self.update_reverb(box.reverb_settings)
             if (
-                self.current_box is not None and
-                box.name != self.current_box.name
+                current_box is not None and box.name != current_box.name and
+                box.name is not None
             ):
-                self.game.output(str(box.name))
-            self.current_box = box
+                self.game.output(box.name)
+            self.current_box = CurrentBox(self.coordinates, box)
 
-    def collide(self, box: Box, coordinates: Point) -> None:
+    def collide(self, box: Box[Any], coordinates: Point) -> None:
         """Handle collitions.
 
         Called to run collision code on a box.
@@ -262,12 +275,13 @@ class BoxLevel(Level):
 
         :param coordinates: The coordinates the player was trying to reach.
         """
+        data: Any = box.data
         if self.player_sound_manager is not None:
-            if box.door is not None and not box.door.open:
+            if box.is_door and not data.open:
                 # Play a closed door sound, instead of a wall sound.
-                if box.door.closed_sound is not None:
+                if data.closed_sound is not None:
                     self.player_sound_manager.play_path(
-                        box.door.closed_sound, True
+                        data.closed_sound, True
                     )
             elif box.wall_sound is not None:
                 self.player_sound_manager.play_path(box.wall_sound, True)
@@ -305,10 +319,10 @@ class BoxLevel(Level):
             _bearing: int = self.bearing if bearing is None else bearing
             x, y = self.calculate_coordinates(distance, _bearing)
             p: Point = Point(x, y, z)
-            box: Optional[Box] = self.box.get_containing_box(p.floor())
+            box: Optional[Box[Any]] = self.get_containing_box(p.floor())
             if box is not None:
                 if box.is_wall(p) or (
-                    box.door is not None and not box.door.open
+                    isinstance(box.data, Door) and not box.data.open
                 ):
                     self.collide(box, p)
                 else:
@@ -407,18 +421,14 @@ class BoxLevel(Level):
 
         def inner() -> None:
             """Activate."""
-            box: Optional[Box] = self.get_current_box()
-            if box is not None and box.portal is not None:
-                return self.handle_portal(box)
-            child: Box
-            for child in self.box.get_descendants():
-                if (
-                    child.door is not None and
-                    self.coordinates.distance_between(
-                        child.start
-                    ) <= door_distance
-                ):
-                    return self.handle_door(child)
+            box: Optional[Box[Any]] = self.get_current_box()
+            if box is not None and box.is_portal:
+                return box.handle_portal()
+            door: Optional[Box[Door]] = self.nearest_door(self.coordinates)
+            if door is not None and self.coordinates.distance_between(
+                door.start
+            ) <= door_distance:
+                return door.handle_door()
             if box is not None:
                 box.dispatch_event('on_activate')
 
@@ -437,19 +447,19 @@ class BoxLevel(Level):
         """
 
         def inner() -> None:
-            d: Optional[Box] = self.box.nearest_door(self.coordinates)
+            d: Optional[Box[Door]] = self.nearest_door(self.coordinates)
             if d is not None:
                 name: str = d.name or 'Untitled door'
                 angle: int = floor(self.get_angle_between(d.start))
                 distance: float = self.coordinates.distance_between(d.start)
+                if max_distance is not None and distance > max_distance:
+                    return self.game.output('There are no nearby doors.')
                 directions: str
                 if not round(distance):
                     directions = 'here'
                 else:
                     directions = '%.1f at %d degrees' % (distance, angle)
-                if max_distance is None or distance < max_distance:
-                    return self.game.output(f'{name}: {directions}.')
-            self.game.output('There are no nearby doors.')
+                self.game.output(f'{name}: {directions}.')
 
         return inner
 
@@ -466,7 +476,19 @@ class BoxLevel(Level):
 
     def get_current_box(self) -> Optional[Box]:
         """Get the box that lies at the current coordinates."""
-        return self.box.get_containing_box(self.coordinates.floor())
+        if (
+            self.current_box is not None and
+            self.current_box.coordinates == self.coordinates
+        ):
+            return self.current_box.box
+        else:
+            box: Optional[Box[Any]] = self.get_containing_box(self.coordinates)
+            if box is None:
+                self.current_box = None
+                return None
+            else:
+                self.current_box = CurrentBox(self.coordinates, box)
+                return box
 
     def get_angle_between(self, other: Point) -> float:
         """Return the angle between the perspective and the other coordinates.
@@ -512,3 +534,83 @@ class BoxLevel(Level):
                 self.player_sound_manager.source, self.reverb
             )
         self.reverb = None
+
+    def nearest_door(
+        self, start: Point, same_z: bool = True
+    ) -> Optional[Box[Door]]:
+        """Get the nearest door.
+
+        Iterates over all descendants, and returns the one whose
+        :attr:`~earwax.Box.door` attribute is not ``None``, and lies nearest to
+        ``start``.
+
+        :param start: The coordinates to start from.
+
+        :param same_z: If ``True``, then doors on different levels will not be
+            considered.
+        """
+        box: Optional[Box[Door]] = None
+        distance: Optional[float] = None
+        descendant: Box
+        for descendant in self.boxes:
+            if (
+                not descendant.is_door or same_z and
+                descendant.start.z != start.z
+            ):
+                continue
+            assert descendant.is_door  # Keep mypy happy.
+            d: float = start.distance_between(descendant.start)
+            if distance is None or d < distance:
+                box = descendant
+                distance = d
+        return box
+
+    def nearest_portal(
+        self, start: Point, same_z: bool = True
+    ) -> Optional[Box[Portal]]:
+        """Get the nearest portal.
+
+        Iterates over all descendants, and returns the one whose
+        :attr:`~earwax.Box.portal` attribute is not ``None``, and lies nearest
+        to ``start``.
+
+        :param start: The coordinates to start from.
+
+        :param same_z: If ``True``, then portals on different levels will not
+            be considered.
+        """
+        box: Optional[Box[Portal]] = None
+        distance: Optional[float] = None
+        descendant: Box
+        for descendant in self.boxes:
+            if not descendant.is_portal or (
+                same_z and descendant.start.z != start.z
+            ):
+                continue
+            assert descendant.is_portal  # Keep mypy happy.
+            d: float = start.distance_between(descendant.start)
+            if distance is None or d < distance:
+                box = descendant
+                distance = d
+        return box
+
+    def sort_boxes(self) -> List[Box]:
+        """Return :attr:`~earwax.Box.children` sorted by area."""
+        return sorted(self.boxes, key=lambda c: c.bounds.area)
+
+    def get_containing_box(self, coordinates: Point) -> Optional[Box]:
+        """Return the box that spans the given coordinates.
+
+        If no box is found, ``None`` will be returned.
+
+        This method scans :attr:`self.boxes <earwax.BoxLevel.boxes>` using  the
+        :meth:`~earwax.BoxLevel.sort_boxes` method.
+
+        :param coordinates: The coordinates the box should span.
+        """
+        box: Box
+        for box in self.sort_boxes():
+            if box.contains_point(coordinates):
+                return box
+        else:
+            return None

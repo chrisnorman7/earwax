@@ -81,12 +81,14 @@ class Level(RegisterEventMixin):
 
     def start_ambiances(self) -> None:
         """Start all the ambiances on this instance."""
-        ctx: Optional[Context] = self.game.audio_context
-        if ctx is None:
+        audio_context: Optional[Context] = self.game.audio_context
+        if audio_context is None:
             raise RuntimeError('Unable to start ambiances with no context.')
         ambiance: Ambiance
         for ambiance in self.ambiances:
-            ambiance.play(ctx, self.game.config.sound.ambiance_volume.value)
+            ambiance.play(
+                audio_context, self.game.config.sound.ambiance_volume.value
+            )
 
     def stop_ambiances(self) -> None:
         """Stop all the ambiances on this instance."""
@@ -223,11 +225,11 @@ class Level(RegisterEventMixin):
         """Stop tracks ETC."""
         try:
             self.stop_ambiances()
-        except SynthizerError:
+        except (SynthizerError, AttributeError):
             pass
         try:
             self.stop_tracks()
-        except SynthizerError:
+        except (SynthizerError, AttributeError):
             pass
 
 
@@ -287,13 +289,13 @@ class IntroLevel(Level):
         and optionally schedule an automatic skip.
         """
         super().on_push()
-        ctx: Optional[Context] = self.game.audio_context
-        if ctx is None:
+        audio_context: Optional[Context] = self.game.audio_context
+        if audio_context is None:
             raise RuntimeError(
                 'Cannot start playing without a valid audio context.'
             )
-        self.source = DirectSource(ctx)
-        self.generator = BufferGenerator(ctx)
+        self.source = DirectSource(audio_context)
+        self.generator = BufferGenerator(audio_context)
         self.source.add_generator(self.generator)
         self.generator.looping = self.looping
         buffer: Buffer = get_buffer('file', str(self.sound_path))

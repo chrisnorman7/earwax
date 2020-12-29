@@ -81,8 +81,7 @@ def get_box(game: Game) -> Box:
 @fixture(name='box_level')
 def get_box_level(game: Game) -> BoxLevel:
     """Get a new ``BoxLevel`` instance."""
-    box: Box = Box(game, Point(1, 1, 1), Point(5, 5, 5))
-    return BoxLevel(game, box)
+    return BoxLevel(game)
 
 
 @fixture(name='board')

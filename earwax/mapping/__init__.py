@@ -1,4 +1,4 @@
-"""Mapping utilities for Earwax.
+"""Mapping functions and classes for Earwax.
 
 This module is inspired by Camlorn's post at `this link
 <https://forum.audiogames.net/post/565561/#p565561>`__
@@ -6,13 +6,20 @@ This module is inspired by Camlorn's post at `this link
 All credit goes to him for the idea.
 """
 
-from .box import (Box, BoxBounds, BoxTypes, NotADoor, OutOfBounds,
+from .box import (Box, BoxBounds, BoxTypes, NotADoor, NotAPortal,
                   ReverbSettingsDict)
-from .box_level import BoxLevel
+from .box_level import BoxLevel, CurrentBox
 from .door import Door
 from .portal import Portal
 
 __all__ = [
-    'Box', 'OutOfBounds', 'BoxTypes', 'BoxLevel', 'Door', 'NotADoor', 'Portal',
-    'BoxBounds', 'ReverbSettingsDict'
+    # box.py:
+    'Box', 'BoxBounds', 'BoxTypes', 'NotADoor', 'NotAPortal',
+    'ReverbSettingsDict',
+    # box_level.py:
+    'BoxLevel', 'CurrentBox',
+    # door.py:
+    'Door',
+    # portal.py:
+    'Portal',
 ]
