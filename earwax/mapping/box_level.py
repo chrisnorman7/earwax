@@ -1,7 +1,7 @@
 """Provides the BoxLevel class."""
 
 from math import cos, floor, sin
-from typing import Any, Callable, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 from attr import Factory, attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
@@ -89,6 +89,9 @@ class BoxLevel(Level):
     """
 
     boxes: List[Box[Any]] = Factory(list)
+    boxes_by_type: Dict[Any, List[Box]] = attrib(
+        default=Factory(dict), init=False, repr=False
+    )
 
     coordinates: Point = Factory(lambda: Point(0, 0, 0))
 
@@ -123,6 +126,10 @@ class BoxLevel(Level):
         :param box: The box to register.
         """
         box.box_level = self
+        data_type = type(box.data)
+        if data_type not in self.boxes_by_type:
+            self.boxes_by_type[data_type] = []
+        self.boxes_by_type[data_type].append(box)
         if self.current_box is not None and box.contains_point(
             self.current_box.coordinates
         ):
@@ -135,6 +142,11 @@ class BoxLevel(Level):
         """
         box.box_level = None
         self.boxes.remove(box)
+        data_type = type(box.data)
+        if data_type in self.boxes_by_type:
+            self.boxes_by_type[data_type].remove(box)
+            if not self.boxes_by_type[data_type]:
+                del self.boxes_by_type[data_type]
         if self.current_box is not None and box.contains_point(
             self.current_box.coordinates
         ):
@@ -614,3 +626,12 @@ class BoxLevel(Level):
                 return box
         else:
             return None
+
+    def get_boxes(self, t: Any) -> List[Box]:
+        """Return a list of boxes of the current type.
+
+        If no boxes are found, an empty list is returned.
+
+        :param t: The type of the boxes.
+        """
+        return self.boxes_by_type.get(t, [])

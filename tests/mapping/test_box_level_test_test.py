@@ -407,3 +407,25 @@ def test_remove_box(box_level: BoxLevel, box: Box) -> None:
     assert box_level.current_box is None
     assert box_level.boxes == []
     assert box.box_level is None
+
+
+def test_box_types(game: Game, box_level: BoxLevel) -> None:
+    """Test box types."""
+    start: Point = Point(0, 0, 0)
+    end: Point = Point(5, 5, 5)
+    door: Box[Door] = Box(game, start, end, data=Door())
+    portal: Box[Portal] = Box(game, start, end, data=Portal(box_level, start))
+    normal: Box = Box(game, start, end)
+    second: Box = Box(game, start, end)
+    box_level.add_box(door)
+    box_level.add_box(portal)
+    box_level.add_box(normal)
+    box_level.add_box(second)
+    assert box_level.get_boxes(Door) == [door]
+    assert box_level.get_boxes(Portal) == [portal]
+    assert box_level.get_boxes(type(None)) == [normal, second]
+    box_level.remove_box(normal)
+    assert box_level.get_boxes(type(None)) == [second]
+    box_level.remove_box(second)
+    assert box_level.get_boxes(type(None)) == []
+    assert type(None) not in box_level.boxes_by_type

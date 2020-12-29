@@ -410,3 +410,18 @@ def test_can_use(box_level: BoxLevel, game: Game, box: Box) -> None:
     start.handle_portal()
     assert game.level is l
     assert l.coordinates == Point(52, 53, 54)
+
+
+def test_get_nearest_point(game: Game) -> None:
+    """Test the get_nearest_point method."""
+    b: Box = Box(game, Point(1, 1, 1), Point(5, 5, 5))
+    assert b.get_nearest_point(Point(0, 0, 0)) == b.start
+    assert b.get_nearest_point(Point(0, 6, 0)) == b.bounds.bottom_front_left
+    assert b.get_nearest_point(Point(6, 6, 0)) == b.bounds.bottom_front_right
+    assert b.get_nearest_point(Point(6, 0, 0)) == b.bounds.bottom_back_right
+    assert b.get_nearest_point(Point(0, 0, 6)) == b.bounds.top_back_left
+    assert b.get_nearest_point(Point(0, 6, 6)) == b.bounds.top_front_left
+    assert b.get_nearest_point(Point(6, 6, 6)) == b.end
+    assert b.get_nearest_point(Point(6, 0, 6)) == b.bounds.top_back_right
+    assert b.get_nearest_point(b.start) == b.start
+    assert b.get_nearest_point(b.centre) == b.centre

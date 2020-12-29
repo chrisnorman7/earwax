@@ -638,6 +638,34 @@ class Box(Generic[T], RegisterEventMixin):
         else:
             self.open()
 
+    def get_nearest_point(self, point: Point) -> Point:
+        """Return the point on this box nearest to the provided point.
+
+        :param point: The point to start from.
+        """
+        x: float
+        y: float
+        z: float
+        if point.x < self.start.x:
+            x = self.start.x
+        elif point.x > self.end.x:
+            x = self.end.x
+        else:
+            x = point.x
+        if point.y < self.start.y:
+            y = self.start.y
+        elif point.y > self.end.y:
+            y = self.end.y
+        else:
+            y = point.y
+        if point.z < self.start.z:
+            z = self.start.z
+        elif point.z > self.end.z:
+            z = self.end.z
+        else:
+            z = point.z
+        return Point(x, y, z)
+
     def __del__(self) -> None:
         """Delete everything."""
         try:
