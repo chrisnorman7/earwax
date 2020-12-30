@@ -35,7 +35,7 @@ corridor_reverb: ReverbSettingsDict = {
 game: Game = Game(
     name='Map Demo', credits=[
         Credit(
-            'Camlorn, for producing the awesome Synthizer audio library',
+            'Camlorn, for producing the amazing Synthizer audio library',
             'https://github.com/synthizer',
             sound=sounds_directory / 'keyboard.wav'
         ), Credit(
