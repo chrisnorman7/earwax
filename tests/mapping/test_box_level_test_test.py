@@ -2,13 +2,14 @@
 
 from math import dist
 from time import sleep
-from typing import Callable, Optional
+from typing import Callable, List, Optional
 
 from pytest import raises
 from synthizer import GlobalFdnReverb
 
 from earwax import (
-    Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door, Game, Point, Portal)
+    Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door, Game, NearestBox,
+    Point, Portal)
 
 
 class CollideWorks(Exception):
@@ -429,3 +430,43 @@ def test_box_types(game: Game, box_level: BoxLevel) -> None:
     box_level.remove_box(second)
     assert box_level.get_boxes(type(None)) == []
     assert type(None) not in box_level.boxes_by_type
+
+
+def test_add_boxes(box_level: BoxLevel, game: Game) -> None:
+    """Test the add_boxes method."""
+    start: Point = Point.origin()
+    boxes: List[Box] = Box.create_row(
+        game, start, Point(5, 5, 5), 10, Point(1, 0, 0)
+    )
+    box_level.add_boxes(boxes)
+    assert box_level.boxes == boxes
+    assert boxes[0].box_level is box_level
+
+
+def test_nearest_by_type(box_level: BoxLevel, game: Game) -> None:
+    """Test the nearest_by_type method."""
+    first: Box[Door]
+    second: Box[Door]
+    third: Box[Door]
+    first, second, third = Box.create_row(
+        game, Point.origin(), Point(5, 5, 5), 3, Point(1, 0, 0), data=Door()
+    )
+    box_level.add_boxes([first, second, third])
+    assert box_level.nearest_by_type(box_level.coordinates, type(None)) is None
+    nb: Optional[NearestBox] = box_level.nearest_by_type(
+        first.start.copy(), Door
+    )
+    assert isinstance(nb, NearestBox)
+    assert nb.box is first
+    assert nb.coordinates == first.start
+    assert nb.distance == 0.0
+    assert box_level.nearest_by_type(Point(0, 0, 1), Door) is None
+    nb = box_level.nearest_by_type(Point(0, 0, 1), Door, same_z=False)
+    assert isinstance(nb, NearestBox)
+    assert nb.box is first
+    assert nb.distance == 0.0
+    assert nb.coordinates == Point(0, 0, 1)
+    nb = box_level.nearest_by_type(third.start.copy(), Door)
+    assert isinstance(nb, NearestBox)
+    assert nb.box is third
+    assert nb.coordinates == third.start

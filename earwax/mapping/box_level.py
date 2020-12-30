@@ -1,7 +1,7 @@
 """Provides the BoxLevel class."""
 
 from math import cos, floor, sin
-from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, cast
 
 from attr import Factory, attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
@@ -169,6 +169,15 @@ class BoxLevel(Level):
             self.current_box.coordinates
         ):
             self.current_box = None
+
+    def add_boxes(self, boxes: Iterable[Box]) -> None:
+        """Add multiple boxes with one call.
+
+        :param boxes: An iterable for boxes to add.
+        """
+        box: Box
+        for box in boxes:
+            self.add_box(box)
 
     def on_push(self) -> None:
         """Set listener orientation, and start ambiances and tracks."""
@@ -584,11 +593,10 @@ class BoxLevel(Level):
         box: Box
         for box in self.get_boxes(data_type):
             point: Point = box.get_nearest_point(start)
-            if same_z and point.z != start.z:
-                continue
-            distance: float = start.distance_between(point)
-            if nearest is None or distance < nearest.distance:
-                nearest = NearestBox(box, point, distance)
+            if not same_z or box.start.z == start.z:
+                distance: float = start.distance_between(point)
+                if nearest is None or distance < nearest.distance:
+                    nearest = NearestBox(box, point, distance)
         return nearest
 
     def nearest_door(
