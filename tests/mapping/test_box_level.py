@@ -350,10 +350,23 @@ def test_nearest_door(game: Game, door: Door) -> None:
         game, room.end.copy(), room.end.copy(), data=door, box_level=box_level
     )
     assert box_level.nearest_door(room.start) is None
-    assert box_level.nearest_door(room.start, same_z=False) is doorstep
+    nearest_door: Optional[NearestBox] = box_level.nearest_door(
+        room.start, same_z=False
+    )
+    assert isinstance(nearest_door, NearestBox)
+    assert nearest_door.box is doorstep
     doorstep.start.z = room.start.z
-    assert box_level.nearest_door(room.start) is doorstep
-    assert box_level.nearest_door(room.start, same_z=False) is doorstep
+    nearest_door = box_level.nearest_door(room.start)
+    assert isinstance(nearest_door, NearestBox)
+    assert nearest_door.box is doorstep
+    nearest_door = box_level.nearest_door(room.start, same_z=False)
+    assert isinstance(nearest_door, NearestBox)
+    assert nearest_door.box is doorstep
+    nearest_door = box_level.nearest_door(doorstep.start)
+    assert isinstance(nearest_door, NearestBox)
+    assert nearest_door.box is doorstep
+    assert nearest_door.coordinates == doorstep.start
+    assert nearest_door.distance == 0.0
 
 
 def test_nearest_portal(game: Game) -> None:
@@ -366,15 +379,25 @@ def test_nearest_portal(game: Game) -> None:
     doorstep: Box[Portal] = Box(
         game, room.end.copy(), room.end.copy(), data=p, box_level=box_level
     )
-    assert box_level.nearest_portal(room.start, same_z=False) is doorstep
+    nearest_portal: Optional[NearestBox] = box_level.nearest_portal(
+        room.start, same_z=False
+    )
+    assert isinstance(nearest_portal, NearestBox)
+    assert nearest_portal.box is doorstep
     doorstep.start.z = room.start.z
-    assert box_level.nearest_portal(room.start) is doorstep
-    assert box_level.nearest_portal(room.start, same_z=False) is doorstep
+    nearest_portal = box_level.nearest_portal(room.start)
+    assert isinstance(nearest_portal, NearestBox)
+    assert nearest_portal.box is doorstep
+    nearest_portal = box_level.nearest_portal(room.start, same_z=False)
+    assert isinstance(nearest_portal, NearestBox)
+    assert nearest_portal.box is doorstep
     second_doorstep: Box[Portal] = Box(
         game, room.start.copy(), room.bounds.top_back_left.copy(), data=p,
         box_level=box_level
     )
-    assert box_level.nearest_portal(room.start) is second_doorstep
+    nearest_portal = box_level.nearest_portal(room.start)
+    assert isinstance(nearest_portal, NearestBox)
+    assert nearest_portal.box is second_doorstep
 
 
 def test_add_box(game: Game, box_level: BoxLevel, box: Box) -> None:

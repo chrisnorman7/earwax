@@ -449,12 +449,14 @@ class BoxLevel(Level):
         """Return a function that can be call when the enter key is pressed.
 
         First we check if the current box is a portal. If it is, then we call
-        :meth:`~earwax.BoxLevel.handle_portal`.
+        :meth:`~earwax.Box.handle_portal`.
 
-        Second we check all doors, to see if there are any close enough to open
-        or close. If there are, then we call
-        :meth:`~earwax.BoxLevel.handle_door`. Otherwise, dispatch the
-        ``on_activate`` event to let boxes do their own thing.
+        If it is not, we check to see if there is a door close enough to be
+        opened or closed. If there is, then we call
+        :meth:`~earwax.Box.handle_door` on it.
+
+        If none of this works, and there is a current box, dispatch the
+        :meth:`~earwax.Box.on_activate` event to let the box do its own thing.
 
         :param door_distance: How close doors have to be for this method to
             open or close them.
@@ -465,11 +467,14 @@ class BoxLevel(Level):
             box: Optional[Box[Any]] = self.get_current_box()
             if box is not None and box.is_portal:
                 return box.handle_portal()
-            door: Optional[Box[Door]] = self.nearest_door(self.coordinates)
-            if door is not None and self.coordinates.distance_between(
-                door.start
-            ) <= door_distance:
-                return door.handle_door()
+            nearest_door: Optional[NearestBox] = self.nearest_door(
+                self.coordinates
+            )
+            if (
+                nearest_door is not None and
+                nearest_door.distance <= door_distance
+            ):
+                return nearest_door.box.handle_door()
             if box is not None:
                 box.dispatch_event('on_activate')
 
@@ -488,11 +493,16 @@ class BoxLevel(Level):
         """
 
         def inner() -> None:
-            d: Optional[Box[Door]] = self.nearest_door(self.coordinates)
-            if d is not None:
+            nearest_door: Optional[NearestBox] = self.nearest_door(
+                self.coordinates
+            )
+            if nearest_door is not None:
+                d: Box[Door] = nearest_door.box
                 name: str = d.name or 'Untitled door'
-                angle: int = floor(self.get_angle_between(d.start))
-                distance: float = self.coordinates.distance_between(d.start)
+                angle: int = floor(
+                    self.get_angle_between(nearest_door.coordinates)
+                )
+                distance: float = nearest_door.distance
                 if max_distance is not None and distance > max_distance:
                     return self.game.output('There are no nearby doors.')
                 directions: str
@@ -601,62 +611,29 @@ class BoxLevel(Level):
 
     def nearest_door(
         self, start: Point, same_z: bool = True
-    ) -> Optional[Box[Door]]:
+    ) -> Optional[NearestBox]:
         """Get the nearest door.
 
-        Iterates over all descendants, and returns the one whose
-        :attr:`~earwax.Box.door` attribute is not ``None``, and lies nearest to
-        ``start``.
+        Iterates over all doors, and returned the nearest one.
 
         :param start: The coordinates to start from.
 
         :param same_z: If ``True``, then doors on different levels will not be
             considered.
         """
-        box: Optional[Box[Door]] = None
-        distance: Optional[float] = None
-        descendant: Box
-        for descendant in self.boxes:
-            if (
-                not descendant.is_door or same_z and
-                descendant.start.z != start.z
-            ):
-                continue
-            assert descendant.is_door  # Keep mypy happy.
-            d: float = start.distance_between(descendant.start)
-            if distance is None or d < distance:
-                box = descendant
-                distance = d
-        return box
+        return self.nearest_by_type(start, Door, same_z=same_z)
 
     def nearest_portal(
         self, start: Point, same_z: bool = True
-    ) -> Optional[Box[Portal]]:
-        """Get the nearest portal.
-
-        Iterates over all descendants, and returns the one whose
-        :attr:`~earwax.Box.portal` attribute is not ``None``, and lies nearest
-        to ``start``.
+    ) -> Optional[NearestBox]:
+        """Return the nearest portal.
 
         :param start: The coordinates to start from.
 
         :param same_z: If ``True``, then portals on different levels will not
             be considered.
         """
-        box: Optional[Box[Portal]] = None
-        distance: Optional[float] = None
-        descendant: Box
-        for descendant in self.boxes:
-            if not descendant.is_portal or (
-                same_z and descendant.start.z != start.z
-            ):
-                continue
-            assert descendant.is_portal  # Keep mypy happy.
-            d: float = start.distance_between(descendant.start)
-            if distance is None or d < distance:
-                box = descendant
-                distance = d
-        return box
+        return self.nearest_by_type(start, Portal, same_z=same_z)
 
     def sort_boxes(self) -> List[Box]:
         """Return :attr:`~earwax.Box.children` sorted by area."""
