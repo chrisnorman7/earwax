@@ -78,3 +78,20 @@ class RegisterEventMixin(EventDispatcher):
         :param func: The function whose name will be used.
         """
         return self.register_event_type(func.__name__)
+
+    def register_and_bind(self, func: 'EventType') -> 'EventType':
+        """Register and bind a new event.
+
+        This is the same as::
+
+            level.register_event_type('f')
+
+            @level.event
+            def f() -> None:
+                pass
+
+        :param func: The function whose name will be registered, and which will
+            be bound to this instance.
+        """
+        self.register_event(func)
+        return self.event(func)

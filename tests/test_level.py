@@ -19,6 +19,10 @@ class OnRevealWorks(Exception):
     """the on_reveal event worked."""
 
 
+class RegisterAndBindWorks(Exception):
+    """The register_and_bind method worked."""
+
+
 def test_init(level: Level, game: Game) -> None:
     """Test initialisation."""
     assert isinstance(level, Level)
@@ -185,3 +189,14 @@ def test_del(game: Game, sound_manager: SoundManager) -> None:
     del l
     assert a.sound is None
     assert t.sound is None
+
+
+def test_register_and_bind(level: Level) -> None:
+    """Make sure the register_and_bind method works properly."""
+
+    @level.register_and_bind
+    def on_test() -> None:
+        raise RegisterAndBindWorks()
+
+    with raises(RegisterAndBindWorks):
+        level.dispatch_event('on_test')
