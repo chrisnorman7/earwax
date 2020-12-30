@@ -612,9 +612,9 @@ class Game(RegisterEventMixin):
             self.joysticks.append(j)
             name: str
             for name in j.event_types:
-                if name not in self.event_matchers:
-                    self.event_matchers[name] = EventMatcher(self, name)
-                m: EventMatcher = self.event_matchers[name]
+                m: EventMatcher = self.event_matchers.setdefault(
+                    name, EventMatcher(self, name)
+                )
                 j.event(name)(m.dispatch)
 
     def push_level(self, level: Level) -> None:
