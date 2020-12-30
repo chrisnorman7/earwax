@@ -375,14 +375,15 @@ class ConfigMenu(Menu):
                     value: Any
                     for value in type_:
                         m.add_item(
-                            f'{"* " if option.value == value else ""}'
-                            f'{repr(value)}', self.set_value(option, value)
+                            self.set_value(option, value),
+                            title=f'{"* " if option.value == value else ""}'
+                            f'{repr(value)}'
                         )
                 elif type_ in self.type_handlers:
                     handler: TypeHandler = self.type_handlers[type_]
                     title: str = handler.title(option, name)
                     m.add_item(
-                        title, self.activate_handler(handler, option)
+                        self.activate_handler(handler, option), title=title
                     )
                 else:
                     raise UnknownTypeError(type_)
