@@ -31,12 +31,11 @@ def configure_earwax(args: Namespace) -> None:
         """Save the configuration before exiting."""
         with path.open('w') as f:
             game.config.save(f)
-        window.close()
+        game.stop()
 
     @menu.item(title='Exit Without Saving')
     def exit_without_saving() -> None:
         """Exit without saving the configuration."""
-        window.close()
+        game.stop()
 
-    game.push_level(menu)
-    game.run(window)
+    game.run(window, initial_level=menu)
