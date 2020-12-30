@@ -142,3 +142,9 @@ def test_in_direction() -> None:
     assert b.x == x
     assert b.y == y
     assert b.z == a.z
+
+
+def test_origin() -> None:
+    """Test the origin constructor."""
+    p: Point = Point.origin()
+    assert p == Point(0, 0, 0)

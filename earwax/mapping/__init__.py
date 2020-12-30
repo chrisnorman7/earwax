@@ -8,7 +8,7 @@ All credit goes to him for the idea.
 
 from .box import (Box, BoxBounds, BoxTypes, NotADoor, NotAPortal,
                   ReverbSettingsDict)
-from .box_level import BoxLevel, CurrentBox
+from .box_level import BoxLevel, CurrentBox, NearestBox
 from .door import Door
 from .portal import Portal
 
@@ -17,7 +17,7 @@ __all__ = [
     'Box', 'BoxBounds', 'BoxTypes', 'NotADoor', 'NotAPortal',
     'ReverbSettingsDict',
     # box_level.py:
-    'BoxLevel', 'CurrentBox',
+    'BoxLevel', 'CurrentBox', 'NearestBox',
     # door.py:
     'Door',
     # portal.py:

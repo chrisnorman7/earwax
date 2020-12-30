@@ -59,8 +59,8 @@ if True:
     from .game_board import GameBoard, NoSuchTile
     from .level import IntroLevel, Level
     from .mapping import (
-        Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door, NotADoor, Portal,
-        ReverbSettingsDict)
+        Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door, NearestBox,
+        NotADoor, Portal, ReverbSettingsDict)
     from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                        TypeHandler, UnknownTypeError)
     from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
@@ -113,7 +113,7 @@ __all__: List[str] = [
     'IntroLevel', 'Level',
     # mapping/__init__.py:
     'Box', 'BoxBounds', 'BoxLevel', 'BoxTypes', 'CurrentBox', 'Door',
-    'NotADoor', 'Portal', 'ReverbSettingsDict',
+    'NearestBox', 'NotADoor', 'Portal', 'ReverbSettingsDict',
     # menu/__init__.py:
     'ActionMenu', 'ConfigMenu', 'FileMenu', 'Menu', 'MenuItem', 'TypeHandler',
     'UnknownTypeError',

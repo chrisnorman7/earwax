@@ -35,6 +35,11 @@ class PointDirections(Enum):
 class Point(CoordinatesMixin):
     """A point in 3d space."""
 
+    @classmethod
+    def origin(cls) -> 'Point':
+        """Return ``Point(0, 0, 0)``."""
+        return cls(0, 0, 0)
+
     def directions_to(self, other: 'Point') -> PointDirections:
         """Return the direction between this point and ``other``.
 

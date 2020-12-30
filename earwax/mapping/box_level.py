@@ -40,6 +40,24 @@ class CurrentBox:
 
 
 @attrs(auto_attribs=True)
+class NearestBox:
+    """A reference to the nearest box.
+
+    :ivar ~earwax.NearestBox.box: The box that was found.
+
+    :ivar ~earwax.NearestBox.coordinates: The nearest coordinates to the ones
+        specified.
+
+    :ivar ~earwax.NearestBox.distance: The distance between the supplied
+        coordinates, and :attr:`~earwax.NearestBox.coordinates`.
+    """
+
+    box: Box
+    coordinates: Point
+    distance: float
+
+
+@attrs(auto_attribs=True)
 class BoxLevel(Level):
     """A level that deals with sound generation for boxes.
 
@@ -546,6 +564,32 @@ class BoxLevel(Level):
                 self.player_sound_manager.source, self.reverb
             )
         self.reverb = None
+
+    def nearest_by_type(
+        self, start: Point, data_type: Any, same_z: bool = True
+    ) -> Optional[NearestBox]:
+        """Get the nearest box to the given point by type.
+
+        If no boxes of the given type are found, ``None`` will be returned.
+
+        :param start: The point to start looking from.
+
+        :param data_type: The type of :attr:`box data <earwax.Box.data>` to
+            search for.
+
+        :param same_z: If this value is ``True``, only boxes on the same z axis
+            will be considered.
+        """
+        nearest: Optional[NearestBox] = None
+        box: Box
+        for box in self.get_boxes(data_type):
+            point: Point = box.get_nearest_point(start)
+            if same_z and point.z != start.z:
+                continue
+            distance: float = start.distance_between(point)
+            if nearest is None or distance < nearest.distance:
+                nearest = NearestBox(box, point, distance)
+        return nearest
 
     def nearest_door(
         self, start: Point, same_z: bool = True
