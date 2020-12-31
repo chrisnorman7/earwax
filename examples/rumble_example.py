@@ -7,9 +7,19 @@ if True:
 from pyglet.input import Joystick
 from pyglet.window import Window, key
 
-from earwax import Game, Level, SdlError
+from earwax import Game, Level, RumbleEffect, SdlError
 
 game: Game = Game(name='Rumble Example')
+effect: RumbleEffect = RumbleEffect(
+    0.2,  # start_value
+    0.3,  # increase_interval
+    0.1,  # increase_value
+    1.5,  # peak_duration
+    1.0,  # peak_value
+    0.3,  # decrease_interval
+    0.1,  # decrease_value
+    0.1,  # end_value
+)
 
 level: Level = Level(game)
 
@@ -34,12 +44,17 @@ def on_joybutton_press(joystick: Joystick, button: int) -> None:
     """Start rumbles.
 
     If ``button`` is ``0``, quit the game.
+
+    If ``button`` is ``1``, make a pretty pattern.
     """
     num_buttons: int = len(joystick.buttons)
+    index: int = game.joysticks.index(joystick)
     v: float = ((100 / num_buttons) * button) / 100
     if button == 0:
         return game.stop()
-    game.start_rumble(game.joysticks.index(joystick), v, 0)
+    elif button == 1:
+        return effect.start(game, index).run()
+    game.start_rumble(index, v, 0)
 
 
 @level.register_and_bind
