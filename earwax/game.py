@@ -817,24 +817,28 @@ class Game(RegisterEventMixin):
         self.push_level(menu)
         return menu
 
-    def start_rumble(self, index: int, value: float, duration: int) -> None:
+    def start_rumble(
+        self, joystick: Joystick, value: float, duration: int
+    ) -> None:
         """Start a simple rumble.
 
-        :param index: The index of the joystick you want to rumble.
+        :param joystick: The joystick to rumble.
 
         :param value: A value from 0.0 to 1.0, which is the power of the
             rumble.
 
         :param duration: The duration of the rumble in milliseconds.
         """
+        index: int = self.joysticks.index(joystick)
         haptic: Any = sdl2.SDL_HapticOpen(index)
         maybe_raise(sdl2.SDL_HapticRumbleInit(haptic))
         maybe_raise(sdl2.SDL_HapticRumblePlay(haptic, value, duration))
 
-    def stop_rumble(self, index: int) -> None:
+    def stop_rumble(self, joystick: Joystick) -> None:
         """Cancel a rumble.
 
-        :param index: The index of the joystick you want to rumble.
+        :param joystick: The joystick you want to rumble.
         """
+        index: int = self.joysticks.index(joystick)
         haptic: Any = sdl2.SDL_HapticOpen(index)
         maybe_raise(sdl2.SDL_HapticRumbleStop(haptic))

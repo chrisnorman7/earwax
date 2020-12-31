@@ -4,6 +4,7 @@ from math import floor
 from typing import TYPE_CHECKING, Generator
 
 from attr import attrs
+from pyglet.input import Joystick
 
 from .promises.staggered_promise import StaggeredPromise
 
@@ -95,34 +96,34 @@ class RumbleEffect:
     decrease_value: float
     end_value: float
 
-    def start(self, game: 'Game', index: int) -> StaggeredPromise:
+    def start(self, game: 'Game', joystick: Joystick) -> StaggeredPromise:
         """Start this effect.
 
         :param game: The game which will provide the
             :meth:`~earwax.Game.start_rumble`, and
             :meth:`~earwax.Game.stop_rumble` methods.
 
-        :param index: The value to pass to :meth:`~earwax.Game.start_rumble`.
+        :param joystick: The joystick to rumble.
         """
 
         @StaggeredPromise.decorate
         def inner() -> Generator[float, None, None]:
             """Run this effect."""
             value: float = self.start_value
-            game.start_rumble(index, value, 0)
+            game.start_rumble(joystick, value, 0)
             while value < self.peak_value:
                 yield self.increase_interval
                 value = min(self.peak_value, value + self.increase_value)
-                game.start_rumble(index, value, 0)
+                game.start_rumble(joystick, value, 0)
             yield self.increase_interval
-            game.start_rumble(index, self.peak_value, 0)
+            game.start_rumble(joystick, self.peak_value, 0)
             yield self.peak_duration
             while value > self.end_value:
                 value = max(self.end_value, value - self.decrease_value)
-                game.start_rumble(index, value, 0)
+                game.start_rumble(joystick, value, 0)
                 yield self.decrease_interval
             game.start_rumble(
-                index, self.end_value, floor(self.decrease_interval * 1000)
+                joystick, self.end_value, floor(self.decrease_interval * 1000)
             )
 
         return inner

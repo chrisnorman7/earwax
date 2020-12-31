@@ -29,14 +29,13 @@ def on_joyaxis_motion(joystick: Joystick, axis: str, value: float):
     """Handle joystick motion."""
     if axis not in ('y', 'ry'):
         return None
-    index: int = game.joysticks.index(joystick)
     if value <= 0:
         try:
-            game.stop_rumble(index)
+            game.stop_rumble(joystick)
         except SdlError:
             pass  # Not started rumbling yet.
     else:
-        game.start_rumble(index, value, 0)
+        game.start_rumble(joystick, value, 0)
 
 
 @level.register_and_bind
@@ -48,19 +47,18 @@ def on_joybutton_press(joystick: Joystick, button: int) -> None:
     If ``button`` is ``1``, make a pretty pattern.
     """
     num_buttons: int = len(joystick.buttons)
-    index: int = game.joysticks.index(joystick)
     v: float = ((100 / num_buttons) * button) / 100
     if button == 0:
         return game.stop()
     elif button == 1:
-        return effect.start(game, index).run()
-    game.start_rumble(index, v, 0)
+        return effect.start(game, joystick).run()
+    game.start_rumble(joystick, v, 0)
 
 
 @level.register_and_bind
 def on_joybutton_release(joystick: Joystick, button: int) -> None:
     """Stop vibrations."""
-    game.stop_rumble(game.joysticks.index(joystick))
+    game.stop_rumble(joystick)
 
 
 @level.action('Show help', symbol=key.SLASH, modifiers=key.MOD_SHIFT)
