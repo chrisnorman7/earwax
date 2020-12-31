@@ -6,3 +6,5 @@ pyyaml
 typing_inspect
 shortuuid
 movement_2d
+pysdl2
+pysdl2-dll

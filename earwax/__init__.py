@@ -70,6 +70,7 @@ if True:
     from .point import Point, PointDirections
     from .promises import (Promise, PromiseStates, StaggeredPromise,
                            ThreadedPromise, staggered_promise)
+    from .sdl import SdlError, maybe_raise, sdl_raise
     from .sound import (AlreadyDestroyed, BufferDirectory, Sound, SoundError,
                         SoundManager, get_buffer)
     from .speech import tts
@@ -127,6 +128,8 @@ __all__: List[str] = [
     # promises/__init__.py:
     'Promise', 'PromiseStates', 'StaggeredPromise', 'ThreadedPromise',
     'staggered_promise',
+    # sdl.py:
+    'SdlError', 'maybe_raise', 'sdl_raise',
     # sound.py:
     'AlreadyDestroyed', 'BufferDirectory', 'Sound', 'SoundError',
     'SoundManager', 'get_buffer',

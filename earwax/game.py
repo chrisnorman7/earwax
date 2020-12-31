@@ -3,10 +3,11 @@
 from concurrent.futures import Executor, ThreadPoolExecutor
 from inspect import isgenerator
 from pathlib import Path
-from typing import (
-    Callable, Dict, Generator, Iterator, List, Optional, Tuple, Type, cast)
+from typing import (Any, Callable, Dict, Generator, Iterator, List, Optional,
+                    Tuple, Type, cast)
 from warnings import warn
 
+import sdl2
 from attr import Factory, attrib, attrs
 
 from .credit import Credit
@@ -43,6 +44,7 @@ from .event_matcher import EventMatcher
 from .hat_directions import DEFAULT
 from .level import Level
 from .mixins import RegisterEventMixin
+from .sdl import maybe_raise
 from .sound import SoundManager
 from .speech import tts
 from .types import (ActionListType, JoyButtonReleaseGeneratorDictType,
@@ -177,6 +179,9 @@ class Game(RegisterEventMixin):
     )
 
     joysticks: List[Joystick] = attrib(default=Factory(list), init=False)
+    sdl_joysticks: List[Any] = attrib(
+        default=Factory(list), init=False, repr=False
+    )
 
     thread_pool: Executor = attrib(
         default=Factory(ThreadPoolExecutor), repr=False
@@ -521,6 +526,10 @@ class Game(RegisterEventMixin):
         """
         pass
 
+    def init_sdl(self) -> None:
+        """Initialise SDL."""
+        sdl2.SDL_Init(sdl2.SDL_INIT_EVERYTHING)
+
     def do_run(self, initial_level: Optional[Level]) -> None:
         """Really run the game."""
         source: Source = DirectSource(self.audio_context)
@@ -548,13 +557,15 @@ class Game(RegisterEventMixin):
 
         By default, this method will perform the following actions in order:
 
-        * Load cytolk.
-
         * Iterate over all the found event types on ``pyglet.window.Window``,
             and decorate them with :class:`~earwax.EventMatcher` instances.
             This means :class:`~earwax.Game` and :class:`~earwax.Level`
             subclasses can take full advantage of all event types by simply
             adding methods with the correct names to their classes.
+
+        * Load cytolk.
+
+        * Initialise SDL2.
 
         * Set the requested mouse exclusive mode on the provided window.
 
@@ -587,10 +598,11 @@ class Game(RegisterEventMixin):
             em = EventMatcher(self, name)
             self.event_matchers[name] = em
             window.event(name)(em.dispatch)
+        load()
+        self.init_sdl()
         window.set_exclusive_mouse(mouse_exclusive)
         self.window = window
         self.open_joysticks()
-        load()
         if detect_screen_reader() is None:
             warn('No screen reader detected.')
         if self.audio_context is None:
@@ -604,12 +616,14 @@ class Game(RegisterEventMixin):
 
     def open_joysticks(self) -> None:
         """Open and attach events to all attached joysticks."""
+        i: int
         j: Joystick
-        for j in get_joysticks():
+        for i, j in enumerate(get_joysticks()):
             if j in self.joysticks:
                 continue
             j.open()
             self.joysticks.append(j)
+            self.sdl_joysticks.append(sdl2.SDL_JoystickOpen(i))
             name: str
             for name in j.event_types:
                 m: EventMatcher = self.event_matchers.setdefault(
@@ -802,3 +816,25 @@ class Game(RegisterEventMixin):
         menu: Menu = Menu.from_credits(self, self.credits, title=title)
         self.push_level(menu)
         return menu
+
+    def start_rumble(self, index: int, value: float, duration: int) -> None:
+        """Start a simple rumble.
+
+        :param index: The index of the joystick you want to rumble.
+
+        :param value: A value from 0.0 to 1.0, which is the power of the
+            rumble.
+
+        :param duration: The duration of the rumble in milliseconds.
+        """
+        haptic: Any = sdl2.SDL_HapticOpen(index)
+        maybe_raise(sdl2.SDL_HapticRumbleInit(haptic))
+        maybe_raise(sdl2.SDL_HapticRumblePlay(haptic, value, duration))
+
+    def stop_rumble(self, index: int) -> None:
+        """Cancel a rumble.
+
+        :param index: The index of the joystick you want to rumble.
+        """
+        haptic: Any = sdl2.SDL_HapticOpen(index)
+        maybe_raise(sdl2.SDL_HapticRumbleStop(haptic))
