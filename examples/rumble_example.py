@@ -7,10 +7,11 @@ if True:
 from pyglet.input import Joystick
 from pyglet.window import Window, key
 
-from earwax import Game, Level, RumbleEffect, SdlError
+from earwax import (Game, Level, RumbleEffect, RumbleSequence,
+                    RumbleSequenceLine, SdlError)
 
 game: Game = Game(name='Rumble Example')
-effect: RumbleEffect = RumbleEffect(
+rumble_wave: RumbleEffect = RumbleEffect(
     0.2,  # start_value
     0.3,  # increase_interval
     0.1,  # increase_value
@@ -19,6 +20,14 @@ effect: RumbleEffect = RumbleEffect(
     0.3,  # decrease_interval
     0.1,  # decrease_value
     0.1,  # end_value
+)
+
+rumble_sequence: RumbleSequence = RumbleSequence(
+    [
+        RumbleSequenceLine(1.0, 100, 0.1),
+        RumbleSequenceLine(1.0, 100, 0.1),
+        RumbleSequenceLine(1.0, 200, None),
+    ]
 )
 
 level: Level = Level(game)
@@ -51,8 +60,11 @@ def on_joybutton_press(joystick: Joystick, button: int) -> None:
     if button == 0:
         return game.stop()
     elif button == 1:
-        return effect.start(game, joystick).run()
-    game.start_rumble(joystick, v, 0)
+        return rumble_wave.start(game, joystick).run()
+    elif button == 2:
+        rumble_sequence.start(game, joystick).run()
+    else:
+        game.start_rumble(joystick, v, 0)
 
 
 @level.register_and_bind
