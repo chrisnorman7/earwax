@@ -48,7 +48,7 @@ class StaggeredPromise(Promise):
 
     func: StaggeredPromiseFunctionType
     generator: Optional[StaggeredPromiseGeneratorType] = attrib(
-        default=None, init=False
+        default=None, init=False, repr=False
     )
 
     def __attrs_post_init__(self) -> None:
