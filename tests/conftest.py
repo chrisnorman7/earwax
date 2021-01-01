@@ -14,6 +14,7 @@ from synthizer import (Context, GlobalFdnReverb, Source3D, StreamingGenerator,
 from earwax import (
     Box, BoxLevel, DialogueTree, Door, Editor, Game, GameBoard, Level, Menu,
     NetworkConnection, Point, Sound, SoundManager, Track, TrackTypes)
+from earwax.cmd.project_credit import ProjectCredit
 
 from .networking.pretend_socket import PretendSocket
 
@@ -158,3 +159,9 @@ def get_door() -> Door:
 def get_dialogue_line() -> DialogueTree:
     """Get a new DialogueTree instance."""
     return DialogueTree()
+
+
+@fixture(name='project_credit')
+def get_project_credit() -> ProjectCredit:
+    """Get a ProjectCredit instance."""
+    return ProjectCredit('Test', 'test.com', 'sound.wav', True)

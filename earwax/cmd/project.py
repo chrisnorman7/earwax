@@ -7,6 +7,7 @@ from attr import Factory, asdict, attrs
 from yaml import FullLoader, dump, load
 
 from .constants import project_filename
+from .project_credit import ProjectCredit, ProjectCreditDict
 from .variable import Variable, VariableDict
 
 ProjectDict = Dict[str, Union[Optional[str], List[VariableDict]]]
@@ -29,6 +30,8 @@ class Project:
 
     :ivar initial_map_id: The id of the first map to load with the game.
 
+    :ivar credits: A list of credits for this project.
+
     :ivar variables: The variables created for this project.
     """
 
@@ -38,6 +41,7 @@ class Project:
     version: str = Factory(lambda: '0.0.0')
     initial_map_id: Optional[str] = None
 
+    credits: List[ProjectCredit] = Factory(list)
     variables: List[Variable] = Factory(list)
 
     def dump(self) -> ProjectDict:
@@ -48,6 +52,11 @@ class Project:
         for variable in self.variables:
             variables_data.append(variable.dump())
         d['variables'] = variables_data
+        credits_data: List[ProjectCreditDict] = []
+        credit: ProjectCredit
+        for credit in self.credits:
+            credits_data.append(credit.dump())
+        d['credits'] = credits_data
         return d
 
     def save(self) -> None:
@@ -76,17 +85,25 @@ class Project:
 
         :param data: The data to load.
         """
-        title: Any = data.pop('title')
+        title: Any = data.pop('title', 'Untitled Project')
         variables: List[Variable] = []
         variables_data: List[VariableDict] = cast(
-            List[VariableDict], data.pop('variables')
+            List[VariableDict], data.pop('variables', [])
         )
         variable_data: VariableDict
         for variable_data in variables_data:
             variables.append(Variable.load(variable_data))
+        credits_list: List[ProjectCredit] = []
+        credits_data: List[ProjectCreditDict] = cast(
+            List[ProjectCreditDict], data.pop('credits', [])
+        )
+        credit_data: ProjectCreditDict
+        for credit_data in credits_data:
+            credits_list.append(ProjectCredit.load(credit_data))
         self: Project = cls(
             cast(str, title),
             variables=variables,
+            credits=credits_list,
             **cast(Dict[str, Any], data)
         )
         return self

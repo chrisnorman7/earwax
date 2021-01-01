@@ -5,11 +5,13 @@ from typing import Any, Dict
 
 import wx
 from attr import asdict, attrs
+from synthizer import Context
 from yaml import FullLoader, dump, load
 
 from earwax.cmd.project import Project
 
 from .events import EVT_SAVE, SaveEvent
+from .panels.credits_panel import CreditsPanel
 from .panels.project_settings import ProjectSettings
 from .panels.variables_panel import VariablesPanel
 
@@ -28,6 +30,7 @@ class MainFrame(wx.Frame):
 
     def __init__(self) -> None:
         """Initialise the window."""
+        self.context: Context = Context()
         super().__init__(None, title='Earwax')
         self.project: Project = Project.load()
         self.set_title()
@@ -36,8 +39,10 @@ class MainFrame(wx.Frame):
         s: wx.BoxSizer = wx.BoxSizer(orient=wx.VERTICAL)
         self.notebook: wx.Notebook = wx.Notebook(p, name='')
         self.project_settings: ProjectSettings = ProjectSettings(self)
+        self.credits_panel: CreditsPanel = CreditsPanel(self)
         self.variables_panel: VariablesPanel = VariablesPanel(self)
         self.notebook.AddPage(self.project_settings, 'Project &Settings')
+        self.notebook.AddPage(self.credits_panel, '&Credits')
         self.notebook.AddPage(self.variables_panel, '&Variables')
         s.Add(self.notebook, 1, wx.GROW)
         s2: wx.BoxSizer = wx.BoxSizer(wx.HORIZONTAL)

@@ -2,6 +2,8 @@
 
 from argparse import Namespace
 
+from synthizer import initialized
+
 try:
     import wx
 except ModuleNotFoundError:
@@ -23,8 +25,9 @@ def gui(args: Namespace) -> None:
     else:
         from .main_frame import MainFrame
         a: wx.App = wx.App(False)
-        f: MainFrame = MainFrame()
-        f.Show()
-        f.Maximize(True)
-        f.Layout()
-        a.MainLoop()
+        with initialized():
+            f: MainFrame = MainFrame()
+            f.Show()
+            f.Maximize(True)
+            f.Layout()
+            a.MainLoop()
