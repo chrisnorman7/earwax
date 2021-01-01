@@ -9,12 +9,12 @@ except ModuleNotFoundError:
     Window = object
 
 from ... import ConfigMenu, Game
-from ..constants import options_filename
+from ..constants import options_path
 
 
 def configure_earwax(args: Namespace) -> None:
     """Configure earwax, using a :class:`earwax.ConfigMenu` instance."""
-    path: Path = options_filename.absolute()
+    path: Path = options_path
     if not path.is_file():
         print('Error: No options file found.')
         print()

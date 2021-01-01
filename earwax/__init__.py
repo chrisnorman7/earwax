@@ -44,48 +44,37 @@ try:
 except (ImportError, TypeError):
     pyglet = None  # Docs are building.
 
-if True:
-    from . import types, utils
-    from .action import Action
-    from .ambiance import Ambiance
-    from .config import Config, ConfigValue
-    from .configuration import EarwaxConfig
-    from .credit import Credit
-    from .dialogue_tree import DialogueLine, DialogueTree
-    from .die import Die
-    from .editor import Editor
-    from .event_matcher import EventMatcher
-    from .game import Game, GameNotRunning
-    from .game_board import GameBoard, NoSuchTile
-    from .level import IntroLevel, Level
-    from .mapping import (
-        Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door, NearestBox,
-        NotADoor, Portal, ReverbSettingsDict)
-    from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
-                       TypeHandler, UnknownTypeError)
-    from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
-    from .networking import (AlreadyConnected, AlreadyConnecting,
-                             ConnectionError, ConnectionStates,
-                             NetworkConnection, NotConnectedYet)
-    from .point import Point, PointDirections
-    from .promises import (Promise, PromiseStates, StaggeredPromise,
-                           ThreadedPromise, staggered_promise)
-    from .rumble_effects import (RumbleEffect, RumbleSequence,
-                                 RumbleSequenceLine)
-    from .sdl import SdlError, maybe_raise, sdl_raise
-    from .sound import (AlreadyDestroyed, BufferDirectory, Sound, SoundError,
-                        SoundManager, get_buffer)
-    from .speech import tts
-    from .task import IntervalFunction, Task, TaskFunction
-    from .track import Track, TrackTypes
-    from .walking_directions import walking_directions
-
-# The below imports are intentionally separated from those above, to avoid
-# errors when trying to import half-initialised modules.
-if True:
-    from .cmd.main import cmd_main
-    from .cmd.project import Project
-    from .cmd.project_level import ProjectLevel
+from . import types, utils
+from .action import Action
+from .ambiance import Ambiance
+from .config import Config, ConfigValue
+from .configuration import EarwaxConfig
+from .credit import Credit
+from .dialogue_tree import DialogueLine, DialogueTree
+from .die import Die
+from .editor import Editor
+from .event_matcher import EventMatcher
+from .game import Game, GameNotRunning
+from .game_board import GameBoard, NoSuchTile
+from .level import IntroLevel, Level
+from .mapping import (Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door,
+                      NearestBox, NotADoor, Portal, ReverbSettingsDict)
+from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
+                   TypeHandler, UnknownTypeError)
+from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
+from .networking import (AlreadyConnected, AlreadyConnecting, ConnectionError,
+                         ConnectionStates, NetworkConnection, NotConnectedYet)
+from .point import Point, PointDirections
+from .promises import (Promise, PromiseStates, StaggeredPromise,
+                       ThreadedPromise, staggered_promise)
+from .rumble_effects import RumbleEffect, RumbleSequence, RumbleSequenceLine
+from .sdl import SdlError, maybe_raise, sdl_raise
+from .sound import (AlreadyDestroyed, BufferDirectory, Sound, SoundError,
+                    SoundManager, get_buffer)
+from .speech import tts
+from .task import IntervalFunction, Task, TaskFunction
+from .track import Track, TrackTypes
+from .walking_directions import walking_directions
 
 __all__: List[str] = [
     # General modules:
@@ -145,10 +134,4 @@ __all__: List[str] = [
     'Track', 'TrackTypes',
     # walking_directions.py:
     'walking_directions',
-    # cmd/main.py:
-    'cmd_main',
-    # cmd/project.py:
-    'Project',
-    # cmd/project_level.py:
-    'ProjectLevel',
 ]

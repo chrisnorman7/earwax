@@ -4,15 +4,12 @@ If you want to create more subcommands, add them in the subcommands directory,
 then register them with the :meth:`subcommand` method.
 """
 
-from argparse import (ArgumentDefaultsHelpFormatter, ArgumentParser, FileType,
-                      Namespace)
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from typing import Callable
 
 from .constants import surfaces_directory
-from .subcommands.build_surfaces import build_surfaces
 from .subcommands.configure_earwax import configure_earwax
 from .subcommands.init_project import init_project
-from .subcommands.new import new
 from .subcommands.project_surfaces import project_surfaces
 from .subcommands.project_title import project_title
 
@@ -88,21 +85,6 @@ project_title_parser = subcommand(
 )
 
 project_title_parser.add_argument('title', nargs='?', help='The new name')
-
-subcommand(
-    'build-surfaces', build_surfaces,
-    formatter_class=ArgumentDefaultsHelpFormatter,
-    description='Build a python file containing all the current surfaces.'
-)
-
-new_parser: ArgumentParser = subcommand(
-    'new', new, description='Create a new game',
-    formatter_class=ArgumentDefaultsHelpFormatter
-)
-new_parser.add_argument(
-    'filename', type=FileType('w'), default='game.py', nargs='?',
-    help='The name of the new source file'
-)
 
 
 def cmd_main() -> None:

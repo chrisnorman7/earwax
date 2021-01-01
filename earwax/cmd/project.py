@@ -1,27 +1,34 @@
 """Provides the Workspace class."""
 
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
-from attr import asdict, attrs
+from attr import Factory, asdict, attrs
 from yaml import FullLoader, dump, load
 
 from .constants import project_filename
-
-WorkspaceDict = Dict[str, str]
+from .variable import Variable, VariableDict
 
 
 @attrs(auto_attribs=True)
 class Project:
     """An earwax project.
 
-    This object holds the id of the initial level (if any), as well as global
-    variables the user can create with the ``globals`` subcommand.
+    This object holds the id of the initial map (if any), as well as global
+    variables the user can create with the ``global`` subcommand.
+
+    :ivar title: The title of this project.
+
+    :ivar initial_map_id: The id of the first map to load with the game.
+
+    :ivar variables: The variables created for this project.
     """
 
     title: str
-    initial_level_id: Optional[str] = None
+    initial_map_id: Optional[str] = None
 
-    def dump(self) -> WorkspaceDict:
+    variables: List[Variable] = Factory(list)
+
+    def dump(self) -> Dict:
         """Return this object as a dictionary."""
         return asdict(self)
 
@@ -31,7 +38,7 @@ class Project:
         Saves this workspace to the file specified in
         ``constants.project_filename``.
         """
-        with project_filename.absolute().open('w') as f:
+        with project_filename.open('w') as f:
             dump(self.dump(), stream=f)
 
     @classmethod
@@ -41,6 +48,11 @@ class Project:
         Loads and returns an instance from the file specified in
         ``constants.project_filename``.
         """
-        with project_filename.absolute().open('r') as f:
-            data: WorkspaceDict = load(f, Loader=FullLoader)
-        return cls(**data)
+        with project_filename.open('r') as f:
+            data: Dict = load(f, Loader=FullLoader)
+        variables_data: List[VariableDict] = data.pop('variables')
+        self: Project = cls(**data)
+        variable_data: VariableDict
+        for variable_data in variables_data:
+            self.variables.append(Variable.load(variable_data))
+        return self
