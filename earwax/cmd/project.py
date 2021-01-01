@@ -1,12 +1,14 @@
 """Provides the Workspace class."""
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union, cast
 
-from attr import Factory, asdict, attrs
+from attr import Factory, attrs
 from yaml import FullLoader, dump, load
 
 from .constants import project_filename
 from .variable import Variable, VariableDict
+
+ProjectDict = Dict[str, Union[Optional[str], List[VariableDict]]]
 
 
 @attrs(auto_attribs=True)
@@ -28,9 +30,15 @@ class Project:
 
     variables: List[Variable] = Factory(list)
 
-    def dump(self) -> Dict:
+    def dump(self) -> ProjectDict:
         """Return this object as a dictionary."""
-        return asdict(self)
+        d: ProjectDict = {'title': self.title}
+        variables_data: List[VariableDict] = []
+        variable: Variable
+        for variable in self.variables:
+            variables_data.append(variable.dump())
+        d['variables'] = variables_data
+        return d
 
     def save(self) -> None:
         """Save this project.
@@ -49,9 +57,20 @@ class Project:
         ``constants.project_filename``.
         """
         with project_filename.open('r') as f:
-            data: Dict = load(f, Loader=FullLoader)
-        variables_data: List[VariableDict] = data.pop('variables')
-        self: Project = cls(**data)
+            data: ProjectDict = load(f, Loader=FullLoader)
+            return cls.from_dict(data)
+
+    @classmethod
+    def from_dict(cls, data: ProjectDict) -> 'Project':
+        """Load and return an instance from the provided data.
+
+        :param data: The data to load.
+        """
+        name: str = cast(str, data['title'])
+        variables_data: List[VariableDict] = cast(
+            List[VariableDict], data.pop('variables')
+        )
+        self: Project = cls(name)
         variable_data: VariableDict
         for variable_data in variables_data:
             self.variables.append(Variable.load(variable_data))
