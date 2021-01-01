@@ -28,9 +28,9 @@ class VariablesPanel(wx.Panel):
         s: wx.BoxSizer = wx.BoxSizer(wx.VERTICAL)
         s.Add(wx.StaticText(self, label='&Variables'), 0, wx.GROW)
         self.variables: wx.ListCtrl = wx.ListCtrl(self, style=wx.LC_REPORT)
-        self.variables.AppendColumn('Name')
-        self.variables.AppendColumn('Value')
-        self.variables.AppendColumn('Type')
+        name: str
+        for name in ('Name', 'Value', 'Type'):
+            self.variables.AppendColumn(name)
         self.variables.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.do_edit)
         s.Add(self.variables, 1, wx.GROW)
         s2: wx.BoxSizer = wx.BoxSizer()
