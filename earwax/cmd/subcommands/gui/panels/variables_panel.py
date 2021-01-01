@@ -1,23 +1,18 @@
 """Provides the VariablesPanel class."""
 
 from json import dumps
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Optional
 
 import wx
 
-from earwax.cmd.variable import Variable, VariableTypes
+from ..events import EVT_VARIABLE_EDIT_DONE, VariableEditDoneEvent
+from .edit_variable_frame import EditVariableFrame
 
 if TYPE_CHECKING:
     from ..main_frame import MainFrame
 
 from earwax.cmd.project import Project
-
-type_strings: Dict[VariableTypes, str] = {
-    VariableTypes.type_bool: 'Boolean',
-    VariableTypes.type_string: 'String',
-    VariableTypes.type_int: 'Integer',
-    VariableTypes.type_float: 'Float'
-}
+from earwax.cmd.variable import Variable, VariableTypes, type_strings
 
 
 class VariablesPanel(wx.Panel):
@@ -25,8 +20,10 @@ class VariablesPanel(wx.Panel):
 
     def __init__(self, parent: 'MainFrame') -> None:
         """Create the panel."""
+        self.edit_variable_frame: Optional[EditVariableFrame] = None
         self.parent: 'MainFrame' = parent
         super().__init__(parent.notebook)
+        parent.Bind(wx.EVT_CLOSE, self.on_parent_close)
         self.project: Project = parent.project
         s: wx.BoxSizer = wx.BoxSizer(wx.VERTICAL)
         s.Add(wx.StaticText(self, label='&Variables'), 0, wx.GROW)
@@ -34,19 +31,12 @@ class VariablesPanel(wx.Panel):
         self.variables.AppendColumn('Name')
         self.variables.AppendColumn('Value')
         self.variables.AppendColumn('Type')
-        variable: Variable
-        for variable in self.project.variables:
-            self.variables.Append(
-                (
-                    variable.name,
-                    dumps(variable.value),
-                    type_strings[variable.get_type()]
-                )
-            )
+        self.variables.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.do_edit)
         s.Add(self.variables, 1, wx.GROW)
         s2: wx.BoxSizer = wx.BoxSizer()
         self.add_button = wx.Button(self, label='&Add')
         self.edit_button = wx.Button(self, label='&Edit')
+        self.edit_button.Bind(wx.EVT_BUTTON, self.do_edit)
         self.delete_button = wx.Button(self, label='&Delete')
         s2.AddMany(
             (
@@ -57,3 +47,65 @@ class VariablesPanel(wx.Panel):
         )
         s.Add(s2, 0, wx.GROW)
         self.SetSizerAndFit(s)
+        self.load_variables(0)
+
+    def load_variables(self, index: int) -> None:
+        """Load all variables, and set selection."""
+        self.variables.DeleteAllItems()
+        variable: Variable
+        for variable in self.project.variables:
+            self.variables.Append(
+                (
+                    variable.name,
+                    variable.value
+                    if variable.get_type() is VariableTypes.type_string else
+                    dumps(variable.value),
+                    type_strings[variable.get_type()]
+                )
+            )
+        self.variables.Focus(index)
+        self.variables.EnsureVisible(index)
+        self.variables.Select(index)
+
+    def set_controls(self, enabled: bool) -> None:
+        """Enable or disable all controls."""
+        for control in (
+            self.variables, self.add_button, self.edit_button,
+            self.delete_button
+        ):
+            if enabled:
+                control.Enable()
+            else:
+                control.Disable()
+
+    def do_edit(self, event: wx.CommandEvent) -> None:
+        """Edit the selected variable."""
+        index: int = self.variables.GetFirstSelected()
+        if index == -1:
+            return wx.Bell()
+        variable: Variable = self.project.variables[index]
+        self.set_controls(False)
+        self.edit_variable_frame = EditVariableFrame(self.project, variable)
+        self.edit_variable_frame.Bind(
+            EVT_VARIABLE_EDIT_DONE, self.on_finish_edit
+        )
+        self.edit_variable_frame.Bind(wx.EVT_CLOSE, self.enable_controls)
+        self.edit_variable_frame.ShowFullScreen(True)
+        self.edit_variable_frame.Maximize(True)
+
+    def on_finish_edit(self, event: VariableEditDoneEvent) -> None:
+        """Reload variables."""
+        self.load_variables(self.variables.GetFirstSelected())
+        self.variables.SetFocus()
+
+    def enable_controls(self, event: wx.CloseEvent) -> None:
+        """Re-enable controls."""
+        self.set_controls(True)
+        self.edit_variable_frame = None
+        event.Skip()
+
+    def on_parent_close(self, event: wx.CloseEvent) -> None:
+        """Close any edit frame that is currently open."""
+        if self.edit_variable_frame is not None:
+            self.edit_variable_frame.Close()
+        event.Skip()

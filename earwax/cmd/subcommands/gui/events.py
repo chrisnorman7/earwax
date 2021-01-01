@@ -3,3 +3,4 @@
 from wx.lib.newevent import NewEvent
 
 SaveEvent, EVT_SAVE = NewEvent()
+VariableEditDoneEvent, EVT_VARIABLE_EDIT_DONE = NewEvent()

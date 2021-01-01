@@ -27,6 +27,14 @@ class VariableTypes(Enum):
     type_bool = 3
 
 
+type_strings: Dict[VariableTypes, str] = {
+    VariableTypes.type_bool: 'Boolean',
+    VariableTypes.type_string: 'String',
+    VariableTypes.type_int: 'Integer',
+    VariableTypes.type_float: 'Float'
+}
+
+
 @attrs(auto_attribs=True)
 class Variable(Generic[T]):
     """A variable in a game made with the earwax script.
