@@ -1,12 +1,26 @@
 """Provides the MainFrame class."""
 
+from pathlib import Path
+from typing import Any, Dict
+
 import wx
+from attr import asdict, attrs
+from yaml import FullLoader, dump, load
 
 from earwax.cmd.project import Project
 
 from .events import EVT_SAVE, SaveEvent
 from .panels.project_settings import ProjectSettings
 from .panels.variables_panel import VariablesPanel
+
+state_path: Path = Path.cwd() / '.gui.yaml'
+
+
+@attrs(auto_attribs=True)
+class AppState:
+    """Save application state."""
+
+    notebook_page: int = 0
 
 
 class MainFrame(wx.Frame):
@@ -40,6 +54,12 @@ class MainFrame(wx.Frame):
         )
         s.Add(s2, 0, wx.GROW)
         p.SetSizerAndFit(s)
+        self.Bind(wx.EVT_CLOSE, self.on_close)
+        if state_path.is_file():
+            with state_path.open('r') as f:
+                data: Dict[str, Any] = load(f, Loader=FullLoader)
+            state: AppState = AppState(**data)
+            self.notebook.SetSelection(state.notebook_page)
 
     def set_title(self) -> None:
         """Set the window title."""
@@ -54,3 +74,10 @@ class MainFrame(wx.Frame):
         """Perform the save."""
         self.project.save()
         event.Skip()
+
+    def on_close(self, event: wx.CloseEvent) -> None:
+        """Save the current notebook page."""
+        event.Skip()
+        state: AppState = AppState(notebook_page=self.notebook.GetSelection())
+        with state_path.open('w') as f:
+            dump(asdict(state), f)

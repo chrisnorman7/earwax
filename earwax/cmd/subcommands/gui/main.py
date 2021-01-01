@@ -27,5 +27,4 @@ def gui(args: Namespace) -> None:
         f.Show()
         f.Maximize(True)
         f.Layout()
-        print(f.GetChildren()[0].GetChildren()[0].GetSize())
         a.MainLoop()
