@@ -44,7 +44,7 @@ def init_project(args: Namespace) -> None:
             f'{project_filename.relative_to(cwd)}.'
         )
     else:
-        project: Project = Project(title='Untitled Game')
+        project: Project = Project(title='Untitled Project')
         project.save()
         print(f'Created {project.title}.')
     update()
