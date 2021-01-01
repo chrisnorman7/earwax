@@ -22,8 +22,10 @@ def gui(args: Namespace) -> None:
         print('Try typing `earwax init` first.')
     else:
         from .main_frame import MainFrame
-        a: wx.App = wx.App()
+        a: wx.App = wx.App(False)
         f: MainFrame = MainFrame()
-        f.Show(True)
+        f.Show()
         f.Maximize(True)
+        f.Layout()
+        print(f.GetChildren()[0].GetChildren()[0].GetSize())
         a.MainLoop()
