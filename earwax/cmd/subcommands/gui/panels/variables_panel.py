@@ -35,6 +35,7 @@ class VariablesPanel(wx.Panel):
         s.Add(self.variables, 1, wx.GROW)
         s2: wx.BoxSizer = wx.BoxSizer()
         self.add_button = wx.Button(self, label='&Add')
+        self.add_button.Bind(wx.EVT_BUTTON, self.do_add)
         self.edit_button = wx.Button(self, label='&Edit')
         self.edit_button.Bind(wx.EVT_BUTTON, self.do_edit)
         self.delete_button = wx.Button(self, label='&Delete')
@@ -86,11 +87,25 @@ class VariablesPanel(wx.Panel):
             else:
                 control.Disable()
 
+    def do_add(self, event: wx.CommandEvent) -> None:
+        """Add a new variable."""
+        self.edit_variable(Variable('Untitled variable', ''))
+
     def do_edit(self, event: wx.CommandEvent) -> None:
         """Edit the selected variable."""
         variable: Optional[Variable] = self.get_current_item()
         if variable is None:
             return wx.Bell()
+        self.edit_variable(variable)
+
+    def edit_variable(self, variable: Variable) -> None:
+        """Edit the given variable in a new window.
+
+        :param variable: The variable to edit.
+
+            This could be a new variable, in which case it will be added to the
+            variables list when editing is finished.
+        """
         self.set_controls(False)
         self.edit_variable_frame = EditVariableFrame(self.project, variable)
         self.edit_variable_frame.Bind(

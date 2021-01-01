@@ -74,6 +74,8 @@ class EditVariableFrame(SizedFrame):
             return None
         self.variable.name = self.name_ctrl.GetValue()
         self.variable.value = value
+        if self.variable not in self.project.variables:
+            self.project.variables.append(self.variable)
         evt: VariableEditDoneEvent = VariableEditDoneEvent(
             project=self.project, variable=self.variable
         )
