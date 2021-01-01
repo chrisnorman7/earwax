@@ -38,6 +38,7 @@ class VariablesPanel(wx.Panel):
         self.edit_button = wx.Button(self, label='&Edit')
         self.edit_button.Bind(wx.EVT_BUTTON, self.do_edit)
         self.delete_button = wx.Button(self, label='&Delete')
+        self.delete_button.Bind(wx.EVT_BUTTON, self.do_delete)
         s2.AddMany(
             (
                 (self.add_button, 0, wx.GROW),
@@ -67,6 +68,13 @@ class VariablesPanel(wx.Panel):
         self.variables.EnsureVisible(index)
         self.variables.Select(index)
 
+    def get_current_item(self) -> Optional[Variable]:
+        """Return the currently-selected variable."""
+        index: int = self.variables.GetFirstSelected()
+        if index == -1:
+            return None
+        return self.project.variables[index]
+
     def set_controls(self, enabled: bool) -> None:
         """Enable or disable all controls."""
         for control in (
@@ -80,10 +88,9 @@ class VariablesPanel(wx.Panel):
 
     def do_edit(self, event: wx.CommandEvent) -> None:
         """Edit the selected variable."""
-        index: int = self.variables.GetFirstSelected()
-        if index == -1:
+        variable: Optional[Variable] = self.get_current_item()
+        if variable is None:
             return wx.Bell()
-        variable: Variable = self.project.variables[index]
         self.set_controls(False)
         self.edit_variable_frame = EditVariableFrame(self.project, variable)
         self.edit_variable_frame.Bind(
@@ -103,6 +110,18 @@ class VariablesPanel(wx.Panel):
         self.set_controls(True)
         self.edit_variable_frame = None
         event.Skip()
+
+    def do_delete(self, event: wx.CommandEvent) -> None:
+        """Delete the currently selected variable."""
+        variable: Optional[Variable] = self.get_current_item()
+        if variable is None:
+            return wx.Bell()
+        if wx.MessageBox(
+            f'Are you sure you want to delete the {variable.name} variable?',
+            caption='Warning', style=wx.ICON_EXCLAMATION | wx.YES_NO
+        ) == wx.YES:
+            self.project.variables.remove(variable)
+            self.load_variables(self.variables.GetFirstSelected() - 1)
 
     def on_parent_close(self, event: wx.CloseEvent) -> None:
         """Close any edit frame that is currently open."""
