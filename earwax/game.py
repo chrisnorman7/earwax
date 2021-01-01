@@ -7,7 +7,6 @@ from typing import (Any, Callable, Dict, Generator, Iterator, List, Optional,
                     Tuple, Type, cast)
 from warnings import warn
 
-import sdl2
 from attr import Factory, attrib, attrs
 
 from .credit import Credit
@@ -528,6 +527,7 @@ class Game(RegisterEventMixin):
 
     def init_sdl(self) -> None:
         """Initialise SDL."""
+        import sdl2
         sdl2.SDL_Init(sdl2.SDL_INIT_EVERYTHING)
 
     def do_run(self, initial_level: Optional[Level]) -> None:
@@ -616,6 +616,7 @@ class Game(RegisterEventMixin):
 
     def open_joysticks(self) -> None:
         """Open and attach events to all attached joysticks."""
+        import sdl2
         i: int
         j: Joystick
         for i, j in enumerate(get_joysticks()):
@@ -829,6 +830,7 @@ class Game(RegisterEventMixin):
 
         :param duration: The duration of the rumble in milliseconds.
         """
+        import sdl2
         index: int = self.joysticks.index(joystick)
         haptic: Any = sdl2.SDL_HapticOpen(index)
         maybe_raise(sdl2.SDL_HapticRumbleInit(haptic))
@@ -839,6 +841,7 @@ class Game(RegisterEventMixin):
 
         :param joystick: The joystick you want to rumble.
         """
+        import sdl2
         index: int = self.joysticks.index(joystick)
         haptic: Any = sdl2.SDL_HapticOpen(index)
         maybe_raise(sdl2.SDL_HapticRumbleStop(haptic))
