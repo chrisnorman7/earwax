@@ -1,8 +1,9 @@
 """Provides the Workspace class."""
 
-from typing import Dict, List, Optional, Union, cast
+from getpass import getuser
+from typing import Any, Dict, List, Optional, Union, cast
 
-from attr import Factory, attrs
+from attr import Factory, asdict, attrs
 from yaml import FullLoader, dump, load
 
 from .constants import project_filename
@@ -20,19 +21,28 @@ class Project:
 
     :ivar title: The title of this project.
 
+    :ivar author: The author of this project.
+
+    :ivar description: A description for this project.
+
+    :ivar version: The version string of this project.
+
     :ivar initial_map_id: The id of the first map to load with the game.
 
     :ivar variables: The variables created for this project.
     """
 
     title: str
+    author: str = Factory(lambda: f'{getuser()} <{getuser()}@localhost')
+    description: str = Factory(str)
+    version: str = Factory(lambda: '0.0.0')
     initial_map_id: Optional[str] = None
 
     variables: List[Variable] = Factory(list)
 
     def dump(self) -> ProjectDict:
         """Return this object as a dictionary."""
-        d: ProjectDict = {'title': self.title}
+        d: ProjectDict = asdict(self)
         variables_data: List[VariableDict] = []
         variable: Variable
         for variable in self.variables:
@@ -66,12 +76,17 @@ class Project:
 
         :param data: The data to load.
         """
-        name: str = cast(str, data['title'])
+        title: Any = data.pop('title')
+        variables: List[Variable] = []
         variables_data: List[VariableDict] = cast(
             List[VariableDict], data.pop('variables')
         )
-        self: Project = cls(name)
         variable_data: VariableDict
         for variable_data in variables_data:
-            self.variables.append(Variable.load(variable_data))
+            variables.append(Variable.load(variable_data))
+        self: Project = cls(
+            cast(str, title),
+            variables=variables,
+            **cast(Dict[str, Any], data)
+        )
         return self
