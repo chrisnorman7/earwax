@@ -1,7 +1,6 @@
 """Provides the MainFrame class."""
 
 import wx
-from wx.lib.sized_controls import SizedPanel
 
 from earwax.cmd.project import Project
 
@@ -27,12 +26,19 @@ class MainFrame(wx.Frame):
         self.notebook.AddPage(self.project_settings, 'Project &Settings')
         self.notebook.AddPage(self.variables_panel, '&Variables')
         s.Add(self.notebook, 1, wx.GROW)
-        p2: SizedPanel = SizedPanel(p)
-        p2.SetSizerType('horizontal')
-        self.save_button = wx.Button(p2, name='', label='&Save')
+        s2: wx.BoxSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.save_button = wx.Button(p, name='', label='&Save')
         self.save_button.Bind(wx.EVT_BUTTON, self.do_save)
-        self.play_button = wx.Button(p2, label='&Play')
-        s.Add(p2, 0, wx.GROW)
+        self.play_button = wx.Button(p, label='&Play')
+        self.build_button = wx.Button(p, label='&Build')
+        s2.AddMany(
+            (
+                (self.save_button, 0, wx.GROW),
+                (self.play_button, 0, wx.GROW),
+                (self.build_button, 0, wx.GROW)
+            )
+        )
+        s.Add(s2, 0, wx.GROW)
         p.SetSizerAndFit(s)
 
     def set_title(self) -> None:
