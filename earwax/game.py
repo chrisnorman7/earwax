@@ -43,7 +43,6 @@ from .event_matcher import EventMatcher
 from .hat_directions import DEFAULT
 from .level import Level
 from .mixins import RegisterEventMixin
-from .sdl import maybe_raise
 from .sound import SoundManager
 from .speech import tts
 from .types import (ActionListType, JoyButtonReleaseGeneratorDictType,
@@ -831,6 +830,8 @@ class Game(RegisterEventMixin):
         :param duration: The duration of the rumble in milliseconds.
         """
         import sdl2
+
+        from .sdl import maybe_raise
         index: int = self.joysticks.index(joystick)
         haptic: Any = sdl2.SDL_HapticOpen(index)
         maybe_raise(sdl2.SDL_HapticRumbleInit(haptic))
@@ -842,6 +843,8 @@ class Game(RegisterEventMixin):
         :param joystick: The joystick you want to rumble.
         """
         import sdl2
+
+        from .sdl import maybe_raise
         index: int = self.joysticks.index(joystick)
         haptic: Any = sdl2.SDL_HapticOpen(index)
         maybe_raise(sdl2.SDL_HapticRumbleStop(haptic))
