@@ -4,7 +4,6 @@ from json import dumps
 from typing import TYPE_CHECKING, Dict
 
 import wx
-from wx.lib.sized_controls import SizedPanel
 
 from earwax.cmd.variable import Variable, VariableTypes
 
@@ -45,9 +44,16 @@ class VariablesPanel(wx.Panel):
                 )
             )
         s.Add(self.variables, 1, wx.GROW)
-        p: SizedPanel = SizedPanel(self)
-        p.SetSizerType('horizontal')
-        self.add_button = wx.Button(p, label='&Add')
-        self.edit_button = wx.Button(p, label='&Edit')
-        self.delete_button = wx.Button(p, label='&Delete')
-        s.Add(p, 0, wx.GROW)
+        s2: wx.BoxSizer = wx.BoxSizer()
+        self.add_button = wx.Button(self, label='&Add')
+        self.edit_button = wx.Button(self, label='&Edit')
+        self.delete_button = wx.Button(self, label='&Delete')
+        s2.AddMany(
+            (
+                (self.add_button, 0, wx.GROW),
+                (self.edit_button, 0, wx.GROW),
+                (self.delete_button, 0, wx.GROW)
+            )
+        )
+        s.Add(s2, 0, wx.GROW)
+        self.SetSizerAndFit(s)
