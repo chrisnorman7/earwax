@@ -68,7 +68,6 @@ from .point import Point, PointDirections
 from .promises import (Promise, PromiseStates, StaggeredPromise,
                        ThreadedPromise, staggered_promise)
 from .rumble_effects import RumbleEffect, RumbleSequence, RumbleSequenceLine
-from .sdl import SdlError, maybe_raise, sdl_raise
 from .sound import (AlreadyDestroyed, BufferDirectory, Sound, SoundError,
                     SoundManager, get_buffer)
 from .speech import tts
@@ -121,8 +120,6 @@ __all__: List[str] = [
     'staggered_promise',
     # rumble_effects.py:
     'RumbleEffect', 'RumbleSequence', 'RumbleSequenceLine',
-    # sdl.py:
-    'SdlError', 'maybe_raise', 'sdl_raise',
     # sound.py:
     'AlreadyDestroyed', 'BufferDirectory', 'Sound', 'SoundError',
     'SoundManager', 'get_buffer',
