@@ -102,10 +102,10 @@ class RegisterEventMixin(EventDispatcher):
 
 
 class DumpLoadMixin:
-    """A mixin that allows any object to be dumped to and loaded from a dict.
+    """A mixin that allows any object to be dumped to and loaded from a dictionary.
 
     It is worth noting that only instance variables which have type hints (and
-    thus end up in the ``__annotations__` dictionary) will be dumped and
+    thus end up in the ``__annotations__`` dictionary) will be dumped and
     loaded.
 
     To dump an instance, use the :meth:`~earwax.mixins.DumpLoadMixin.dump`
