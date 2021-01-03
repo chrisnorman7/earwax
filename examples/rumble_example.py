@@ -5,6 +5,7 @@ if True:
     sys.path.insert(0, '..')
 
 from warnings import warn
+
 from pyglet.input import Joystick
 from pyglet.window import Window, key
 

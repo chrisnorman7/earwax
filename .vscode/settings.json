@@ -53,6 +53,7 @@
         "exc",
         "genindex",
         "getfqdn",
+        "isclass",
         "isgenerator",
         "isidentifier",
         "isupper",
