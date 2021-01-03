@@ -1,6 +1,7 @@
 """Provides various mixin classes for used with other objects."""
 
 from datetime import datetime
+from enum import Enum
 from inspect import isclass
 from typing import (TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type,
                     get_args, get_origin)
@@ -132,7 +133,9 @@ class DumpLoadMixin:
         """
         cls: Type[DumpLoadMixin] = type(self)
         value_type: Type = type(value)
-        if value_type in self.__allowed_basic_types__:
+        if value_type in self.__allowed_basic_types__ or isinstance(
+            value, Enum
+        ):
             return value
         elif isclass(value_type) and issubclass(value_type, DumpLoadMixin):
             assert isinstance(value, DumpLoadMixin)
@@ -197,20 +200,30 @@ class DumpLoadMixin:
 
         If the type of the provided value is found in the
         :attr:`~earwax.mixins.DumpLoadMixin.__allowed_basic_types__` list, it
-        will be returned as-is.
+        will be returned as-is. This is also true if the value is an
+        enumeration value.
 
         If the type of the provided value is ``list``, then each element will
         be passed through this method and a list of the loaded values returned.
 
         If the type of the value is ``dict``, one of two things will occur:
 
-        * If ``expected_type``
+        * If ``expected_type`` is also a dict, then the given value will have
+        its keys and values loaded with this function.
+
+        * If ``expected_type`` is also a subclass of
+        :class:`earwax.mixins.DumpLoadMixin`, then it will be loaded with that
+        class's ``load`` method.
+
+        * If neither of these things are true, ``RuntimeError`` will be raised.
+
+        :param expected_type: The type from the ``__annotations__`` dictionary.
 
         :param value: The raw value to load.
         """
         type_: Type = type(value)
         origin: Optional[Type] = get_origin(expected_type)
-        if type_ in cls.__allowed_basic_types__:
+        if type_ in cls.__allowed_basic_types__ or isinstance(value, Enum):
             return value
         elif type_ is list:
             entry_type: Type[Any] = get_args(expected_type)[0]
@@ -244,7 +257,11 @@ class DumpLoadMixin:
                         'unable to load a union value without a type hint.'
                     )
             else:
-                print(origin)
+                raise RuntimeError(
+                    'Unable to load %r, with an expected type %r.' % (
+                        value, expected_type
+                    )
+                )
 
     @classmethod
     def load(cls, data: Dict[str, Any]) -> Any:

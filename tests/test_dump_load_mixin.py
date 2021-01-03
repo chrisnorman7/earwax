@@ -1,6 +1,7 @@
 """Test the DumpLoadMixin class."""
 
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
 from attr import Factory, attrs
@@ -10,11 +11,19 @@ from earwax.mixins import DumpLoadMixin
 AnyDict = Dict[str, Any]
 
 
+class AddressTypes(Enum):
+    """Various types of address."""
+
+    home = 0
+    work = 1
+    other = 2
+
+
 @attrs(auto_attribs=True)
 class Address(DumpLoadMixin):
     """A house address."""
 
-    name: str
+    address_type: AddressTypes
     line_1: str
     city: str
 
@@ -114,8 +123,8 @@ def test_dump() -> None:
 
 def test_load() -> None:
     """Test the load constructor."""
-    h: Address = Address('Home', '1 Test Passed', 'Test Heap')
-    w: Address = Address('Work', '3600 Mount Crash', 'Fail Gardens')
+    h: Address = Address(AddressTypes.home, '1 Test Passed', 'Test Heap')
+    w: Address = Address(AddressTypes.work, '3600 Mount Crash', 'Fail Gardens')
     p1: Person = Person(
         'Chris Norman', datetime(1989, 6, 14), 1.8, addresses=[h, w], emails=[
             'chris.norman2@googlemail.com', 'earwax-tests@example.com'
