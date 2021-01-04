@@ -3,9 +3,15 @@
 from pathlib import Path
 from typing import Any, Dict
 
-import wx
 from attr import asdict, attrs
-from synthizer import Context
+
+try:
+    import wx
+    from synthizer import Context
+except ModuleNotFoundError:
+    wx = None
+    Context = object
+
 from yaml import FullLoader, dump, load
 
 from earwax.cmd.project import Project

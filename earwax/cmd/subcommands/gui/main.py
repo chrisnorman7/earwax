@@ -2,12 +2,12 @@
 
 from argparse import Namespace
 
-from synthizer import initialized
-
 try:
+    from synthizer import initialized
     import wx
 except ModuleNotFoundError:
     wx = None
+    initialized = None
 
 from earwax.cmd.constants import project_filename
 
