@@ -58,7 +58,7 @@ class EditVariableFrame(SizedFrame):
             except ValueError as e:
                 show_error(str(e))
                 return None
-        new: Variable = Variable('Temporary', value)
+        new: Variable = Variable('Temporary', new_type, value)
         actual_type: VariableTypes
         try:
             actual_type = new.get_type()

@@ -26,8 +26,11 @@ def test_path(project_credit: ProjectCredit) -> None:
 def test_dump(project_credit: ProjectCredit) -> None:
     """Test the dump method."""
     assert project_credit.dump() == {
-        'name': project_credit.name, 'url': project_credit.url, 'sound':
-        project_credit.sound, 'loop': project_credit.loop
+        ProjectCredit.__type_key__: ProjectCredit.__name__,
+        ProjectCredit.__value_key__: {
+            'name': project_credit.name, 'url': project_credit.url, 'sound':
+            project_credit.sound, 'loop': project_credit.loop
+        }
     }
 
 

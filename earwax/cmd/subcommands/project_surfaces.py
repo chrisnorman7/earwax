@@ -18,7 +18,6 @@ def project_surfaces(args: Namespace) -> None:
             print(surface.name)
     else:
         surface = surfaces_directory / args.surface
-        surface = surface.absolute()
         if surface.is_dir():
             print(f'Showing files in {surface.relative_to(Path.cwd())}:')
             surface_file: Path

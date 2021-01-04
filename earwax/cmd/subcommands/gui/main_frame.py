@@ -32,7 +32,7 @@ class MainFrame(wx.Frame):
         """Initialise the window."""
         self.context: Context = Context()
         super().__init__(None, title='Earwax')
-        self.project: Project = Project.load()
+        self.project: Project = Project.from_file()
         self.set_title()
         self.Bind(EVT_SAVE, self.on_save)
         p: wx.Panel = wx.Panel(self)

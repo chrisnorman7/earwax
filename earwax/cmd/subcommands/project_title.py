@@ -8,7 +8,7 @@ from ..project import Project
 def project_title(args: Namespace) -> None:
     """Rename the current workspace."""
     try:
-        project: Project = Project.load()
+        project: Project = Project.from_file()
         if args.title is None:
             print(f'Project title: {project.title}.')
         else:

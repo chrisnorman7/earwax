@@ -1,15 +1,15 @@
 """Provides the ProjectCredit class."""
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, cast
+from typing import Optional
 
-from attr import asdict, attrs
+from attr import attrs
 
-ProjectCreditDict = Dict[str, Optional[Union[str, bool]]]
+from earwax.mixins import DumpLoadMixin
 
 
 @attrs(auto_attribs=True)
-class ProjectCredit:
+class ProjectCredit(DumpLoadMixin):
     """A representation of the :class:`earwax.Credit` class.
 
     This class has a different name to avoid possible confusion.
@@ -34,15 +34,3 @@ class ProjectCredit:
         if self.sound is None:
             return None
         return Path(self.sound)
-
-    def dump(self) -> ProjectCreditDict:
-        """Return this object as a dictionary."""
-        return asdict(self)
-
-    @classmethod
-    def load(cls, data: ProjectCreditDict) -> 'ProjectCredit':
-        """Load and return an instance from the given data.
-
-        :param data: The data to load.
-        """
-        return cls(**cast(Dict[str, Any], data))

@@ -89,7 +89,9 @@ class VariablesPanel(wx.Panel):
 
     def do_add(self, event: wx.CommandEvent) -> None:
         """Add a new variable."""
-        self.edit_variable(Variable('Untitled variable', ''))
+        self.edit_variable(
+            Variable('Untitled variable', VariableTypes.type_string, '')
+        )
 
     def do_edit(self, event: wx.CommandEvent) -> None:
         """Edit the selected variable."""

@@ -2,9 +2,11 @@
 
 from typing import Any, Dict
 
-from earwax.cmd.project import Project, ProjectDict
+from earwax.cmd.project import Project
 from earwax.cmd.project_credit import ProjectCredit
-from earwax.cmd.variable import Variable
+from earwax.cmd.variable import Variable, VariableTypes
+
+ProjectDict = Dict[str, Any]
 
 
 def test_init(project_credit: ProjectCredit) -> None:
@@ -22,13 +24,18 @@ def test_dump(project_credit: ProjectCredit) -> None:
         'Test', author='Bob Test', description='A test dame', version='5.4.3'
     )
     character_name: Variable[str] = Variable(
-        'character_name', 'Test character'
+        'character_name', VariableTypes.type_string, 'Test character'
     )
     p.variables.append(character_name)
-    character_points: Variable[int] = Variable('character_points', 500)
+    character_points: Variable[int] = Variable(
+        'character_points', VariableTypes.type_int, 500
+    )
     p.variables.append(character_points)
     p.credits.append(project_credit)
     d: Dict[str, Any] = p.dump()
+    assert d[Project.__type_key__] == Project.__name__
+    d = d[Project.__value_key__]
+    assert isinstance(d, dict)
     assert d['title'] == p.title
     assert d['author'] == p.author
     assert d['version'] == p.version
@@ -43,12 +50,14 @@ def test_from_dict(project_credit: ProjectCredit) -> None:
         'Test', author='Bob Test', description='A test dame', version='5.4.3'
     )
     character_name: Variable[str] = Variable(
-        'character_name', 'Test character'
+        'character_name', VariableTypes.type_string, 'Test character'
     )
     p.variables.append(character_name)
-    character_points: Variable[int] = Variable('character_points', 500)
+    character_points: Variable[int] = Variable(
+        'character_points', VariableTypes.type_int, 500
+    )
     p.variables.append(character_points)
     p.credits.append(project_credit)
     d: ProjectDict = p.dump()
-    p2: Project = Project.from_dict(d)
+    p2: Project = Project.load(d)
     assert p2 == p

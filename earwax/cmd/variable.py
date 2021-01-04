@@ -1,12 +1,13 @@
 """Provides the Variable class."""
 
 from enum import Enum
-from typing import Dict, Generic, TypeVar, Union, cast
+from typing import Any, Dict, Generic, TypeVar
 
 from attr import attrs
 
+from earwax.mixins import DumpLoadMixin
+
 T = TypeVar('T')
-VariableDict = Dict[str, Union[str, T]]
 
 
 class VariableTypes(Enum):
@@ -36,7 +37,7 @@ type_strings: Dict[VariableTypes, str] = {
 
 
 @attrs(auto_attribs=True)
-class Variable(Generic[T]):
+class Variable(Generic[T], DumpLoadMixin):
     """A variable in a game made with the earwax script.
 
     :ivar name: The name of the variable.
@@ -45,6 +46,7 @@ class Variable(Generic[T]):
     """
 
     name: str
+    type: VariableTypes
     value: T
 
     def get_type(self) -> VariableTypes:
@@ -64,27 +66,17 @@ class Variable(Generic[T]):
         else:
             raise TypeError('Unknown type for %r.' % self)
 
-    def dump(self) -> VariableDict:
-        """Return this object as a dictionary."""
-        return {
-            'name': self.name,
-            'value': self.value,
-            'type': self.get_type().name
-        }
-
     @classmethod
-    def load(cls, data: VariableDict) -> 'Variable':
-        """Load and return an instance from the provided dictionary.
+    def load(cls, data: Dict[str, Any]) -> 'Variable':
+        """Load a variable, and check its type.
 
-        :param data: The data to load.
+        :param value: The value to load.
         """
-        name: str = data['name']
-        value: T = cast(T, data['value'])
-        self: Variable[T] = cls(name, value)
-        if self.get_type().name != data['type']:
+        v: Variable = super().load(data)
+        if v.type is not v.get_type():
             raise TypeError(
-                'Type mismatch: Got %r but stored was %s.' % (
-                    self.get_type(), data['type']
+                'Loaded type %r but expected %r from data %r.' % (
+                    v.get_type(), v.type, data
                 )
             )
-        return self
+        return v
