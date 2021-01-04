@@ -6,7 +6,7 @@ from jinja2 import Environment, Template
 import wx
 from pathlib import Path
 from earwax import hat_directions as _hat_directions
-from pyglet.window import key
+from pyglet.window import key, mouse
 
 keys_code: str = '''"""Provides keys for templates."""
 
@@ -24,6 +24,12 @@ keys: List[str] = [{% for key in keys %}
     '{{ key }}',{% endfor %}
 ]
 
+# Mouse buttons:
+
+mouse_buttons: List[str] = [{% for button in mouse_buttons %}
+    '{{ button }}',{% endfor %}
+]
+
 # Hat directions:
 
 hat_directions: List[str] = [{% for direction in hat_directions %}
@@ -36,6 +42,7 @@ hat_directions: List[str] = [x for x in dir(_hat_directions) if x.isupper()]
 
 keys: List[str] = []
 modifiers: List[str] = []
+mouse_buttons: List[str] = sorted(x for x in dir(mouse) if x.isupper())
 
 wx_code: str = '''"""Provides a pretend WX module."""
 
@@ -61,7 +68,8 @@ def make_keys_module() -> None:
     e: Environment = Environment()
     t: Template = e.from_string(keys_code)
     rendered: str = t.render(
-        keys=keys, modifiers=modifiers, hat_directions=hat_directions
+        keys=keys, modifiers=modifiers, hat_directions=hat_directions,
+        mouse_buttons=mouse_buttons
     )
     with filename.open('w') as f:
         f.write(rendered)

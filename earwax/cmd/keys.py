@@ -205,6 +205,14 @@ keys: List[str] = [
     'Z',
 ]
 
+# Mouse buttons:
+
+mouse_buttons: List[str] = [
+    'LEFT',
+    'MIDDLE',
+    'RIGHT',
+]
+
 # Hat directions:
 
 hat_directions: List[str] = [
