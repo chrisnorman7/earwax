@@ -2,7 +2,10 @@
 
 import sys
 
-from sdl2 import SDL_GetError
+try:
+    from sdl2 import SDL_GetError
+except ModuleNotFoundError:
+    SDL_GetError = None
 
 
 class SdlError(Exception):
