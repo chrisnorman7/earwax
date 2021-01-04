@@ -57,7 +57,7 @@ def get_keys() -> None:
 
 def make_keys_module() -> None:
     """Build the module."""
-    filename: Path = Path.cwd() / 'earwax/cmd/subcommands/gui/keys.py'
+    filename: Path = Path.cwd() / 'earwax/cmd/keys.py'
     e: Environment = Environment()
     t: Template = e.from_string(keys_code)
     rendered: str = t.render(
