@@ -117,7 +117,7 @@ class VariablesPanel(wx.Panel):
             EVT_VARIABLE_EDIT_DONE, self.on_finish_edit
         )
         self.edit_variable_frame.Bind(wx.EVT_CLOSE, self.enable_controls)
-        self.edit_variable_frame.ShowFullScreen(True)
+        self.edit_variable_frame.Show(True)
         self.edit_variable_frame.Maximize(True)
 
     def on_finish_edit(self, event: VariableEditDoneEvent) -> None:
