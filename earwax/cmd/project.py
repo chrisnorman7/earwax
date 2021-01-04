@@ -74,3 +74,5 @@ class Project(DumpLoadMixin):
         with project_filename.open('r') as f:
             data: Dict[str, Any] = load(f, Loader=CLoader)
             return cls.load(data)
+
+import synthizer
