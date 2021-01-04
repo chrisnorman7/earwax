@@ -69,6 +69,7 @@
         "pytest",
         "quickstart",
         "raspberrypi",
+        "rtd",
         "ry",
         "synthizer",
         "toctree",
