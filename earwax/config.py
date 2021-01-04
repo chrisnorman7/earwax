@@ -248,7 +248,7 @@ class Config:
         :param f: A file-like object to write the resulting data to.
         """
         data: DumpDict = self.dump()
-        dump(data, stream=f)
+        dump(data, stream=f, Dumper=CDumper)
 
     def load(self, f: TextIO) -> None:
         """Load data from a file.
