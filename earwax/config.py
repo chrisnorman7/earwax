@@ -3,7 +3,11 @@
 from typing import Any, Callable, Dict, Generic, Optional, TextIO, TypeVar
 
 from attr import Factory, attrib, attrs
-from yaml import FullLoader, dump, load
+
+try:
+    from yaml import CDumper, CLoader, dump, load
+except ImportError:
+    CDumper, CLoader, dump, load = (None, None, None, None)  # type: ignore
 
 T = TypeVar('T')
 
@@ -261,5 +265,5 @@ class Config:
 
         :param f: A file-like object to load data from.
         """
-        data: Any = load(f, Loader=FullLoader)
+        data: Any = load(f, Loader=CLoader)
         self.populate_from_dict(data)
