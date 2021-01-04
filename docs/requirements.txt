@@ -5,4 +5,3 @@ pyyaml
 movement_2d
 typing_inspect
 shortuuid
-wxpython
