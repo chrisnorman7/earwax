@@ -6,7 +6,8 @@ try:
     import wx
     from wx.lib.sized_controls import SizedPanel
 except ModuleNotFoundError:
-    wx, SizedPanel = (None, None)
+    SizedPanel = object
+    from .. import pretend_wx as wx
 
 from earwax.cmd.project import Project
 

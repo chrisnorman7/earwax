@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Optional
 try:
     import wx
 except ModuleNotFoundError:
-    wx = None
+    from .. import pretend_wx as wx
 
 from ..events import EVT_VARIABLE_EDIT_DONE, VariableEditDoneEvent
 from .edit_variable_frame import EditVariableFrame

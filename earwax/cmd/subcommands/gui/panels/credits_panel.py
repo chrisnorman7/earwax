@@ -10,7 +10,8 @@ try:
     from wx.lib.sized_controls import SizedPanel
 except ModuleNotFoundError:
     DirectSource, StreamingGenerator, SynthizerError = (None, None, None)
-    wx, FileBrowseButton, SizedPanel = (None, None, None)
+    FileBrowseButton, SizedPanel = (object, object)
+    from .. import pretend_wx as wx
 
 from earwax.cmd.constants import sounds_directory
 from earwax.cmd.project import Project

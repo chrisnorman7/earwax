@@ -6,7 +6,7 @@ try:
     import wx
     from synthizer import initialized
 except ModuleNotFoundError:
-    wx = None
+    from . import pretend_wx as wx
     initialized = None
 
 from earwax.cmd.constants import project_filename

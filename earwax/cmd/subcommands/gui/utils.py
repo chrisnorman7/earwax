@@ -3,7 +3,7 @@
 try:
     import wx
 except ModuleNotFoundError:
-    wx = None
+    from . import pretend_wx as wx
 
 
 def show_error(message: str, caption: str = 'Error') -> int:

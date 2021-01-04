@@ -9,7 +9,7 @@ try:
     import wx
     from synthizer import Context
 except ModuleNotFoundError:
-    wx = None
+    from . import pretend_wx as wx
     Context = object
 
 from yaml import FullLoader, dump, load
