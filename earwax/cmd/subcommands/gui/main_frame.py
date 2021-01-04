@@ -3,7 +3,9 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from attr import asdict, attrs
+from attr import attrs
+
+from build.lib.earwax.mixins import DumpLoadMixin
 
 try:
     import wx
@@ -12,12 +14,19 @@ except ModuleNotFoundError:
     from . import pretend_wx as wx
     Context = object
 
-from yaml import FullLoader, dump, load
+from yaml import dump, load
+
+try:
+    from yaml import CDumper, CLoader
+except ImportError:
+    from yaml import FullLoader as CLoader  # type: ignore[misc]
+    from yaml import Dumper as CDumper  # type: ignore[misc]
 
 from earwax.cmd.project import Project
 
 from .events import EVT_SAVE, SaveEvent
 from .panels.credits_panel import CreditsPanel
+from .panels.levels_panel import LevelsPanel
 from .panels.project_settings import ProjectSettings
 from .panels.variables_panel import VariablesPanel
 
@@ -25,7 +34,7 @@ state_path: Path = Path.cwd() / '.gui.yaml'
 
 
 @attrs(auto_attribs=True)
-class AppState:
+class AppState(DumpLoadMixin):
     """Save application state."""
 
     notebook_page: int = 0
@@ -45,11 +54,13 @@ class MainFrame(wx.Frame):
         s: wx.BoxSizer = wx.BoxSizer(orient=wx.VERTICAL)
         self.notebook: wx.Notebook = wx.Notebook(p, name='')
         self.project_settings: ProjectSettings = ProjectSettings(self)
-        self.credits_panel: CreditsPanel = CreditsPanel(self)
+        self.levels_panel: LevelsPanel = LevelsPanel(self)
         self.variables_panel: VariablesPanel = VariablesPanel(self)
+        self.credits_panel: CreditsPanel = CreditsPanel(self)
         self.notebook.AddPage(self.project_settings, 'Project &Settings')
-        self.notebook.AddPage(self.credits_panel, '&Credits')
+        self.notebook.AddPage(self.levels_panel, '&Levels')
         self.notebook.AddPage(self.variables_panel, '&Variables')
+        self.notebook.AddPage(self.credits_panel, '&Credits')
         s.Add(self.notebook, 1, wx.GROW)
         p.SetSizerAndFit(s)
         mb: wx.MenuBar = wx.MenuBar()
@@ -64,8 +75,8 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.on_close)
         if state_path.is_file():
             with state_path.open('r') as f:
-                data: Dict[str, Any] = load(f, Loader=FullLoader)
-            state: AppState = AppState(**data)
+                data: Dict[str, Any] = load(f, Loader=CLoader)
+            state: AppState = AppState.load(data)
             self.notebook.SetSelection(state.notebook_page)
 
     def set_title(self) -> None:
@@ -87,4 +98,4 @@ class MainFrame(wx.Frame):
         event.Skip()
         state: AppState = AppState(notebook_page=self.notebook.GetSelection())
         with state_path.open('w') as f:
-            dump(asdict(state), f)
+            dump(state.dump(), f, Dumper=CDumper)
