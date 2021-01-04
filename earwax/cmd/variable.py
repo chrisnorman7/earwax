@@ -48,6 +48,8 @@ class Variable(Generic[T], DumpLoadMixin):
         :attr:`~earwax.cmd.variable.Variable.value`.
 
     :ivar ~earwax.cmd.variable.Variable.value: The value this variable holds.
+
+    :ivar ~earwax.cmd.variable.Variable.id: The id of this variable.
     """
 
     name: str

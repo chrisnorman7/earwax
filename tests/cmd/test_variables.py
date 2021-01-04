@@ -55,13 +55,13 @@ def test_load() -> None:
         Variable.__type_key__: Variable.__name__,
         Variable.__value_key__: {
             'name': 'points',
-            'id': 'asdf;lkj',
+            'id': 'test id',
             'type': VariableTypes.type_int,
             'value': 500
         }
     }
     v: Variable[int] = Variable.load(d)
-    assert v.id == 'asdf;lkj'
+    assert v.id == 'test id'
     assert v.name == 'points'
     assert v.value == 500
     assert isinstance(v.value, int)
