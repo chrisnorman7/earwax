@@ -144,7 +144,7 @@ class DumpLoadMixin:
             entry_type: Type = get_args(type_)[0]
             if entry_type in cls.__allowed_basic_types__:
                 return value
-            elif issubclass(entry_type, DumpLoadMixin):
+            elif isclass(entry_type) and issubclass(entry_type, DumpLoadMixin):
                 entry: DumpLoadMixin
                 return [entry.dump() for entry in value]
         elif isinstance(value, dict):

@@ -3,7 +3,8 @@
 from enum import Enum
 from typing import Any, Dict, Generic, TypeVar
 
-from attr import attrs
+from attr import Factory, attrs
+from shortuuid import uuid
 
 from earwax.mixins import DumpLoadMixin
 
@@ -52,6 +53,7 @@ class Variable(Generic[T], DumpLoadMixin):
     name: str
     type: VariableTypes
     value: T
+    id: str = Factory(uuid)
 
     def get_type(self) -> VariableTypes:
         """Return the type of this variable.

@@ -12,6 +12,7 @@ VariableDict = Dict[str, Any]
 def test_init() -> None:
     """Test initialisation."""
     v: Variable[int] = Variable('points', VariableTypes.type_int, 500)
+    assert isinstance(v.id, str)
     assert v.name == 'points'
     assert v.type is VariableTypes.type_int
     assert v.value == 500
@@ -54,11 +55,13 @@ def test_load() -> None:
         Variable.__type_key__: Variable.__name__,
         Variable.__value_key__: {
             'name': 'points',
+            'id': 'asdf;lkj',
             'type': VariableTypes.type_int,
             'value': 500
         }
     }
     v: Variable[int] = Variable.load(d)
+    assert v.id == 'asdf;lkj'
     assert v.name == 'points'
     assert v.value == 500
     assert isinstance(v.value, int)
