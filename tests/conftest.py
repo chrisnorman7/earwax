@@ -14,6 +14,7 @@ from synthizer import (Context, GlobalFdnReverb, Source3D, StreamingGenerator,
 from earwax import (
     Box, BoxLevel, DialogueTree, Door, Editor, Game, GameBoard, Level, Menu,
     NetworkConnection, Point, Sound, SoundManager, Track, TrackTypes)
+from earwax.cmd.constants import scripts_directory
 from earwax.cmd.project_credit import ProjectCredit
 
 from .networking.pretend_socket import PretendSocket
@@ -64,6 +65,8 @@ def get_editor(game: Game, window: Window) -> Editor:
 def initialise_tests() -> Generator[None, None, None]:
     """Initialise and shutdown Synthizer."""
     with initialized():
+        if not scripts_directory.is_dir():
+            scripts_directory.mkdir()
         yield
 
 

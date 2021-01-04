@@ -20,10 +20,17 @@ def test_game_level_script() -> None:
     """Test the GameLevelScript class."""
     t: Trigger = Trigger()
     code: str = 'def _():\n    print("works.")\n'
-    s: GameLevelScript = GameLevelScript('Test Script', t, code)
+    s: GameLevelScript = GameLevelScript('Test Script', t)
     assert s.name == 'Test Script'
     assert s.trigger is t
-    assert s.code == code
+    assert s.code == ''
+    try:
+        s.code = code
+        assert s.script_path.is_file()
+        assert s.code == code
+    finally:
+        if s.script_path.is_file():
+            s.script_path.unlink()
 
 
 def test_box_level_data() -> None:

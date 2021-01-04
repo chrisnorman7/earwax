@@ -1,11 +1,13 @@
 """Provides the GameLevel class."""
 
+from pathlib import Path
 from typing import List, Optional, Union
 
 from attr import Factory, attrs
 from shortuuid import uuid
 
 from ..mixins import DumpLoadMixin
+from .constants import scripts_directory
 
 
 @attrs(auto_attribs=True)
@@ -25,8 +27,43 @@ class GameLevelScript(DumpLoadMixin):
 
     name: str
     trigger: Trigger
-    code: str
     id: str = Factory(uuid)
+
+    @property
+    def script_name(self) -> str:
+        """Return the script name (although not the path) for this script.
+
+        If you want the path, use the :attr:`~script_path` attribute.
+        """
+        name: str = f'script_{self.id}'
+        assert name.isidentifier(), f'{name} is not a valid identifier.'
+        return name + '.py'
+
+    @property
+    def script_path(self) -> Path:
+        """Return the path where code for this script resides.
+
+        If you want the filename, use the :attr:`~script_name` attribute.
+        """
+        return scripts_directory / self.script_name
+
+    @property
+    def code(self) -> str:
+        """Return the code of this script.
+
+        If :attr:`~script_path` does not exist, an empty string will be
+        returned.
+        """
+        if not self.script_path.is_file():
+            return ''
+        with self.script_path.open('r') as f:
+            return f.read()
+
+    @code.setter
+    def code(self, code: str) -> None:
+        """Set the code."""
+        with self.script_path.open('w') as f:
+            f.write(code)
 
 
 @attrs(auto_attribs=True)

@@ -5,8 +5,8 @@ from pathlib import Path
 
 from ... import EarwaxConfig
 from ..constants import (ambiances_directory, maps_directory, music_directory,
-                         options_path, project_filename, sounds_directory,
-                         surfaces_directory, scripts_directory)
+                         options_path, project_filename, scripts_directory,
+                         sounds_directory, surfaces_directory)
 from ..project import Project
 
 
