@@ -14,13 +14,16 @@ class ProjectCredit(DumpLoadMixin):
 
     This class has a different name to avoid possible confusion.
 
-    :ivar name: The name of what is being credited.
+    :ivar ~earwax.cmd.project_credit.ProjectCredit.name: The name of what is
+        being credited.
 
-    :ivar url: A URL for this credit.
+    :ivar ~earwax.cmd.project_credit.ProjectCredit.url: A URL for this credit.
 
-    :ivar sound: The sound that will play when this credit is shown in a menu.
+    :ivar ~earwax.cmd.project_credit.ProjectCredit.sound: The sound that will
+        play when this credit is shown in a menu.
 
-    :ivar loop: Whether or not :attr:`ProjectCredit.sound` should loop.
+    :ivar ~earwax.cmd.project_credit.ProjectCredit.loop: Whether or not
+        :attr:`ProjectCredit.sound` should loop.
     """
 
     name: str

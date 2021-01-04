@@ -13,13 +13,14 @@ T = TypeVar('T')
 class VariableTypes(Enum):
     """Provides the possible types of variable.
 
-    :ivar type_int: An integer.
+    :ivar ~earwax.cmd.variable.VariableTypes.type_int: An integer.
 
-    :ivar type_float: A floating point number.
+    :ivar ~earwax.cmd.variable.VariableTypes.type_float: A floating point
+        number.
 
-    :ivar type_string: a string.
+    :ivar ~earwax.cmd.variable.VariableTypes.type_string: a string.
 
-    :ivar type_bool: A boolean value.
+    :ivar ~earwax.cmd.variable.VariableTypes.type_bool: A boolean value.
     """
 
     type_int = 0
@@ -40,9 +41,12 @@ type_strings: Dict[VariableTypes, str] = {
 class Variable(Generic[T], DumpLoadMixin):
     """A variable in a game made with the earwax script.
 
-    :ivar name: The name of the variable.
+    :ivar ~earwax.cmd.variable.Variable.name: The name of the variable.
 
-    :ivar value: The value this variable holds.
+    :ivar ~earwax.cmd.variable.Variable.type: The type of
+        :attr:`~earwax.cmd.variable.Variable.value`.
+
+    :ivar ~earwax.cmd.variable.Variable.value: The value this variable holds.
     """
 
     name: str

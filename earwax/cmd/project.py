@@ -24,19 +24,24 @@ class Project(DumpLoadMixin):
     This object holds the id of the initial map (if any), as well as global
     variables the user can create with the ``global`` subcommand.
 
-    :ivar title: The title of this project.
+    :ivar ~earwax.cmd.project.Project.title: The title of this project.
 
-    :ivar author: The author of this project.
+    :ivar ~earwax.cmd.project.Project.author: The author of this project.
 
-    :ivar description: A description for this project.
+    :ivar ~earwax.cmd.project.Project.description: A description for this
+        project.
 
-    :ivar version: The version string of this project.
+    :ivar ~earwax.cmd.project.Project.version: The version string of this
+        project.
 
-    :ivar initial_map_id: The id of the first map to load with the game.
+    :ivar ~earwax.cmd.project.Project.initial_map_id: The id of the first map
+        to load with the game.
 
-    :ivar credits: A list of credits for this project.
+    :ivar ~earwax.cmd.project.Project.credits: A list of credits for this
+        project.
 
-    :ivar variables: The variables created for this project.
+    :ivar ~earwax.cmd.project.Project.variables: The variables created for this
+        project.
     """
 
     title: str
