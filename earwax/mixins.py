@@ -109,6 +109,9 @@ class DumpLoadMixin:
     thus end up in the ``__annotations__`` dictionary) will be dumped and
     loaded.
 
+    Also, any instance variables whose name starts with an underscore (_) will
+    be ignored.
+
     To dump an instance, use the :meth:`~earwax.mixins.DumpLoadMixin.dump`
     method, and to load, use the :meth:`~earwax.mixins.DumpLoadMixin.load`
     constructor.
@@ -184,6 +187,7 @@ class DumpLoadMixin:
         dump_value: Dict[str, Any] = {
             name: self._get_dump_value(type_, getattr(self, name))
             for name, type_ in cls.__annotations__.items()
+            if not name.startswith('_')
         }
         return {cls.__type_key__: cls.__name__, cls.__value_key__: dump_value}
 

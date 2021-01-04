@@ -1,7 +1,9 @@
 """Test classes from the trigger_map module."""
 
+from typing import Any, Dict
+
 from earwax.cmd.game_level import (BoxLevelData, GameLevel, GameLevelScript,
-                                   Trigger)
+                                   LevelData, Trigger)
 
 
 def test_init() -> None:
@@ -45,3 +47,11 @@ def test_game_level() -> None:
     assert gl.data is d
     gl2: GameLevel = GameLevel.load(gl.dump())
     assert gl2 == gl
+
+
+def test_level_data() -> None:
+    """Test the LevelData class."""
+    level_data: LevelData = LevelData()
+    d: Dict[str, Any] = level_data.dump()[LevelData.__value_key__]
+    assert isinstance(d, dict)
+    assert d == {}

@@ -12,3 +12,4 @@ except ModuleNotFoundError:
 
 SaveEvent, EVT_SAVE = NewEvent()
 VariableEditDoneEvent, EVT_VARIABLE_EDIT_DONE = NewEvent()
+LevelEditDoneEvent, EVT_LEVEL_EDIT_DONE = NewEvent()
