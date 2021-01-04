@@ -3,8 +3,8 @@
 from argparse import Namespace
 
 try:
-    from synthizer import initialized
     import wx
+    from synthizer import initialized
 except ModuleNotFoundError:
     wx = None
     initialized = None

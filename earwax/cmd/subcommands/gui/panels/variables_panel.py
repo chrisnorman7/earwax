@@ -3,7 +3,10 @@
 from json import dumps
 from typing import TYPE_CHECKING, Optional
 
-import wx
+try:
+    import wx
+except ModuleNotFoundError:
+    wx = None
 
 from ..events import EVT_VARIABLE_EDIT_DONE, VariableEditDoneEvent
 from .edit_variable_frame import EditVariableFrame

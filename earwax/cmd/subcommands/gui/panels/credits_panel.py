@@ -3,10 +3,14 @@
 import webbrowser
 from typing import TYPE_CHECKING, Optional
 
-import wx
-from synthizer import DirectSource, StreamingGenerator, SynthizerError
-from wx.lib.filebrowsebutton import FileBrowseButton
-from wx.lib.sized_controls import SizedPanel
+try:
+    import wx
+    from synthizer import DirectSource, StreamingGenerator, SynthizerError
+    from wx.lib.filebrowsebutton import FileBrowseButton
+    from wx.lib.sized_controls import SizedPanel
+except ModuleNotFoundError:
+    DirectSource, StreamingGenerator, SynthizerError = (None, None, None)
+    wx, FileBrowseButton, SizedPanel = (None, None, None)
 
 from earwax.cmd.constants import sounds_directory
 from earwax.cmd.project import Project

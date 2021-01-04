@@ -3,8 +3,11 @@
 from json import dumps, loads
 from typing import Any, List
 
-import wx
-from wx.lib.sized_controls import SizedFrame, SizedPanel
+try:
+    import wx
+    from wx.lib.sized_controls import SizedFrame, SizedPanel
+except ModuleNotFoundError:
+    wx, SizedPanel, SizedFrame = (None, None, None)
 
 from earwax.cmd.project import Project
 from earwax.cmd.variable import Variable, VariableTypes, type_strings

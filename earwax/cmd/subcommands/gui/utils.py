@@ -1,6 +1,9 @@
 """Various utility functions."""
 
-import wx
+try:
+    import wx
+except ModuleNotFoundError:
+    wx = None
 
 
 def show_error(message: str, caption: str = 'Error') -> int:

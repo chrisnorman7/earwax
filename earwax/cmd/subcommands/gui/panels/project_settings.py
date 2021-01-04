@@ -2,8 +2,11 @@
 
 from typing import TYPE_CHECKING
 
-import wx
-from wx.lib.sized_controls import SizedPanel
+try:
+    import wx
+    from wx.lib.sized_controls import SizedPanel
+except ModuleNotFoundError:
+    wx, SizedPanel = (None, None)
 
 from earwax.cmd.project import Project
 
