@@ -6,7 +6,7 @@ from pathlib import Path
 from ... import EarwaxConfig
 from ..constants import (ambiances_directory, maps_directory, music_directory,
                          options_path, project_filename, sounds_directory,
-                         surfaces_directory)
+                         surfaces_directory, scripts_directory)
 from ..project import Project
 
 
@@ -26,7 +26,7 @@ def update() -> None:
     cwd: Path = Path.cwd()
     for path in (
         sounds_directory, surfaces_directory, ambiances_directory,
-        music_directory, maps_directory
+        music_directory, maps_directory, scripts_directory
     ):
         if not path.is_dir():
             path.mkdir()
@@ -44,7 +44,7 @@ def init_project(args: Namespace) -> None:
             f'{project_filename.relative_to(cwd)}.'
         )
     else:
-        project: Project = Project(title='Untitled Project')
+        project: Project = Project(name='Untitled Project')
         project.save()
         print(f'Created {project.name}.')
     update()

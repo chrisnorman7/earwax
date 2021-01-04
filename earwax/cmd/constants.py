@@ -15,6 +15,9 @@ project_filename: Path = cd / 'project.yaml'
 # Directory where maps are stored.
 maps_directory: Path = cd / 'maps'
 
+# Directory where scripts are stored.
+scripts_directory: Path = cd / 'scripts'
+
 # The main sounds directory.
 sounds_directory: Path = cd / 'sounds'
 
