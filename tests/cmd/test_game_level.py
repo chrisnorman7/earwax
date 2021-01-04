@@ -1,6 +1,6 @@
 """Test classes from the trigger_map module."""
 
-from earwax.cmd.trigger_map import Trigger
+from earwax.cmd.game_level import Trigger
 
 
 def test_init() -> None:
