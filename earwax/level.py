@@ -5,22 +5,19 @@ from typing import TYPE_CHECKING, Callable, Generator, List, Optional, cast
 
 from attr import Factory, attrib, attrs
 
-from .sound import SoundManager
+from .sound import AlreadyDestroyed, Sound, SoundManager
 from .types import EventType
 
 try:
     from pyglet.clock import schedule_once
-    from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
-                           SynthizerError)
+    from synthizer import Context, SynthizerError
 except ModuleNotFoundError:
     schedule_once = None
-    Buffer, BufferGenerator, Context, DirectSource = (None, None, None, None)
-    SynthizerError = Exception
+    Context, SynthizerError = (object, Exception)
 
 from .action import Action, ActionFunctionType
 from .ambiance import Ambiance
 from .mixins import RegisterEventMixin
-from .sound import get_buffer
 from .track import Track, TrackTypes
 
 if TYPE_CHECKING:
@@ -249,24 +246,28 @@ class IntroLevel(Level):
     :ivar ~earwax.IntroLevel.sound_path: The sound to play when this level is
         pushed.
 
-    :ivar ~earwax.IntroLevel.skip_after: An optional number of seconds to add
-        to the length of the sound buffer before skipping this level.
+    :ivar ~earwax.IntroLevel.skip_after: An optional number of seconds to wait
+        before skipping this level.
 
         If this value is ``None``, then the level will not automatically skip
-        itself, and you will have to provide some other means of skipping.
+        itself, and you will have to provide some other means of getting past
+        it.
 
-    :ivar ~earwax.IntroLevel.looping: Whether or not :attr:`self.generator
-        <earwax.IntroLevel.generator>` should loop.
+    :ivar ~earwax.IntroLevel.looping: Whether or not the playing sound should
+        loop.
 
-        If this value is ``True``, then :attr:`self.skip_after
-        <earwax.IntroLevel.skip_after>` must be ``None``, otherwise
-        ``AssertionError`` will be raised.
+        If this value is ``True``, then :attr:`~earwax.IntroLevel.skip_after`
+            must be ``None``, otherwise ``AssertionError`` will be raised.
 
-    :ivar ~earwax.IntroLevel.generator: The ``synthizer.BufferGenerator`` to
-        play the sound through.
+    :ivar ~earwax.IntroLevel.sound_manager: The sound manager to use to play
+        the sound.
 
-    :ivar ~earwax.IntroLevel.source: The source to play :attr:`self.generator
-        <earwax.IntroLevel.buffer>` through.
+        If this value is ``None``, then the sound will not be playing.
+
+    :ivar ~earwax.IntroLevel.sound: The sound object which represents the
+        playing sound.
+
+        If this value is ``None``, then the sound will not be playing.
     """
 
     level: Level
@@ -274,8 +275,12 @@ class IntroLevel(Level):
     skip_after: Optional[float]
     looping: bool = False
 
-    generator: Optional['BufferGenerator'] = None
-    source: Optional['DirectSource'] = None
+    sound_manager: Optional[SoundManager] = attrib(
+        default=Factory(type(None)), init=False, repr=False
+    )
+    sound: Optional[Sound] = attrib(
+        default=Factory(type(None)), init=False, repr=False
+    )
 
     def __attrs_post_init__(self) -> None:
         """Run sanity checks on the setup of this instance."""
@@ -294,31 +299,33 @@ class IntroLevel(Level):
             raise RuntimeError(
                 'Cannot start playing without a valid audio context.'
             )
-        self.source = DirectSource(audio_context)
-        self.generator = BufferGenerator(audio_context)
-        self.source.add_generator(self.generator)
-        self.generator.looping = self.looping
-        buffer: Buffer = get_buffer('file', str(self.sound_path))
-        self.generator.buffer = buffer
+        source: DirectSource = DirectSource(audio_context)
+        self.sound_manager = SoundManager(
+            audio_context, source, should_loop=self.looping
+        )
+        self.sound = self.sound_manager.play_path(
+            self.sound_path, not self.looping
+        )
         if self.skip_after is not None:
-            schedule_once(
-                lambda dt: self.skip(),
-                self.skip_after + buffer.get_length_in_seconds()
-            )
+            schedule_once(lambda dt: self.skip(), self.skip_after)
 
     def on_pop(self) -> None:
         """Destroy synthizer objects.
 
-        Destroys :attr:`self.generator <earwax.IntroLevel.generator>`, and
-        :attr:`self.source <earwax.IntroLevel.source>`.
+        Destroys the :attr:`~earwax.IntroLevel.sound_manager`, and
+        :attr:`~earwax.IntroLevel.sound`.
         """
         super().on_pop()
-        if self.generator is not None:
-            self.generator.destroy()
-            self.generator = None
-        if self.source is not None:
-            self.source.destroy()
-            self.source = None
+        if (
+            self.sound_manager is not None and
+            self.sound_manager.source is not None
+        ):
+            self.sound_manager.source.destroy()
+        if self.sound is not None:
+            try:
+                self.sound.destroy()
+            except AlreadyDestroyed:
+                pass
 
     def skip(self) -> Generator[None, None, None]:
         """Skip this level.
