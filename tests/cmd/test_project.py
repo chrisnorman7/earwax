@@ -19,6 +19,7 @@ def test_init(project_credit: ProjectCredit) -> None:
     assert p.requirements == 'earwax\npyglet\nsynthizer\n'
     assert p.variables == []
     assert p.credits == []
+    assert p.levels == []
 
 
 def test_dump(project_credit: ProjectCredit) -> None:

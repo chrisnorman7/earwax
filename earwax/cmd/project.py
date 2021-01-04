@@ -13,6 +13,7 @@ except ImportError:
 from earwax.mixins import DumpLoadMixin
 
 from .constants import project_filename
+from .game_level import GameLevel
 from .project_credit import ProjectCredit
 from .variable import Variable
 
@@ -54,6 +55,7 @@ class Project(DumpLoadMixin):
 
     credits: List[ProjectCredit] = Factory(list)
     variables: List[Variable] = Factory(list)
+    levels: List[GameLevel] = Factory(list)
 
     def save(self) -> None:
         """Save this project.
