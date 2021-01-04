@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from attr import attrs
 
-from build.lib.earwax.mixins import DumpLoadMixin
+from earwax.mixins import DumpLoadMixin
 
 try:
     import wx
