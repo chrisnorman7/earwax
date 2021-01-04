@@ -7,8 +7,8 @@ from pyglet.clock import schedule_once
 from pyglet.window import Window, key
 from pytest import raises
 
-from earwax import (Action, Ambiance, Game, Level, Sound, SoundManager, Track,
-                    TrackTypes)
+from earwax import (Action, Ambiance, Game, IntroLevel, Level, Sound,
+                    SoundManager, Track, TrackTypes)
 
 
 class OnCoverWorks(Exception):
@@ -200,3 +200,100 @@ def test_register_and_bind(level: Level) -> None:
 
     with raises(RegisterAndBindWorks):
         level.dispatch_event('on_test')
+
+
+def test_intro_level(window: Window, level: Level, game: Game) -> None:
+    """Test the IntroLevel class."""
+    intro: IntroLevel
+    with raises(AssertionError):
+        intro = IntroLevel(
+            game, level, Path('sound.wav'), skip_after=5.0, looping=True
+        )
+    intro = IntroLevel(game, level, Path('sound.wav'))
+    assert intro.sound_manager is None
+    assert intro.sound is None
+
+    @intro.event
+    def on_push() -> None:
+        def inner(dt: float) -> None:
+            assert isinstance(intro.sound_manager, SoundManager)
+            assert intro.sound_manager.should_loop is intro.looping
+            assert isinstance(intro.sound, Sound)
+
+        schedule_once(inner, 0.5)
+
+    def f(dt: float) -> None:
+        window.close()
+
+    schedule_once(f, 2.0)
+    game.run(window, initial_level=intro)
+    assert game.level is intro
+
+
+def test_intro_level_skip_after(
+    window: Window, level: Level, game: Game
+) -> None:
+    """Test what happens when skip_after is set."""
+    intro: IntroLevel = IntroLevel(
+        game, level, Path('sound.wav'), skip_after=0.5
+    )
+
+    @level.event
+    def on_push() -> None:
+        def inner(dt: float) -> None:
+            window.close()
+
+        schedule_once(inner, 0.2)
+
+    game.run(window, initial_level=intro)
+    assert game.level is level
+    assert intro.sound_manager is None
+    assert intro.sound is None
+
+
+def test_intro_level_looping(window: Window, level: Level, game: Game) -> None:
+    """Test that intro levels loop properly."""
+    intro: IntroLevel = IntroLevel(
+        game, level, Path('sound.wav'), looping=True
+    )
+
+    @level.event
+    def on_push() -> None:
+        def inner(dt: float) -> None:
+            window.close()
+
+        schedule_once(inner, 0.2)
+
+    def f(dt: float) -> None:
+        window.close()
+
+    schedule_once(f, 2.0)
+
+    game.run(window, initial_level=intro)
+    assert game.level is intro
+    assert isinstance(intro.sound_manager, SoundManager)
+    assert isinstance(intro.sound, Sound)
+    intro.dispatch_event('on_pop')
+
+
+def test_intro_level_skip(window: Window, level: Level, game: Game) -> None:
+    """Test skipping an IntroLevel instance."""
+    intro: IntroLevel = IntroLevel(
+        game, level, Path('sound.wav'), skip_after=5.0
+    )
+
+    @level.event
+    def on_push() -> None:
+        def inner(dt: float) -> None:
+            window.close()
+
+        schedule_once(inner, 0.2)
+
+    def f(dt: float) -> None:
+        list(intro.skip())
+
+    schedule_once(f, 0.5)
+    game.run(window, initial_level=intro)
+    assert game.level is level
+    assert intro.sound_manager is None
+    assert intro.sound is None

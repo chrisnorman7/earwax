@@ -10,10 +10,10 @@ from .types import EventType
 
 try:
     from pyglet.clock import schedule_once
-    from synthizer import Context, SynthizerError
+    from synthizer import Context, DirectSource, SynthizerError
 except ModuleNotFoundError:
     schedule_once = None
-    Context, SynthizerError = (object, Exception)
+    Context, DirectSource, SynthizerError = (object, object, Exception)
 
 from .action import Action, ActionFunctionType
 from .ambiance import Ambiance
@@ -272,7 +272,7 @@ class IntroLevel(Level):
 
     level: Level
     sound_path: Path
-    skip_after: Optional[float]
+    skip_after: Optional[float] = None
     looping: bool = False
 
     sound_manager: Optional[SoundManager] = attrib(
@@ -307,7 +307,11 @@ class IntroLevel(Level):
             self.sound_path, not self.looping
         )
         if self.skip_after is not None:
-            schedule_once(lambda dt: self.skip(), self.skip_after)
+            schedule_once(
+                lambda dt: self.game.replace_level(self.level)
+                if self.game.level is self else None,
+                self.skip_after
+            )
 
     def on_pop(self) -> None:
         """Destroy synthizer objects.
@@ -321,11 +325,13 @@ class IntroLevel(Level):
             self.sound_manager.source is not None
         ):
             self.sound_manager.source.destroy()
-        if self.sound is not None:
+        self.sound_manager = None
+        if self.sound is not None and self.looping:
             try:
                 self.sound.destroy()
             except AlreadyDestroyed:
                 pass
+        self.sound = None
 
     def skip(self) -> Generator[None, None, None]:
         """Skip this level.
