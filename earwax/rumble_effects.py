@@ -12,7 +12,11 @@ from math import floor
 from typing import TYPE_CHECKING, Generator, List, Optional
 
 from attr import attrs
-from pyglet.input import Joystick
+
+try:
+    from pyglet.input import Joystick
+except ModuleNotFoundError:
+    Joystick = object
 
 from .promises.staggered_promise import StaggeredPromise
 
