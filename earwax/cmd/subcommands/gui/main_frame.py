@@ -51,20 +51,16 @@ class MainFrame(wx.Frame):
         self.notebook.AddPage(self.credits_panel, '&Credits')
         self.notebook.AddPage(self.variables_panel, '&Variables')
         s.Add(self.notebook, 1, wx.GROW)
-        s2: wx.BoxSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.save_button = wx.Button(p, name='', label='&Save')
-        self.save_button.Bind(wx.EVT_BUTTON, self.do_save)
-        self.play_button = wx.Button(p, label='&Play')
-        self.build_button = wx.Button(p, label='&Build')
-        s2.AddMany(
-            (
-                (self.save_button, 0, wx.GROW),
-                (self.play_button, 0, wx.GROW),
-                (self.build_button, 0, wx.GROW)
+        p.SetSizerAndFit(s)
+        mb: wx.MenuBar = wx.MenuBar()
+        fm: wx.Menu = wx.Menu()
+        self.Bind(
+            wx.EVT_MENU, self.do_save, fm.Append(
+                wx.ID_SAVE, '&Save\tCTRL+S', 'Save the project'
             )
         )
-        s.Add(s2, 0, wx.GROW)
-        p.SetSizerAndFit(s)
+        mb.Append(fm, '&File')
+        self.SetMenuBar(mb)
         self.Bind(wx.EVT_CLOSE, self.on_close)
         if state_path.is_file():
             with state_path.open('r') as f:
