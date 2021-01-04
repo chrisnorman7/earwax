@@ -2,7 +2,6 @@
 
 from typing import Tuple, Type
 
-
 try:
     from wx.lib.newevent import NewEvent
 except ModuleNotFoundError:
