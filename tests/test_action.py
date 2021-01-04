@@ -20,15 +20,14 @@ class RightMouseButton(Exception):
     """The right mouse button was pressed."""
 
 
-def test_init(level: Level) -> None:
+def test_init() -> None:
     """Test that instances actions properly."""
-    a = Action(level, 'Print', print)
-    assert a.level is level
+    a = Action('Print', print)
     assert a.title == 'Print'
     assert a.func is print
     assert a.symbol is None
     assert a.modifiers == 0
-    a = Action(level, 'Print', print, symbol=key.P, modifiers=key.MOD_SHIFT)
+    a = Action('Print', print, symbol=key.P, modifiers=key.MOD_SHIFT)
     assert a.symbol == key.P
     assert a.modifiers == key.MOD_SHIFT
 

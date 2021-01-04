@@ -160,7 +160,7 @@ class Level(RegisterEventMixin):
 
         def inner(func: ActionFunctionType) -> Action:
             """Actually add the action."""
-            a: Action = Action(self, name, func, **kwargs)
+            a: Action = Action(name, func, **kwargs)
             self.actions.append(a)
             return a
 

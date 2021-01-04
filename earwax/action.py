@@ -1,14 +1,11 @@
 """Provides the Action class."""
 
 from time import time
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from attr import Factory, attrib, attrs
 
 from .types import ActionFunctionType, HatDirection, OptionalGenerator
-
-if TYPE_CHECKING:
-    from .level import Level
 
 
 @attrs(auto_attribs=True)
@@ -76,7 +73,6 @@ class Action:
         - action.last_run``.
     """
 
-    level: 'Level'
     title: str
     func: ActionFunctionType
     symbol: Optional[int] = None
