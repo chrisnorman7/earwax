@@ -282,6 +282,6 @@ class DumpLoadMixin:
         data = data.get(cls.__value_key__, {})
         kwargs: Dict[str, Any] = {
             name: cls._get_load_value(type_, data[name])
-            for name, type_ in cls.__annotations__.items()
+            for name, type_ in cls.__annotations__.items() if name in data
         }
         return cls(**kwargs)  # type: ignore[call-arg]

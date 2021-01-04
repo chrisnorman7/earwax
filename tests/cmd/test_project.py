@@ -12,8 +12,11 @@ ProjectDict = Dict[str, Any]
 def test_init(project_credit: ProjectCredit) -> None:
     """Test initialisation."""
     p: Project = Project('Test')
-    assert p.title == 'Test'
-    assert p.initial_map_id is None
+    assert p.name == 'Test'
+    assert isinstance(p.author, str)
+    assert p.description == ''
+    assert p.version == '0.0.0'
+    assert p.requirements == 'earwax\npyglet\nsynthizer\n'
     assert p.variables == []
     assert p.credits == []
 
@@ -36,7 +39,7 @@ def test_dump(project_credit: ProjectCredit) -> None:
     assert d[Project.__type_key__] == Project.__name__
     d = d[Project.__value_key__]
     assert isinstance(d, dict)
-    assert d['title'] == p.title
+    assert d['name'] == p.name
     assert d['author'] == p.author
     assert d['version'] == p.version
     assert d['description'] == p.description

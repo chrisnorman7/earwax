@@ -70,7 +70,7 @@ class MainFrame(wx.Frame):
 
     def set_title(self) -> None:
         """Set the window title."""
-        self.SetTitle(f'Earwax - {self.project.title}')
+        self.SetTitle(f'Earwax - {self.project.name}')
 
     def do_save(self, event: wx.CommandEvent) -> None:
         """Performa  save."""

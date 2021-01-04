@@ -1,7 +1,7 @@
 """Provides the Workspace class."""
 
 from getpass import getuser
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from attr import Factory, attrs
 
@@ -24,7 +24,7 @@ class Project(DumpLoadMixin):
     This object holds the id of the initial map (if any), as well as global
     variables the user can create with the ``global`` subcommand.
 
-    :ivar ~earwax.cmd.project.Project.title: The title of this project.
+    :ivar ~earwax.cmd.project.Project.name: The name of this project.
 
     :ivar ~earwax.cmd.project.Project.author: The author of this project.
 
@@ -44,11 +44,13 @@ class Project(DumpLoadMixin):
         project.
     """
 
-    title: str
+    name: str
     author: str = Factory(lambda: f'{getuser()} <{getuser()}@localhost')
     description: str = Factory(str)
     version: str = Factory(lambda: '0.0.0')
-    initial_map_id: Optional[str] = None
+    requirements: str = Factory(
+        lambda: 'earwax\npyglet\nsynthizer\n'
+    )
 
     credits: List[ProjectCredit] = Factory(list)
     variables: List[Variable] = Factory(list)

@@ -10,11 +10,11 @@ def project_title(args: Namespace) -> None:
     try:
         project: Project = Project.from_file()
         if args.title is None:
-            print(f'Project title: {project.title}.')
+            print(f'Project title: {project.name}.')
         else:
-            project.title = args.title
+            project.name = args.title
             project.save()
-            print(f'Project renamed to {project.title}.')
+            print(f'Project renamed to {project.name}.')
     except FileNotFoundError:
         print('Error: No project has been created yet.')
         print()
