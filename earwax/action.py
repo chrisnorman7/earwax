@@ -17,8 +17,6 @@ class Action:
     Usually, this class is not used directly, but returned by the
     :meth:`earwax.Level.action` method.
 
-    :ivar ~earwax.Action.level: The level this action is bound to.
-
     :ivar ~earwax.Action.title: The title of this action.
 
     :ivar ~earwax.Action.func: The function to run.
