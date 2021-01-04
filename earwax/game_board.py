@@ -42,7 +42,9 @@ class GameBoard(Level, Generic[T]):
 
     coordinates: Point = Factory(lambda: Point(0, 0, 0))
 
-    tiles: List[List[List[T]]] = attrib(default=Factory(list), init=False)
+    tiles: List[List[List[T]]] = attrib(
+        default=Factory(list), init=False, repr=False
+    )
     populated_points: List[Point] = attrib(default=Factory(list), init=False)
 
     def __attrs_post_init__(self) -> None:
