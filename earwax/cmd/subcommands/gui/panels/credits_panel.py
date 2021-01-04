@@ -89,7 +89,7 @@ class CreditsPanel(wx.Panel):
 
     def get_current_item(self) -> Optional[ProjectCredit]:
         """Return the currently-selected credit."""
-        index: int = self.credits.GetFirstSelected()
+        index: int = self.credits.GetFocusedItem()
         if index == -1:
             return None
         return self.project.credits[index]
@@ -111,7 +111,7 @@ class CreditsPanel(wx.Panel):
             caption='Warning', style=wx.ICON_EXCLAMATION | wx.YES_NO
         ) == wx.YES:
             self.project.credits.remove(credit)
-            self.load_credits(self.credits.GetFirstSelected() - 1)
+            self.load_credits(self.credits.GetFocusedItem() - 1)
 
     def on_focus_change(self, event: wx.ListEvent) -> None:
         """Handle the currently-focussed credit changing."""
@@ -158,7 +158,7 @@ class CreditsPanel(wx.Panel):
         if not credit.sound:
             credit.sound = None
         credit.loop = self.loop_ctrl.GetValue()
-        self.load_credits(self.credits.GetFirstSelected())
+        self.load_credits(self.credits.GetFocusedItem())
 
     def do_reset(self, event: wx.CommandEvent) -> None:
         """Reset the currently-focussed credit."""

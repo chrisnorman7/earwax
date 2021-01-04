@@ -74,7 +74,7 @@ class VariablesPanel(wx.Panel):
 
     def get_current_item(self) -> Optional[Variable]:
         """Return the currently-selected variable."""
-        index: int = self.variables.GetFirstSelected()
+        index: int = self.variables.GetFocusedItem()
         if index == -1:
             return None
         return self.project.variables[index]
@@ -122,7 +122,7 @@ class VariablesPanel(wx.Panel):
 
     def on_finish_edit(self, event: VariableEditDoneEvent) -> None:
         """Reload variables."""
-        self.load_variables(self.variables.GetFirstSelected())
+        self.load_variables(self.variables.GetFocusedItem())
         self.variables.SetFocus()
 
     def enable_controls(self, event: wx.CloseEvent) -> None:
@@ -141,7 +141,7 @@ class VariablesPanel(wx.Panel):
             caption='Warning', style=wx.ICON_EXCLAMATION | wx.YES_NO
         ) == wx.YES:
             self.project.variables.remove(variable)
-            self.load_variables(self.variables.GetFirstSelected() - 1)
+            self.load_variables(self.variables.GetFocusedItem() - 1)
 
     def on_parent_close(self, event: wx.CloseEvent) -> None:
         """Close any edit frame that is currently open."""
