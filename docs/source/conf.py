@@ -78,5 +78,5 @@ def setup(app):
 master_doc = 'index'
 
 version: str = check_output(
-    ['git', 'describe', '--abbrev=1', '--tags']
+    ['git', 'describe', '--abbrev=1', '--always', '--tags']
 ).decode().strip()
