@@ -4,7 +4,11 @@ from getpass import getuser
 from typing import Any, Dict, List, Optional
 
 from attr import Factory, attrs
-from yaml import CDumper, CLoader, dump, load
+
+try:
+    from yaml import CDumper, CLoader, dump, load
+except ImportError:
+    CDumper, CLoader, dump, load = (None, None, None, None)  # type: ignore
 
 from earwax.mixins import DumpLoadMixin
 
