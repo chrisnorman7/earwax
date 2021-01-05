@@ -504,8 +504,10 @@ class Game(RegisterEventMixin):
     def before_run(self) -> None:
         """Do stuff before starting the main event loop.
 
-        This event is used by the run method, just before pyglet.app.run is
-        called.
+        This event is used by the run method, before any initial level is
+        pushed, or any of the sound managers are created.
+
+        This is the event to use if you're planning to load configuration.
 
         By this point, default events have been decorated, such as
         on_key_press and on_text. Also, we are inside a synthizer.initialized
@@ -531,6 +533,7 @@ class Game(RegisterEventMixin):
 
     def do_run(self, initial_level: Optional[Level]) -> None:
         """Really run the game."""
+        self.dispatch_event('before_run')
         source: Source = DirectSource(self.audio_context)
         manager: SoundManager = SoundManager(self.audio_context, source)
         manager.gain = self.config.sound.sound_volume.value
@@ -545,7 +548,6 @@ class Game(RegisterEventMixin):
         self.ambiance_sound_manager = manager
         if initial_level is not None:
             self.push_level(initial_level)
-        self.dispatch_event('before_run')
         app.run()
 
     def run(
@@ -572,14 +574,14 @@ class Game(RegisterEventMixin):
 
         * Enter a ``synthizer.initialized`` contextmanager.
 
+        * Dispatch the :meth:`~earwax.Game.before_run` event.
+
         * populate :attr:`~earwax.Game.interface_sound_manager`,
             :attr:`~earwax.Game.music_sound_manager`, and
             :attr:`~earwax.Game.ambiance_sound_manager`, and set the
             appropriate gains from :attr:`~earwax.Game.config`.
 
         * if ``initial_level`` is not ``None``, push the given level.
-
-        * Dispatch the :meth:`~earwax.Game.before_run` event.
 
         * Start the pyglet event loop.
 
