@@ -607,7 +607,7 @@ class Game(RegisterEventMixin):
 
         * Enter a ``synthizer.initialized`` contextmanager.
 
-        * Dispatch the :meth:`~earwax.Game.before_run` event.
+        * Dispatch the :meth:`~earwax.Game.setup` event.
 
         * populate :attr:`~earwax.Game.interface_sound_manager`,
             :attr:`~earwax.Game.music_sound_manager`, and
@@ -615,6 +615,8 @@ class Game(RegisterEventMixin):
             appropriate gains from :attr:`~earwax.Game.config`.
 
         * if ``initial_level`` is not ``None``, push the given level.
+
+        * Dispatch the :meth:`~earwax.Game.before_run` event.
 
         * Start the pyglet event loop.
 
