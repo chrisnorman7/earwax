@@ -11,9 +11,9 @@ from pytest import fixture
 from synthizer import (Context, GlobalFdnReverb, Source3D, StreamingGenerator,
                        initialized)
 
-from earwax import (
-    Box, BoxLevel, DialogueTree, Door, Editor, Game, GameBoard, Level, Menu,
-    NetworkConnection, Point, Sound, SoundManager, Track, TrackTypes)
+from earwax import (Box, BoxLevel, BufferCache, DialogueTree, Door, Editor,
+                    Game, GameBoard, Level, Menu, NetworkConnection, Point,
+                    Sound, SoundManager, Track, TrackTypes)
 from earwax.cmd.constants import scripts_directory
 from earwax.cmd.project_credit import ProjectCredit
 
@@ -33,10 +33,22 @@ def get_level(game: Game) -> Level:
 
 
 @fixture(name='game')
-def get_game(context: Context, thread_pool: ThreadPoolExecutor) -> Game:
+def get_game(context: Context, thread_pool: ThreadPoolExecutor) -> Generator[
+    Game, None, None
+]:
     """Get a new ``Game`` instance."""
     g: Game = Game(audio_context=context, thread_pool=thread_pool)
-    return g
+    yield g
+    g.buffer_cache.destroy_all()
+    if g.ambiance_sound_manager is not None:
+        g.ambiance_sound_manager.destroy_all()
+        g.ambiance_sound_manager.source.destroy()
+    if g.music_sound_manager is not None:
+        g.music_sound_manager.destroy_all()
+        g.music_sound_manager.source.destroy()
+    if g.interface_sound_manager is not None:
+        g.interface_sound_manager.destroy_all()
+        g.interface_sound_manager.source.destroy()
 
 
 @fixture(name='menu')
@@ -128,15 +140,19 @@ def get_source_3d(context: Context) -> Source3D:
 
 
 @fixture(name='sound_manager')
-def get_sound_manager(context: Context, source: Source3D) -> SoundManager:
+def get_sound_manager(
+    buffer_cache: BufferCache, context: Context, source: Source3D
+) -> SoundManager:
     """Get a new sound manager instance."""
-    return SoundManager(context, source)
+    return SoundManager(context, source, buffer_cache=buffer_cache)
 
 
 @fixture(name='sound')
-def get_sound(context: Context, source: Source3D) -> Sound:
+def get_sound(game: Game, context: Context, source: Source3D) -> Sound:
     """Get a new sound."""
-    return Sound.from_path(context, source, Path('sound.wav'))
+    return Sound.from_path(
+        context, source, game.buffer_cache, Path('sound.wav')
+    )
 
 
 @fixture(name='track')
@@ -168,3 +184,9 @@ def get_dialogue_line() -> DialogueTree:
 def get_project_credit() -> ProjectCredit:
     """Get a ProjectCredit instance."""
     return ProjectCredit('Test', 'test.com', 'sound.wav', True)
+
+
+@fixture(name='buffer_cache')
+def get_buffer_cache(game: Game) -> BufferCache:
+    """Return a buffer cache."""
+    return game.buffer_cache

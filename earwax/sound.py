@@ -1,5 +1,6 @@
 """Provides sound-related functions and classes."""
 
+from concurrent.futures import Executor
 from pathlib import Path
 from random import choice
 from typing import Callable, Dict, List, Optional
@@ -21,8 +22,111 @@ except ModuleNotFoundError:
     ) = (None, None, None, None, None, None, None, None, None)
     SynthizerError = Exception
 
-buffers: Dict[str, Buffer] = {}
 OnDestroyFunction = Callable[[], None]
+
+
+@attrs(auto_attribs=True)
+class BufferCache:
+    """A cache for buffers.
+
+    :ivar ~earwax.BufferCache.max_size: The maximum size (in bytes) the cache
+        will be allowed to grow before pruning.
+
+    :ivar ~earwax.BufferCache.buffer_uris: The URIs of the buffers that are
+        loaded. Least recently used first.
+
+    :ivar ~earwax.BufferCache.buffers: The loaded buffers.
+
+    :ivar ~earwax.BufferCache.current_size: The current size of the cache.
+    """
+
+    max_size: int
+
+    buffer_uris: List[str] = attrib(
+        default=Factory(list), init=False, repr=False
+    )
+    buffers: Dict[str, Buffer] = attrib(
+        default=Factory(dict), init=False, repr=False
+    )
+    current_size: int = attrib(default=Factory(int), init=False)
+
+    def get_size(self, buffer: Buffer) -> int:
+        """Return the size of the provided buffer.
+
+        :param buffer: The buffer to get the size of.
+        """
+        return buffer.get_channels() * buffer.get_length_in_samples() * 2
+
+    def get_buffer(self, protocol: str, path: str) -> Buffer:
+        """Load and return a Buffer instance.
+
+        Buffers are cached in the :attr:`~earwax.BufferCache.buffers`
+        dictionary, so if there is already a buffer with the given protocol and
+        path, it will be returned. Otherwise, a new buffer will be created, and
+        added to the dictionary::
+
+            cache: BufferCache = BufferCache(1024 ** 2 * 512)  # 512 MB max.
+            assert isinstance(
+                cache.get_buffer('file', 'sound.wav'), synthizer.Buffer
+            )
+            # True.
+            # Now it is cached:
+            assert cache.get_buffer(
+                'file', 'sound.wav'
+            ) is cache.get_buffer(
+                'file', 'sound.wav'
+            )
+            # True.
+
+        If getting a new buffer would grow the cache past the point of
+        :attr:`~earwax.BufferCache.max_size`, the least recently used buffer
+        will be removed and destroyed.
+
+        It is not recommended that you destroy buffers yourself. Let the cache
+        do that for you.
+
+        At present, both arguments are passed to
+        ``synthizer.Buffer.from_stream``.
+
+        :param protocol: One of the protocols supported by `Synthizer
+            <https://synthizer.github.io/>`__.
+
+            As far as I know, currently only ``'file'`` works.
+
+        :param path: The path to whatever data your buffer will contain.
+        """
+        uri: str = f'{protocol}://{path}'
+        if uri not in self.buffers:
+            # Firstly load the buffer.
+            buffer: Buffer = Buffer.from_stream(protocol, path)
+            self.buffer_uris.insert(0, uri)
+            self.buffers[uri] = buffer
+            self.current_size += self.get_size(buffer)
+            self.prune_buffers()
+        return self.buffers[uri]
+
+    def prune_buffers(self) -> None:
+        """Prune old buffers.
+
+        This function will keep going, until either there is only ` buffer
+        left, or :attr:`~earwax.BufferCache.current_size` has shrunk to less
+        than :attr:`~earwax.BufferCache.max_size`.
+        """
+        while self.current_size > self.max_size and len(self.buffer_uris) > 1:
+            self.pop_buffer().destroy()
+
+    def pop_buffer(self) -> Buffer:
+        """Remove and return the least recently used buffer."""
+        uri: str = self.buffer_uris.pop()
+        buffer: Buffer = self.buffers.pop(uri)
+        self.current_size -= self.get_size(buffer)
+        return buffer
+
+    def destroy_all(self) -> None:
+        """Destroy all the buffers cached by this instance."""
+        while self.buffer_uris:
+            self.pop_buffer().destroy()
+        self.current_size = 0  # Should be anyway.
 
 
 class SoundError(Exception):
@@ -31,34 +135,6 @@ class SoundError(Exception):
 
 class AlreadyDestroyed(SoundError):
     """This sound has already been destroyed."""
-
-
-def get_buffer(protocol: str, path: str) -> Buffer:
-    """Get a Buffer instance.
-
-    Buffers are cached in the buffers dictionary, so if there is already a
-    buffer with the given protocol and path, it will be returned. Otherwise, a
-    new buffer will be created, and added to the dictionary::
-
-        assert isinstance(get_buffer('file', 'sound.wav'), synthizer.Buffer)
-        # True.
-
-    If you are going to destroy a buffer, make sure you remove it from the
-    buffers dictionary.
-
-    At present, both arguments are passed to ``synthizer.Buffer.from_stream``.
-
-    :param protocol: One of the protocols from `Synthizer
-        <https://synthizer.github.io/>`__.
-
-        As far as I know, currently only ``'file'`` works.
-
-    :param path: The path to the socket data.
-    """
-    url: str = f'{protocol}://{path}'
-    if url not in buffers:
-        buffers[url] = Buffer.from_stream(protocol, path)
-    return buffers[url]
 
 
 @attrs(auto_attribs=True)
@@ -106,7 +182,8 @@ class Sound:
 
     @classmethod
     def from_path(
-        cls, context: Context, source: Source, path: Path
+        cls, context: Context, source: Source, buffer_cache: BufferCache,
+        path: Path
     ) -> 'Sound':
         """Create a sound that plays the given path.
 
@@ -114,14 +191,18 @@ class Sound:
 
         :param source: The synthizer source to play through.
 
+        :param cache: The buffer cache to load buffers from.
+
         :param path: The path to play.
 
             If the given path is a directory, then a random file from that
             directory will be chosen.
         """
         if path.is_dir():
-            return cls.from_path(context, source, choice(list(path.iterdir())))
-        buffer: Buffer = get_buffer('file', str(path))
+            return cls.from_path(
+                context, source, buffer_cache, choice(list(path.iterdir()))
+            )
+        buffer: Buffer = buffer_cache.get_buffer('file', str(path))
         generator: BufferGenerator = BufferGenerator(context)
         generator.buffer = buffer
         source.add_generator(generator)
@@ -197,6 +278,14 @@ class Sound:
         self.generator.position = 0.0
 
 
+class SoundManagerError(Exception):
+    """The base class for all sound manager errors."""
+
+
+class NoCache(SoundManagerError):
+    """This sound manager was created with no cache."""
+
+
 @attrs(auto_attribs=True)
 class SoundManager:
     """An object to hold sounds.
@@ -209,6 +298,8 @@ class SoundManager:
     :ivar ~earwax.SoundManager.should_loop: Whether or not to start new
         generators looping when using the various play methods.
 
+    :ivar ~earwax.SoundManager.cache: The buffer cache to get buffers from.
+
     :ivar ~earwax.SoundManager.sounds: A list of sounds that are playing.
 
     :ivar ~earwax.SoundManager.gain: The gain of the connected
@@ -218,6 +309,7 @@ class SoundManager:
     context: Context
     source: Source
     should_loop: bool = Factory(bool)
+    buffer_cache: Optional[BufferCache] = None
 
     sounds: List[Sound] = attrib(Factory(list), init=False, repr=False)
     _gain: float = attrib(init=False)
@@ -283,7 +375,11 @@ class SoundManager:
         :param schedule_destruction: Whether or not to schedule the newly
             created sound for destruction when it has finished playing.
         """
-        sound: Sound = Sound.from_path(self.context, self.source, path)
+        if self.buffer_cache is None:
+            raise NoCache(self)
+        sound: Sound = Sound.from_path(
+            self.context, self.source, self.buffer_cache, path
+        )
         sound.generator.looping = self.should_loop
         self.sounds.append(sound)
         if schedule_destruction:
@@ -325,7 +421,7 @@ class BufferDirectory:
     For example::
 
         b: BufferDirectory = BufferDirectory(
-            Path('sounds/weapons/cannons'), glob='*.wav'
+            cache, Path('sounds/weapons/cannons'), glob='*.wav'
         )
         # Get a random cannon buffer:
         print(b.random_buffer())
@@ -340,6 +436,8 @@ class BufferDirectory:
     :attr:`~earwax.BufferDirectory.paths` dictionary, or a random path with the
     :meth:`~earwax.BufferDirectory.random_path` method.
 
+    :ivar ~earwax.BufferDirectory.cache: The buffer cache to use.
+
     :ivar ~earwax.BufferDirectory.path: The path to load audio files from.
 
     :ivar ~earwax.BufferDirectory.glob: The glob to use when loading files.
@@ -351,9 +449,11 @@ class BufferDirectory:
         pairs.
     """
 
+    buffer_cache: BufferCache
     path: Path
-
     glob: Optional[str] = None
+
+    thread_pool: Optional[Executor] = None
 
     paths: Dict[str, Path] = attrib(init=False, default=Factory(dict))
 
@@ -373,10 +473,18 @@ class BufferDirectory:
             g = instance.path.glob(instance.glob)
         d: Dict[str, Buffer] = {}
         p: Path
-        for p in g:
+
+        def inner(p: Path) -> None:
             p = p.resolve()
             instance.paths[p.name] = p
-            d[p.name] = get_buffer('file', str(p))
+            d[p.name] = instance.buffer_cache.get_buffer('file', str(p))
+
+        map_generator: Generator[None, None, None]
+        if instance.thread_pool is None:
+            map_generator = map(inner, g)
+        else:
+            map_generator = instance.thread_pool.map(inner, g)
+        list(map_generator)
         return d
 
     def random_path(self) -> Path:

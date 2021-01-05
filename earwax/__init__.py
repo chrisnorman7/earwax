@@ -68,8 +68,8 @@ from .point import Point, PointDirections
 from .promises import (Promise, PromiseStates, StaggeredPromise,
                        ThreadedPromise, staggered_promise)
 from .rumble_effects import RumbleEffect, RumbleSequence, RumbleSequenceLine
-from .sound import (AlreadyDestroyed, BufferDirectory, Sound, SoundError,
-                    SoundManager, get_buffer)
+from .sound import (AlreadyDestroyed, BufferCache, BufferDirectory, NoCache,
+                    Sound, SoundError, SoundManager)
 from .speech import tts
 from .task import IntervalFunction, Task, TaskFunction
 from .track import Track, TrackTypes
@@ -121,8 +121,8 @@ __all__: List[str] = [
     # rumble_effects.py:
     'RumbleEffect', 'RumbleSequence', 'RumbleSequenceLine',
     # sound.py:
-    'AlreadyDestroyed', 'BufferDirectory', 'Sound', 'SoundError',
-    'SoundManager', 'get_buffer',
+    'AlreadyDestroyed', 'BufferCache', 'BufferDirectory', 'NoCache', 'Sound',
+    'SoundError', 'SoundManager',
     # speech.py:
     'tts',
     # task.py:

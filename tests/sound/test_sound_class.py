@@ -8,12 +8,14 @@ from pytest import raises
 from synthizer import (Buffer, BufferGenerator, Context, GlobalFdnReverb,
                        Source, Source3D, StreamingGenerator, SynthizerError)
 
-from earwax import AlreadyDestroyed, Game, Sound, get_buffer
+from earwax import AlreadyDestroyed, BufferCache, Game, Sound
 
 
-def test_init(context: Context, source: Source3D) -> None:
+def test_init(
+    buffer_cache: BufferCache, context: Context, source: Source3D
+) -> None:
     """Test initialisation."""
-    buffer: Buffer = get_buffer('file', 'sound.wav')
+    buffer: Buffer = buffer_cache.get_buffer('file', 'sound.wav')
     generator: BufferGenerator = BufferGenerator(context)
     sound: Sound = Sound(context, source, generator, buffer)
     assert sound.context is context
@@ -34,9 +36,13 @@ def test_from_stream(context: Context, source: Source3D) -> None:
     assert sound.is_stream is True
 
 
-def test_from_path(context: Context, source: Source3D) -> None:
+def test_from_path(
+    buffer_cache: BufferCache, context: Context, source: Source3D
+) -> None:
     """Test the Sound.from_path method."""
-    sound: Sound = Sound.from_path(context, source, Path('sound.wav'))
+    sound: Sound = Sound.from_path(
+        context, source, buffer_cache, Path('sound.wav')
+    )
     assert isinstance(sound, Sound)
     assert sound.context is context
     assert sound.source is source
@@ -46,9 +52,13 @@ def test_from_path(context: Context, source: Source3D) -> None:
     assert sound.is_stream is False
 
 
-def test_destroy_sound_from_path(context: Context, source: Source) -> None:
+def test_destroy_sound_from_path(
+    buffer_cache: BufferCache, context: Context, source: Source
+) -> None:
     """Make sure we can destroy sounds."""
-    sound: Sound = Sound.from_path(context, source, Path('sound.wav'))
+    sound: Sound = Sound.from_path(
+        context, source, buffer_cache, Path('sound.wav')
+    )
     sound.destroy()
     assert sound._valid is False
     assert sound.context is context
@@ -79,7 +89,8 @@ def test_destroy_from_stream(context: Context, source: Source) -> None:
 
 
 def test_schedule_destruction(
-    game: Game, window: Window, context: Context, source: Source3D
+    buffer_cache: BufferCache, game: Game, window: Window, context: Context,
+    source: Source3D
 ) -> None:
     """Ensure sounds get destroyed properly."""
     sound: Sound = Sound.from_stream(context, source, 'file', 'sound.wav')
@@ -87,7 +98,7 @@ def test_schedule_destruction(
         sound.schedule_destruction()
     assert sound._valid is True
     sound.destroy()
-    sound = Sound.from_path(context, source, Path('sound.wav'))
+    sound = Sound.from_path(context, source, buffer_cache, Path('sound.wav'))
     sound.schedule_destruction(lambda: window.close())
     game.run(window)
     assert sound._valid is False

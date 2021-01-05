@@ -9,7 +9,7 @@ from pytest import raises
 from synthizer import (Buffer, BufferGenerator, Context, Source3D,
                        StreamingGenerator, SynthizerError)
 
-from earwax import AlreadyDestroyed, Sound, SoundManager
+from earwax import AlreadyDestroyed, BufferCache, NoCache, Sound, SoundManager
 
 
 def test_init(sound_manager: SoundManager) -> None:
@@ -18,6 +18,7 @@ def test_init(sound_manager: SoundManager) -> None:
     assert isinstance(sound_manager.context, Context)
     assert isinstance(sound_manager.source, Source3D)
     assert sound_manager.should_loop is False
+    assert isinstance(sound_manager.buffer_cache, BufferCache)
     assert sound_manager.sounds == []
 
 
@@ -77,10 +78,13 @@ def test_destroy_all(
     sound_manager: SoundManager, context: Context, source: Source3D
 ) -> None:
     """Make sure we can destroy all sounds."""
+    assert sound_manager.buffer_cache is not None
     x: int
     for x in range(5):
         sound_manager.register_sound(
-            Sound.from_path(context, source, Path('sound.wav'))
+            Sound.from_path(
+                context, source, sound_manager.buffer_cache, Path('sound.wav')
+            )
         )
     assert len(sound_manager.sounds) == 5
     sound_manager.destroy_all()
@@ -140,11 +144,28 @@ def test_play_stream_looping(sound_manager: SoundManager) -> None:
     assert s.generator.looping is True
 
 
-def test_del(context: Context, source: Source3D) -> None:
+def test_del(
+    buffer_cache: BufferCache, context: Context, source: Source3D
+) -> None:
     """Ensure all sounds are destroyed when deleting a sound manager."""
-    manager: SoundManager = SoundManager(context, source)
+    manager: SoundManager = SoundManager(
+        context, source, buffer_cache=buffer_cache
+    )
     manager.play_path(Path('sound.wav'), False)
     manager.play_stream('file', 'sound.wav')
     del manager
     with raises(SynthizerError):
         source.destroy()
+
+
+def test_no_cache(
+    buffer_cache: BufferCache, sound_manager: SoundManager
+) -> None:
+    """Test trying to play a path with no buffer cache."""
+    sound_manager.buffer_cache = None
+    with raises(NoCache):
+        sound_manager.play_path(Path('sound.wav'), True)
+    sound_manager.buffer_cache = buffer_cache
+    s: Sound = sound_manager.play_path(Path('sound.wav'), False)
+    assert isinstance(s, Sound)
+    sound_manager.destroy_sound(s)

@@ -24,7 +24,7 @@ class MenuConfig(Config):
     """The menu configuration section."""
 
     __section_name__ = 'Menus'
-    default_item_select_sound: ConfigValue = ConfigValue(
+    default_item_select_sound: ConfigValue[Optional[Path]] = ConfigValue(
         None, type_=Optional[Path],
         name='The default sound that plays when moving through menus',
         value_converters={
@@ -34,7 +34,7 @@ class MenuConfig(Config):
     default_item_select_sound.dump(dump_path)
     default_item_select_sound.load(load_path)
 
-    default_item_activate_sound: ConfigValue = ConfigValue(
+    default_item_activate_sound: ConfigValue[Optional[Path]] = ConfigValue(
         None, type_=Optional[Path],
         name='The default sound that plays when activating items in menus',
         value_converters={
@@ -64,6 +64,9 @@ class SoundConfig(Config):
     sound_volume: ConfigValue = ConfigValue(0.5, name='Sound volume')
     music_volume: ConfigValue = ConfigValue(0.4, name='Music volume')
     ambiance_volume: ConfigValue = ConfigValue(0.4, name='Ambiance volume')
+    default_cache_size: ConfigValue[int] = ConfigValue(
+        1024 ** 2 * 500, name='The size of the default sound cache in bytes'
+    )
 
 
 class EditorConfig(Config):

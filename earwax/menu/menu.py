@@ -219,7 +219,9 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         """
         assert self.game.audio_context  # Keeps mypy happy.
         source: DirectSource = DirectSource(self.game.audio_context)
-        sound: Sound = Sound.from_path(self.game.audio_context, source, path)
+        sound: Sound = Sound.from_path(
+            self.game.audio_context, source, self.game.buffer_cache, path
+        )
         sound.generator.looping = item.loop_select_sound
         source.gain = self.game.config.sound.ambiance_volume.value
         return sound

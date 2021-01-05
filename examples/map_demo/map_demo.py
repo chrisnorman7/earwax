@@ -51,7 +51,8 @@ def before_run() -> None:
     """Create rooms and level."""
     boxes: List[Box] = []
     player_sound_manager: SoundManager = SoundManager(
-        game.audio_context, DirectSource(game.audio_context)
+        game.audio_context, DirectSource(game.audio_context),
+        buffer_cache=game.buffer_cache
     )
     ambiances: List[Ambiance] = []
 

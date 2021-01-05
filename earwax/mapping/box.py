@@ -513,7 +513,10 @@ class Box(Generic[T], RegisterEventMixin):
         source: Source3D = Source3D(self.game.audio_context)
         source.position = self.centre.coordinates
         source.panner_strategy = PannerStrategy.HRTF
-        return SoundManager(self.game.audio_context, source)
+        return SoundManager(
+            self.game.audio_context, source,
+            buffer_cache=self.game.buffer_cache
+        )
 
     def get_reverb(self) -> GlobalFdnReverb:
         """Make a reverb suitable for this box."""

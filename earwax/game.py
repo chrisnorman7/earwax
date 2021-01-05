@@ -2,6 +2,7 @@
 
 from concurrent.futures import Executor, ThreadPoolExecutor
 from inspect import isgenerator
+from multiprocessing import cpu_count
 from pathlib import Path
 from typing import (Any, Callable, Dict, Generator, Iterator, List, Optional,
                     Tuple, Type, cast)
@@ -12,6 +13,7 @@ from attr import Factory, attrib, attrs
 from .credit import Credit
 from .menu import Menu
 from .menu.action_menu import ActionMenu
+from .sound import BufferCache
 from .task import IntervalFunction, Task, TaskFunction
 from .types import EventType
 
@@ -140,6 +142,16 @@ class Game(RegisterEventMixin):
         default=Factory(NoneType), repr=False
     )
 
+    buffer_cache: BufferCache = attrib(repr=False)
+
+    @buffer_cache.default
+    def get_default_buffer_cache(instance: 'Game') -> BufferCache:
+        """Return the default buffer cache.
+
+        :param instance: The game to return the buffer cache for.
+        """
+        return BufferCache(instance.config.sound.default_cache_size.value)
+
     interface_sound_manager: SoundManager = attrib(
         default=Factory(NoneType), init=False, repr=False
     )
@@ -182,7 +194,9 @@ class Game(RegisterEventMixin):
     )
 
     thread_pool: Executor = attrib(
-        default=Factory(ThreadPoolExecutor), repr=False
+        default=Factory(
+            lambda: ThreadPoolExecutor(max(1, int(cpu_count() / 4)))
+        ), repr=False
     )
 
     tasks: List[Task] = attrib(default=Factory(list), init=False, repr=False)
@@ -194,7 +208,7 @@ class Game(RegisterEventMixin):
             self.before_run, self.after_run, self.on_close,
             self.on_joyhat_motion, self.on_joybutton_press,
             self.on_joybutton_release, self.on_key_press, self.on_key_release,
-            self.on_mouse_press, self.on_mouse_release
+            self.on_mouse_press, self.on_mouse_release, self.setup
         ):
             self.register_event(cast(EventType, func))
 
@@ -501,6 +515,16 @@ class Game(RegisterEventMixin):
             return True
         return False
 
+    def setup(self) -> None:
+        """Set up things needed for the game.
+
+        This event is dispatched just inside the synthizer context manager,
+        before the various sound managers have been created.
+
+        This event is perfect for loading configurations ETC.
+        """
+        pass
+
     def before_run(self) -> None:
         """Do stuff before starting the main event loop.
 
@@ -533,21 +557,30 @@ class Game(RegisterEventMixin):
 
     def do_run(self, initial_level: Optional[Level]) -> None:
         """Really run the game."""
-        self.dispatch_event('before_run')
+        self.dispatch_event('setup')
         source: Source = DirectSource(self.audio_context)
-        manager: SoundManager = SoundManager(self.audio_context, source)
+        manager: SoundManager = SoundManager(
+            self.audio_context, source, buffer_cache=self.buffer_cache
+        )
         manager.gain = self.config.sound.sound_volume.value
         self.interface_sound_manager = manager
         source = DirectSource(self.audio_context)
-        manager = SoundManager(self.audio_context, source, should_loop=True)
+        manager = SoundManager(
+            self.audio_context, source, should_loop=True,
+            buffer_cache=self.buffer_cache
+        )
         manager.gain = self.config.sound.music_volume.value
         self.music_sound_manager = manager
         source = DirectSource(self.audio_context)
-        manager = SoundManager(self.audio_context, source, should_loop=True)
+        manager = SoundManager(
+            self.audio_context, source, should_loop=True,
+            buffer_cache=self.buffer_cache
+        )
         manager.gain = self.config.sound.ambiance_volume.value
         self.ambiance_sound_manager = manager
         if initial_level is not None:
             self.push_level(initial_level)
+        self.dispatch_event('before_run')
         app.run()
 
     def run(

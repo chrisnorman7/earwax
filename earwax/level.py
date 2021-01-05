@@ -226,7 +226,7 @@ class Level(RegisterEventMixin):
             pass
         try:
             self.stop_tracks()
-        except (SynthizerError, AttributeError):
+        except (SynthizerError, AttributeError, AlreadyDestroyed):
             pass
 
 
@@ -301,7 +301,8 @@ class IntroLevel(Level):
             )
         source: DirectSource = DirectSource(audio_context)
         self.sound_manager = SoundManager(
-            audio_context, source, should_loop=self.looping
+            audio_context, source, should_loop=self.looping,
+            buffer_cache=self.game.buffer_cache
         )
         self.sound = self.sound_manager.play_path(
             self.sound_path, not self.looping
