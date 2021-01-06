@@ -1,12 +1,14 @@
 """Generates the earwax.cmd.subcommands.gui.keys module."""
 
-from typing import Any, List
 from inspect import isclass
-from jinja2 import Environment, Template
-import wx
 from pathlib import Path
-from earwax import hat_directions as _hat_directions
+from typing import Any, List
+
+import wx
+from jinja2 import Environment, Template
 from pyglet.window import key, mouse
+
+from earwax import hat_directions as _hat_directions
 
 keys_code: str = '''"""Provides keys for templates."""
 
