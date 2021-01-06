@@ -46,6 +46,7 @@ except (ImportError, TypeError):
 
 from . import hat_directions, types, utils
 from .action import Action
+from .action_map import ActionMap
 from .ambiance import Ambiance
 from .config import Config, ConfigValue
 from .configuration import EarwaxConfig
@@ -80,6 +81,8 @@ __all__: List[str] = [
     'hat_directions', 'types', 'utils',
     # action.py:
     'Action',
+    # action_map.py:
+    'ActionMap',
     # ambiance.py:
     'Ambiance',
     # config.py:

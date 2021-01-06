@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Callable, Generator, List, Optional, cast
 
 from attr import Factory, attrib, attrs
 
+from .action_map import ActionMap
 from .sound import AlreadyDestroyed, Sound, SoundManager
 from .types import EventType
 
@@ -26,7 +27,7 @@ if TYPE_CHECKING:
 
 
 @attrs(auto_attribs=True)
-class Level(RegisterEventMixin):
+class Level(RegisterEventMixin, ActionMap):
     """A level in a :class:`~earwax.Game` instance.
 
     An object that contains event handlers. Can be pushed and pulled from
@@ -58,9 +59,6 @@ class Level(RegisterEventMixin):
 
     game: 'Game'
 
-    actions: 'ActionListType' = attrib(
-        default=Factory(list), init=False, repr=False
-    )
     motions: 'MotionsType' = attrib(Factory(dict), init=False, repr=False)
 
     ambiances: List['Ambiance'] = attrib(
@@ -132,36 +130,6 @@ class Level(RegisterEventMixin):
         """
         if motion in self.motions:
             self.motions[motion]()
-
-    def action(self, name: str, **kwargs) -> Callable[
-        [ActionFunctionType], Action
-    ]:
-        """Add an action to this level.
-
-        For example::
-
-            @level.action(
-                'Walk forwards', symbol=key.W, mouse_button=mouse.RIGHT,
-                interval=0.5
-            )
-            def walk_forwards():
-                # ...
-
-        :param name: The name of the new action.
-
-            The name is currently only used by :class:`earwax.ActionMenu`.
-
-        :param kwargs: Extra keyword arguments to passed along to the
-            constructor of :class:`earwax.Action`.
-        """
-
-        def inner(func: ActionFunctionType) -> Action:
-            """Actually add the action."""
-            a: Action = Action(name, func, **kwargs)
-            self.actions.append(a)
-            return a
-
-        return inner
 
     def motion(self, motion: int) -> Callable[
         ['MotionFunctionType'], 'MotionFunctionType'
