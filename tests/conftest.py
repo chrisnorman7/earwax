@@ -11,9 +11,9 @@ from pytest import fixture
 from synthizer import (Context, GlobalFdnReverb, Source3D, StreamingGenerator,
                        initialized)
 
-from earwax import (Box, BoxLevel, BufferCache, DialogueTree, Door, Editor,
-                    Game, GameBoard, Level, Menu, NetworkConnection, Point,
-                    Sound, SoundManager, Track, TrackTypes)
+from earwax import (ActionMap, Box, BoxLevel, BufferCache, DialogueTree, Door,
+                    Editor, Game, GameBoard, Level, Menu, NetworkConnection,
+                    Point, Sound, SoundManager, Track, TrackTypes)
 from earwax.cmd.constants import scripts_directory
 from earwax.cmd.project_credit import ProjectCredit
 
@@ -190,3 +190,9 @@ def get_project_credit() -> ProjectCredit:
 def get_buffer_cache(game: Game) -> BufferCache:
     """Return a buffer cache."""
     return game.buffer_cache
+
+
+@fixture(name='action_map')
+def get_action_map() -> ActionMap:
+    """Return a new ActionMap instance."""
+    return ActionMap()
