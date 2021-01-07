@@ -1,0 +1,57 @@
+<world>
+    <name>Chris's World</name>
+    <author>Chris Norman &lt;chris.norman2@googlemail.com&gt;</author>
+    <entrance>living_room</entrance>
+    <room id="living_room">
+        <name>Living Room</name>
+        <description>This room is fairly small and comfortably furnished. There is a wooden cabinet in one corner, and a roaring fire in another.</description>
+        <ambiance>sound.wav</ambiance>
+        <object x="3" y="4" z="0">
+            <name>A tall wooden cabinet</name>
+            <ambiance>sound.wav</ambiance>
+            <action>
+                <name>Look inside</name>
+                <message>You look inside the wooden cabinet. There isn't much inside, just some old photographs, and a lot of dust.</message>
+                <sound>sound.wav</sound>
+            </action>
+        </object>
+        <object x="2" y="4" z="0">
+            <name>A roaring fire</name>
+            <ambiance>firewav</ambiance>
+            <action>
+                <name>Look at</name>
+                <message>You gaze into the fire. There are wooden logs, blackening in the heat.</message>
+                <sound>sound.wav</sound>
+            </action>
+        </object>
+        <exit destination="bedroom">
+            <action>
+                <name>A wooden door to the bedroom</name>
+                <sound>move.wav</sound>
+                <message>You walk through a small wooden door.</message>
+            </action>
+        </exit>
+    </room>
+    <room id="bedroom">
+        <name>A small bedroom</name>
+        <description>A small but comfortable bedroom, with a large bed against one wall, and a rug on the floor at the foot.</description>
+        <object>
+            <name>The bed</name>
+            <action>
+                <name>Look at</name>
+                <message>This bed has been left neatly made.</message>
+            </action>
+        </object>
+        <exit destination="living_room">
+            <action>
+                <name>The bedroom door</name>
+                <sound>move.wav</sound>
+                <message>You walk out of the bedroom.</message>
+            </action>
+        </exit>
+    </room>
+    <room id="kitchen">
+        <name>Kitchen</name>
+        <description>A well stocked kitchen, with utensils hanging up on one wall, and countertops running around the edges.</description>
+    </room>
+</world>

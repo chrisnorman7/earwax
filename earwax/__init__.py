@@ -44,7 +44,7 @@ try:
 except (ImportError, TypeError):
     pyglet = None  # Docs are building.
 
-from . import hat_directions, types, utils
+from . import hat_directions, story, types, utils
 from .action import Action
 from .action_map import ActionMap
 from .ambiance import Ambiance
@@ -78,7 +78,7 @@ from .walking_directions import walking_directions
 
 __all__: List[str] = [
     # General modules:
-    'hat_directions', 'types', 'utils',
+    'hat_directions', 'story', 'types', 'utils',
     # action.py:
     'Action',
     # action_map.py:

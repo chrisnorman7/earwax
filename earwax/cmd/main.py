@@ -13,6 +13,7 @@ from .subcommands.gui.main import gui
 from .subcommands.init_project import init_project
 from .subcommands.project_surfaces import project_surfaces
 from .subcommands.project_title import project_title
+from .subcommands.story import play_story
 
 SubcommandFunction = Callable[[Namespace], None]
 
@@ -88,6 +89,13 @@ project_title_parser = subcommand(
 project_title_parser.add_argument('title', nargs='?', help='The new name')
 
 subcommand('gui', gui)
+
+play_story_parser: ArgumentParser = subcommand(
+    'story', play_story, formatter_class=ArgumentDefaultsHelpFormatter,
+    description='Play a story file.'
+)
+
+play_story_parser.add_argument('filename', help='The filename to load from.')
 
 
 def cmd_main() -> None:
