@@ -23,7 +23,7 @@ def play_story(args: Namespace) -> None:
         print(f'There is no file named {filename}.')
         raise SystemExit
     try:
-        story: StoryWorld = story_builder.handle_filename(filename)
+        world: StoryWorld = story_builder.handle_filename(filename)
     except (RuntimeError, UnhandledElement) as e:
         print('Error loading story:')
         print()
@@ -40,13 +40,13 @@ def play_story(args: Namespace) -> None:
                 )
             )
         raise SystemExit
-    game: Game = Game(name=story.name)
+    game: Game = Game(name=world.name)
     try:
-        level: StoryLevel = StoryLevel(game, story)
+        level: StoryLevel = StoryLevel(game, world)
     except RuntimeError as e:
         print('Error creating story level:')
         print()
         print(e)
         raise SystemExit
-    window: Window = Window(caption=story.name)
+    window: Window = Window(caption=world.name)
     game.run(window, initial_level=level)
