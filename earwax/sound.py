@@ -410,7 +410,7 @@ class SoundManager:
         """Stop all sounds."""
         try:
             self.source.destroy()
-        except SynthizerError:
+        except (SynthizerError, AttributeError):
             pass
 
 
