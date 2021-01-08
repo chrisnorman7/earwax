@@ -5,7 +5,12 @@ from typing import Dict, List, Optional, Tuple, Union
 from xml.etree.ElementTree import Element
 
 from attr import Factory, attrib, attrs
-from pyglet.window import key
+
+try:
+    from pyglet.window import key
+except ModuleNotFoundError:
+    key = None
+
 from shortuuid import uuid
 from xml_python import Builder, NoneType
 

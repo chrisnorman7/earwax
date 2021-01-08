@@ -4,7 +4,10 @@ import os
 from argparse import Namespace
 from xml.etree.ElementTree import Element
 
-from pyglet.window import Window
+try:
+    from pyglet.window import Window
+except ModuleNotFoundError:
+    Window = object
 from xml_python import Builder, UnhandledElement
 
 from earwax import Game
