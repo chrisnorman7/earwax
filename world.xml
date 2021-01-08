@@ -1,57 +1,45 @@
 <world>
+    <message id="no_objects">You see nothing special.</message>
     <name>Chris's World</name>
     <author>Chris Norman &lt;chris.norman2@googlemail.com&gt;</author>
-    <entrance>living_room</entrance>
-    <room id="living_room">
-        <name>Living Room</name>
-        <description>This room is fairly small and comfortably furnished. There is a wooden cabinet in one corner, and a roaring fire in another.</description>
-        <ambiance>sound.wav</ambiance>
+    <entrance>jungle_1</entrance>
+    <room id="jungle_1">
+        <name>A Jungle Path</name>
+        <description>This path stretches away into the distance, hemmed in on both sides by the tall trees that are so common in this jungle.</description>
+        <ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\The Nature Pack\059200 - Amazon Jungle Night - Loop.wav</ambiance>
         <object x="3" y="4" z="0">
-            <name>A tall wooden cabinet</name>
-            <ambiance>sound.wav</ambiance>
+            <name>a standing stone</name>
             <action>
-                <name>Look inside</name>
-                <message>You look inside the wooden cabinet. There isn't much inside, just some old photographs, and a lot of dust.</message>
-                <sound>sound.wav</sound>
+                <name>Examine</name>
+                <message>This is a tall carved stone. It has lots of writing carved into it by unknown hands.</message>
+                <sound>D:\sounds\A Sound Effect SFX sampler 2016\SoundBits_Handwriting\Handwriting_Stone_007.wav</sound>
             </action>
         </object>
         <object x="2" y="4" z="0">
-            <name>A roaring fire</name>
-            <ambiance>firewav</ambiance>
+            <name>an ancient tree</name>
+            <ambiance>D:\sounds\King Collection - Volume 1\Ambience - Rural\Cornfield_Windy_CU_Leaves_Scrape_Rustle_KCV1-01.wav</ambiance>
             <action>
-                <name>Look at</name>
-                <message>You gaze into the fire. There are wooden logs, blackening in the heat.</message>
-                <sound>sound.wav</sound>
+                <name>Examine</name>
+                <message>You gaze at the tree. The bark is old and rugged, with claw marks from small animals criss-crossing it.</message>
+                <sound>D:\sounds\CORE 2 Free Sampler\Swooshes\Swish\SWSH_Palm Frond Whoosh Fast Stereo 090_PSE_WPA_0Vcbe.wav</sound>
             </action>
         </object>
-        <exit destination="bedroom">
+        <exit destination="jungle_2">
             <action>
-                <name>A wooden door to the bedroom</name>
-                <sound>move.wav</sound>
-                <message>You walk through a small wooden door.</message>
+                <name>Travel farther along the path</name>
+                <message>You walk further down the path.</message>
             </action>
         </exit>
     </room>
-    <room id="bedroom">
-        <name>A small bedroom</name>
-        <description>A small but comfortable bedroom, with a large bed against one wall, and a rug on the floor at the foot.</description>
-        <object>
-            <name>The bed</name>
+    <room id="jungle_2">
+        <name id="jungle_1"></name>
+        <description id="jungle_1"></description>
+        <ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\The Nature Pack\059200 - Amazon Jungle Night - Loop.wav</ambiance>
+        <exit destination="jungle_1">
             <action>
-                <name>Look at</name>
-                <message>This bed has been left neatly made.</message>
-            </action>
-        </object>
-        <exit destination="living_room">
-            <action>
-                <name>The bedroom door</name>
-                <sound>move.wav</sound>
-                <message>You walk out of the bedroom.</message>
+                <name>Travel back along the path</name>
+                <message>You walk back along the path.</message>
             </action>
         </exit>
-    </room>
-    <room id="kitchen">
-        <name>Kitchen</name>
-        <description>A well stocked kitchen, with utensils hanging up on one wall, and countertops running around the edges.</description>
     </room>
 </world>
