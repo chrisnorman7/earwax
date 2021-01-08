@@ -353,13 +353,13 @@ def make_world(parent: NoneType, element: Element) -> StoryWorld:
     return StoryWorld()
 
 
-story_builder: Builder[NoneType, StoryWorld] = Builder(
+world_builder: Builder[NoneType, StoryWorld] = Builder(
     make_world, name='Story', builders={'room': room_builder},
     parsers={'name': set_name}
 )
 
 
-@story_builder.parser('menumusic')
+@world_builder.parser('menumusic')
 def set_main_menu_music(world: StoryWorld, element: Element) -> None:
     """Add some main menu music."""
     p: Optional[str] = element.text
@@ -371,19 +371,19 @@ def set_main_menu_music(world: StoryWorld, element: Element) -> None:
         world.main_menu_musics.append(p)
 
 
-@story_builder.parser('entrance')
+@world_builder.parser('entrance')
 def set_entrance(world: StoryWorld, element: Element) -> None:
     """Set the initial room."""
     world.initial_room_id = element.text
 
 
-@story_builder.parser('author')
+@world_builder.parser('author')
 def set_author(world: StoryWorld, element: Element) -> None:
     """Set the author."""
     world.author = element.text
 
 
-@story_builder.parser('message')
+@world_builder.parser('message')
 def set_world_message(world: StoryWorld, element: Element) -> None:
     """Set a message on the world."""
     message_ids: List[str] = list(world.messages.__annotations__)

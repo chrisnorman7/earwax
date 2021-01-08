@@ -11,7 +11,7 @@ except ModuleNotFoundError:
 from xml_python import Builder, UnhandledElement
 
 from earwax import Game, StoryContext
-from earwax.story import StoryWorld, story_builder
+from earwax.story import StoryWorld, world_builder
 
 
 def play_story(args: Namespace) -> None:
@@ -23,7 +23,7 @@ def play_story(args: Namespace) -> None:
         print(f'There is no file named {filename}.')
         raise SystemExit
     try:
-        world: StoryWorld = story_builder.handle_filename(filename)
+        world: StoryWorld = world_builder.handle_filename(filename)
     except (RuntimeError, UnhandledElement) as e:
         print('Error loading story:')
         print()
