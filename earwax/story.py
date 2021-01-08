@@ -298,7 +298,9 @@ exit_builder: Builder[WorldRoom, RoomExit] = Builder(
 
 def make_room(world: StoryWorld, element: Element) -> WorldRoom:
     """Make a new room."""
-    room: WorldRoom = WorldRoom(world, element.attrib.get('id', uuid()))
+    room: WorldRoom = WorldRoom(
+        world, element.attrib.get('id', f'Room_{len(world.rooms) + 1}')
+    )
     world.rooms[room.id] = room
     return room
 
@@ -390,6 +392,8 @@ class StoryLevel(Level):
     def get_default_state(instance: 'StoryLevel') -> WorldState:
         """Get a default state."""
         return WorldState(instance.world)
+
+    action_sounds: List[Sound] = Factory(list)
 
     def __attrs_post_init__(self) -> None:
         """Ensure all room IDs are valid."""
@@ -514,6 +518,10 @@ class StoryLevel(Level):
         self.state.room_id = room.id
         self.state.object_index = None
         self.state.category_index = 0
+        while self.action_sounds:
+            s: Sound = self.action_sounds.pop()
+            s.source.destroy
+            s.destroy()
         self.stop_ambiances()
         self.ambiances.clear()
         obj: RoomObject
@@ -551,12 +559,12 @@ class StoryLevel(Level):
             if action.sound is not None:
                 source: Source3D = Source3D(self.game.audio_context)
                 source.gain = self.game.config.sound.ambiance_volume.value
-                # source.position = obj.position.coordinates
+                source.position = obj.position.coordinates
                 s: Sound = Sound.from_path(
                     self.game.audio_context, source, self.game.buffer_cache,
                     Path(action.sound)
                 )
-                s.schedule_destruction()
+                self.action_sounds.append(s)
             self.game.pop_level()
 
         return inner
