@@ -4,8 +4,9 @@ import os.path
 from enum import Enum
 from pathlib import Path
 from typing import (TYPE_CHECKING, Callable, Dict, Generator, List, Optional,
-                    Union)
-from xml.etree.ElementTree import Element
+                    Type, Union)
+from xml.dom.minidom import Document, parseString
+from xml.etree.ElementTree import Element, tostring
 
 from attr import Factory, attrib, attrs
 
@@ -31,22 +32,52 @@ if TYPE_CHECKING:
     from .story_context import StoryContext
 
 
+def get_element(
+    tag: str, text: Optional[str] = None, attrib: Dict[str, str] = {}
+) -> Element:
+    """Return a fully-formed element.
+
+    :param tag: The XML tag t use.
+    :param text: The text contained by this element.
+
+    :param attrib: The extra attributes for the element.
+    """
+    e: Element = Element(tag, attrib=attrib)
+    e.text = text
+    return e
+
+
+class StoryWorldBase:
+    """Allows dumping to XML."""
+
+    def to_xml(self) -> Element:
+        """Dump this object to XML."""
+        raise NotImplementedError
+
+    def to_document(self) -> Document:
+        """Return this object as an XML document."""
+        s: bytes = tostring(self.to_xml())
+        return parseString(s)
+
+    def to_string(self) -> str:
+        """Return this object as pretty-printed XML."""
+        d: Document = self.to_document()
+        return d.toprettyxml()
+
+
 @attrs(auto_attribs=True)
-class WorldSound:
-    """A sound which is heard when something happens in the story."""
+class WorldAmbiance(StoryWorldBase):
+    """An ambiance."""
 
     path: str
 
-
-@attrs(auto_attribs=True)
-class WorldAmbiance(WorldSound):
-    """An ambiance."""
-
-    position: Optional[Point] = None
+    def to_xml(self) -> Element:
+        """Dump this ambiance."""
+        return get_element('ambiance', text=self.path)
 
 
 @attrs(auto_attribs=True)
-class WorldAction:
+class WorldAction(StoryWorldBase):
     """An action that can be performed.
 
     This class is used on objects, and when walking through doors.
@@ -54,11 +85,21 @@ class WorldAction:
 
     name: str = 'Unnamed Action'
     message: Optional[str] = None
-    sound: Optional[WorldSound] = None
+    sound: Optional[str] = None
+
+    def to_xml(self) -> Element:
+        """Dump this object."""
+        e: Element = get_element('action')
+        e.append(get_element('name', text=self.name))
+        if self.message is not None:
+            e.append(get_element('message', text=self.message))
+        if self.sound is not None:
+            e.append(get_element('sound', text=self.sound))
+        return e
 
 
 @attrs(auto_attribs=True)
-class RoomObject:
+class RoomObject(StoryWorldBase):
     """An object in the story.
 
     Will either sit in a room, or be in the player's inventory.
@@ -71,9 +112,28 @@ class RoomObject:
     ambiances: List[WorldAmbiance] = Factory(list)
     actions: List[WorldAction] = Factory(list)
 
+    def to_xml(self) -> Element:
+        """Dump this object."""
+        e: Element = get_element('object')
+        if self.position is not None:
+            e.attrib = {
+                'x': str(self.position.x),
+                'y': str(self.position.y),
+                'z': str(self.position.y)
+            }
+        e.attrib['id'] = self.id
+        e.append(get_element('name', text=self.name))
+        ambiance: WorldAmbiance
+        for ambiance in self.ambiances:
+            e.append(ambiance.to_xml())
+        action: WorldAction
+        for action in self.actions:
+            e.append(action.to_xml())
+        return e
+
 
 @attrs(auto_attribs=True)
-class RoomExit:
+class RoomExit(StoryWorldBase):
     """An exit between two rooms."""
 
     location: 'WorldRoom'
@@ -85,9 +145,17 @@ class RoomExit:
         """Return the room this exit leads from."""
         return self.location.world.rooms[self.destination_id]
 
+    def to_xml(self) -> Element:
+        """Dump this exit."""
+        e: Element = get_element(
+            'exit', attrib={'destination': self.destination_id}
+        )
+        e.append(self.action.to_xml())
+        return e
+
 
 @attrs(auto_attribs=True)
-class WorldRoom:
+class WorldRoom(StoryWorldBase):
     """A room in a world."""
 
     world: 'StoryWorld'
@@ -98,9 +166,25 @@ class WorldRoom:
     objects: Dict[str, RoomObject] = Factory(dict)
     exits: List[RoomExit] = Factory(list)
 
+    def to_xml(self) -> Element:
+        """Dump this room."""
+        e: Element = get_element('room', attrib={'id': self.id})
+        e.append(get_element('name', text=self.name))
+        e.append(get_element('description', text=self.description))
+        ambiance: WorldAmbiance
+        for ambiance in self.ambiances:
+            e.append(ambiance.to_xml())
+        obj: RoomObject
+        for obj in self.objects.values():
+            e.append(obj.to_xml())
+        x: RoomExit
+        for x in self.exits:
+            e.append(x.to_xml())
+        return e
+
 
 @attrs(auto_attribs=True)
-class WorldMessages:
+class WorldMessages(StoryWorldBase):
     """All the messages that can be shown to the player."""
 
     no_objects: str = 'This room is empty.'
@@ -120,7 +204,7 @@ class WorldMessages:
 
 
 @attrs(auto_attribs=True)
-class StoryWorld:
+class StoryWorld(StoryWorldBase):
     """The top level world object."""
 
     name: str = 'Untitled World'
@@ -135,6 +219,29 @@ class StoryWorld:
     def initial_room(self) -> Optional[WorldRoom]:
         """Return the initial room for this world."""
         return self.rooms[self.initial_room_id]
+
+    def to_xml(self) -> Element:
+        """Dump this world."""
+        e: Element = get_element('world')
+        e.append(get_element('name', text=self.name))
+        e.append(get_element('author', text=self.author))
+        music: str
+        for music in self.main_menu_musics:
+            e.append(get_element('menumusic', text=music))
+        room: WorldRoom
+        for room in self.rooms.values():
+            e.append(room.to_xml())
+        if self.initial_room_id is not None:
+            e.append(get_element('entrance', text=self.initial_room_id))
+        name: str
+        type_: Type
+        for name, type_ in self.messages.__annotations__.items():
+            if type_ is str:
+                value: str = getattr(self.messages, name)
+                e.append(
+                    get_element('message', text=value, attrib={'id': name})
+                )
+        return e
 
 
 class WorldStateCategories(Enum):
@@ -208,8 +315,6 @@ def set_ambiance(
             'The ambiance for %s is invalid: %s.' % (parent.name, p)
         )
     a: WorldAmbiance = WorldAmbiance(element.text)
-    if isinstance(parent, RoomObject):
-        a.position = parent.position
     parent.ambiances.append(a)
 
 
@@ -532,7 +637,7 @@ class StoryLevel(Level):
         a: WorldAmbiance
         for obj in room.objects.values():
             for a in obj.ambiances:
-                ambiance: Ambiance = Ambiance('file', a.path, a.position)
+                ambiance: Ambiance = Ambiance('file', a.path, obj.position)
                 self.ambiances.append(ambiance)
         self.start_ambiances()
         ambiance_paths: List[str] = [a.path for a in room.ambiances]
