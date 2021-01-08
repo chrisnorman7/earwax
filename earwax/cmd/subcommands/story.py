@@ -10,8 +10,8 @@ except ModuleNotFoundError:
     Window = object
 from xml_python import Builder, UnhandledElement
 
-from earwax import Game
-from earwax.story import StoryLevel, StoryWorld, story_builder
+from earwax import Game, StoryContext
+from earwax.story import StoryWorld, story_builder
 
 
 def play_story(args: Namespace) -> None:
@@ -41,12 +41,13 @@ def play_story(args: Namespace) -> None:
             )
         raise SystemExit
     game: Game = Game(name=world.name)
+    ctx: StoryContext
     try:
-        level: StoryLevel = StoryLevel(game, world)
+        ctx = StoryContext(game, world)
     except RuntimeError as e:
         print('Error creating story level:')
         print()
         print(e)
         raise SystemExit
     window: Window = Window(caption=world.name)
-    game.run(window, initial_level=level)
+    game.run(window, initial_level=ctx.get_main_menu())

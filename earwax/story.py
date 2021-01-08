@@ -3,7 +3,8 @@
 import os.path
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Dict, Generator, List, Optional, Union
+from typing import (TYPE_CHECKING, Callable, Dict, Generator, List, Optional,
+                    Union)
 from xml.etree.ElementTree import Element
 
 from attr import Factory, attrib, attrs
@@ -25,6 +26,9 @@ from shortuuid import uuid
 from xml_python import Builder, NoneType
 
 from .level import Level
+
+if TYPE_CHECKING:
+    from .story_context import StoryContext
 
 
 @attrs(auto_attribs=True)
@@ -107,6 +111,12 @@ class WorldMessages:
     room_category: str = 'Location'
     objects_category: str = 'Objects'
     exits_category: str = 'Exits'
+    main_menu: str = 'Main Menu'
+    play_game: str = 'Play'
+    show_credits: str = 'Show Credits'
+    credits_menu: str = 'Credits'
+    welcome: str = 'Welcome to this game.'
+    exit: str = 'Exit'
 
 
 @attrs(auto_attribs=True)
@@ -116,6 +126,7 @@ class StoryWorld:
     name: str = 'Untitled World'
     author: str = 'Unknown'
 
+    main_menu_musics: List[str] = Factory(list)
     rooms: Dict[str, WorldRoom] = Factory(dict)
     initial_room_id: Optional[str] = None
     messages: WorldMessages = Factory(WorldMessages)
@@ -126,7 +137,7 @@ class StoryWorld:
         return self.rooms[self.initial_room_id]
 
 
-class StoryStateCategories(Enum):
+class WorldStateCategories(Enum):
     """The story state categories."""
 
     room = 0
@@ -151,9 +162,9 @@ class WorldState:
         return self.world.rooms[self.room_id]
 
     @property
-    def category(self) -> StoryStateCategories:
+    def category(self) -> WorldStateCategories:
         """Return the current category."""
-        return list(StoryStateCategories)[self.category_index]
+        return list(WorldStateCategories)[self.category_index]
 
 
 def set_name(
@@ -337,15 +348,27 @@ def set_description(room: WorldRoom, element: Element) -> None:
             room.description = room.world.rooms[room_id].description
 
 
-def make_story(parent: NoneType, element: Element) -> StoryWorld:
-    """Make a story object."""
+def make_world(parent: NoneType, element: Element) -> StoryWorld:
+    """Make a StoryWorld object."""
     return StoryWorld()
 
 
 story_builder: Builder[NoneType, StoryWorld] = Builder(
-    make_story, name='Story', builders={'room': room_builder},
+    make_world, name='Story', builders={'room': room_builder},
     parsers={'name': set_name}
 )
+
+
+@story_builder.parser('menumusic')
+def set_main_menu_music(world: StoryWorld, element: Element) -> None:
+    """Add some main menu music."""
+    p: Optional[str] = element.text
+    if p is None:
+        raise RuntimeError(
+            'You must provide a path to load main menu music from.'
+        )
+    else:
+        world.main_menu_musics.append(p)
 
 
 @story_builder.parser('entrance')
@@ -383,53 +406,29 @@ def set_world_message(world: StoryWorld, element: Element) -> None:
 class StoryLevel(Level):
     """A level that can be used to play a story."""
 
-    world: StoryWorld
+    world_context: 'StoryContext'
 
     sound_manager: SoundManager = attrib(repr=False, init=False)
-    state: WorldState = attrib()
-
-    @state.default
-    def get_default_state(instance: 'StoryLevel') -> WorldState:
-        """Get a default state."""
-        return WorldState(instance.world)
-
     action_sounds: List[Sound] = Factory(list)
 
     def __attrs_post_init__(self) -> None:
-        """Ensure all room IDs are valid."""
-        if self.world.initial_room_id is None:
-            raise RuntimeError(
-                'You must set the initial room for your world, with a '
-                '<entrance> tag inside your <world> tag.'
-            )
-        elif self.world.initial_room_id not in self.world.rooms:
-            raise RuntimeError(
-                'Invalid room id for <entrance> tag: %s.' %
-                self.world.initial_room_id
-            )
-        room: WorldRoom
-        inaccessible_rooms: List[WorldRoom] = list(self.world.rooms.values())
-        for room in self.world.rooms.values():
-            x: RoomExit
-            for x in room.exits:
-                did: str = x.destination_id
-                if did not in self.world.rooms:
-                    raise RuntimeError(
-                        'Invalid destination %r for exit %s of room %s.' % (
-                            did, x.action.name, room.name
-                        )
-                    )
-                if x.destination in inaccessible_rooms:
-                    inaccessible_rooms.remove(x.destination)
-        for room in inaccessible_rooms:
-            print('WARNING: There is no way to access %s!' % room.name)
-        self.state.room_id = self.world.initial_room_id
+        """Bind actions."""
         self.action('Next category', symbol=key.DOWN)(self.next_category)
         self.action('Previous category', symbol=key.UP)(self.previous_category)
         self.action('Next object', symbol=key.RIGHT)(self.next_object)
         self.action('Previous object', symbol=key.LEFT)(self.previous_object)
         self.action('Activate object', symbol=key.RETURN)(self.activate)
         return super().__attrs_post_init__()
+
+    @property
+    def state(self) -> WorldState:
+        """Return the current state."""
+        return self.world_context.state
+
+    @property
+    def world(self) -> StoryWorld:
+        """Get the attached world."""
+        return self.world_context.world
 
     def on_push(self) -> None:
         """Set the sound manager up."""
@@ -454,12 +453,12 @@ class StoryLevel(Level):
         """Cycle through information categories."""
         self.state.category_index = (
             self.state.category_index + direction
-        ) % len(StoryStateCategories)
-        category: StoryStateCategories = self.state.category
+        ) % len(WorldStateCategories)
+        category: WorldStateCategories = self.state.category
         category_name: str
-        if category is StoryStateCategories.room:
+        if category is WorldStateCategories.room:
             category_name = self.world.messages.room_category
-        elif category is StoryStateCategories.objects:
+        elif category is WorldStateCategories.objects:
             category_name = self.world.messages.objects_category
         else:
             category_name = self.world.messages.exits_category
@@ -480,18 +479,18 @@ class StoryLevel(Level):
         """Cycle through objects."""
         data: List[str]
         room: WorldRoom = self.state.room
-        category: StoryStateCategories = self.state.category
-        if category is StoryStateCategories.room:
+        category: WorldStateCategories = self.state.category
+        if category is WorldStateCategories.room:
             data = [room.name, room.description]
-        elif category is StoryStateCategories.objects:
+        elif category is WorldStateCategories.objects:
             data = [o.name for o in room.objects.values()]
         else:
             data = [x.action.name for x in room.exits]
         if not data:
             message: str = 'If you are seeing this, you have found a bug.'
-            if category is StoryStateCategories.objects:
+            if category is WorldStateCategories.objects:
                 message = self.world.messages.no_objects
-            elif category is StoryStateCategories.exits:
+            elif category is WorldStateCategories.exits:
                 message = self.world.messages.no_exits
             self.game.output(message)
         else:
@@ -584,10 +583,10 @@ class StoryLevel(Level):
     def activate(self) -> None:
         """Activate the currently focussed object."""
         room: WorldRoom = self.state.room
-        category: StoryStateCategories = self.state.category
-        if category is StoryStateCategories.room:
+        category: WorldStateCategories = self.state.category
+        if category is WorldStateCategories.room:
             self.game.output(self.world.messages.room_activate)
-        elif category is StoryStateCategories.exits:
+        elif category is WorldStateCategories.exits:
             if room.exits:
                 x: RoomExit = room.exits[self.state.object_index]
                 self.use_exit(x)
