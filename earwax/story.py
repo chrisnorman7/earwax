@@ -418,6 +418,7 @@ class StoryLevel(Level):
         self.action('Next object', symbol=key.RIGHT)(self.next_object)
         self.action('Previous object', symbol=key.LEFT)(self.previous_object)
         self.action('Activate object', symbol=key.RETURN)(self.activate)
+        self.action('Return to main menu', symbol=key.ESCAPE)(self.main_menu)
         return super().__attrs_post_init__()
 
     @property
@@ -440,6 +441,10 @@ class StoryLevel(Level):
         )
         self.sound_manager.gain = self.game.config.sound.ambiance_volume.value
         self.set_room(self.state.room)
+
+    def main_menu(self) -> None:
+        """Return to the main menu."""
+        self.game.replace_level(self.world_context.get_main_menu())
 
     def next_category(self) -> Generator[None, None, None]:
         """Next information category."""

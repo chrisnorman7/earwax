@@ -23,6 +23,8 @@ class StoryContext:
         """Get a default state."""
         return WorldState(instance.world)
 
+    main_level: StoryLevel = attrib(init=False, repr=False)
+
     def __attrs_post_init__(self) -> None:
         """Make sure everything is in working order."""
         if self.world.initial_room_id is None:
@@ -52,10 +54,13 @@ class StoryContext:
         for room in inaccessible_rooms:
             print('WARNING: There is no way to access %s!' % room.name)
         self.state.room_id = self.world.initial_room_id
+        self.main_level = StoryLevel(self.game, self)
 
     def get_main_menu(self) -> Menu:
         """Create a main menu for this world."""
-        m: Menu = Menu(self.game, self.world.messages.main_menu)
+        m: Menu = Menu(
+            self.game, self.world.messages.main_menu, dismissible=False
+        )
         path: str
         for path in self.world.main_menu_musics:
             t: Track = Track('file', path, TrackTypes.music)
@@ -68,15 +73,10 @@ class StoryContext:
         m.add_item(self.game.stop, title=self.world.messages.exit)
         return m
 
-    def get_world_level(self) -> StoryLevel:
-        """Return a story level suitable for this world."""
-        return StoryLevel(self.game, self)
-
     def play(self) -> None:
         """Push the world level."""
-        level: StoryLevel = self.get_world_level()
         self.game.output(self.world.messages.welcome)
-        self.game.replace_level(level)
+        self.game.replace_level(self.main_level)
 
     def push_credits(self) -> None:
         """Push the credits menu."""
