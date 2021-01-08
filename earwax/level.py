@@ -16,14 +16,13 @@ except ModuleNotFoundError:
     schedule_once = None
     Context, DirectSource, SynthizerError = (object, object, Exception)
 
-from .action import Action, ActionFunctionType
 from .ambiance import Ambiance
 from .mixins import RegisterEventMixin
 from .track import Track, TrackTypes
 
 if TYPE_CHECKING:
     from .game import Game
-    from .types import ActionListType, MotionFunctionType, MotionsType
+    from .types import MotionFunctionType, MotionsType
 
 
 @attrs(auto_attribs=True)
