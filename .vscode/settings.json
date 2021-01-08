@@ -46,6 +46,7 @@
         "bufsize",
         "chrooted",
         "cls",
+        "ctx",
         "cwd",
         "cytolk",
         "dialog",
