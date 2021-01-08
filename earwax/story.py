@@ -11,7 +11,7 @@ from attr import Factory, attrib, attrs
 from .ambiance import Ambiance
 from .menu import Menu
 from .point import Point
-from .sound import SoundManager
+from .sound import Sound, SoundManager
 from .track import Track, TrackTypes
 
 try:
@@ -549,9 +549,14 @@ class StoryLevel(Level):
             """Actually perform the action."""
             self.game.output(action.message)
             if action.sound is not None:
-                self.game.interface_sound_manager.play_path(
-                    Path(action.sound), True
+                source: Source3D = Source3D(self.game.audio_context)
+                source.gain = self.game.config.sound.ambiance_volume.value
+                # source.position = obj.position.coordinates
+                s: Sound = Sound.from_path(
+                    self.game.audio_context, source, self.game.buffer_cache,
+                    Path(action.sound)
                 )
+                s.schedule_destruction()
             self.game.pop_level()
 
         return inner
