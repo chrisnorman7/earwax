@@ -28,6 +28,7 @@
             <action>
                 <name>Travel farther along the path</name>
                 <message>You walk further down the path.</message>
+                <sound>D:\sounds\WARFARE SOUNDS\Footsteps\footstep_sand_slide_09.wav</sound>
             </action>
         </exit>
     </room>
@@ -39,6 +40,7 @@
             <action>
                 <name>Travel back along the path</name>
                 <message>You walk back along the path.</message>
+                <sound>D:\sounds\WARFARE SOUNDS\Footsteps\footstep_sand_slide_09.wav</sound>
             </action>
         </exit>
     </room>

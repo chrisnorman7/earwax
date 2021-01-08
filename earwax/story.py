@@ -505,6 +505,8 @@ class StoryLevel(Level):
         """Use the given exit."""
         a: WorldAction = x.action
         self.game.output(a.message)
+        if a.sound is not None:
+            self.game.interface_sound_manager.play_path(Path(a.sound), True)
         self.set_room(x.destination)
 
     def set_room(self, room: WorldRoom) -> None:
@@ -547,7 +549,9 @@ class StoryLevel(Level):
             """Actually perform the action."""
             self.game.output(action.message)
             if action.sound is not None:
-                self.game.interface_sound_manager.play_path(Path(action.sound), True)
+                self.game.interface_sound_manager.play_path(
+                    Path(action.sound), True
+                )
             self.game.pop_level()
 
         return inner
