@@ -1,13 +1,16 @@
 """Provides classes related to XML stories."""
 
+import os.path
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Dict, Generator, List, Optional, Tuple, Union
+from typing import Callable, Dict, Generator, List, Optional, Union
 from xml.etree.ElementTree import Element
 
 from attr import Factory, attrib, attrs
 
+from .ambiance import Ambiance
 from .menu import Menu
+from .point import Point
 from .sound import SoundManager
 from .track import Track, TrackTypes
 
@@ -28,14 +31,14 @@ from .level import Level
 class WorldSound:
     """A sound which is heard when something happens in the story."""
 
-    path: Path
+    path: str
 
 
 @attrs(auto_attribs=True)
 class WorldAmbiance(WorldSound):
     """An ambiance."""
 
-    position: Optional[Tuple[float, float, float]] = None
+    position: Optional[Point] = None
 
 
 @attrs(auto_attribs=True)
@@ -59,7 +62,7 @@ class RoomObject:
 
     id: str
     location: 'WorldRoom'
-    position: Optional[Tuple[float, float, float]] = None
+    position: Optional[Point] = None
     name: str = 'Unnamed Object'
     ambiances: List[WorldAmbiance] = Factory(list)
     actions: List[WorldAction] = Factory(list)
@@ -188,10 +191,10 @@ def set_ambiance(
         raise RuntimeError(
             'You must provide a path for the ambiance of %s.' % parent.name
         )
-    p: Path = Path(element.text)
-    if not p.exists():
+    p: str = element.text
+    if not os.path.exists(p):
         raise RuntimeError(
-            'The ambiance for %s is invalid: %s.' % (parent.name, element.text)
+            'The ambiance for %s is invalid: %s.' % (parent.name, p)
         )
     a: WorldAmbiance = WorldAmbiance(element.text)
     if isinstance(parent, RoomObject):
@@ -233,11 +236,11 @@ def set_sound(action: WorldAction, element: Element) -> None:
     """Set the action sound."""
     if element.text is None:
         raise RuntimeError('Empty sound tag for action %s.' % action.name)
-    p: Path = Path(element.text)
-    if not p.exists():
+    p: str = element.text
+    if not os.path.exists(p):
         raise RuntimeError(
             'Invalid sound for action %s: %r: Path does not exist.' % (
-                action.name, element.text
+                action.name, p
             )
         )
     action.sound = p
@@ -259,7 +262,7 @@ def make_object(room: WorldRoom, element: Element) -> RoomObject:
                 )
             )
     if coordinates != [0.0, 0.0, 0.0]:
-        obj.position = tuple(coordinates)
+        obj.position = Point(*coordinates)
     room.objects[obj.id] = obj
     return obj
 
@@ -511,6 +514,13 @@ class StoryLevel(Level):
         self.state.category_index = 0
         self.stop_ambiances()
         self.ambiances.clear()
+        obj: RoomObject
+        a: WorldAmbiance
+        for obj in room.objects.values():
+            for a in obj.ambiances:
+                ambiance: Ambiance = Ambiance('file', a.path, a.position)
+                self.ambiances.append(ambiance)
+        self.start_ambiances()
         ambiance_paths: List[str] = [a.path for a in room.ambiances]
         loaded_paths: List[str] = []
         track: Track
@@ -537,7 +547,7 @@ class StoryLevel(Level):
             """Actually perform the action."""
             self.game.output(action.message)
             if action.sound is not None:
-                self.game.interface_sound_manager.play_path(action.sound, True)
+                self.game.interface_sound_manager.play_path(Path(action.sound), True)
             self.game.pop_level()
 
         return inner
