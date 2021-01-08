@@ -1,5 +1,6 @@
 """Provides the StoryContext class."""
 
+import webbrowser
 from typing import List
 
 from attr import attrib, attrs
@@ -70,6 +71,11 @@ class StoryContext:
             m.add_item(
                 self.push_credits, title=self.world.messages.show_credits
             )
+        m.add_item(
+            lambda: webbrowser.open(
+                'https://github.com/chrisnorman7/earwax/issues/new'
+            ), title='Report Earwax Bug'
+        )
         m.add_item(self.game.stop, title=self.world.messages.exit)
         return m
 
