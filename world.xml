@@ -7,15 +7,16 @@
         <name>A Jungle Path</name>
         <description>This path stretches away into the distance, hemmed in on both sides by the tall trees that are so common in this jungle.</description>
         <ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\The Nature Pack\059200 - Amazon Jungle Night - Loop.wav</ambiance>
-        <object x="3" y="4" z="0">
+        <object x="-2" y="2" z="0">
             <name>a standing stone</name>
+            <ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\Metal Worlds\355000 - Spherical Vibration Drone Medium.wav</ambiance>
             <action>
                 <name>Examine</name>
                 <message>This is a tall carved stone. It has lots of writing carved into it by unknown hands.</message>
                 <sound>D:\sounds\A Sound Effect SFX sampler 2016\SoundBits_Handwriting\Handwriting_Stone_007.wav</sound>
             </action>
         </object>
-        <object x="2" y="4" z="0">
+        <object x="1" y="-1" z="0">
             <name>an ancient tree</name>
             <ambiance>D:\sounds\King Collection - Volume 1\Ambience - Rural\Cornfield_Windy_CU_Leaves_Scrape_Rustle_KCV1-01.wav</ambiance>
             <action>
