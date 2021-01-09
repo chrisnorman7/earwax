@@ -7,7 +7,7 @@
 		<name>A Jungle Path</name>
 		<description>This path stretches away into the distance, hemmed in on both sides by the tall trees that are so common in this jungle.</description>
 		<ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\The Nature Pack\059200 - Amazon Jungle Night - Loop.wav</ambiance>
-		<object x="-2.0" y="2.0" z="2.0" id="jFEEKh7KUSfgGnorKpaMgt">
+		<object x="-2.0" y="2.0" z="2.0" id="f86C8BT6Jg6gCjtuDvvQVo">
 			<name>a standing stone</name>
 			<ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\Metal Worlds\355000 - Spherical Vibration Drone Medium.wav</ambiance>
 			<action>
@@ -16,7 +16,7 @@
 				<sound>D:\sounds\A Sound Effect SFX sampler 2016\SoundBits_Handwriting\Handwriting_Stone_007.wav</sound>
 			</action>
 		</object>
-		<object x="1.0" y="-1.0" z="-1.0" id="Zh6NFxCK56s4if8wJeDpYV">
+		<object x="1.0" y="-1.0" z="-1.0" id="LXFHCyXjAYxCZumWMzDVJu">
 			<name>an ancient tree</name>
 			<ambiance>D:\sounds\King Collection - Volume 1\Ambience - Rural\Cornfield_Windy_CU_Leaves_Scrape_Rustle_KCV1-01.wav</ambiance>
 			<action>
@@ -46,6 +46,30 @@
 		</exit>
 	</room>
 	<room id="KUtdDVXEuWJfNMsH6vGYTa">
+		<name>Unnamed Room</name>
+		<description>This room is empty. Kind of looks like a cell.</description>
+	</room>
+	<room id="SYoycvs4eeAsANbZH3tsTP">
+		<name>Unnamed Room</name>
+		<description>Not described.</description>
+	</room>
+	<room id="EqrDGhGs6ayFfSbKvD3dGc">
+		<name>Unnamed Room</name>
+		<description>Not described.</description>
+	</room>
+	<room id="ba5u8sgaKmZ8hx9bCRmeJs">
+		<name>Unnamed Room</name>
+		<description>Not described.</description>
+	</room>
+	<room id="krxthPB7Aw2LQdJsWpNCLY">
+		<name>Unnamed Room</name>
+		<description>Not described.</description>
+	</room>
+	<room id="gV9HuaTav5f32kXtc8sKtE">
+		<name>Unnamed Room</name>
+		<description>Not described.</description>
+	</room>
+	<room id="nW2gSHbWrbYPghKSBvLkM7">
 		<name>Unnamed Room</name>
 		<description>Not described.</description>
 	</room>
