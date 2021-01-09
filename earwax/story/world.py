@@ -10,6 +10,8 @@ from attr import Factory, attrib, attrs
 from ..point import Point
 from .util import get_element
 
+ObjectTypes = Union['WorldRoom', 'RoomObject', 'RoomExit']
+
 
 @attrs(auto_attribs=True)
 class WorldAmbiance:
@@ -614,7 +616,7 @@ class WorldState:
         return list(WorldStateCategories)[self.category_index]
 
     @property
-    def object(self) -> Union[WorldRoom, RoomObject, RoomExit]:
+    def object(self) -> ObjectTypes:
         """Return the currently focused object."""
         room: WorldRoom = self.room
         category: WorldStateCategories = self.category
