@@ -233,7 +233,8 @@ class PlayLevel(Level):
 
         def inner() -> None:
             """Actually perform the action."""
-            self.game.output(action.message)
+            if action.message is not None:
+                self.game.output(action.message)
             if action.sound is not None:
                 source: Source3D = Source3D(self.game.audio_context)
                 source.gain = self.game.config.sound.ambiance_volume.value
