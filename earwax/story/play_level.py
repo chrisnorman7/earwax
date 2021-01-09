@@ -55,6 +55,12 @@ class PlayLevel(Level):
         self.action(
             'Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT
         )(self.game.push_action_menu)
+        self.action('Volume down', symbol=key.PAGEDOWN, interval=0.1)(
+            lambda: self.game.adjust_volume(-0.05)
+        )
+        self.action('Volume Up', symbol=key.PAGEUP, interval=0.1)(
+            lambda: self.game.adjust_volume(0.05)
+        )
         return super().__attrs_post_init__()
 
     def pause(self) -> None:
