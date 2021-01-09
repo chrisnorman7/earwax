@@ -15,7 +15,7 @@ from .subcommands.gui.main import gui
 from .subcommands.init_project import init_project
 from .subcommands.project_surfaces import project_surfaces
 from .subcommands.project_title import project_title
-from .subcommands.story import play_story
+from .subcommands.story import create_story, play_story
 
 SubcommandFunction = Callable[[Namespace], None]
 
@@ -123,6 +123,14 @@ play_story_parser: ArgumentParser = subcommand(
 )
 
 play_story_parser.add_argument('filename', help='The filename to load from.')
+
+create_story_parser: ArgumentParser = subcommand(
+    'new', create_story, subparser=story_subcommands,
+    formatter_class=ArgumentDefaultsHelpFormatter,
+    description='Create a new story file.'
+)
+
+create_story_parser.add_argument('filename', help='The filename to create.')
 
 
 def cmd_main() -> None:

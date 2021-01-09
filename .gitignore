@@ -134,3 +134,4 @@ docs/source/api/
 /sounds
 surfaces.py
 *.dll
+new.xml

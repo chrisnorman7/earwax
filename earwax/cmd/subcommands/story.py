@@ -11,7 +11,7 @@ except ModuleNotFoundError:
 from xml_python import Builder, UnhandledElement
 
 from earwax import Game
-from earwax.story import StoryContext, StoryWorld, world_builder
+from earwax.story import StoryContext, StoryWorld, WorldRoom, world_builder
 
 
 def play_story(args: Namespace) -> None:
@@ -51,3 +51,20 @@ def play_story(args: Namespace) -> None:
         raise SystemExit
     window: Window = Window(caption=world.name)
     game.run(window, initial_level=ctx.get_main_menu())
+
+
+def create_story(args: Namespace) -> None:
+    """Create a new story."""
+    filename: str = args.filename
+    if os.path.exists(filename):
+        print('Error: Path already exists: %s.' % filename)
+        print()
+        print('Perhaps you meant the `story play` subcommand?')
+    else:
+        w: StoryWorld = StoryWorld(name='Untitled World')
+        r: WorldRoom = WorldRoom(w, 'first_room')
+        w.rooms[r.id] = r
+        w.initial_room_id = r.id
+        with open(filename, 'w') as f:
+            f.write(w.to_string())
+        print('Created %s.' % w.name)
