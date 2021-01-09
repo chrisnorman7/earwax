@@ -151,3 +151,19 @@ def test_paused(sound: Sound) -> None:
     sound.paused = False
     assert sound.paused is False
     assert sound._paused is False
+
+
+def test_destroy_source(context: Context, sound: Sound) -> None:
+    """Test that the source can be destroyed as well."""
+    sound.destroy()
+    with raises(SynthizerError):
+        sound.generator.destroy()
+    sound.source.destroy()
+    source: Source3D = Source3D(context)
+    sound = Sound.from_stream(context, source, 'file', 'move.wav')
+    assert sound.source is source
+    sound.destroy(destroy_source=True)
+    with raises(SynthizerError):
+        sound.generator.destroy()
+    with raises(SynthizerError):
+        sound.source.destroy()

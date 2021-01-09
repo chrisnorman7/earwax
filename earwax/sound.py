@@ -241,18 +241,22 @@ class Sound:
         self._paused = False
         self.generator.play()
 
-    def destroy(self) -> None:
+    def destroy(self, destroy_source: bool = False) -> None:
         """Destroy this sound.
 
-        This method will destroy the attached :attr:`~earwax.Sound.generator`,
-        but you must destroy the :attr:`~earwax.Sound.source` yourself.
+        This method will destroy the attached :attr:`~earwax.Sound.generator`.
 
         If this sound has already been destroyed, then
         :class:`~earwax.Sound.AlreadyDestroyed` will be raised.
+
+        :param destroy_source: If this value is ``True``, then the attached
+            :attr:`~earwax.Sound.source` will be destroyed as well.
         """
         if not self._valid:
             raise AlreadyDestroyed(self)
         self.generator.destroy()
+        if destroy_source:
+            self.source.destroy()
         self._valid = False
 
     def _destroy(
