@@ -537,12 +537,14 @@ class StoryWorld:
 class WorldStateCategories(Enum):
     """The various categories the player can select.
 
-    :ivar room: The category where the name and description of a room are
-        shown.
+    :ivar ~WorldStateCategories.room: The category where the name and
+        description of a room are shown.
 
-    :ivar objects: The category where the objects of a room are shown.
+    :ivar ~WorldStateCategories.objects: The category where the objects of a
+        room are shown.
 
-    :ivar exits: The category where the exits of a room are shown.
+    :ivar ~WorldStateCategories.exits: The category where the exits of a room
+        are shown.
     """
 
     room = 0
