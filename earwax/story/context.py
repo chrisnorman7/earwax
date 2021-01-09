@@ -5,10 +5,11 @@ from typing import List
 
 from attr import attrib, attrs
 
-from .game import Game
-from .menu import Menu
-from .story import RoomExit, StoryLevel, StoryWorld, WorldRoom, WorldState
-from .track import Track, TrackTypes
+from ..game import Game
+from ..menu import Menu
+from ..track import Track, TrackTypes
+from .play_level import PlayLevel
+from .world import RoomExit, StoryWorld, WorldRoom, WorldState
 
 
 @attrs(auto_attribs=True)
@@ -24,7 +25,7 @@ class StoryContext:
         """Get a default state."""
         return WorldState(instance.world)
 
-    main_level: StoryLevel = attrib(init=False, repr=False)
+    main_level: PlayLevel = attrib(init=False, repr=False)
 
     def __attrs_post_init__(self) -> None:
         """Make sure everything is in working order."""
@@ -55,7 +56,7 @@ class StoryContext:
         for room in inaccessible_rooms:
             print('WARNING: There is no way to access %s!' % room.name)
         self.state.room_id = self.world.initial_room_id
-        self.main_level = StoryLevel(self.game, self)
+        self.main_level = PlayLevel(self.game, self)
 
     def get_main_menu(self) -> Menu:
         """Create a main menu for this world."""

@@ -72,7 +72,6 @@ from .rumble_effects import RumbleEffect, RumbleSequence, RumbleSequenceLine
 from .sound import (AlreadyDestroyed, BufferCache, BufferDirectory, NoCache,
                     Sound, SoundError, SoundManager)
 from .speech import tts
-from .story_context import StoryContext
 from .task import IntervalFunction, Task, TaskFunction
 from .track import Track, TrackTypes
 from .walking_directions import walking_directions
@@ -129,8 +128,6 @@ __all__: List[str] = [
     'SoundError', 'SoundManager',
     # speech.py:
     'tts',
-    # story_context.py
-    'StoryContext',
     # task.py:
     'IntervalFunction', 'Task', 'TaskFunction',
     # track.py:

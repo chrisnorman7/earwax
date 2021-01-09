@@ -10,8 +10,8 @@ except ModuleNotFoundError:
     Window = object
 from xml_python import Builder, UnhandledElement
 
-from earwax import Game, StoryContext
-from earwax.story import StoryWorld, world_builder
+from earwax import Game
+from earwax.story import StoryContext, StoryWorld, world_builder
 
 
 def play_story(args: Namespace) -> None:
