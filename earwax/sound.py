@@ -158,6 +158,7 @@ class Sound:
     generator: Generator
     buffer: Optional[Buffer]
     _valid: bool = Factory(lambda: True)
+    _paused: bool = False
 
     @classmethod
     def from_stream(
@@ -216,6 +217,29 @@ class Sound:
         :attr:`self.buffer <earwax.Sound.buffer>` is ``None``.
         """
         return self.buffer is None
+
+    @property
+    def paused(self) -> bool:
+        """Return whether or not this sound is paused."""
+        return self._paused
+
+    @paused.setter
+    def paused(self, value: bool) -> None:
+        """Set the paused state."""
+        if value:
+            self.pause()
+        else:
+            self.play()
+
+    def pause(self) -> None:
+        """Pause this sound."""
+        self._paused = True
+        self.generator.pause()
+
+    def play(self) -> None:
+        """Resumes this sound after a call to :meth:`~earwax.Sound.pause`."""
+        self._paused = False
+        self.generator.play()
 
     def destroy(self) -> None:
         """Destroy this sound.

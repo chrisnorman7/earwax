@@ -125,3 +125,29 @@ def test_restart(sound: Sound) -> None:
     sound.restart()
     sleep(0.5)
     assert sound.generator.position == 0.0
+
+
+def test_pause(sound: Sound) -> None:
+    """Test the pause method."""
+    sound.pause()
+    assert sound.paused is True
+    assert sound._paused is True
+
+
+def test_play(sound: Sound) -> None:
+    """Test the play method."""
+    sound.pause()
+    assert sound.paused is True
+    sound.play()
+    assert sound.paused is False
+    assert sound._paused is False
+
+
+def test_paused(sound: Sound) -> None:
+    """Test the paused property."""
+    sound.paused = True
+    assert sound.paused is True
+    assert sound._paused is True
+    sound.paused = False
+    assert sound.paused is False
+    assert sound._paused is False
