@@ -2,6 +2,7 @@
 
 from concurrent.futures.thread import ThreadPoolExecutor
 from pathlib import Path
+from time import sleep
 
 from pyglet.clock import schedule_once
 from pyglet.resource import get_settings_path
@@ -243,3 +244,29 @@ def test_push_credits_menu(context: Context) -> None:
     assert len(m.items) == 2
     assert m.items[0].title == 'Test 1'
     assert m.items[1].title == 'Test 2'
+
+
+def test_adjust_volume(game: Game) -> None:
+    """Test adjusting the master volume."""
+    game.config.sound.max_volume.value = 0.5
+    assert game.adjust_volume(0.1) == 0.5
+    assert game.config.sound.master_volume.value == 0.5
+    assert game.adjust_volume(-0.1) == 0.4
+    assert game.config.sound.master_volume.value == 0.4
+    assert game.adjust_volume(-1.0) == 0.0
+    assert game.config.sound.master_volume.value == 0.0
+
+
+def test_set_volume(game: Game) -> None:
+    """Test setting the volume exactly."""
+    game.set_volume(0.5)
+    assert game.config.sound.master_volume.value == 0.5
+    sleep(0.1)
+    assert game.audio_context.gain == 0.5
+    game.set_volume(2.0)
+    assert game.config.sound.master_volume.value == 2.0
+    sleep(0.1)
+    assert game.audio_context.gain == 2.0
+    game.set_volume(1.0)
+    sleep(0.1)
+    assert game.audio_context.gain == 1.0

@@ -885,3 +885,26 @@ class Game(RegisterEventMixin):
         index: int = self.joysticks.index(joystick)
         haptic: Any = sdl2.SDL_HapticOpen(index)
         maybe_raise(sdl2.SDL_HapticRumbleStop(haptic))
+
+    def adjust_volume(self, amount: float) -> float:
+        """Adjust the master volume.
+
+        :param amount: The amount to add to the current volume.
+        """
+        v: float = min(
+            self.config.sound.max_volume.value,
+            self.config.sound.master_volume.value + amount
+        )
+        if v < 0:
+            v = 0
+        self.set_volume(v)
+        return v
+
+    def set_volume(self, value: float) -> None:
+        """Set the master volume to a specific value.
+
+        :param value: The new volume.
+        """
+        if self.audio_context is not None:
+            self.audio_context.gain = value
+        self.config.sound.master_volume.value = value
