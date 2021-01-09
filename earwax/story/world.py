@@ -22,7 +22,7 @@ class WorldAmbiance:
 
         <ambiance>Loop.wav</ambiance>
 
-    :ivar path: The path to a sound file.
+    :ivar ~earwax.story.WorldAmbiance.path: The path to a sound file.
     """
 
     path: str
@@ -51,14 +51,15 @@ class WorldAction:
             <message>The message shown when this action is performed.</message>
         </action>
 
-    :ivar name: The name of this action.
+    :ivar ~earwax.story.WorldAction.name: The name of this action.
 
-    :ivar message: The message that is shown to the player when
-        this action is used.
+    :ivar ~earwax.story.WorldAction.message: The message that is shown to the
+        player when this action is used.
 
         If this value is omitted, no message will be shown.
 
-    :ivar sound: The sound that should play when this action is used.
+    :ivar ~earwax.story.WorldAction.sound: The sound that should play when this
+        action is used.
 
         If this value is omitted, no sound will be heard.
     """
@@ -93,14 +94,15 @@ class RoomObject:
             <action>...</action>
         </object>
 
-    :ivar id: The unique ID of this object. If this ID is not provided, then
-        picking it up will not be reliable, as the ID will be randomly
-        generated.
+    :ivar ~earwax.story.RoomObject.id: The unique ID of this object. If this ID
+        is not provided, then picking it up will not be reliable, as the ID
+        will be randomly generated.
 
         Other than the above restriction, you can set the ID to be whatever you
         like.
 
-    :param location: The room where this object is located.
+    :ivar ~earwax.story.RoomObject.location: The room where this object is
+        located.
 
         You do not set this attribute in XML, as it is inferred from which room
         holds the ``<object>`` tag.
@@ -108,7 +110,7 @@ class RoomObject:
         If this object is picked up, the location will not change, it will just
         not show up in the objects list.
 
-    :ivar position: The position of this object.
+    :ivar ~earwax.story.RoomObject.position: The position of this object.
 
         This value is provided in XML with the ``x``, ``y``, and ``z``
         attributes.
@@ -116,14 +118,15 @@ class RoomObject:
         If this value is ``None``, then any :attr:`ambiances` will not be
         panned.
 
-    :ivar name: The name of this object.
+    :ivar ~earwax.story.RoomObject.name: The name of this object.
 
         You can provide this value in XML, with a ``<name>`` tag.
 
-    :ivar ambiances: A list of ambiances to play at the :attr:`position` of
-        this object.
+    :ivar ~earwax.story.RoomObject.ambiances: A list of ambiances to play at
+        the :attr:`~earwax.story.RoomObject.position` of this object.
 
-    :ivar actions: A list of actions that can be performed on this object.
+    :ivar ~earwax.story.RoomObject.actions: A list of actions that can be
+        performed on this object.
     """
 
     id: str
@@ -171,12 +174,13 @@ class RoomExit:
     The actual destination can be retrieved with the :attr:`destination`
     property.
 
-    :ivar location: The location of this exit.
+    :ivar ~earwax.story.RoomExit.location: The location of this exit.
 
         You cannot set this in XML, as it is inferred from the room which
         contains the ``<exit>`` tag.
 
-    :ivar destination_id: The ID of the room on the other side of this exit.
+    :ivar ~earwax.story.RoomExit.destination_id: The ID of the room on the
+        other side of this exit.
 
         You provide this in XML with the ``destination`` attribute.
 
@@ -184,7 +188,8 @@ class RoomExit:
         possible to give exits IDs in the future so that extra code can be
         placed upon them.
 
-    :ivar action: An action to perform when using this exit.
+    :ivar ~earwax.story.RoomExit.action: An action to perform when using this
+        exit.
     """
 
     location: 'WorldRoom'
@@ -246,12 +251,12 @@ class WorldRoom:
     If you changed the name on the room with the id ``provider``, the name of
     the other room would also change.
 
-    :ivar world: The world this room is part of.
+    :ivar ~earwax.story.WorldRoom.world: The world this room is part of.
 
         You cannot set this value in XML, as it is inferred from the tag the
         ``<room>`` tag is part of.
 
-    :ivar id: The unique ID of this room.
+    :ivar ~earwax.story.WorldRoom.id: The unique ID of this room.
 
         If this value is not provided, then an ID will be generated, based on
         the number of rooms that have already been loaded.
@@ -259,21 +264,22 @@ class WorldRoom:
         If you want to link this room with exits, it is *highly* recommended
         that you provide your own ID.
 
-    :ivar name: The name of this room, or the #id of a room to inherit the name
-        from.
+    :ivar ~earwax.story.WorldRoom.name: The name of this room, or the #id of a
+        room to inherit the name from.
 
         This value is provided in XML with the ``<name>`` tag.
 
-    :ivar description: The description of this room, or the #id of another room
-        to inherit the description from.
+    :ivar ~earwax.story.WorldRoom.description: The description of this room, or
+        the #id of another room to inherit the description from.
 
         This value is provided in XML with the ``<description>`` tag.
 
-    :ivar ambiances: A list of ambiances to play when this room is in focus.
+    :ivar ~earwax.story.WorldRoom.ambiances: A list of ambiances to play when
+        this room is in focus.
 
         This value is provided in XML with a series of ``<ambiance>`` tags.
 
-    :ivar objects: A mapping of object ids to objects.
+    :ivar ~earwax.story.WorldRoom.objects: A mapping of object ids to objects.
 
         To get a list of objects, the canonical way is to use the
         :meth:`get_objects` method, as this will properly hide objects which
@@ -281,7 +287,7 @@ class WorldRoom:
 
         This value is provided in XML with a series of ``<object>`` tags.
 
-    :ivar exits: A list of exits from this room.
+    :ivar ~earwax.story.WorldRoom.exits: A list of exits from this room.
 
         This value is provided in XML as a series of ``<exit>`` tags.
     """
@@ -368,46 +374,54 @@ class WorldMessages:
     Providing an ID which is *not* an attribute of this object will raise
     ``RuntimeError``, with a list of valid IDs.
 
-    :ivar no_objects: The message which is shown when the player cycles to an
-        empty list of objects.
+    :ivar ~earwax.story.WorldMessages.no_objects: The message which is shown
+        when the player cycles to an empty list of objects.
 
-    :ivar no_actions: The message which is shown when there are no actions for
-        an object.
+    :ivar ~earwax.story.WorldMessages.no_actions: The message which is shown
+        when there are no actions for an object.
 
-    :ivar no_exits: The message which is shown when the player cycles to an
-        empty list of exits.
+    :ivar ~earwax.story.WorldMessages.no_exits: The message which is shown when
+            the player cycles to an empty list of exits.
 
-    :ivar room_activate: The message which is shown when enter is pressed with
-        the room category selected.
+    :ivar ~earwax.story.WorldMessages.room_activate: The message which is shown
+        when enter is pressed with the room category selected.
 
         Maybe an action attribute should be added to rooms, so that enter can
         be used everywhere?
 
-    :ivar room_category: The name of the "room" category.
+    :ivar ~earwax.story.WorldMessages.room_category: The name of the "room"
+        category.
 
-    :ivar objects_category: The name of the "objects" category.
+    :ivar ~earwax.story.WorldMessages.objects_category: The name of the
+        "objects" category.
 
-    :ivar exits_category: The name of the "exits" category.
+    :ivar ~earwax.story.WorldMessages.exits_category: The name of the "exits"
+        category.
 
-    :ivar actions_menu: The message which is shown when the actions menu is
-        activated.
+    :ivar ~earwax.story.WorldMessages.actions_menu: The message which is shown
+        when the actions menu is activated.
 
         You can include the name of the object in question, by including a set
         of braces::
 
             <message id="actions_menu">You examine {}.</message>
 
-    :ivar main_menu: The title of the main menu.
+    :ivar ~earwax.story.WorldMessages.main_menu: The title of the main menu.
 
-    :ivar play_game: The title of the "play game" entry in the main menu.
+    :ivar ~earwax.story.WorldMessages.play_game: The title of the "play game"
+        entry in the main menu.
 
-    :ivar show_credits: The title of the "show credits" entry in the main menu.
+    :ivar ~earwax.story.WorldMessages.show_credits: The title of the "show
+        credits" entry in the main menu.
 
-    :ivar credits_menu: The title of the credits menu.
+    :ivar ~earwax.story.WorldMessages.credits_menu: The title of the credits
+        menu.
 
-    :ivar welcome: The message which is shown when play starts.
+    :ivar ~earwax.story.WorldMessages.welcome: The message which is shown when
+        play starts.
 
-    :ivar exit: The title of the "exit" entry of the main menu.
+    :ivar ~earwax.story.WorldMessages.exit: The title of the "exit" entry of
+        the main menu.
     """
 
     # Empty category and failure messages:
@@ -447,11 +461,11 @@ class StoryWorld:
 
     Worlds can be returned as an XML string with the :meth:`to_string` def
 
-    :ivar name: The name of this world.
+    :ivar ~earwax.story.StoryWorld.name: The name of this world.
 
         This value is provided in XML with the ``<name>`` tag.
 
-    :ivar author: The author of this world.
+    :ivar ~earwax.story.StoryWorld.author: The author of this world.
 
         The format of this value is arbitrary, although
         ``Author Name <author@domain.com>`` is recommended.
@@ -462,26 +476,27 @@ class StoryWorld:
 
             <author>Chris Norman &lt;chris.norman2@googlemail.com&gt;</author>
 
-    :ivar main_menu_musics: A list of filenames to play as music while the main
-        menu is being shown.
+    :ivar ~earwax.story.StoryWorld.main_menu_musics: A list of filenames to
+        play as music while the main menu is being shown.
 
         This value is provided in XML as a series of ``<menumusic>`` tags::
 
             <menumusic>music_1.wav</menumusic>
             <menumusic>music_2.wav</menumusic>
 
-    :ivar rooms: A mapping of room IDs to rooms.
+    :ivar ~earwax.story.StoryWorld.rooms: A mapping of room IDs to rooms.
 
         This value is provided in XML as a series of ``<room>`` tags.
 
-    :ivar initial_room_id: The ID of the room to be used when first starting
-        the game.
+    :ivar ~earwax.story.StoryWorld.initial_room_id: The ID of the room to be
+        used when first starting the game.
 
         This value is provided in XML with the ``<entrance>`` tag::
 
             <entrance>room_id</entrance>
 
-    :ivar messages: The messages object used by this world.
+    :ivar ~earwax.story.StoryWorld.messages: The messages object used by this
+        world.
 
         This value is provided in XML with a series of <:class:`message
         <WorldMessages>`> tags.
@@ -537,14 +552,14 @@ class StoryWorld:
 class WorldStateCategories(Enum):
     """The various categories the player can select.
 
-    :ivar ~WorldStateCategories.room: The category where the name and
-        description of a room are shown.
+    :ivar ~earwax.story.WorldStateCategories.room: The category where the name
+        and description of a room are shown.
 
-    :ivar ~WorldStateCategories.objects: The category where the objects of a
-        room are shown.
+    :ivar ~earwax.story.WorldStateCategories.objects: The category where the
+        objects of a room are shown.
 
-    :ivar ~WorldStateCategories.exits: The category where the exits of a room
-        are shown.
+    :ivar ~earwax.story.WorldStateCategories.exits: The category where the
+        exits of a room are shown.
     """
 
     room = 0
@@ -560,16 +575,18 @@ class WorldState:
     have primitive types as its attributes, so that instances can be easily
     dumped to yaml.
 
-    :ivar world: The world this state represents.
+    :ivar ~earwax.story.WorldState.world: The world this state represents.
 
-    :ivar room_id: The ID of the current room.
+    :ivar ~earwax.story.WorldState.room_id: The ID of the current room.
 
-    :ivar inventory_ids: A list of object IDs which make up the player's
-        inventory.
+    :ivar ~earwax.story.WorldState.inventory_ids: A list of object IDs which
+        make up the player's inventory.
 
-    :ivar category_index: The player's position in the list of categories.
+    :ivar ~earwax.story.WorldState.category_index: The player's position in the
+        list of categories.
 
-    :ivar object_index: The player's position in the current category.
+    :ivar ~earwax.story.WorldState.object_index: The player's position in the
+        current category.
     """
 
     world: StoryWorld
