@@ -635,8 +635,7 @@ class StoryLevel(Level):
         self.state.category_index = 0
         while self.action_sounds:
             s: Sound = self.action_sounds.pop()
-            s.source.destroy
-            s.destroy()
+            s.destroy(destroy_source=True)
         self.stop_ambiances()
         self.ambiances.clear()
         obj: RoomObject
