@@ -169,7 +169,8 @@ class PlayLevel(Level):
         :param x: The exit to use.
         """
         a: WorldAction = x.action
-        self.game.output(a.message)
+        if a.message is not None:
+            self.game.output(a.message)
         if a.sound is not None:
             self.game.interface_sound_manager.play_path(Path(a.sound), True)
         self.set_room(x.destination)
