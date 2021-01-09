@@ -8,7 +8,7 @@ from xml.etree.ElementTree import Element, tostring
 from attr import Factory, attrib, attrs
 
 from ..point import Point
-from .util import get_element
+from .util import get_element, stringify
 
 ObjectTypes = Union['WorldRoom', 'RoomObject', 'RoomExit']
 
@@ -32,6 +32,10 @@ class WorldAmbiance:
     def to_xml(self) -> Element:
         """Dump this ambiance."""
         return get_element('ambiance', text=self.path)
+
+    def __str__(self) -> str:
+        """Return a string."""
+        return f'Ambiance {self.path}'
 
 
 @attrs(auto_attribs=True)
@@ -79,6 +83,10 @@ class WorldAction:
         if self.sound is not None:
             e.append(get_element('sound', text=self.sound))
         return e
+
+    def __str__(self) -> str:
+        """Return a string."""
+        return self.name
 
 
 @attrs(auto_attribs=True)
@@ -157,6 +165,10 @@ class RoomObject:
             e.append(action.to_xml())
         return e
 
+    def __str__(self) -> str:
+        """Return a string."""
+        return stringify(self)
+
 
 @attrs(auto_attribs=True)
 class RoomExit:
@@ -213,6 +225,11 @@ class RoomExit:
         )
         e.append(self.action.to_xml())
         return e
+        return e
+
+    def __str__(self) -> str:
+        """Return a string."""
+        return self.action.name or 'Unnamed Exit'
 
 
 @attrs(auto_attribs=True)
@@ -353,6 +370,10 @@ class WorldRoom:
             e.append(x.to_xml())
         return e
 
+    def __str__(self) -> str:
+        """Return a string."""
+        return stringify(self)
+
 
 @attrs(auto_attribs=True)
 class WorldMessages:
@@ -445,6 +466,10 @@ class WorldMessages:
     credits_menu: str = 'Credits'
     welcome: str = 'Welcome to this game.'
     exit: str = 'Exit'
+
+    def __str__(self) -> str:
+        """Return a string."""
+        return 'World messages'
 
 
 @attrs(auto_attribs=True)
@@ -556,6 +581,10 @@ class StoryWorld:
         """Return this object as pretty-printed XML."""
         d: Document = self.to_document()
         return d.toprettyxml()
+
+    def __str__(self) -> str:
+        """Return a string."""
+        return f'World({self.name!r})'
 
 
 class WorldStateCategories(Enum):

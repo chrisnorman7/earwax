@@ -1,7 +1,10 @@
 """Provides various utility functions for stories."""
 
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Union
 from xml.etree.ElementTree import Element
+
+if TYPE_CHECKING:
+    from .world import RoomObject, WorldRoom
 
 
 def get_element(
@@ -27,3 +30,11 @@ def get_element(
     e: Element = Element(tag, attrib=attrib)
     e.text = text
     return e
+
+
+def stringify(obj: Union['WorldRoom', 'RoomObject']) -> str:
+    """Return this object as a string.
+
+    :param obj: The object to work with.
+    """
+    return f'{obj.name} (#{obj.id})'
