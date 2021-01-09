@@ -35,8 +35,8 @@
         </exit>
     </room>
     <room id="jungle_2">
-        <name id="jungle_1"></name>
-        <description id="jungle_1"></description>
+        <name>#jungle_1</name>
+        <description>#jungle_1</description>
         <ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\The Nature Pack\059200 - Amazon Jungle Night - Loop.wav</ambiance>
         <exit destination="jungle_1">
             <action>

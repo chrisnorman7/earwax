@@ -166,6 +166,26 @@ class WorldRoom(StoryWorldBase):
     objects: Dict[str, RoomObject] = Factory(dict)
     exits: List[RoomExit] = Factory(list)
 
+    def get_name(self) -> str:
+        """Return the actual name of this room."""
+        name: str = self.name
+        if name.startswith('#'):
+            name = name[1:]
+            if name in self.world.rooms:
+                return self.world.rooms[name].name
+            return f'!! ERROR: Invalid room ID {name} !!'
+        return name
+
+    def get_description(self) -> str:
+        """Return the actual description of this room."""
+        description: str = self.description
+        if description.startswith('#'):
+            description = description[1:]
+            if description in self.world.rooms:
+                return self.world.rooms[description].description
+            return f'!! ERROR: Invalid room ID {description} !!'
+        return description
+
     def to_xml(self) -> Element:
         """Dump this room."""
         e: Element = get_element('room', attrib={'id': self.id})
@@ -280,25 +300,8 @@ def set_name(
     """Set the world name."""
     name: Optional[str] = element.text
     if name is None:
-        room_id: Optional[str] = element.attrib.get('id', None)
-        if room_id is None:
-            raise RuntimeError(
-                'An empty name was given, with no room ID to copy the name '
-                'from.'
-            )
-        elif not isinstance(thing, WorldRoom):
-            raise RuntimeError(
-                'Names can only be copied by rooms from other rooms.'
-            )
-        elif room_id not in thing.world.rooms:
-            raise RuntimeError(
-                'Invalid room ID %r. That room may not have been loaded yet.' %
-                room_id
-            )
-        else:
-            name = thing.world.rooms[room_id].name
+        raise RuntimeError('Names cannot be blank.')
     thing.name = name
-    assert isinstance(thing.name, str)
 
 
 def set_ambiance(
@@ -435,22 +438,9 @@ room_builder: Builder[StoryWorld, WorldRoom] = Builder(
 @room_builder.parser('description')
 def set_description(room: WorldRoom, element: Element) -> None:
     """Set the description."""
-    if element.text is not None:
-        room.description = element.text
-    else:
-        room_id: Optional[str] = element.attrib.get('id', None)
-        if room_id is None:
-            raise RuntimeError(
-                'An empty description was given, with no room ID to copy the '
-                'description from.'
-            )
-        elif room_id not in room.world.rooms:
-            raise RuntimeError(
-                'Invalid room ID %r. That room may not have been loaded yet.' %
-                room_id
-            )
-        else:
-            room.description = room.world.rooms[room_id].description
+    if element.text is None:
+        raise RuntimeError('Empty description provided for %s.' % room.name)
+    room.description = element.text
 
 
 def make_world(parent: NoneType, element: Element) -> StoryWorld:
@@ -524,7 +514,23 @@ class StoryLevel(Level):
         self.action('Previous object', symbol=key.LEFT)(self.previous_object)
         self.action('Activate object', symbol=key.RETURN)(self.activate)
         self.action('Return to main menu', symbol=key.ESCAPE)(self.main_menu)
+        self.action('Play or pause sounds', symbol=key.P)(self.pause)
+        self.action(
+            'Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT
+        )(self.game.push_action_menu)
         return super().__attrs_post_init__()
+
+    def pause(self) -> None:
+        """Pause stuff."""
+        a: Ambiance
+        for a in self.ambiances:
+            a.sound.paused = not a.sound.paused
+        t: Track
+        for t in self.tracks:
+            t.sound.paused = not t.sound.paused
+        s: Sound
+        for s in self.action_sounds:
+            s.paused = not s.paused
 
     @property
     def state(self) -> WorldState:
@@ -591,7 +597,7 @@ class StoryLevel(Level):
         room: WorldRoom = self.state.room
         category: WorldStateCategories = self.state.category
         if category is WorldStateCategories.room:
-            data = [room.name, room.description]
+            data = [room.get_name(), room.get_description()]
         elif category is WorldStateCategories.objects:
             data = [o.name for o in room.objects.values()]
         else:
