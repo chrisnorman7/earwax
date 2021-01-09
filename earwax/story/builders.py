@@ -87,7 +87,7 @@ def set_sound(action: WorldAction, element: Element) -> None:
 
 def make_object(room: WorldRoom, element: Element) -> RoomObject:
     """Make a story object instance."""
-    obj: RoomObject = RoomObject(element.attrib.get('str', uuid()), room)
+    obj: RoomObject = RoomObject(element.attrib.get('id', uuid()), room)
     coordinates: List[float] = []
     name: str
     for name in ('x', 'y', 'z'):
