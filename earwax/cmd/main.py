@@ -4,7 +4,9 @@ If you want to create more subcommands, add them in the subcommands directory,
 then register them with the :meth:`subcommand` method.
 """
 
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
+from argparse import (
+    ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace,
+    _SubParsersAction)
 from typing import Callable
 
 from .constants import surfaces_directory
@@ -27,7 +29,9 @@ commands = parser.add_subparsers(
 
 
 def subcommand(
-    name: str, func: SubcommandFunction, **kwargs
+    name: str, func: SubcommandFunction,
+    subparser: _SubParsersAction = commands,
+    **kwargs
 ) -> ArgumentParser:
     """Add a subcommand to the argument parser.
 
@@ -35,9 +39,11 @@ def subcommand(
 
     :param func: The function that will be called when this subcommand is used.
 
+    :param subparser: The parser to add the sub command to.
+
     :param kwargs: Keyword arguments to be passed to ``commands.add_parser``.
     """
-    parser = commands.add_parser(name, **kwargs)
+    parser = subparser.add_parser(name, **kwargs)
     parser.set_defaults(func=func)
     return parser
 
@@ -49,19 +55,25 @@ subcommand(
 )
 
 
-def cmd_help(args: Namespace) -> None:
-    """Show all the possible subcommands."""
-    print('Subcommands:')
-    name: str
-    parser: ArgumentParser
-    for name, parser in sorted(
-        commands.choices.items(), key=lambda item: item[0]
-    ):
-        print(f'{name}: {parser.description}')
+def cmd_help(parser: ArgumentParser) -> Callable[[Namespace], None]:
+    """Return a command function that will show all subcommands."""
+
+    def inner(args: Namespace) -> None:
+        """Show all the possible subcommands."""
+        print('Subcommands:')
+        name: str
+        p: ArgumentParser
+        for name, p in sorted(
+            parser.choices.items(), key=lambda item: item[0]
+        ):
+            print(f'{name}: {p.description}')
+
+    return inner
 
 
 subcommand(
-    'help', cmd_help, description='Show a list of all possible subcommands.',
+    'help', cmd_help(commands),
+    description='Show a list of all possible subcommands.',
     formatter_class=ArgumentDefaultsHelpFormatter, aliases=['commands']
 )
 
@@ -88,10 +100,25 @@ project_title_parser = subcommand(
 
 project_title_parser.add_argument('title', nargs='?', help='The new name')
 
-subcommand('gui', gui)
+subcommand('gui', gui, description='Create basic games in a GUI')
+
+story_parser: ArgumentParser = commands.add_parser(
+    'story', description='Play, edit, or build stories.'
+)
+
+story_subcommands: _SubParsersAction = story_parser.add_subparsers(
+    metavar='<action>', required=True, help='The action to perform'
+)
+
+subcommand(
+    'help', cmd_help(story_subcommands), subparser=story_subcommands,
+    description='Show a list of all possible subcommands.',
+    formatter_class=ArgumentDefaultsHelpFormatter, aliases=['commands']
+)
 
 play_story_parser: ArgumentParser = subcommand(
-    'story', play_story, formatter_class=ArgumentDefaultsHelpFormatter,
+    'play', play_story, subparser=story_subcommands,
+    formatter_class=ArgumentDefaultsHelpFormatter,
     description='Play a story file.'
 )
 
