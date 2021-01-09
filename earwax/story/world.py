@@ -1,7 +1,7 @@
 """Provides various classes relating to worlds."""
 
 from enum import Enum
-from typing import Dict, List, Optional, Type
+from typing import Dict, List, Optional, Type, Union
 from xml.dom.minidom import Document, parseString
 from xml.etree.ElementTree import Element, tostring
 
@@ -612,3 +612,18 @@ class WorldState:
     def category(self) -> WorldStateCategories:
         """Return the current category."""
         return list(WorldStateCategories)[self.category_index]
+
+    @property
+    def object(self) -> Union[WorldRoom, RoomObject, RoomExit]:
+        """Return the currently focused object."""
+        room: WorldRoom = self.room
+        category: WorldStateCategories = self.category
+        if category is WorldStateCategories.room:
+            return room
+        elif category is WorldStateCategories.objects:
+            obj: RoomObject = room.get_objects()[self.object_index]
+            return obj
+        else:
+            assert category is WorldStateCategories.exits
+            x: RoomExit = room.exits[self.object_index]
+            return x

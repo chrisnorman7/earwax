@@ -44,10 +44,20 @@
 				<sound>D:\sounds\WARFARE SOUNDS\Footsteps\footstep_sand_slide_09.wav</sound>
 			</action>
 		</exit>
+		<exit destination="KUtdDVXEuWJfNMsH6vGYTa">
+			<action>
+				<name>Go through a small hole in the undergrowth</name>
+			</action>
+		</exit>
 	</room>
 	<room id="KUtdDVXEuWJfNMsH6vGYTa">
-		<name>Unnamed Room</name>
-		<description>This room is empty. Kind of looks like a cell.</description>
+		<name>A small hole in the ground.</name>
+		<description>You find yourself in a small hole burrowed into the undergrowth along the sides of the path. The walls are supported by gnarled routes, and the floor is covered with a light dusting of sand.</description>
+		<exit destination="jungle_2">
+			<action>
+				<name>Clamber back onto the jungle path.</name>
+			</action>
+		</exit>
 	</room>
 	<room id="SYoycvs4eeAsANbZH3tsTP">
 		<name>Unnamed Room</name>
