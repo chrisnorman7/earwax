@@ -538,6 +538,13 @@ class StoryWorld:
                 )
         return e
 
+    def add_room(self, room: WorldRoom) -> None:
+        """Add a room to this world.
+
+        :param room: The room to add.
+        """
+        self.rooms[room.id] = room
+
     def to_document(self) -> Document:
         """Return this object as an XML document."""
         s: bytes = tostring(self.to_xml())

@@ -1,49 +1,67 @@
+<?xml version="1.0" ?>
 <world>
-    <menumusic>D:\sounds\CORE 2 Free Sampler\Musical\Song &amp; Phrase\MUSCSong_Alexion Full Mix_001_PSE_AMO_G4cHe.wav</menumusic>
-    <message id="no_objects">You see nothing special.</message>
-    <name>Chris's World</name>
-    <author>Chris Norman &lt;chris.norman2@googlemail.com&gt;</author>
-    <entrance>jungle_1</entrance>
-    <room id="jungle_1">
-        <name>A Jungle Path</name>
-        <description>This path stretches away into the distance, hemmed in on both sides by the tall trees that are so common in this jungle.</description>
-        <ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\The Nature Pack\059200 - Amazon Jungle Night - Loop.wav</ambiance>
-        <object x="-2" y="2" z="0">
-            <name>a standing stone</name>
-            <ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\Metal Worlds\355000 - Spherical Vibration Drone Medium.wav</ambiance>
-            <action>
-                <name>Examine</name>
-                <message>This is a tall carved stone. It has lots of writing carved into it by unknown hands.</message>
-                <sound>D:\sounds\A Sound Effect SFX sampler 2016\SoundBits_Handwriting\Handwriting_Stone_007.wav</sound>
-            </action>
-        </object>
-        <object x="1" y="-1" z="0">
-            <name>an ancient tree</name>
-            <ambiance>D:\sounds\King Collection - Volume 1\Ambience - Rural\Cornfield_Windy_CU_Leaves_Scrape_Rustle_KCV1-01.wav</ambiance>
-            <action>
-                <name>Examine</name>
-                <message>You gaze at the tree. The bark is old and rugged, with claw marks from small animals criss-crossing it.</message>
-                <sound>D:\sounds\CORE 2 Free Sampler\Swooshes\Swish\SWSH_Palm Frond Whoosh Fast Stereo 090_PSE_WPA_0Vcbe.wav</sound>
-            </action>
-        </object>
-        <exit destination="jungle_2">
-            <action>
-                <name>Travel farther along the path</name>
-                <message>You walk further down the path.</message>
-                <sound>D:\sounds\WARFARE SOUNDS\Footsteps\footstep_sand_slide_09.wav</sound>
-            </action>
-        </exit>
-    </room>
-    <room id="jungle_2">
-        <name>#jungle_1</name>
-        <description>#jungle_1</description>
-        <ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\The Nature Pack\059200 - Amazon Jungle Night - Loop.wav</ambiance>
-        <exit destination="jungle_1">
-            <action>
-                <name>Travel back along the path</name>
-                <message>You walk back along the path.</message>
-                <sound>D:\sounds\WARFARE SOUNDS\Footsteps\footstep_sand_slide_09.wav</sound>
-            </action>
-        </exit>
-    </room>
+	<name>Chris's World</name>
+	<author>Chris Norman &lt;chris.norman2@googlemail.com&gt;</author>
+	<menumusic>D:\sounds\CORE 2 Free Sampler\Musical\Song &amp; Phrase\MUSCSong_Alexion Full Mix_001_PSE_AMO_G4cHe.wav</menumusic>
+	<room id="jungle_1">
+		<name>A Jungle Path</name>
+		<description>This path stretches away into the distance, hemmed in on both sides by the tall trees that are so common in this jungle.</description>
+		<ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\The Nature Pack\059200 - Amazon Jungle Night - Loop.wav</ambiance>
+		<object x="-2.0" y="2.0" z="2.0" id="jFEEKh7KUSfgGnorKpaMgt">
+			<name>a standing stone</name>
+			<ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\Metal Worlds\355000 - Spherical Vibration Drone Medium.wav</ambiance>
+			<action>
+				<name>Examine</name>
+				<message>This is a tall carved stone. It has lots of writing carved into it by unknown hands.</message>
+				<sound>D:\sounds\A Sound Effect SFX sampler 2016\SoundBits_Handwriting\Handwriting_Stone_007.wav</sound>
+			</action>
+		</object>
+		<object x="1.0" y="-1.0" z="-1.0" id="Zh6NFxCK56s4if8wJeDpYV">
+			<name>an ancient tree</name>
+			<ambiance>D:\sounds\King Collection - Volume 1\Ambience - Rural\Cornfield_Windy_CU_Leaves_Scrape_Rustle_KCV1-01.wav</ambiance>
+			<action>
+				<name>Examine</name>
+				<message>You gaze at the tree. The bark is old and rugged, with claw marks from small animals criss-crossing it.</message>
+				<sound>D:\sounds\CORE 2 Free Sampler\Swooshes\Swish\SWSH_Palm Frond Whoosh Fast Stereo 090_PSE_WPA_0Vcbe.wav</sound>
+			</action>
+		</object>
+		<exit destination="jungle_2">
+			<action>
+				<name>Travel farther along the path</name>
+				<message>You walk further down the path.</message>
+				<sound>D:\sounds\WARFARE SOUNDS\Footsteps\footstep_sand_slide_09.wav</sound>
+			</action>
+		</exit>
+	</room>
+	<room id="jungle_2">
+		<name>#jungle_1</name>
+		<description>#jungle_1</description>
+		<ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\The Nature Pack\059200 - Amazon Jungle Night - Loop.wav</ambiance>
+		<exit destination="jungle_1">
+			<action>
+				<name>Travel back along the path</name>
+				<message>You walk back along the path.</message>
+				<sound>D:\sounds\WARFARE SOUNDS\Footsteps\footstep_sand_slide_09.wav</sound>
+			</action>
+		</exit>
+	</room>
+	<room id="KUtdDVXEuWJfNMsH6vGYTa">
+		<name>Unnamed Room</name>
+		<description>Not described.</description>
+	</room>
+	<entrance>jungle_1</entrance>
+	<message id="no_objects">You see nothing special.</message>
+	<message id="no_actions">There is nothing you can do with this object.</message>
+	<message id="no_exits">There is no way out of this room.</message>
+	<message id="room_activate">You cannot do that.</message>
+	<message id="room_category">Location</message>
+	<message id="objects_category">Objects</message>
+	<message id="exits_category">Exits</message>
+	<message id="actions_menu">You step up to {}.</message>
+	<message id="main_menu">Main Menu</message>
+	<message id="play_game">Play</message>
+	<message id="show_credits">Show Credits</message>
+	<message id="credits_menu">Credits</message>
+	<message id="welcome">Welcome to this game.</message>
+	<message id="exit">Exit</message>
 </world>

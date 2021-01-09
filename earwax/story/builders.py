@@ -140,7 +140,7 @@ def make_room(world: StoryWorld, element: Element) -> WorldRoom:
     room: WorldRoom = WorldRoom(
         world, element.attrib.get('id', f'Room_{len(world.rooms) + 1}')
     )
-    world.rooms[room.id] = room
+    world.add_room(room)
     return room
 
 

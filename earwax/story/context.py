@@ -1,13 +1,14 @@
 """Provides the StoryContext class."""
 
 import webbrowser
-from typing import List
+from typing import List, Type
 
-from attr import attrib, attrs
+from attr import Factory, attrib, attrs
 
 from ..game import Game
 from ..menu import Menu
 from ..track import Track, TrackTypes
+from .edit_level import EditLevel
 from .play_level import PlayLevel
 from .world import RoomExit, StoryWorld, WorldRoom, WorldState
 
@@ -18,6 +19,7 @@ class StoryContext:
 
     game: Game
     world: StoryWorld
+    edit: bool = Factory(bool)
     state: WorldState = attrib()
 
     @state.default
@@ -56,7 +58,12 @@ class StoryContext:
         for room in inaccessible_rooms:
             print('WARNING: There is no way to access %s!' % room.name)
         self.state.room_id = self.world.initial_room_id
-        self.main_level = PlayLevel(self.game, self)
+        cls: Type[PlayLevel]
+        if self.edit:
+            cls = EditLevel
+        else:
+            cls = PlayLevel
+        self.main_level = cls(self.game, self)
 
     def get_main_menu(self) -> Menu:
         """Create a main menu for this world."""
@@ -68,6 +75,8 @@ class StoryContext:
             t: Track = Track('file', path, TrackTypes.music)
             m.tracks.append(t)
         m.add_item(self.play, title=self.world.messages.play_game)
+        if isinstance(self.main_level, EditLevel):
+            m.add_item(self.main_level.save, title='Save')
         if self.game.credits:
             m.add_item(
                 self.push_credits, title=self.world.messages.show_credits

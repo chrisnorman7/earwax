@@ -15,7 +15,7 @@ from .subcommands.gui.main import gui
 from .subcommands.init_project import init_project
 from .subcommands.project_surfaces import project_surfaces
 from .subcommands.project_title import project_title
-from .subcommands.story import create_story, play_story
+from .subcommands.story import create_story, edit_story, play_story
 
 SubcommandFunction = Callable[[Namespace], None]
 
@@ -131,6 +131,14 @@ create_story_parser: ArgumentParser = subcommand(
 )
 
 create_story_parser.add_argument('filename', help='The filename to create.')
+
+edit_story_parser: ArgumentParser = subcommand(
+    'edit', edit_story, subparser=story_subcommands,
+    formatter_class=ArgumentDefaultsHelpFormatter,
+    description='Edit a story file.'
+)
+
+edit_story_parser.add_argument('filename', help='The filename to load from.')
 
 
 def cmd_main() -> None:

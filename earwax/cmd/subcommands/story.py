@@ -11,10 +11,11 @@ except ModuleNotFoundError:
 from xml_python import Builder, UnhandledElement
 
 from earwax import Game
-from earwax.story import StoryContext, StoryWorld, WorldRoom, world_builder
+from earwax.story import (EditLevel, StoryContext, StoryWorld, WorldRoom,
+                          world_builder)
 
 
-def play_story(args: Namespace) -> None:
+def play_story(args: Namespace, edit: bool = False) -> None:
     """Load and play a story."""
     filename: str = args.filename
     if not os.path.isfile(filename):
@@ -43,13 +44,20 @@ def play_story(args: Namespace) -> None:
     game: Game = Game(name=world.name)
     ctx: StoryContext
     try:
-        ctx = StoryContext(game, world)
+        ctx = StoryContext(game, world, edit=edit)
     except RuntimeError as e:
         print('Error creating story level:')
         print()
         print(e)
         raise SystemExit
-    window: Window = Window(caption=world.name)
+    caption: str = world.name
+    if edit:
+        caption += f' ({filename})'
+        assert isinstance(ctx.main_level, EditLevel), (
+            'Invalid level %r' % ctx.main_level
+        )
+        ctx.main_level.filename = filename
+    window: Window = Window(caption=caption)
     game.run(window, initial_level=ctx.get_main_menu())
 
 
@@ -68,3 +76,8 @@ def create_story(args: Namespace) -> None:
         with open(filename, 'w') as f:
             f.write(w.to_string())
         print('Created %s.' % w.name)
+
+
+def edit_story(args: Namespace) -> None:
+    """Edit the given story."""
+    return play_story(args, edit=True)
