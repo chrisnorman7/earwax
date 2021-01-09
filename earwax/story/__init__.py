@@ -34,13 +34,13 @@ from .builders import (action_builder, exit_builder, object_builder,
 from .context import StoryContext
 from .edit_level import EditLevel
 from .play_level import PlayLevel
-from .world import (RoomExit, RoomObject, StoryWorld, WorldAction,
-                    WorldAmbiance, WorldMessages, WorldRoom, WorldState,
-                    WorldStateCategories)
+from .world import (
+    ObjectTypes, RoomExit, RoomObject, StoryWorld, WorldAction, WorldAmbiance,
+    WorldMessages, WorldRoom, WorldState, WorldStateCategories)
 
 __all__: List[str] = [
     'action_builder', 'exit_builder', 'object_builder', 'room_builder',
-    'world_builder'
+    'world_builder', 'ObjectTypes'
 ]
 __all__.extend(
     thing.__name__ for thing in [
