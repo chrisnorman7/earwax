@@ -461,6 +461,9 @@ class WorldMessages:
     :ivar ~earwax.story.WorldMessages.play_game: The title of the "play game"
         entry in the main menu.
 
+    :ivar ~earwax.story.WorldMessages.load_game: The title of the "load game"
+        entry in the main menu.
+
     :ivar ~earwax.story.WorldMessages.show_credits: The title of the "show
         credits" entry in the main menu.
 
@@ -469,6 +472,9 @@ class WorldMessages:
 
     :ivar ~earwax.story.WorldMessages.welcome: The message which is shown when
         play starts.
+
+    :ivar ~earwax.story.WorldMessages.no_saved_game: The message which is
+        spoken when there is no game to load.
 
     :ivar ~earwax.story.WorldMessages.exit: The title of the "exit" entry of
         the main menu.
@@ -488,10 +494,12 @@ class WorldMessages:
     # Menu messages:
     actions_menu: str = 'You step up to {}.'
     main_menu: str = 'Main Menu'
-    play_game: str = 'Play'
+    play_game: str = 'Start new game'
+    load_game: str = 'Load game'
     show_credits: str = 'Show Credits'
     credits_menu: str = 'Credits'
     welcome: str = 'Welcome to this game.'
+    no_saved_game: str = 'You have no game saved.'
     exit: str = 'Exit'
 
     def __str__(self) -> str:
@@ -705,3 +713,11 @@ class WorldState:
                 x: RoomExit = room.exits[self.object_index]
                 return x
         return None
+
+    def dump(self) -> Dict[str, Any]:
+        """Dump this object as a dictionary for saving."""
+        d: Dict[str, Any] = {
+            'room_id': self.room_id,
+            'inventory_ids': self.inventory_ids,
+        }
+        return d

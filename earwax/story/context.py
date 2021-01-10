@@ -2,9 +2,16 @@
 
 import webbrowser
 from logging import Logger, getLogger
-from typing import List, Type
+from pathlib import Path
+from typing import Any, Dict, List, Type
 
 from attr import Factory, attrib, attrs
+from yaml import load
+
+try:
+    from yaml import CLoader
+except ImportError:
+    from yaml import FullLoader as CLoader  # type: ignore[misc]
 
 from ..game import Game
 from ..menu import ConfigMenu, Menu
@@ -27,6 +34,13 @@ class StoryContext:
     def get_default_logger(instance: 'StoryContext') -> Logger:
         """Return a default logger."""
         return getLogger(instance.world.name)
+
+    config_file: Path = attrib(init=False, repr=False)
+
+    @config_file.default
+    def get_default_config_file(instance: 'StoryContext') -> Path:
+        """Get the default configuration filename."""
+        return instance.game.get_settings_path() / 'game.yaml'
 
     state: WorldState = attrib()
 
@@ -106,6 +120,7 @@ class StoryContext:
             t: Track = Track('file', path, TrackTypes.music)
             m.tracks.append(t)
         m.add_item(self.play, title=self.world.messages.play_game)
+        m.add_item(self.load, title=self.world.messages.load_game)
         if isinstance(self.main_level, EditLevel):
             m.add_item(self.main_level.save, title='Save')
             m.add_item(self.configure_earwax, title='Configure Earwax')
@@ -121,6 +136,24 @@ class StoryContext:
         """Push the world level."""
         self.game.output(self.world.messages.welcome)
         self.game.replace_level(self.main_level)
+
+    def load(self) -> None:
+        """Load an existing game, and start it."""
+        if self.config_file.is_file():
+            self.logger.info(
+                'Loading configuration file %s.' % self.config_file
+            )
+            with self.config_file.open('r') as f:
+                d: Dict[str, Any] = load(f, Loader=CLoader)
+                self.logger.info('Loaded configuration data: %r.' % d)
+            self.state = WorldState(self.world, **d)
+            self.game.output('Game loaded.')
+            if self.game.level is self.main_level:
+                self.main_level.set_room(self.state.room)
+            else:
+                self.play()
+        else:
+            self.game.output(self.world.messages.no_saved_game)
 
     def push_credits(self) -> None:
         """Push the credits menu."""

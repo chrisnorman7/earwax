@@ -1,9 +1,16 @@
 """Provides the StoryLevel class."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Generator, List, Optional
+from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List,
+                    Optional)
 
 from attr import Factory, attrib, attrs
+from yaml import dump
+
+try:
+    from yaml import CDumper
+except ImportError:
+    from yaml import Dumper as CDumper  # type: ignore[misc]
 
 from ..ambiance import Ambiance
 from ..level import Level
@@ -62,6 +69,8 @@ class PlayLevel(Level):
         self.action('Volume Up', symbol=key.PAGEUP, interval=0.1)(
             self.game.change_volume(0.05)
         )
+        self.action('Save game', symbol=key.F3)(self.save)
+        self.action('Load game', symbol=key.F4)(self.world_context.load)
         return super().__attrs_post_init__()
 
     def pause(self) -> None:
@@ -338,3 +347,30 @@ class PlayLevel(Level):
                 self.actions_menu(obj)
             else:
                 self.game.output(self.world.messages.no_objects)
+
+    def save(self) -> None:
+        """Save the current state."""
+        directory: Path = self.game.get_settings_path()
+        if not directory.is_dir():
+            try:
+                directory.mkdir()
+                self.world_context.logger.info(
+                    'Created game settings directory %s.',
+                    self.game.get_settings_path()
+                )
+            except Exception as e:
+                self.game.output(
+                    'Unable to create game settings directory: %s' % e
+                )
+                return self.world_context.logger.exception(
+                    'Failed to create game settings directory.'
+                )
+        data: Dict[str, Any] = self.state.dump()
+        try:
+            self.world_context.logger.info('Saving game state: %r.', data)
+            with self.world_context.config_file.open('w') as f:
+                f.write(dump(data, Dumper=CDumper))
+            self.game.output('Game saved.')
+        except Exception as e:
+            self.game.output('Unable to create save file: %s' % e)
+            self.world_context.logger.exception('Failed to create save file.')

@@ -122,8 +122,10 @@ speech:
 	<message id="actions_menu">You step up to {}.</message>
 	<message id="main_menu">Main Menu</message>
 	<message id="play_game">Play</message>
+	<message id="load_game">Load game</message>
 	<message id="show_credits">Show Credits</message>
 	<message id="credits_menu">Credits</message>
 	<message id="welcome">Welcome to this game.</message>
+	<message id="no_saved_game">You have no game saved.</message>
 	<message id="exit">Exit</message>
 </world>

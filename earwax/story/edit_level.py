@@ -34,10 +34,12 @@ message_descriptions: Dict[str, str] = {
     'actions_menu': 'The default title of the object actions menu',
     'main_menu': 'The title of the main menu',
     'play_game': 'The title of the play game entry of the main menu',
+    'load_game': 'The title of the load game entry of the main menu',
     'exit': 'The title of the exit entry of the main menu',
     'credits_menu': 'The title of the credits menu',
     'show_credits': 'The title of the show credits entry of the main menu',
     'welcome': 'The welcome message',
+    'no_saved_game': 'The message which is spoken when there is no saved game'
 }
 
 
