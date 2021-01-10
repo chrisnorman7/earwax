@@ -1,9 +1,9 @@
 """Provides the EditLevel class."""
 
 from inspect import isgenerator
-from typing import Callable, Generator, List, Optional, Union
+from typing import Callable, Dict, Generator, List, Optional, Union, cast
 
-from attr import attrs
+from attr import Attribute, attrs
 from shortuuid import uuid
 
 from ..editor import Editor
@@ -12,12 +12,32 @@ from ..level import Level
 from ..menu import Menu
 from ..types import OptionalGenerator
 from .play_level import PlayLevel
-from .world import ObjectTypes, RoomExit, RoomObject, WorldAction, WorldRoom
+from .world import (ObjectTypes, RoomExit, RoomObject, WorldAction,
+                    WorldMessages, WorldRoom)
 
 try:
     from pyglet.window import key
 except ModuleNotFoundError:
     key = None
+
+message_descriptions: Dict[str, str] = {
+    'no_objects': 'The message shown when focusing an empty object list',
+    'no_actions': 'The message which is shown when there are no object '
+    'actions',
+    'no_exits': 'The message which is shown when focusing an empty exit list',
+    'room_activate': 'The message which is shown when trying to activate a '
+    'room name or description',
+    'room_category': 'The name of the room category',
+    'objects_category': 'The name of the objects category',
+    'exits_category': 'The name of the exits category',
+    'actions_menu': 'The default title of the object actions menu',
+    'main_menu': 'The title of the main menu',
+    'play_game': 'The title of the play game entry of the main menu',
+    'exit': 'The title of the exit entry of the main menu',
+    'credits_menu': 'The title of the credits menu',
+    'show_credits': 'The title of the show credits entry of the main menu',
+    'welcome': 'The welcome message',
+}
 
 
 def push_rooms_menu(
@@ -104,6 +124,9 @@ class EditLevel(PlayLevel):
             'Shadow room description', symbol=key.D, modifiers=key.MOD_SHIFT
         )(self.shadow_description)
         self.action('Change message', symbol=key.M)(self.remessage)
+        self.action(
+            'Change world message', symbol=key.M, modifiers=key.MOD_SHIFT
+        )(self.set_world_messages)
         return super().__attrs_post_init__()
 
     @property
@@ -298,3 +321,42 @@ class EditLevel(PlayLevel):
                     yield from self.set_message(obj.actions_action)
 
                 level.add_item(inner, title='Object Actions Message')
+
+    def set_world_messages(self) -> Generator[None, None, None]:
+        """Push a menu that allows the editing of world messages."""
+        yield
+        messages: WorldMessages = self.world.messages
+        m: Menu = Menu(self.game, 'World Messages')
+        value: str
+        a: Attribute
+        for a in messages.__attrs_attrs__:  # type: ignore[attr-defined]
+            if a.type is not str:
+                continue
+            value = getattr(self.world.messages, a.name)
+            assert isinstance(value, str)
+
+            def inner(
+                name: str = a.name, value: str = value,
+                default: str = cast(str, a.default)
+            ) -> Generator[None, None, None]:
+                """Edit the message."""
+                e: Editor = Editor(self.game, text=value)
+
+                @e.event
+                def on_submit(text: str) -> None:
+                    """Set the value."""
+                    self.game.pop_level()
+                    if not text:
+                        text = default
+                    setattr(self.world.messages, name, text)
+                    self.game.output('Message set.')
+
+                self.game.pop_level()
+                self.game.output('Enter the message: %s' % value)
+                yield
+                self.game.push_level(e)
+
+            title: str = message_descriptions.get(a.name, a.name)
+            title = f'{title}: {value!r}'
+            m.add_item(inner, title=title)
+        self.game.push_level(m)
