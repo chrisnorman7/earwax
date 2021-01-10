@@ -24,7 +24,9 @@ def configure_earwax(args: Namespace) -> None:
     game: Game = Game()
     with path.open('r') as f:
         game.config.load(f)
-    menu: ConfigMenu = ConfigMenu(game, 'Configure Earwax', dismissible=False)
+    menu: ConfigMenu = ConfigMenu(  # type: ignore[misc]
+        game, 'Configure Earwax', dismissible=False  # type: ignore[arg-type]
+    )
 
     @menu.item(title='Save and Exit')
     def save_and_exit() -> None:

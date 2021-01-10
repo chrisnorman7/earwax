@@ -233,7 +233,7 @@ class ConfigMenu(Menu):
         if is_union_type(t) and type(None) in get_args(t):
             empty_label = 'Clear'
         fm: FileMenu = FileMenu(
-            self.game, 'Select Path',
+            self.game, 'Select Path',  # type: ignore[arg-type]
             path=option.value.parent if isinstance(option.value, Path) else
             Path.cwd(), func=inner,
             empty_label=empty_label
@@ -327,7 +327,9 @@ class ConfigMenu(Menu):
         def inner() -> Generator[None, None, None]:
             """Push the previously created menu onto the level stack."""
             yield
-            m: ConfigMenu = ConfigMenu(self.game, name, config=subsection)
+            m: ConfigMenu = ConfigMenu(
+                self.game, name, config=subsection  # type: ignore[arg-type]
+            )
             self.game.push_level(m)
 
         return inner
