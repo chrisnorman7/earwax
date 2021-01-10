@@ -2,6 +2,7 @@
 
 import os
 from argparse import Namespace
+from logging import Logger, getLogger
 from xml.etree.ElementTree import Element, ElementTree, parse
 
 try:
@@ -14,10 +15,13 @@ from earwax import Game
 from earwax.story import (EditLevel, StoryContext, StoryWorld, WorldRoom,
                           world_builder)
 
+logger: Logger = getLogger(__name__)
+
 
 def play_story(args: Namespace, edit: bool = False) -> None:
     """Load and play a story."""
     filename: str = args.filename
+    logger.info('Attempting to load worl file %s.', filename)
     if not os.path.isfile(filename):
         print('File not found.')
         print()

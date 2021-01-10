@@ -1,6 +1,7 @@
 """A script for interracting with story files."""
 
 from argparse import ArgumentParser, Namespace, _MutuallyExclusiveGroup
+from logging import Logger, basicConfig, getLogger
 
 from earwax.cmd.subcommands.story import create_story, play_story
 
@@ -29,7 +30,11 @@ parser.add_argument(
 
 if __name__ == '__main__':
     args: Namespace = parser.parse_args()
+    basicConfig(filename='storyplayer.log', level='INFO')
+    logger: Logger = getLogger(__name__)
     if args.create:
+        logger.info('Creating a story.')
         create_story(args)
     else:
+        logger.info('%sing a story.' % ('Edit' if args.edit else 'Play'))
         play_story(args, edit=args.edit)

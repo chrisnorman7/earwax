@@ -7,7 +7,10 @@ then register them with the :meth:`subcommand` method.
 from argparse import (
     ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace,
     _SubParsersAction)
+from logging import basicConfig
 from typing import Callable
+
+from default_argparse import parser
 
 from .constants import surfaces_directory
 from .subcommands.configure_earwax import configure_earwax
@@ -18,10 +21,6 @@ from .subcommands.project_title import project_title
 from .subcommands.story import create_story, edit_story, play_story
 
 SubcommandFunction = Callable[[Namespace], None]
-
-parser: ArgumentParser = ArgumentParser(
-    formatter_class=ArgumentDefaultsHelpFormatter
-)
 
 commands = parser.add_subparsers(
     metavar='<command>', required=True, description='The subcommand to call.'
@@ -144,4 +143,7 @@ edit_story_parser.add_argument('filename', help='The filename to load from.')
 def cmd_main() -> None:
     """Run the earwax client."""
     args = parser.parse_args()
+    basicConfig(
+        stream=args.log_file, level=args.log_level, format=args.log_format
+    )
     return args.func(args)

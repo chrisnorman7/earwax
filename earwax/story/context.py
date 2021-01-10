@@ -1,6 +1,7 @@
 """Provides the StoryContext class."""
 
 import webbrowser
+from logging import Logger, getLogger
 from typing import List, Type
 
 from attr import Factory, attrib, attrs
@@ -20,6 +21,13 @@ class StoryContext:
     game: Game
     world: StoryWorld
     edit: bool = Factory(bool)
+    logger: Logger = attrib(init=False, repr=False)
+
+    @logger.default
+    def get_default_logger(instance: 'StoryContext') -> Logger:
+        """Return a default logger."""
+        return getLogger(instance.world.name)
+
     state: WorldState = attrib()
 
     @state.default
@@ -32,11 +40,15 @@ class StoryContext:
     def __attrs_post_init__(self) -> None:
         """Make sure everything is in working order."""
         if self.world.initial_room_id is None:
+            self.logger.critical('Initial room ID is None.')
             raise RuntimeError(
                 'You must set the initial room for your world, with a '
                 '<entrance> tag inside your <world> tag.'
             )
         elif self.world.initial_room_id not in self.world.rooms:
+            self.logger.critical(
+                'Invalid initial room ID: %s.', self.world.initial_room_id
+            )
             raise RuntimeError(
                 'Invalid room id for <entrance> tag: %s.' %
                 self.world.initial_room_id
@@ -48,6 +60,7 @@ class StoryContext:
             for x in room.exits:
                 did: str = x.destination_id
                 if did not in self.world.rooms:
+                    self.logger.critical('Invalid exit destination: %s.', did)
                     raise RuntimeError(
                         'Invalid destination %r for exit %s of room %s.' % (
                             did, x.action.name, room.name
@@ -56,13 +69,14 @@ class StoryContext:
                 if x.destination in inaccessible_rooms:
                     inaccessible_rooms.remove(x.destination)
         for room in inaccessible_rooms:
-            print('WARNING: There is no way to access %s!' % room.name)
+            self.logger.warning('There is no way to access %s.', room)
         self.state.room_id = self.world.initial_room_id
         cls: Type[PlayLevel]
         if self.edit:
             cls = EditLevel
         else:
             cls = PlayLevel
+        self.logger.info('Creating %r.', cls)
         self.main_level = cls(self.game, self)
 
     def earwax_bug(self) -> None:
