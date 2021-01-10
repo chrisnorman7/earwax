@@ -14,7 +14,7 @@ from ..menu import Menu
 from ..types import OptionalGenerator
 from .play_level import PlayLevel
 from .world import (ObjectTypes, RoomExit, RoomObject, WorldAction,
-                    WorldMessages, WorldRoom)
+                    WorldAmbiance, WorldMessages, WorldRoom)
 
 try:
     from pyglet.window import key
@@ -129,6 +129,7 @@ class EditLevel(PlayLevel):
             'Change world message', symbol=key.M, modifiers=key.MOD_SHIFT
         )(self.set_world_messages)
         self.action('Sounds menu', symbol=key.S)(self.sounds_menu)
+        self.action('Ambiances menu', symbol=key.A)(self.ambiances_menu)
         return super().__attrs_post_init__()
 
     @property
@@ -420,3 +421,117 @@ class EditLevel(PlayLevel):
             )
         else:
             self.game.output('Nothing selected.')
+
+    def add_ambiance(
+        self, ambiances: List[WorldAmbiance]
+    ) -> Callable[[], Generator[None, None, None]]:
+        """Add a new ambiance to the given list."""
+
+        def inner() -> Generator[None, None, None]:
+            e: Editor = Editor(self.game)
+
+            @e.event
+            def on_submit(text: str) -> None:
+                if not text:
+                    self.game.output('Cancelled.')
+                elif not os.path.exists(text):
+                    self.game.output('Path does not exist: %s.' % text)
+                else:
+                    ambiances.append(WorldAmbiance(text))
+                    self.set_room(self.room)
+                    self.game.output('Done.')
+                while not isinstance(self.game.level, EditLevel):
+                    self.game.pop_level()
+
+            self.game.output('Enter a path for your new ambiance')
+            yield
+            self.game.push_level(e)
+
+        return inner
+
+    def ambiance_menu(
+        self, ambiances: List[WorldAmbiance], ambiance: WorldAmbiance
+    ) -> Callable[[], None]:
+        """Push the edit ambiance menu."""
+        def inner() -> None:
+            m: Menu = Menu(self.game, 'Ambiance Menu')
+            m.add_item(self.edit_ambiance(ambiance), title='Edit')
+            m.add_item(
+                self.delete_ambiance(ambiances, ambiance), title='Delete'
+            )
+            self.game.push_level(m)
+
+        return inner
+
+    def edit_ambiance(
+        self, ambiance: WorldAmbiance
+    ) -> Callable[[], Generator[None, None, None]]:
+        """Edit the ambiance."""
+
+        def inner() -> Generator[None, None, None]:
+            e: Editor = Editor(self.game, text=ambiance.path)
+
+            @e.event
+            def on_submit(text: str) -> None:
+                """Set the new ambiance."""
+                self.game.pop_level()
+                if text:
+                    if os.path.exists(text):
+                        ambiance.path = text
+                        self.game.output('Ambiance set.')
+                        self.set_room(self.room)
+                    else:
+                        self.game.output('Path does not exist: %s.' % text)
+                else:
+                    self.game.output(
+                        'Ambiances cannot be cleared, only deleted.'
+                    )
+
+            self.game.output('Enter a path: %s' % ambiance.path)
+            yield
+            self.game.push_level(e)
+
+        return inner
+
+    def delete_ambiance(
+        self, ambiances: List[WorldAmbiance], ambiance: WorldAmbiance
+    ) -> Callable[[], None]:
+        """Delete the ambiance."""
+
+        def yes() -> None:
+            """Actually delete the ambiance."""
+            ambiances.remove(ambiance)
+            self.game.output('Deleted.')
+            while not isinstance(self.game.level, EditLevel):
+                self.game.pop_level()
+            self.set_room(self.room)
+
+        def no() -> None:
+            """Don't delete."""
+            self.game.output('Cancelled.')
+            self.game.pop_level()
+
+        def inner() -> None:
+            m: Menu = Menu.yes_no(self.game, yes, no)
+            self.game.push_level(m)
+
+        return inner
+
+    def ambiances_menu(self) -> None:
+        """Push a menu that can edit ambiances."""
+        obj: Optional[ObjectTypes] = self.object
+        if isinstance(obj, RoomExit):
+            self.game.output(
+                'Exits do not have ambiances. Perhaps you wanted to edit the '
+                'exit sound with the S key?'
+            )
+        else:
+            assert isinstance(obj, (WorldRoom, RoomObject))
+            m: Menu = Menu(self.game, 'Ambiances')
+            m.add_item(self.add_ambiance(obj.ambiances), title='Add')
+            a: WorldAmbiance
+            for a in obj.ambiances:
+                m.add_item(
+                    self.ambiance_menu(obj.ambiances, a), title=a.path
+                )
+            self.game.push_level(m)
