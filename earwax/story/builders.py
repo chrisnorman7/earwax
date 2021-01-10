@@ -49,7 +49,10 @@ def make_action(
     if isinstance(obj, RoomExit):
         obj.action = action
     elif isinstance(obj, RoomObject):
-        obj.actions.append(action)
+        if element.tag == 'action':
+            obj.actions.append(action)
+        else:
+            obj.actions_action = action
     else:
         raise RuntimeError('Invalid action placement: below object %r.' % obj)
     return action
@@ -111,7 +114,8 @@ object_builder: Builder[WorldRoom, RoomObject] = Builder(
         'name': set_name,
         'ambiance': set_ambiance
     }, builders={
-        'action': action_builder
+        'action': action_builder,
+        'mainaction': action_builder
     }
 )
 

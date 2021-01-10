@@ -1,13 +1,14 @@
 """Provides the StoryLevel class."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Generator, List
+from typing import TYPE_CHECKING, Callable, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
 
 from ..ambiance import Ambiance
 from ..level import Level
 from ..menu import Menu
+from ..point import Point
 from ..sound import Sound
 from ..track import Track, TrackTypes
 from .world import (RoomExit, RoomObject, StoryWorld, WorldAction,
@@ -87,6 +88,12 @@ class PlayLevel(Level):
         """Get the attached world."""
         return self.world_context.world
 
+    def stop_action_sounds(self) -> None:
+        """Stop all action sounds."""
+        while self.action_sounds:
+            s: Sound = self.action_sounds.pop()
+            s.destroy(destroy_source=True)
+
     def on_push(self) -> None:
         """Set the initial room.
 
@@ -95,6 +102,11 @@ class PlayLevel(Level):
         """
         super().on_push()
         self.set_room(self.state.room)
+
+    def on_pop(self) -> None:
+        """Stop all the action sounds."""
+        self.stop_action_sounds()
+        return super().on_pop()
 
     def main_menu(self) -> None:
         """Return to the main menu."""
@@ -183,9 +195,7 @@ class PlayLevel(Level):
         self.state.room_id = room.id
         self.state.object_index = None
         self.state.category_index = 0
-        while self.action_sounds:
-            s: Sound = self.action_sounds.pop()
-            s.destroy(destroy_source=True)
+        self.stop_action_sounds()
         self.stop_ambiances()
         self.ambiances.clear()
         ambiance_paths: List[str] = [a.path for a in room.ambiances]
@@ -216,6 +226,47 @@ class PlayLevel(Level):
                     self.ambiances.append(ambiance)
         self.start_ambiances()
 
+    def do_action(
+        self, action: WorldAction, position: Optional[Point] = None
+    ) -> None:
+        """Actually perform an action.
+
+        :param action: The action to perform.
+
+        :param position: The position of whatever object owns this action.
+
+            If this value is ``None``, then ``action.sound`` will not be
+            panned.
+        """
+        if action.message is not None:
+            self.game.output(action.message)
+        if action.sound is not None:
+            self.play_action_sound(action.sound, position=position)
+
+    def play_action_sound(
+        self, sound: str, position: Optional[Point] = None
+    ) -> None:
+        """Play an action sound.
+
+        :param sound: The filename of the sound to play.
+
+        :param position: The position of the owning object.
+
+            If this value is ``None``, the sound will not be panned.
+        """
+        source: Source
+        if position is None:
+            source = DirectSource(self.game.audio_context)
+        else:
+            source = Source3D(self.game.audio_context)
+            source.position = position.coordinates
+        source.gain = self.game.config.sound.sound_volume.value
+        s: Sound = Sound.from_path(
+            self.game.audio_context, source, self.game.buffer_cache,
+            Path(sound)
+        )
+        self.action_sounds.append(s)
+
     def perform_action(self, obj: RoomObject, action: WorldAction) -> Callable[
         [], None
     ]:
@@ -240,21 +291,7 @@ class PlayLevel(Level):
 
         def inner() -> None:
             """Actually perform the action."""
-            if action.message is not None:
-                self.game.output(action.message)
-            if action.sound is not None:
-                source: Source
-                if obj.position is None:
-                    source = DirectSource(self.game.audio_context)
-                else:
-                    source = Source3D(self.game.audio_context)
-                    source.position = obj.position.coordinates
-                source.gain = self.game.config.sound.ambiance_volume.value
-                s: Sound = Sound.from_path(
-                    self.game.audio_context, source, self.game.buffer_cache,
-                    Path(action.sound)
-                )
-                self.action_sounds.append(s)
+            self.do_action(action, position=obj.position)
             self.game.pop_level()
 
         return inner
@@ -263,9 +300,20 @@ class PlayLevel(Level):
         """Show a menu of object actions."""
         if not obj.actions:
             return self.game.output(self.world.messages.no_actions)
-        m: Menu = Menu(
-            self.game, self.world.messages.actions_menu.format(obj.name)
-        )
+        msg: str
+        if (
+            obj.actions_action is not None and
+            obj.actions_action.message is not None
+        ):
+            msg = obj.actions_action.message
+        else:
+            msg = self.world.messages.actions_menu
+        m: Menu = Menu(self.game, msg.format(obj.name))
+        if (
+            obj.actions_action is not None and
+            obj.actions_action.sound is not None
+        ):
+            self.play_action_sound(obj.actions_action.sound)
         action: WorldAction
         for action in obj.actions:
             m.add_item(self.perform_action(obj, action), title=action.name)

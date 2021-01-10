@@ -102,7 +102,15 @@ class RoomObject:
             <name>Object Name</name>
             <ambiance>sound.wav</ambiance>
             <action>...</action>
+            <mainaction>
+                <sound>music.wav</sound>
+                <message>You step up to {}.</message>
+            </mainaction>
         </object>
+
+    Without a ``mainaction`` child tag, no music will play when viewing the
+    actions menu for this object, and the
+    :attr:`~earwax.story.WorldMessages.actions_menu` message will be shown.
 
     :ivar ~earwax.story.RoomObject.id: The unique ID of this object. If this ID
         is not provided, then picking it up will not be reliable, as the ID
@@ -132,6 +140,11 @@ class RoomObject:
 
         You can provide this value in XML, with a ``<name>`` tag.
 
+    :ivar ~earwax.story.RoomObject.actions_action: An action object which will
+        be used when viewing the actions menu for this object.
+
+        This value is provided in XML with the ``<mainaction>`` tag.
+
     :ivar ~earwax.story.RoomObject.ambiances: A list of ambiances to play at
         the :attr:`~earwax.story.RoomObject.position` of this object.
 
@@ -143,6 +156,7 @@ class RoomObject:
     location: 'WorldRoom'
     position: Optional[Point] = None
     name: str = 'Unnamed Object'
+    actions_action: Optional[WorldAction] = None
     ambiances: List[WorldAmbiance] = Factory(list)
     actions: List[WorldAction] = Factory(list)
 
@@ -156,6 +170,10 @@ class RoomObject:
                 'z': str(self.position.y)
             }
         e.attrib['id'] = self.id
+        if self.actions_action is not None:
+            actions_action_element: Element = self.actions_action.to_xml()
+            actions_action_element.tag = 'mainaction'
+            e.append(actions_action_element)
         e.append(get_element('name', text=self.name))
         ambiance: WorldAmbiance
         for ambiance in self.ambiances:
