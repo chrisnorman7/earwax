@@ -11,6 +11,11 @@ try:
 except ModuleNotFoundError:
     key = None
 
+try:
+    from pyperclip import copy, paste
+except ModuleNotFoundError:
+    copy, paste = (None, None)
+
 from .level import Level
 from .mixins import DismissibleMixin
 
@@ -64,9 +69,33 @@ class Editor(Level, DismissibleMixin):
         self.action('Submit text', symbol=key.RETURN)(self.submit)
         self.action('Dismiss', symbol=key.ESCAPE)(self.dismiss)
         self.action('Clear', symbol=key.U, modifiers=key.MOD_CTRL)(self.clear)
+        self.action('Cut', symbol=key.X, modifiers=key.MOD_CTRL)(self.cut)
+        self.action('Copy', symbol=key.C, modifiers=key.MOD_CTRL)(self.copy)
+        self.action('Paste', symbol=key.V, modifiers=key.MOD_CTRL)(self.paste)
         for func in (self.on_text, self.on_submit):
             self.register_event_type(func.__name__)
         return super().__attrs_post_init__()
+
+    def cut(self) -> None:
+        """Cut the contents of this editor to the clipboard."""
+        self.copy()
+        if copy is not None:
+            self.text = ''
+            self.beginning_of_line()
+
+    def copy(self) -> None:
+        """Copy the contents of this editor to the clipboard."""
+        if copy is None:
+            self.game.output('Pyperclip is not installed.')
+        else:
+            copy(self.text)
+
+    def paste(self) -> None:
+        """Paste the contents of the clipboard into this editor."""
+        if paste is None:
+            self.game.output('Cannot paste without Pyperclip installed.')
+        else:
+            self.dispatch_event('on_text', paste())
 
     def submit(self) -> None:
         """Submit :attr:`self.text <earwax.Editor.text>`.
