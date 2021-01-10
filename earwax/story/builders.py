@@ -1,12 +1,20 @@
 """Provides builders for the various story classes."""
 
 import os.path
-from typing import List, Optional, Union
+from html import unescape
+from typing import Any, Dict, List, Optional, Union
 from xml.etree.ElementTree import Element
 
 from shortuuid import uuid
 from xml_python import Builder
+from yaml import load
 
+try:
+    from yaml import CLoader
+except ModuleNotFoundError:
+    from yaml import FullLoader as CLoader  # type: ignore[misc]
+
+from ..game import Game
 from ..point import Point
 from .world import (RoomExit, RoomObject, StoryWorld, WorldAction,
                     WorldAmbiance, WorldRoom)
@@ -21,7 +29,7 @@ def set_name(
     name: Optional[str] = element.text
     if name is None:
         raise RuntimeError('Names cannot be blank.')
-    thing.name = name
+    thing.name = unescape(name)
 
 
 def set_ambiance(
@@ -32,7 +40,7 @@ def set_ambiance(
         raise RuntimeError(
             'You must provide a path for the ambiance of %s.' % parent.name
         )
-    p: str = element.text
+    p: str = unescape(element.text)
     if not os.path.exists(p):
         raise RuntimeError(
             'The ambiance for %s is invalid: %s.' % (parent.name, p)
@@ -72,6 +80,8 @@ action_builder: Builder[
 def set_action_message(action: WorldAction, element: Element) -> None:
     """Set the action message."""
     action.message = element.text
+    if action.message is not None:
+        action.message = unescape(action.message)
 
 
 @action_builder.parser('sound')
@@ -79,7 +89,7 @@ def set_sound(action: WorldAction, element: Element) -> None:
     """Set the action sound."""
     if element.text is None:
         raise RuntimeError('Empty sound tag for action %s.' % action.name)
-    p: str = element.text
+    p: str = unescape(element.text)
     if not os.path.exists(p):
         raise RuntimeError(
             'Invalid sound for action %s: %r: Path does not exist.' % (
@@ -165,15 +175,15 @@ def set_description(room: WorldRoom, element: Element) -> None:
     """Set the description."""
     if element.text is None:
         raise RuntimeError('Empty description provided for %s.' % room.name)
-    room.description = element.text
+    room.description = unescape(element.text)
 
 
-def make_world(parent: NoneType, element: Element) -> StoryWorld:
+def make_world(parent: Game, element: Element) -> StoryWorld:
     """Make a StoryWorld object."""
-    return StoryWorld()
+    return StoryWorld(parent)
 
 
-world_builder: Builder[NoneType, StoryWorld] = Builder(
+world_builder: Builder[Game, StoryWorld] = Builder(
     make_world, name='Story', builders={'room': room_builder},
     parsers={'name': set_name}
 )
@@ -187,14 +197,19 @@ def set_main_menu_music(world: StoryWorld, element: Element) -> None:
         raise RuntimeError(
             'You must provide a path to load main menu music from.'
         )
-    else:
-        world.main_menu_musics.append(p)
+    p = unescape(p)
+    if not os.path.isfile(p):
+        raise RuntimeError('Invalid music path: %s. path does not exist.' % p)
+    world.main_menu_musics.append(p)
 
 
 @world_builder.parser('entrance')
 def set_entrance(world: StoryWorld, element: Element) -> None:
     """Set the initial room."""
-    world.initial_room_id = element.text
+    rid: Optional[str] = element.text
+    if rid is None:
+        raise RuntimeError('Empty <entrance> tag provided.')
+    world.initial_room_id = unescape(rid)
 
 
 @world_builder.parser('author')
@@ -202,7 +217,7 @@ def set_author(world: StoryWorld, element: Element) -> None:
     """Set the author."""
     if element.text is None:
         raise RuntimeError('The author tag cannot be empty.')
-    world.author = element.text
+    world.author = unescape(element.text)
 
 
 @world_builder.parser('message')
@@ -212,13 +227,23 @@ def set_world_message(world: StoryWorld, element: Element) -> None:
     message_id: Optional[str] = element.attrib.get('id', None)
     if message_id is None:
         raise RuntimeError('All world messages must have IDs.')
-    elif message_id not in message_ids:
+    message_id = unescape(message_id)
+    if message_id not in message_ids:
         raise RuntimeError(
             'Invalid message ID %r. Valid IDs: %s' % (
                 message_id, ', '.join(message_ids)
             )
         )
-    elif element.text is None:
+    if element.text is None:
         raise RuntimeError('Tried to blank the %r message.' % message_id)
-    else:
-        setattr(world.messages, message_id, element.text)
+    setattr(world.messages, message_id, unescape(element.text))
+
+
+@world_builder.parser('config')
+def set_config(world: StoryWorld, element: Element) -> None:
+    """Load Earwax configuration."""
+    if element.text is None:
+        raise RuntimeError('Empty <config> tag supplied.')
+    text: str = unescape(element.text)
+    data: Dict[str, Any] = load(text, Loader=CLoader)
+    world.game.config.populate_from_dict(data)

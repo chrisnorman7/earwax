@@ -2,7 +2,7 @@
 
 import os
 from argparse import Namespace
-from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import Element, ElementTree, parse
 
 try:
     from pyglet.window import Window
@@ -23,8 +23,11 @@ def play_story(args: Namespace, edit: bool = False) -> None:
         print()
         print(f'There is no file named {filename}.')
         raise SystemExit
+    game: Game = Game()
+    tree: ElementTree = parse(filename)
+    e: Element = tree.getroot()
     try:
-        world: StoryWorld = world_builder.handle_filename(filename)
+        world: StoryWorld = world_builder.build(game, e)
     except (RuntimeError, UnhandledElement) as e:
         print('Error loading story:')
         print()
@@ -41,7 +44,7 @@ def play_story(args: Namespace, edit: bool = False) -> None:
                 )
             )
         raise SystemExit
-    game: Game = Game(name=world.name)
+    game.name = world.name
     ctx: StoryContext
     try:
         ctx = StoryContext(game, world, edit=edit)
@@ -69,7 +72,8 @@ def create_story(args: Namespace) -> None:
         print()
         print('Perhaps you meant the `story play` subcommand?')
     else:
-        w: StoryWorld = StoryWorld(name='Untitled World')
+        game: Game = Game()
+        w: StoryWorld = StoryWorld(game, name='Untitled World')
         r: WorldRoom = WorldRoom(w, 'first_room')
         w.rooms[r.id] = r
         w.initial_room_id = r.id

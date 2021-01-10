@@ -6,7 +6,7 @@ from typing import List, Type
 from attr import Factory, attrib, attrs
 
 from ..game import Game
-from ..menu import Menu
+from ..menu import ConfigMenu, Menu
 from ..track import Track, TrackTypes
 from .edit_level import EditLevel
 from .play_level import PlayLevel
@@ -69,6 +69,19 @@ class StoryContext:
         """Open the Earwax new issue URL."""
         webbrowser.open('https://github.com/chrisnorman7/earwax/issues/new')
 
+    def configure_earwax(self) -> None:
+        """Push a menu that can be used to configure Earwax."""
+        m: ConfigMenu = ConfigMenu(  # type: ignore[misc]
+            self.game,
+            'Configure Earwax', dismissible=False  # type: ignore[arg-type]
+        )
+
+        @m.item(title='Return to main menu')
+        def main_menu() -> None:
+            self.game.replace_level(self.get_main_menu())
+
+        self.game.replace_level(m)
+
     def get_main_menu(self) -> Menu:
         """Create a main menu for this world."""
         m: Menu = Menu(
@@ -81,6 +94,7 @@ class StoryContext:
         m.add_item(self.play, title=self.world.messages.play_game)
         if isinstance(self.main_level, EditLevel):
             m.add_item(self.main_level.save, title='Save')
+            m.add_item(self.configure_earwax, title='Configure Earwax')
         if self.game.credits:
             m.add_item(
                 self.push_credits, title=self.world.messages.show_credits

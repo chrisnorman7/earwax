@@ -1,5 +1,21 @@
 <?xml version="1.0" ?>
 <world>
+	<config>editors:
+  hat_alphabet: ' abcdefghijklmnopqrstuvwxyz.,1234567890@ABCDEFGHIJKLMNOPQRSTUVWXYZ-#[]{}'
+menus:
+  default_item_activate_sound: C:\Users\chris\src\earwax\sound.wav
+  default_item_select_sound: C:\Users\chris\src\earwax\move.wav
+sound:
+  ambiance_volume: 0.4
+  default_cache_size: 524288000
+  master_volume: 1.0
+  max_volume: 1.0
+  music_volume: 0.4
+  sound_volume: 0.5
+speech:
+  braille: true
+  speak: true
+</config>
 	<name>Chris's World</name>
 	<author>Chris Norman &lt;chris.norman2@googlemail.com&gt;</author>
 	<menumusic>D:\sounds\CORE 2 Free Sampler\Musical\Song &amp; Phrase\MUSCSong_Alexion Full Mix_001_PSE_AMO_G4cHe.wav</menumusic>
@@ -15,6 +31,7 @@
 			</mainaction>
 			<name>a standing stone</name>
 			<ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\Metal Worlds\355000 - Spherical Vibration Drone Medium.wav</ambiance>
+			<ambiance>D:\sounds\CORE 2 Free Sampler\Musical\Song &amp; Phrase\MUSCSong_Alexion Full Mix_001_PSE_AMO_G4cHe.wav</ambiance>
 			<action>
 				<name>Examine</name>
 				<message>This is a tall carved stone. It has lots of writing carved into it by unknown hands.</message>
@@ -62,8 +79,6 @@
 		<name>A small hole in the ground.</name>
 		<description>You find yourself in a small hole burrowed into the undergrowth along the sides of the path. The walls are supported by gnarled routes, and the floor is covered with a light dusting of sand.</description>
 		<ambiance>D:\sounds\CORE 2 Free Sampler\Musical\Song &amp; Phrase\MUSCSong_Alexion Full Mix_001_PSE_AMO_G4cHe.wav</ambiance>
-		<ambiance>D:\sounds\King Collection - Volume 1\Ambience - Rural\Rural_Cornfield_Ambience_Afternoon_Day_Cicadas_KCV1-05.wav</ambiance>
-		<ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\Metal Worlds\349400 - Dark Vibrating Metal Rattle - Loop.wav</ambiance>
 		<exit destination="jungle_2">
 			<action>
 				<name>Clamber back onto the jungle path.</name>

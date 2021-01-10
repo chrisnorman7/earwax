@@ -212,8 +212,8 @@ class PlayLevel(Level):
             path_str: str = str(a.path)
             if path_str not in loaded_paths:
                 track = Track('file', path_str, TrackTypes.ambiance)
-                self.tracks.append(track)
                 track.play(self.game.ambiance_sound_manager)
+                self.tracks.append(track)
         obj: RoomObject
         for obj in room.objects.values():
             for a in obj.ambiances:

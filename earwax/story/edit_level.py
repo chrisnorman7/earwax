@@ -520,7 +520,9 @@ class EditLevel(PlayLevel):
     def ambiances_menu(self) -> None:
         """Push a menu that can edit ambiances."""
         obj: Optional[ObjectTypes] = self.object
-        if isinstance(obj, RoomExit):
+        if obj is None:
+            self.game.output('Nothing selected.')
+        elif isinstance(obj, RoomExit):
             self.game.output(
                 'Exits do not have ambiances. Perhaps you wanted to edit the '
                 'exit sound with the S key?'

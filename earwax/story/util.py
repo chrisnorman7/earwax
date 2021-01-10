@@ -28,7 +28,8 @@ def get_element(
     :param attrib: The extra attributes for the element.
     """
     e: Element = Element(tag, attrib=attrib)
-    e.text = text
+    if text is not None:
+        e.text = text
     return e
 
 

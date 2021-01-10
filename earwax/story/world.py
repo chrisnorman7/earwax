@@ -1,14 +1,23 @@
 """Provides various classes relating to worlds."""
 
 from enum import Enum
-from typing import Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 from xml.dom.minidom import Document, parseString
 from xml.etree.ElementTree import Element, tostring
 
 from attr import Factory, attrib, attrs
+from yaml import dump
+
+try:
+    from yaml import CDumper
+except ModuleNotFoundError:
+    from yaml import Dumper as CDumper  # type: ignore[misc]
 
 from ..point import Point
 from .util import get_element, stringify
+
+if TYPE_CHECKING:
+    from ..game import Game
 
 ObjectTypes = Union['WorldRoom', 'RoomObject', 'RoomExit']
 
@@ -506,6 +515,8 @@ class StoryWorld:
 
     Worlds can be returned as an XML string with the :meth:`to_string` def
 
+    :ivar ~earwax.story.StoryWorld.game: The game this world is part of.
+
     :ivar ~earwax.story.StoryWorld.name: The name of this world.
 
         This value is provided in XML with the ``<name>`` tag.
@@ -547,6 +558,7 @@ class StoryWorld:
         <WorldMessages>`> tags.
     """
 
+    game: 'Game'
     name: str = 'Untitled World'
     author: str = 'Unknown'
 
@@ -564,7 +576,10 @@ class StoryWorld:
 
     def to_xml(self) -> Element:
         """Dump this world."""
+        data: Dict[str, Any] = self.game.config.dump()
+        configuration: str = dump(data, Dumper=CDumper)
         e: Element = get_element('world')
+        e.append(get_element('config', text=configuration))
         e.append(get_element('name', text=self.name))
         e.append(get_element('author', text=self.author))
         music: str
