@@ -53,6 +53,7 @@ def make_action(
             obj.actions.append(action)
         else:
             obj.actions_action = action
+            action.name = 'Main Action'
     else:
         raise RuntimeError('Invalid action placement: below object %r.' % obj)
     return action

@@ -1,5 +1,6 @@
 """Provides the EditLevel class."""
 
+import os.path
 from inspect import isgenerator
 from typing import Callable, Dict, Generator, List, Optional, Union, cast
 
@@ -112,7 +113,7 @@ class EditLevel(PlayLevel):
             self.save
         )
         self.action('Go to another room', symbol=key.G)(self.goto_room)
-        self.action('Create menu', symbol=key.C)(self.create_menu)
+        self.action('Creation menu', symbol=key.C)(self.create_menu)
         self.action('Rename the currently focused object', symbol=key.R)(
             self.rename
         )
@@ -127,6 +128,7 @@ class EditLevel(PlayLevel):
         self.action(
             'Change world message', symbol=key.M, modifiers=key.MOD_SHIFT
         )(self.set_world_messages)
+        self.action('Sounds menu', symbol=key.S)(self.sounds_menu)
         return super().__attrs_post_init__()
 
     @property
@@ -309,18 +311,18 @@ class EditLevel(PlayLevel):
             yield from self.set_message(obj.action)
         else:
             push_actions_menu(self.game, obj.actions, self.set_message)
-            if obj.actions_action is not None:
-                level: Optional[Level] = self.game.level
-                assert isinstance(level, Menu)
+            level: Optional[Level] = self.game.level
+            assert isinstance(level, Menu)
 
-                def inner() -> Generator[None, None, None]:
-                    """Set ``obj.actions_action.message``."""
-                    assert isinstance(obj, RoomObject)
-                    assert obj.actions_action is not None
-                    self.game.pop_level()
-                    yield from self.set_message(obj.actions_action)
+            def inner() -> Generator[None, None, None]:
+                """Set ``obj.actions_action.message``."""
+                assert isinstance(obj, RoomObject)
+                if obj.actions_action is None:
+                    obj.actions_action = WorldAction(name='Main Action')
+                self.game.pop_level()
+                yield from self.set_message(obj.actions_action)
 
-                level.add_item(inner, title='Object Actions Message')
+            level.add_item(inner, title='Object Actions Message')
 
     def set_world_messages(self) -> Generator[None, None, None]:
         """Push a menu that allows the editing of world messages."""
@@ -360,3 +362,61 @@ class EditLevel(PlayLevel):
             title = f'{title}: {value!r}'
             m.add_item(inner, title=title)
         self.game.push_level(m)
+
+    def set_sound(self, action: WorldAction) -> Generator[None, None, None]:
+        """Set the sound on the given action.
+
+        :param action: The action whose sound will be changed.
+        """
+        e: Editor = Editor(self.game, text=action.sound or '')
+
+        @e.event
+        def on_submit(text: str) -> None:
+            """Set the sound."""
+            if text:
+                if os.path.exists(text):
+                    self.game.pop_level()
+                    action.sound = text
+                    self.game.output('Sound set.')
+                    self.play_action_sound(text)
+                else:
+                    self.game.output('Path does not exist: %s.' % text)
+                    e.text = text
+            else:
+                self.game.pop_level()
+                action.sound = None
+                self.game.output('Sound cleared.')
+
+        self.game.output(
+            'Enter a new sound for %s: %s' % (action.name, action.sound)
+        )
+        yield
+        self.game.push_level(e)
+
+    def sounds_menu(self) -> OptionalGenerator:
+        """Add or remove ambiances for the currently focused object."""
+        obj: Optional[ObjectTypes] = self.object
+        if isinstance(obj, RoomExit):
+            yield from self.set_sound(obj.action)
+        elif isinstance(obj, RoomObject):
+            yield
+            push_actions_menu(self.game, obj.actions, self.set_sound)
+            assert isinstance(self.game.level, Menu)
+            m: Menu = self.game.level
+
+            def inner() -> Generator[None, None, None]:
+                """Edit the main object action."""
+                assert isinstance(obj, RoomObject)
+                self.game.pop_level()
+                if obj.actions_action is None:
+                    obj.actions_action = WorldAction(name='Main Action')
+                yield from self.set_sound(obj.actions_action)
+
+            m.add_item(inner, title='Main actions sound')
+        elif isinstance(obj, WorldRoom):
+            self.game.output(
+                'Rooms do not have any sounds to edit. Perhaps you meant to '
+                'edit ambiances with the "a" key?'
+            )
+        else:
+            self.game.output('Nothing selected.')

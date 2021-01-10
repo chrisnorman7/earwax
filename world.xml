@@ -9,8 +9,7 @@
 		<ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\The Nature Pack\059200 - Amazon Jungle Night - Loop.wav</ambiance>
 		<object x="-2.0" y="2.0" z="2.0" id="f86C8BT6Jg6gCjtuDvvQVo">
 			<mainaction>
-				<name>Unnamed Action</name>
-				<message>A jolt of power runs up your arm as you touch {}.</message>
+				<name>Main Action</name>
 				<sound>D:\sounds\CORE 2 Free Sampler\Musical\Misc\MUSCMisc_Metal Impact Detuned High Tension Long Tail 227_PSE_SONBM_3btfq.wav</sound>
 			</mainaction>
 			<name>a standing stone</name>

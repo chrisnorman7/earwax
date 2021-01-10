@@ -71,6 +71,7 @@
         "pathlib",
         "pdate",
         "pyglet",
+        "pyperclip",
         "pytest",
         "quickstart",
         "raspberrypi",
