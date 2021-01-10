@@ -10,7 +10,7 @@ from yaml import dump
 
 try:
     from yaml import CDumper
-except ModuleNotFoundError:
+except ImportError:
     from yaml import Dumper as CDumper  # type: ignore[misc]
 
 from ..point import Point

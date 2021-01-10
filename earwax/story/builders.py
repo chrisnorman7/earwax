@@ -11,7 +11,7 @@ from yaml import load
 
 try:
     from yaml import CLoader
-except ModuleNotFoundError:
+except ImportError:
     from yaml import FullLoader as CLoader  # type: ignore[misc]
 
 from ..game import Game
