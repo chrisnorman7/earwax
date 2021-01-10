@@ -8,6 +8,7 @@ from shortuuid import uuid
 
 from ..editor import Editor
 from ..game import Game
+from ..level import Level
 from ..menu import Menu
 from ..types import OptionalGenerator
 from .play_level import PlayLevel
@@ -257,13 +258,14 @@ class EditLevel(PlayLevel):
 
         :param action: The action whose message attribute will be modified.
         """
-        print('Hello.')
         e: Editor = Editor(self.game, text=action.message or '')
 
         @e.event
         def on_submit(text: str) -> None:
             """Set the message."""
             action.message = text
+            if text == '':
+                action.message = None
             self.game.pop_level()
             self.game.output('Message set.')
 
@@ -284,3 +286,15 @@ class EditLevel(PlayLevel):
             yield from self.set_message(obj.action)
         else:
             push_actions_menu(self.game, obj.actions, self.set_message)
+            if obj.actions_action is not None:
+                level: Optional[Level] = self.game.level
+                assert isinstance(level, Menu)
+
+                def inner() -> Generator[None, None, None]:
+                    """Set ``obj.actions_action.message``."""
+                    assert isinstance(obj, RoomObject)
+                    assert obj.actions_action is not None
+                    self.game.pop_level()
+                    yield from self.set_message(obj.actions_action)
+
+                level.add_item(inner, title='Object Actions Message')
