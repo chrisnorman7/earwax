@@ -26,6 +26,8 @@ from .menu_item import MenuItem
 if TYPE_CHECKING:
     from ..game import Game
 
+YesNoFunction = Callable[[], OptionalGenerator]
+
 
 @attrs(auto_attribs=True)
 class Menu(Level, TitleMixin, DismissibleMixin):
@@ -142,6 +144,36 @@ class Menu(Level, TitleMixin, DismissibleMixin):
                 func, title=credit.name, select_sound_path=credit.sound,
                 loop_select_sound=credit.loop
             )
+        return m
+
+    @classmethod
+    def yes_no(
+        cls, game: 'Game', yes_action: YesNoFunction, no_action: YesNoFunction,
+        title: str = 'Are you sure?',
+        yes_label: str = 'Yes', no_label: str = 'No',
+        **kwargs
+    ) -> 'Menu':
+        """Create and return a yes no menu.
+
+        :param game: The game to bind the new menu to.
+
+        :param yes_action: The function to be called if the yes item is
+            selected.
+
+        :param no_action: The action to be performed if no is selected.
+
+        :param title: The title of the menu.
+
+        :param yes_label: The label of the yes item.
+
+        :param no_label: The title of the no label.
+
+        :param kwargs: Extra keyword arguments to be passed to the ``Menu``
+            constructor.
+        """
+        m: Menu = cls(game, title, **kwargs)
+        m.add_item(yes_action, title=yes_label)
+        m.add_item(no_action, title=no_label)
         return m
 
     @property
