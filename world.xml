@@ -41,6 +41,7 @@
 	<room id="jungle_2">
 		<name>#jungle_1</name>
 		<description>#jungle_1</description>
+		<ambiance>D:\sounds\CORE 2 Free Sampler\Musical\Song &amp; Phrase\MUSCSong_Alexion Full Mix_001_PSE_AMO_G4cHe.wav</ambiance>
 		<ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\The Nature Pack\059200 - Amazon Jungle Night - Loop.wav</ambiance>
 		<exit destination="jungle_1">
 			<action>
@@ -53,16 +54,21 @@
 			<action>
 				<name>Go through a small hole in the undergrowth</name>
 				<message>You work your way into the small hole.</message>
+				<sound>D:\sounds\WARFARE SOUNDS\Weapons\Bullets\bullet_impact_grass_07.wav</sound>
 			</action>
 		</exit>
 	</room>
 	<room id="KUtdDVXEuWJfNMsH6vGYTa">
 		<name>A small hole in the ground.</name>
 		<description>You find yourself in a small hole burrowed into the undergrowth along the sides of the path. The walls are supported by gnarled routes, and the floor is covered with a light dusting of sand.</description>
+		<ambiance>D:\sounds\CORE 2 Free Sampler\Musical\Song &amp; Phrase\MUSCSong_Alexion Full Mix_001_PSE_AMO_G4cHe.wav</ambiance>
+		<ambiance>D:\sounds\King Collection - Volume 1\Ambience - Rural\Rural_Cornfield_Ambience_Afternoon_Day_Cicadas_KCV1-05.wav</ambiance>
+		<ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\Metal Worlds\349400 - Dark Vibrating Metal Rattle - Loop.wav</ambiance>
 		<exit destination="jungle_2">
 			<action>
 				<name>Clamber back onto the jungle path.</name>
 				<message>You clamber out of the hole.</message>
+				<sound>D:\sounds\WARFARE SOUNDS\Weapons\Bullets\bullet_impact_grass_07.wav</sound>
 			</action>
 		</exit>
 	</room>
