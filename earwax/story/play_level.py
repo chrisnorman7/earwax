@@ -15,10 +15,10 @@ from .world import (RoomExit, RoomObject, StoryWorld, WorldAction,
 
 try:
     from pyglet.window import key
-    from synthizer import Source3D
+    from synthizer import DirectSource, Source, Source3D
 except ModuleNotFoundError:
     key = None
-    Source3D = object
+    DirectSource, Source, Source3D = (object, object, object)
 
 
 if TYPE_CHECKING:
@@ -56,10 +56,10 @@ class PlayLevel(Level):
             'Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT
         )(self.game.push_action_menu)
         self.action('Volume down', symbol=key.PAGEDOWN, interval=0.1)(
-            lambda: self.game.adjust_volume(-0.05)
+            self.game.change_volume(-0.05)
         )
         self.action('Volume Up', symbol=key.PAGEUP, interval=0.1)(
-            lambda: self.game.adjust_volume(0.05)
+            self.game.change_volume(0.05)
         )
         return super().__attrs_post_init__()
 
@@ -67,10 +67,12 @@ class PlayLevel(Level):
         """Pause All the currently-playing room sounds."""
         a: Ambiance
         for a in self.ambiances:
-            a.sound.paused = not a.sound.paused
+            if a.sound is not None:
+                a.sound.paused = not a.sound.paused
         t: Track
         for t in self.tracks:
-            t.sound.paused = not t.sound.paused
+            if t.sound is not None:
+                t.sound.paused = not t.sound.paused
         s: Sound
         for s in self.action_sounds:
             s.paused = not s.paused
@@ -177,6 +179,7 @@ class PlayLevel(Level):
 
     def set_room(self, room: WorldRoom) -> None:
         """Move to a new room."""
+        assert self.game.ambiance_sound_manager is not None
         self.state.room_id = room.id
         self.state.object_index = None
         self.state.category_index = 0
@@ -185,13 +188,6 @@ class PlayLevel(Level):
             s.destroy(destroy_source=True)
         self.stop_ambiances()
         self.ambiances.clear()
-        obj: RoomObject
-        a: WorldAmbiance
-        for obj in room.objects.values():
-            for a in obj.ambiances:
-                ambiance: Ambiance = Ambiance('file', a.path, obj.position)
-                self.ambiances.append(ambiance)
-        self.start_ambiances()
         ambiance_paths: List[str] = [a.path for a in room.ambiances]
         loaded_paths: List[str] = []
         track: Track
@@ -205,9 +201,20 @@ class PlayLevel(Level):
         for a in room.ambiances:
             path_str: str = str(a.path)
             if path_str not in loaded_paths:
-                track: Track = Track('file', path_str, TrackTypes.ambiance)
+                track = Track('file', path_str, TrackTypes.ambiance)
                 self.tracks.append(track)
                 track.play(self.game.ambiance_sound_manager)
+        obj: RoomObject
+        for obj in room.objects.values():
+            for a in obj.ambiances:
+                if obj.position is None:
+                    track = Track('file', a.path, TrackTypes.ambiance)
+                    self.tracks.append(track)
+                    track.play(self.game.ambiance_sound_manager)
+                else:
+                    ambiance: Ambiance = Ambiance('file', a.path, obj.position)
+                    self.ambiances.append(ambiance)
+        self.start_ambiances()
 
     def perform_action(self, obj: RoomObject, action: WorldAction) -> Callable[
         [], None
@@ -236,9 +243,13 @@ class PlayLevel(Level):
             if action.message is not None:
                 self.game.output(action.message)
             if action.sound is not None:
-                source: Source3D = Source3D(self.game.audio_context)
+                source: Source
+                if obj.position is None:
+                    source = DirectSource(self.game.audio_context)
+                else:
+                    source = Source3D(self.game.audio_context)
+                    source.position = obj.position.coordinates
                 source.gain = self.game.config.sound.ambiance_volume.value
-                source.position = obj.position.coordinates
                 s: Sound = Sound.from_path(
                     self.game.audio_context, source, self.game.buffer_cache,
                     Path(action.sound)
@@ -262,6 +273,7 @@ class PlayLevel(Level):
 
     def activate(self) -> None:
         """Activate the currently focussed object."""
+        assert self.state.object_index is not None
         room: WorldRoom = self.state.room
         category: WorldStateCategories = self.state.category
         if category is WorldStateCategories.room:

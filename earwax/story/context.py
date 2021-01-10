@@ -65,6 +65,10 @@ class StoryContext:
             cls = PlayLevel
         self.main_level = cls(self.game, self)
 
+    def earwax_bug(self) -> None:
+        """Open the Earwax new issue URL."""
+        webbrowser.open('https://github.com/chrisnorman7/earwax/issues/new')
+
     def get_main_menu(self) -> Menu:
         """Create a main menu for this world."""
         m: Menu = Menu(
@@ -81,11 +85,7 @@ class StoryContext:
             m.add_item(
                 self.push_credits, title=self.world.messages.show_credits
             )
-        m.add_item(
-            lambda: webbrowser.open(
-                'https://github.com/chrisnorman7/earwax/issues/new'
-            ), title='Report Earwax Bug'
-        )
+        m.add_item(self.earwax_bug, title='Report Earwax Bug')
         m.add_item(self.game.stop, title=self.world.messages.exit)
         return m
 

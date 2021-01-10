@@ -195,6 +195,8 @@ def set_entrance(world: StoryWorld, element: Element) -> None:
 @world_builder.parser('author')
 def set_author(world: StoryWorld, element: Element) -> None:
     """Set the author."""
+    if element.text is None:
+        raise RuntimeError('The author tag cannot be empty.')
     world.author = element.text
 
 

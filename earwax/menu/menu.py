@@ -1,6 +1,7 @@
 """Provides the Menu class."""
 
 import webbrowser
+from inspect import isgenerator
 from pathlib import Path
 from time import time
 from typing import TYPE_CHECKING, Callable, Generator, List, Optional
@@ -286,10 +287,14 @@ class Menu(Level, TitleMixin, DismissibleMixin):
             )
             if (
                 sound_path is not None and
-                self.game.interface_sound_player is not None
+                self.game.interface_sound_manager is not None
             ):
-                self.game.interface_sound_player.play_path(sound_path)
-            return item.func()
+                self.game.interface_sound_manager.play_path(sound_path, True)
+            res: OptionalGenerator = item.func()
+            if res is not None and isgenerator(res):
+                yield from res
+            else:
+                return res
         return None
 
     def home(self) -> None:

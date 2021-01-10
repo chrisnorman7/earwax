@@ -18,8 +18,11 @@ from .task import IntervalFunction, Task, TaskFunction
 from .types import EventType
 
 try:
+    from pyglet.event import EVENT_HANDLED, EVENT_UNHANDLED
     from synthizer import Context, DirectSource, Source, initialized
 except ModuleNotFoundError:
+    EVENT_HANDLED = True
+    EVENT_UNHANDLED = None
     Context, DirectSource, Source, initialized = (None, None, None, None)
 
 try:
@@ -268,12 +271,15 @@ class Game(RegisterEventMixin):
                 if a.symbol == symbol and a.modifiers == modifiers:
                     res: OptionalGenerator = self.start_action(a)
                     if isgenerator(res):
-                        next(cast(Iterator[None], res))
-                        self.key_release_generators[symbol] = cast(
-                            Generator[None, None, None], res
-                        )
-            return True
-        return False
+                        try:
+                            next(cast(Iterator[None], res))
+                            self.key_release_generators[symbol] = cast(
+                                Generator[None, None, None], res
+                            )
+                        except StopIteration:
+                            pass
+            return EVENT_HANDLED
+        return EVENT_UNHANDLED
 
     def on_key_release(self, symbol: int, modifiers: int) -> bool:
         """Handle a released key.
@@ -835,7 +841,7 @@ class Game(RegisterEventMixin):
         :param kwargs: The extra keyword arguments to pass to the ActionMenu
             constructor.
         """
-        menu: ActionMenu = ActionMenu(self, title, **kwargs)
+        menu: ActionMenu = ActionMenu(self, title=title, **kwargs)
         self.push_level(menu)
         return menu
 
@@ -908,3 +914,15 @@ class Game(RegisterEventMixin):
         if self.audio_context is not None:
             self.audio_context.gain = value
         self.config.sound.master_volume.value = value
+
+    def change_volume(self, amount: float) -> Callable[[], None]:
+        """Return a callable that can be used to change the master volume.
+
+        :param amount: The amount to change the volume by.
+        """
+
+        def inner() -> None:
+            """Perform the volume change."""
+            self.adjust_volume(amount)
+
+        return inner

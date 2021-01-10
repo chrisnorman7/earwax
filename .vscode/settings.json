@@ -73,6 +73,7 @@
         "pytest",
         "quickstart",
         "raspberrypi",
+        "remessage",
         "rtd",
         "ry",
         "synthizer",

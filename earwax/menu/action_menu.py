@@ -3,8 +3,6 @@
 from inspect import isgenerator
 from typing import Iterator, Tuple, cast
 
-from attr import attrs
-
 try:
     from pyglet.window import key, mouse
 except ModuleNotFoundError:
@@ -17,7 +15,6 @@ from ..types import ActionFunctionType, OptionalGenerator
 from .menu import Menu
 
 
-@attrs(auto_attribs=True)
 class ActionMenu(Menu):
     """A menu to show a list of actions and their associated triggers.
 

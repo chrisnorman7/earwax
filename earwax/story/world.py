@@ -540,7 +540,9 @@ class StoryWorld:
     @property
     def initial_room(self) -> Optional[WorldRoom]:
         """Return the initial room for this world."""
-        return self.rooms[self.initial_room_id]
+        if self.initial_room_id is not None:
+            return self.rooms[self.initial_room_id]
+        return None
 
     def to_xml(self) -> Element:
         """Dump this world."""
@@ -629,7 +631,16 @@ class WorldState:
 
     world: StoryWorld
 
-    room_id: Optional[str] = None
+    room_id: str = attrib()
+
+    @room_id.default
+    def get_default_room_id(instance: 'WorldState') -> str:
+        """Get the first room ID from the attached world.
+
+        :param instance: The instance to work on.
+        """
+        assert instance.world.initial_room_id is not None
+        return instance.world.initial_room_id
     inventory_ids: List[str] = Factory(list)
     category_index: int = Factory(int)
     object_index: Optional[int] = None
@@ -645,16 +656,19 @@ class WorldState:
         return list(WorldStateCategories)[self.category_index]
 
     @property
-    def object(self) -> ObjectTypes:
+    def object(self) -> Optional[ObjectTypes]:
         """Return the currently focused object."""
         room: WorldRoom = self.room
         category: WorldStateCategories = self.category
         if category is WorldStateCategories.room:
             return room
         elif category is WorldStateCategories.objects:
-            obj: RoomObject = room.get_objects()[self.object_index]
-            return obj
+            if self.object_index is not None:
+                obj: RoomObject = room.get_objects()[self.object_index]
+                return obj
         else:
             assert category is WorldStateCategories.exits
-            x: RoomExit = room.exits[self.object_index]
-            return x
+            if self.object_index is not None:
+                x: RoomExit = room.exits[self.object_index]
+                return x
+        return None

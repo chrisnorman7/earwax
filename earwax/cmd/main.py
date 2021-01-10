@@ -55,7 +55,7 @@ subcommand(
 )
 
 
-def cmd_help(parser: ArgumentParser) -> Callable[[Namespace], None]:
+def cmd_help(subcommand: _SubParsersAction) -> Callable[[Namespace], None]:
     """Return a command function that will show all subcommands."""
 
     def inner(args: Namespace) -> None:
@@ -64,7 +64,7 @@ def cmd_help(parser: ArgumentParser) -> Callable[[Namespace], None]:
         name: str
         p: ArgumentParser
         for name, p in sorted(
-            parser.choices.items(), key=lambda item: item[0]
+            subcommand.choices.items(), key=lambda item: item[0]
         ):
             print(f'{name}: {p.description}')
 

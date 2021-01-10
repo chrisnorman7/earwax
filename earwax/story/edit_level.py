@@ -1,5 +1,6 @@
 """Provides the EditLevel class."""
 
+from inspect import isgenerator
 from typing import Callable, Generator, List, Optional, Union
 
 from attr import attrs
@@ -8,8 +9,9 @@ from shortuuid import uuid
 from ..editor import Editor
 from ..game import Game
 from ..menu import Menu
+from ..types import OptionalGenerator
 from .play_level import PlayLevel
-from .world import RoomExit, RoomObject, WorldAction, WorldRoom
+from .world import ObjectTypes, RoomExit, RoomObject, WorldAction, WorldRoom
 
 try:
     from pyglet.window import key
@@ -18,7 +20,8 @@ except ModuleNotFoundError:
 
 
 def push_rooms_menu(
-    game: Game, rooms: List[WorldRoom], activate: Callable[[WorldRoom], None]
+    game: Game, rooms: List[WorldRoom],
+    activate: Callable[[WorldRoom], OptionalGenerator]
 ) -> None:
     """Push a menu with all the provided rooms.
 
@@ -32,14 +35,47 @@ def push_rooms_menu(
     room: WorldRoom
     for room in rooms:
 
-        def inner(r: WorldRoom = room) -> None:
+        def inner(r: WorldRoom = room) -> OptionalGenerator:
             """Pop the menu, and call ``activate(room)``."""
             game.pop_level()
             game.output(r.get_name())
-            activate(r)
+            res: OptionalGenerator = activate(r)
+            if res is not None and isgenerator(res):
+                yield from res
+            else:
+                return res
 
         m.add_item(inner, title=f'{room.get_name()}: {room.get_description()}')
 
+    game.push_level(m)
+
+
+def push_actions_menu(
+    game: Game, actions: List[WorldAction],
+    activate: Callable[[WorldAction], OptionalGenerator]
+) -> None:
+    """Push a menu that lets the player select an action.
+
+    :param game: The game to use when constructing the menu.
+
+    :param actions: A list of actions to show.
+
+    :param activate: A function to call with the chosen action.
+    """
+    m: Menu = Menu(game, 'Actions')
+    a: WorldAction
+    for a in actions:
+
+        def inner(action: WorldAction = a) -> OptionalGenerator:
+            """Pop the level and call ``activate``."""
+            game.pop_level()
+            res: OptionalGenerator = activate(action)
+            if res is not None and isgenerator(res):
+                yield from res
+            else:
+                return res
+
+        m.add_item(inner, title=a.name)
     game.push_level(m)
 
 
@@ -66,12 +102,18 @@ class EditLevel(PlayLevel):
         self.action(
             'Shadow room description', symbol=key.D, modifiers=key.MOD_SHIFT
         )(self.shadow_description)
+        self.action('Change message', symbol=key.M)(self.remessage)
         return super().__attrs_post_init__()
 
     @property
     def room(self) -> WorldRoom:
         """Return the current room."""
         return self.state.room
+
+    @property
+    def object(self) -> Optional[ObjectTypes]:
+        """Return the object from ``self.state``."""
+        return self.state.object
 
     def get_rooms(self, include_current: bool = True) -> List[WorldRoom]:
         """Return a list of rooms from this world.
@@ -86,6 +128,7 @@ class EditLevel(PlayLevel):
 
     def save(self) -> None:
         """Save the world."""
+        assert self.filename
         try:
             with open(self.filename, 'w') as f:
                 f.write(self.world.to_string())
@@ -112,8 +155,10 @@ class EditLevel(PlayLevel):
 
     def rename(self) -> Generator[None, None, None]:
         """Rename the currently focused object."""
-        obj: Union[WorldRoom, RoomObject, RoomExit] = self.state.object
-        if isinstance(obj, (WorldRoom, RoomObject)):
+        obj: Optional[ObjectTypes] = self.object
+        if obj is None:
+            self.game.output('No object selected.')
+        elif isinstance(obj, (WorldRoom, RoomObject)):
             yield from self.set_name(obj)
         else:
             assert isinstance(obj, RoomExit)
@@ -206,3 +251,36 @@ class EditLevel(PlayLevel):
         self.game.output('Enter a new name for %s:' % obj.name)
         yield
         self.game.push_level(e)
+
+    def set_message(self, action: WorldAction) -> Generator[None, None, None]:
+        """Push an editor to set the message on the provided action.
+
+        :param action: The action whose message attribute will be modified.
+        """
+        print('Hello.')
+        e: Editor = Editor(self.game, text=action.message or '')
+
+        @e.event
+        def on_submit(text: str) -> None:
+            """Set the message."""
+            action.message = text
+            self.game.pop_level()
+            self.game.output('Message set.')
+
+        self.game.output(
+            f'Enter a new message for {action.name}: {action.message}'
+        )
+        yield
+        self.game.push_level(e)
+
+    def remessage(self) -> OptionalGenerator:
+        """Set a message on the currently-focused object."""
+        obj: Optional[ObjectTypes] = self.object
+        if obj is None:
+            self.game.output('No object selected.')
+        elif isinstance(obj, WorldRoom):
+            return self.game.output('Rooms do not have messages.')
+        elif isinstance(obj, RoomExit):
+            yield from self.set_message(obj.action)
+        else:
+            push_actions_menu(self.game, obj.actions, self.set_message)

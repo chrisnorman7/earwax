@@ -47,6 +47,7 @@
 		<exit destination="KUtdDVXEuWJfNMsH6vGYTa">
 			<action>
 				<name>Go through a small hole in the undergrowth</name>
+				<message>You work your way into the small hole.</message>
 			</action>
 		</exit>
 	</room>
@@ -56,6 +57,7 @@
 		<exit destination="jungle_2">
 			<action>
 				<name>Clamber back onto the jungle path.</name>
+				<message>You clamber out of the hole.</message>
 			</action>
 		</exit>
 	</room>
