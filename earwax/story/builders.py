@@ -2,12 +2,15 @@
 
 import os.path
 from html import unescape
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from xml.etree.ElementTree import Element
 
 from shortuuid import uuid
 from xml_python import Builder
 from yaml import load
+
+from ..credit import Credit
 
 try:
     from yaml import CLoader
@@ -23,7 +26,8 @@ NoneType = type(None)
 
 
 def set_name(
-    thing: Union[StoryWorld, WorldRoom, WorldAction], element: Element
+    thing: Union[StoryWorld, WorldRoom, WorldAction, Credit],
+    element: Element
 ) -> None:
     """Set the world name."""
     name: Optional[str] = element.text
@@ -85,18 +89,26 @@ def set_action_message(action: WorldAction, element: Element) -> None:
 
 
 @action_builder.parser('sound')
-def set_sound(action: WorldAction, element: Element) -> None:
+def set_sound(obj: Union[WorldAction, Credit], element: Element) -> None:
     """Set the action sound."""
+    type_name: str
+    if isinstance(obj, WorldAction):
+        type_name = 'action'
+    else:
+        assert isinstance(obj, Credit)
+        type_name = 'credit'
     if element.text is None:
-        raise RuntimeError('Empty sound tag for action %s.' % action.name)
+        raise RuntimeError(f'Empty sound tag for {type_name} {obj.name}.')
     p: str = unescape(element.text)
     if not os.path.exists(p):
         raise RuntimeError(
-            'Invalid sound for action %s: %r: Path does not exist.' % (
-                action.name, p
-            )
+            f'Invalid sound for {type_name} {obj.name}: {p!r}: '
+            'Path does not exist.'
         )
-    action.sound = p
+    if isinstance(obj, Credit):
+        obj.sound = Path(p)
+    else:
+        obj.sound = p
 
 
 def make_object(room: WorldRoom, element: Element) -> RoomObject:
@@ -178,13 +190,41 @@ def set_description(room: WorldRoom, element: Element) -> None:
     room.description = unescape(element.text)
 
 
+def make_credit(world: StoryWorld, element: Element) -> Credit:
+    """Make a new credit."""
+    c: Credit = Credit.earwax_credit()
+    world.game.credits.append(c)
+    return c
+
+
+credit_builder: Builder[StoryWorld, Credit] = Builder(
+    make_credit, name='Credit', parsers={
+        'name': set_name,
+        'sound': set_sound
+    }
+)
+
+
+@credit_builder.parser('url')
+def set_url(credit: Credit, element: Element) -> None:
+    """Set the URL."""
+    if element.text is None:
+        raise RuntimeError(
+            'An empty URL was provided for the %s credit.' % credit.name
+        )
+    credit.url = element.text
+
+
 def make_world(parent: Game, element: Element) -> StoryWorld:
     """Make a StoryWorld object."""
     return StoryWorld(parent)
 
 
 world_builder: Builder[Game, StoryWorld] = Builder(
-    make_world, name='Story', builders={'room': room_builder},
+    make_world, name='Story', builders={
+        'room': room_builder,
+        'credit': credit_builder
+    },
     parsers={'name': set_name}
 )
 

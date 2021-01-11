@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
 <world>
-	<cursorsound>D:\sounds\A Sound Effect SFX sampler 2016\Digtal_Rain_Lab_Lethal Energies\Construction Kit\CK_Sensors\CK_Sensors-06.wav</cursorsound>
 	<config>editors:
   hat_alphabet: ' abcdefghijklmnopqrstuvwxyz.,1234567890@ABCDEFGHIJKLMNOPQRSTUVWXYZ-#[]{}'
 menus:
@@ -19,7 +18,13 @@ speech:
 </config>
 	<name>Chris's World</name>
 	<author>Chris Norman &lt;chris.norman2@googlemail.com&gt;</author>
+	<cursorsound>D:\sounds\A Sound Effect SFX sampler 2016\Digtal_Rain_Lab_Lethal Energies\Construction Kit\CK_Sensors\CK_Sensors-06.wav</cursorsound>
 	<menumusic>D:\sounds\CORE 2 Free Sampler\Musical\Song &amp; Phrase\MUSCSong_Alexion Full Mix_001_PSE_AMO_G4cHe.wav</menumusic>
+	<menumusic>D:\sounds\CORE 2 Free Sampler\Musical\Misc\MUSCMisc_Designed Piano Strings Impacts Long Intervals 27_PSE_SONPD_Z0GvO.wav</menumusic>
+	<credit>
+		<name>Chris Norman (the Earwax game engine)</name>
+		<url>https://www.github.com/chrisnorman7/earwax</url>
+	</credit>
 	<room id="jungle_1">
 		<name>A Jungle Path</name>
 		<description>This path stretches away into the distance, hemmed in on both sides by the tall trees that are so common in this jungle.</description>

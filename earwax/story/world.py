@@ -8,6 +8,8 @@ from xml.etree.ElementTree import Element, tostring
 from attr import Factory, attrib, attrs
 from yaml import dump
 
+from ..credit import Credit
+
 try:
     from yaml import CDumper
 except ImportError:
@@ -521,6 +523,13 @@ class StoryWorld:
             <author>Chris Norman &lt;chris.norman2@googlemail.com&gt;</author>
         </world>
 
+    Credits can be added with the ``<credit>`` tag::
+
+        <credit>
+            <name>Chris Norman (Earwax game engine)</name>
+            <url>https://www.github.com/chrisnorman7/earwax.git</url>
+        </credit>
+
     Worlds can be returned as an XML string with the :meth:`to_string` def
 
     :ivar ~earwax.story.StoryWorld.game: The game this world is part of.
@@ -603,6 +612,18 @@ class StoryWorld:
         music: str
         for music in self.main_menu_musics:
             e.append(get_element('menumusic', text=music))
+        credit: Credit
+        for credit in self.game.credits:
+            credit_element: Element = Element('credit')
+            credit_element.extend(
+                [
+                    get_element('name', text=credit.name),
+                    get_element('url', credit.url),
+                ]
+            )
+            if credit.sound is not None:
+                e.append(get_element('sound', text=str(credit.sound)))
+            e.append(credit_element)
         room: WorldRoom
         for room in self.rooms.values():
             e.append(room.to_xml())
