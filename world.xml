@@ -67,9 +67,9 @@ speech:
 				<sound>D:\sounds\CORE 2 Free Sampler\Swooshes\Swish\SWSH_Palm Frond Whoosh Fast Stereo 090_PSE_WPA_0Vcbe.wav</sound>
 			</action>
 		</object>
-		<object x="1" y="-7" z="-7" id="cJ3mxX5kcDAEw7iiW7gtUt">
-			<type>stuck</type>
-			<name>Unnamed Object</name>
+		<object x="1.0" y="-7.0" z="-7.0" id="cJ3mxX5kcDAEw7iiW7gtUt">
+			<type>takeable</type>
+			<name>a broken stick</name>
 		</object>
 		<exit destination="jungle_2">
 			<action>

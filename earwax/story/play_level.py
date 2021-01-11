@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List,
-                    Optional)
+                    Optional, Union)
 
 from attr import Factory, attrib, attrs
 from yaml import dump
@@ -57,7 +57,8 @@ class PlayLevel(Level):
     inventory: List[RoomObject] = Factory(list)
 
     def __attrs_post_init__(self) -> None:
-        """Bind actions."""
+        """Load inventory and bind actions."""
+        self.build_inventory()
         self.action(
             'Next category', symbol=key.DOWN, hat_direction=hat_directions.DOWN
         )(self.next_category)
@@ -74,8 +75,24 @@ class PlayLevel(Level):
         self.action(
             'Activate object', symbol=key.RETURN, joystick_button=0
         )(self.activate)
-        self.action('Inventory', symbol=key.I, joystick_button=1)(
-            self.inventory_menu
+        self.action(
+            'Inventory', symbol=key.I, joystick_button=2
+        )(self.inventory_menu)
+        self.action(
+            'Use object', symbol=key.U, joystick_button=3
+        )(
+            self.objects_menu(
+                [obj for obj in self.inventory if obj.is_usable],
+                self.use_object, 'Use Object'
+            )
+        )
+        self.action(
+            'Drop object', symbol=key.D, joystick_button=1
+        )(
+            self.objects_menu(
+                [obj for obj in self.inventory if obj.is_droppable],
+                self.drop_object, 'Drop Object'
+            )
         )
         self.action(
             'Return to main menu', symbol=key.ESCAPE, joystick_button=9
@@ -101,6 +118,23 @@ class PlayLevel(Level):
         )(self.world_context.load)
         return super().__attrs_post_init__()
 
+    def build_inventory(self) -> None:
+        """Build the player inventory.
+
+        This method should be performed any time
+        :attr:`~earwax.story.play_level.PlayLevel.state` changes.
+        """
+        obj: RoomObject
+        while self.inventory:
+            obj = self.inventory.pop()
+            obj.location.objects[obj.id] = obj
+        room: WorldRoom
+        for room in list(self.world.rooms.values()):
+            for obj in list(room.objects.values()):
+                if obj.id in self.state.inventory_ids:
+                    self.inventory.append(obj)
+                    del room.objects[obj.id]
+
     def get_objects(self) -> List[RoomObject]:
         """Return a list of objects that the player can see.
 
@@ -109,7 +143,7 @@ class PlayLevel(Level):
         """
         return [
             obj for obj in self.state.room.objects.values()
-            if obj not in self.state.inventory_ids
+            if obj not in self.inventory
         ]
 
     def pause(self) -> None:
@@ -300,20 +334,33 @@ class PlayLevel(Level):
         self.start_ambiances()
 
     def do_action(
-        self, action: WorldAction, position: Optional[Point] = None
+        self, action: WorldAction, obj: Union[RoomObject, RoomExit],
+        pan: bool = True
     ) -> None:
         """Actually perform an action.
 
         :param action: The action to perform.
 
-        :param position: The position of whatever object owns this action.
+        :param obj: The object that owns this action.
 
-            If this value is ``None``, then ``action.sound`` will not be
-            panned.
+            If this value is of type :class:`~earwax.story.world.RoomObject`,
+            and its :attr:`~earwax.story.world.RoomObject.position` value is
+            not ``None``, then the action sound will be panned accordingly..
+
+        :param pan: If this value evaluates to ``False``, then regardless of
+            the ``obj`` value, no panning will be performed.
         """
         if action.message is not None:
-            self.game.output(action.message)
+            name: str
+            if isinstance(obj, RoomObject):
+                name = obj.name
+            else:
+                name = action.name
+            self.game.output(action.message.format(name))
         if action.sound is not None:
+            position: Optional[Point] = None
+            if isinstance(obj, RoomObject) and pan:
+                position = obj.position
             self.play_action_sound(action.sound, position=position)
 
     def play_cursor_sound(self, position: Optional[Point]) -> None:
@@ -380,14 +427,25 @@ class PlayLevel(Level):
 
         def inner() -> None:
             """Actually perform the action."""
-            self.do_action(action, position=obj.position)
+            if action is obj.take_action or action is self.world.take_action:
+                self.take_object(obj)
+            else:
+                self.do_action(action, obj)
             self.game.pop_level()
 
         return inner
 
     def actions_menu(self, obj: RoomObject) -> None:
         """Show a menu of object actions."""
-        if not obj.actions:
+        actions: List[WorldAction] = obj.actions.copy()
+        action: WorldAction
+        if obj.is_takeable:
+            if obj.take_action is None:
+                action = self.world.take_action
+            else:
+                action = obj.take_action
+            actions.append(action)
+        if not actions:
             return self.game.output(self.world.messages.no_actions)
         msg: str
         if (
@@ -403,16 +461,10 @@ class PlayLevel(Level):
             obj.actions_action.sound is not None
         ):
             self.play_action_sound(obj.actions_action.sound)
-        action: WorldAction
-        for action in obj.actions:
-            m.add_item(self.perform_action(obj, action), title=action.name)
-        if obj.is_takeable:
-            if obj.take_action is None:
-                action = self.world.take_action
-            else:
-                action = obj.take_action
+        for action in actions:
             m.add_item(
-                self.take_object(obj), title=action.name.format(obj.name)
+                self.perform_action(obj, action),
+                title=action.name.format(obj.name)
             )
         self.game.push_level(m)
 
@@ -483,7 +535,8 @@ class PlayLevel(Level):
                 m.add_item(
                     self.drop_object(obj), title=action.name.format(obj.name)
                 )
-            self.game.push_level(m)
+            if obj.is_droppable or obj.is_usable:
+                self.game.push_level(m)
 
         return inner
 
@@ -495,33 +548,29 @@ class PlayLevel(Level):
             m.add_item(self.object_menu(obj), title=obj.name)
         self.game.push_level(m)
 
-    def take_object(self, obj: RoomObject) -> Callable[[], None]:
-        """Return a callable that can be used to take an object."""
-
-        def inner() -> None:
-            action: WorldAction
-            if obj.take_action is None:
-                action = self.world.take_action
-            else:
-                action = obj.take_action
-            self.do_action(action)
-            self.inventory.append(obj)
-            del obj.location.objects[obj.id]
-            self.state.inventory_ids.append(obj.id)
-
-        return inner
+    def take_object(self, obj: RoomObject) -> None:
+        """Take an object."""
+        action: WorldAction
+        if obj.take_action is None:
+            action = self.world.take_action
+        else:
+            action = obj.take_action
+        self.do_action(action, obj)
+        self.inventory.append(obj)
+        del obj.location.objects[obj.id]
+        self.state.inventory_ids.append(obj.id)
 
     def drop_object(self, obj: RoomObject) -> Callable[[], None]:
         """Return a callable that can be used to drop an object."""
 
         def inner() -> None:
-            self.game.pop_levels(2)
+            self.game.reveal_level(self)
             action: WorldAction
             if obj.drop_action is None:
                 action = self.world.drop_action
             else:
                 action = obj.drop_action
-            self.do_action(action)
+            self.do_action(action, obj, pan=False)
             self.state.room.objects[obj.id] = obj
             self.state.inventory_ids.remove(obj.id)
             self.inventory.remove(obj)
@@ -532,8 +581,24 @@ class PlayLevel(Level):
         """Return a callable that can be used to use an object."""
 
         def inner() -> None:
-            self.game.pop_levels(2)
+            self.game.reveal_level(self)
             if obj.use_action is not None:
-                self.do_action(obj.use_action)
+                self.do_action(obj.use_action, obj, pan=False)
+
+        return inner
+
+    def objects_menu(
+        self, objects: List[RoomObject],
+        func: Callable[[RoomObject], Callable[[], None]],
+        title: str
+    ) -> Callable[[], None]:
+        """Return a function that'll show a menu of objects."""
+
+        def inner() -> None:
+            m: Menu = Menu(self.game, title)
+            obj: RoomObject
+            for obj in objects:
+                m.add_item(func(obj), title=obj.name)
+            self.game.push_level(m)
 
         return inner

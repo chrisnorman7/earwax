@@ -20,8 +20,8 @@ from ..menu import Menu
 from ..point import Point
 from ..types import OptionalGenerator
 from .play_level import PlayLevel
-from .world import (ObjectTypes, RoomExit, RoomObject, WorldAction,
-                    WorldAmbiance, WorldMessages, WorldRoom)
+from .world import (ObjectTypes, RoomExit, RoomObject, RoomObjectTypes,
+                    WorldAction, WorldAmbiance, WorldMessages, WorldRoom)
 
 try:
     from pyglet.window import key
@@ -240,15 +240,16 @@ class EditLevel(PlayLevel):
         self.action(
             'Shadow room name', symbol=key.R, modifiers=key.MOD_SHIFT
         )(self.shadow_name)
-        self.action('Describe this room', symbol=key.D)(self.describe_room)
+        self.action('Describe this room', symbol=key.E)(self.describe_room)
         self.action(
-            'Shadow room description', symbol=key.D, modifiers=key.MOD_SHIFT
+            'Shadow room description', symbol=key.E, modifiers=key.MOD_SHIFT
         )(self.shadow_description)
         self.action('Change message', symbol=key.M)(self.remessage)
         self.action(
             'Change world message', symbol=key.M, modifiers=key.MOD_SHIFT
         )(self.set_world_messages)
         self.action('Sounds menu', symbol=key.S)(self.sounds_menu)
+        self.action('Change object type', symbol=key.T)(self.set_object_type)
         self.action('Ambiances menu', symbol=key.A)(self.ambiances_menu)
         self.action('Reposition object', symbol=key.X)(self.reposition_object)
         self.action('Delete', symbol=key.DELETE)(self.delete)
@@ -758,4 +759,28 @@ class EditLevel(PlayLevel):
             self.game, yes, no,
             title=f'Are you sure you want to delete {obj!s}?'
         )
+        self.game.push_level(m)
+
+    def set_object_type(self) -> None:
+        """Change the type of an object."""
+        types: Dict[RoomObjectTypes, str] = {
+            RoomObjectTypes.stuck: 'An object which cannot be taken',
+            RoomObjectTypes.takeable: 'An object which can be picked up',
+            RoomObjectTypes.droppable: 'An object that can be dropped'
+        }
+        obj: Optional[ObjectTypes] = self.object
+        if not isinstance(obj, RoomObject):
+            return self.game.output('First select an object.')
+        description: str = types[obj.type]
+        m: Menu = Menu(self.game, f'Object Type ({description})')
+        type_: RoomObjectTypes
+        for type_, description in types.items():
+
+            def inner(t: RoomObjectTypes = type_) -> None:
+                assert isinstance(obj, RoomObject)
+                self.game.pop_level()
+                obj.type = t
+                self.game.output('Object type set.')
+
+            m.add_item(inner, title=description)
         self.game.push_level(m)

@@ -158,6 +158,9 @@ class StoryContext:
                     d: Dict[str, Any] = load(f, Loader=CLoader)
                     self.logger.info('Loaded configuration data: %r.' % d)
                 self.state = WorldState(self.world, **d)
+                # Remove any duplicates.
+                self.state.inventory_ids = list(set(self.state.inventory_ids))
+                self.main_level.build_inventory()
                 self.game.output('Game loaded.')
                 if len(self.game.levels) > 1:
                     self.game.pop_level()
