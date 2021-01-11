@@ -76,10 +76,10 @@ class PlayLevel(Level):
             'Activate object', symbol=key.RETURN, joystick_button=0
         )(self.activate)
         self.action(
-            'Inventory', symbol=key.I, joystick_button=2
+            'Inventory', symbol=key.I, joystick_button=3
         )(self.inventory_menu)
         self.action(
-            'Use object', symbol=key.U, joystick_button=3
+            'Use object', symbol=key.U, joystick_button=2
         )(self.use_object_menu)
         self.action(
             'Drop object', symbol=key.D, joystick_button=1
