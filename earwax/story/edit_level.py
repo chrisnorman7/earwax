@@ -396,6 +396,32 @@ class EditLevel(PlayLevel):
         yield
         self.game.push_level(e)
 
+    def set_cursor_sound(self) -> Generator[None, None, None]:
+        """Set the cursor sound."""
+        sound: str = ''
+        if self.world.cursor_sound is not None:
+            sound = self.world.cursor_sound
+        e: Editor = Editor(self.game, text=sound)
+
+        @e.event
+        def on_submit(text: str) -> None:
+            self.game.pop_level()
+            if not text:
+                self.world.cursor_sound = None
+                self.game.output('Cursor sound cleared.')
+            elif not os.path.exists(text):
+                self.game.output('Pat does not exist: %s.' % text)
+            else:
+                self.world.cursor_sound = text
+                self.game.output('Cursor sound set.')
+
+        self.game.output(
+            'Enter a new path for the cursor sound: %s' %
+            self.world.cursor_sound
+        )
+        yield
+        self.game.push_level(e)
+
     def sounds_menu(self) -> OptionalGenerator:
         """Add or remove ambiances for the currently focused object."""
         obj: Optional[ObjectTypes] = self.object
@@ -417,10 +443,7 @@ class EditLevel(PlayLevel):
 
             m.add_item(inner, title='Main actions sound')
         elif isinstance(obj, WorldRoom):
-            self.game.output(
-                'Rooms do not have any sounds to edit. Perhaps you meant to '
-                'edit ambiances with the "a" key?'
-            )
+            yield from self.set_cursor_sound()
         else:
             self.game.output('Nothing selected.')
 
