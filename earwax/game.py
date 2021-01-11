@@ -564,6 +564,7 @@ class Game(RegisterEventMixin):
     def do_run(self, initial_level: Optional[Level]) -> None:
         """Really run the game."""
         self.dispatch_event('setup')
+        self.audio_context.gain = self.config.sound.master_volume.value
         source: Source = DirectSource(self.audio_context)
         manager: SoundManager = SoundManager(
             self.audio_context, source, buffer_cache=self.buffer_cache
