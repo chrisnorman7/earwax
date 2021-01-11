@@ -514,10 +514,13 @@ class Game(RegisterEventMixin):
                 if a.hat_direction == direction:
                     res: OptionalGenerator = self.start_action(a)
                     if isgenerator(res):
-                        next(cast(Iterator[None], res))
-                        self.joyhat_release_generators.append(
-                            cast(Generator[None, None, None], res)
-                        )
+                        try:
+                            next(cast(Iterator[None], res))
+                            self.joyhat_release_generators.append(
+                                cast(Generator[None, None, None], res)
+                            )
+                        except StopIteration:
+                            pass
             return True
         return False
 
