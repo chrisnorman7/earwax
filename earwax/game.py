@@ -939,3 +939,16 @@ class Game(RegisterEventMixin):
             self.adjust_volume(amount)
 
         return inner
+
+    def reveal_level(self, Level: Level) -> int:
+        """Pop levels until ``level`` is revealed.
+
+        This method returned the number of levels which were popped.
+
+        :param level: The level to reveal.
+        """
+        i: int = 0
+        while self.level is not Level:
+            self.pop_level()
+            i += 1
+        return i

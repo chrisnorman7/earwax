@@ -259,6 +259,7 @@ def test_adjust_volume(game: Game) -> None:
 
 def test_set_volume(game: Game) -> None:
     """Test setting the volume exactly."""
+    assert game.audio_context is not None
     game.set_volume(0.5)
     assert game.config.sound.master_volume.value == 0.5
     sleep(0.1)
@@ -270,3 +271,22 @@ def test_set_volume(game: Game) -> None:
     game.set_volume(1.0)
     sleep(0.1)
     assert game.audio_context.gain == 1.0
+
+
+def test_reveal_level(game: Game, level: Level) -> None:
+    """Test the reveal_level method."""
+    game.push_level(level)
+    assert game.reveal_level(level) == 0
+    assert game.level is level
+    assert game.levels == [level]
+    l1: Level = Level(game)
+    l2: Level = Level(game)
+    game.push_level(l1)
+    game.push_level(l2)
+    assert game.reveal_level(l1) == 1
+    assert game.level is l1
+    assert game.levels == [level, l1]
+    game.push_level(l2)
+    assert game.reveal_level(level) == 2
+    assert game.level is level
+    assert game.levels == [level]
