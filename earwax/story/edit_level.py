@@ -2,15 +2,22 @@
 
 import os.path
 from inspect import isgenerator
-from typing import Callable, Dict, Generator, List, Optional, Union, cast
+from typing import (Callable, Dict, Generator, List, Optional, Tuple, Union,
+                    cast)
 
-from attr import Attribute, attrs
+from attr import Attribute, attrib, attrs
 from shortuuid import uuid
+
+try:
+    from synthizer import DirectSource, Source, Source3D
+except ModuleNotFoundError:
+    DirectSource, Source, Source3D = (object, object, object)
 
 from ..editor import Editor
 from ..game import Game
 from ..level import Level
 from ..menu import Menu
+from ..point import Point
 from ..types import OptionalGenerator
 from .play_level import PlayLevel
 from .world import (ObjectTypes, RoomExit, RoomObject, WorldAction,
@@ -41,6 +48,115 @@ message_descriptions: Dict[str, str] = {
     'welcome': 'The welcome message',
     'no_saved_game': 'The message which is spoken when there is no saved game'
 }
+
+
+@attrs(auto_attribs=True)
+class ObjectPositionLevel(Level):
+    """A level for editing the position of an object.
+
+    :ivar ~earwax.story.edit_level.ObjectPositionLevel.object: The object
+        whose position will be edited.
+
+    :ivar ~earwax.story.edit_level.ObjectPositionLevel.level: The edit level
+        which pushed this level.
+    """
+
+    object: RoomObject
+    level: 'EditLevel'
+
+    initial_position: Optional[Point] = attrib()
+
+    @initial_position.default
+    def get_initial_position(
+        instance: 'ObjectPositionLevel'
+    ) -> Optional[Point]:
+        """Get the object position."""
+        return instance.object.position
+
+    def __attrs_post_init__(self) -> None:
+        """Add actions."""
+        keys: List[Tuple[int, Callable[[], None]]] = [
+            (key.LEFT, self.left),
+            (key.RIGHT, self.right),
+            (key.UP, self.forward),
+            (key.DOWN, self.backward),
+            (key.PAGEDOWN, self.down),
+            (key.PAGEUP, self.up)
+        ]
+        symbol: int
+        func: Callable[[], None]
+        for symbol, func in keys:
+            self.action(func.__name__.title(), symbol=symbol)(func)
+        self.action('Clear position', symbol=key.C)(self.clear)
+        self.action('Finish moving', symbol=key.RETURN)(self.done)
+        self.action('Cancel', symbol=key.ESCAPE)(self.cancel)
+        self.action('Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT)(
+            lambda: self.game.push_action_menu()
+        )
+        return super().__attrs_post_init__()
+
+    def reset(self) -> None:
+        """Reset the current room."""
+        if self.object.position is None:
+            self.game.output('Position cleared.')
+        else:
+            f: float
+            y: float
+            x: float
+            x, y, z = self.object.position.floor().coordinates
+            self.game.output(f'Moved to {x}, {y}, {z}.')
+        self.level.play_cursor_sound(self.object.position)
+        self.level.set_room(self.level.room)
+
+    def move(self, x: int = 0, y: int = 0, z: int = 0) -> None:
+        """Change the position of this object."""
+        if self.object.position is None:
+            self.object.position = Point(x, y, z)
+        else:
+            self.object.position += Point(x, y, z)
+        self.reset()
+
+    def clear(self) -> None:
+        """Clear the object position."""
+        self.object.position = None
+        self.reset()
+
+    def forward(self) -> None:
+        """Move the sound forwards."""
+        self.move(y=1)
+
+    def backward(self) -> None:
+        """Move the sound backwards."""
+        self.move(y=-1)
+
+    def left(self) -> None:
+        """Move the sound left."""
+        self.move(x=-1)
+
+    def right(self) -> None:
+        """Move the sound right."""
+        self.move(x=1)
+
+    def down(self) -> None:
+        """Move the sound down."""
+        self.move(z=-1)
+
+    def up(self) -> None:
+        """Move the sound up."""
+        self.move(z=1)
+
+    def done(self) -> None:
+        """Finish editing."""
+        if self.object.position == self.initial_position:
+            self.game.output('Object unmoved.')
+        else:
+            self.game.output('Finished editing.')
+        self.game.pop_level()
+
+    def cancel(self) -> None:
+        """Undo the move, and return everything to how it was."""
+        self.object.position = self.initial_position
+        self.done()
 
 
 def push_rooms_menu(
@@ -132,6 +248,7 @@ class EditLevel(PlayLevel):
         )(self.set_world_messages)
         self.action('Sounds menu', symbol=key.S)(self.sounds_menu)
         self.action('Ambiances menu', symbol=key.A)(self.ambiances_menu)
+        self.action('Reposition object', symbol=key.X)(self.reposition_object)
         return super().__attrs_post_init__()
 
     @property
@@ -562,3 +679,18 @@ class EditLevel(PlayLevel):
                     self.ambiance_menu(obj.ambiances, a), title=a.path
                 )
             self.game.push_level(m)
+
+    def reposition_object(self) -> None:
+        """Reposition the currently selected object."""
+        obj: Optional[ObjectTypes] = self.object
+        if not isinstance(obj, RoomObject):
+            return self.game.output('You must first select an object.')
+        position: str = 'Not set'
+        if obj.position is not None:
+            position = f'{obj.position.x}, {obj.position.y}, {obj.position.z}'
+        self.game.output(
+            f'Repositioning {obj.name}. '
+            f'Current position: {position}.'
+        )
+        l: ObjectPositionLevel = ObjectPositionLevel(self.game, obj, self)
+        self.game.push_level(l)

@@ -32,7 +32,7 @@ from typing import List
 from .builders import (action_builder, exit_builder, object_builder,
                        room_builder, world_builder)
 from .context import StoryContext
-from .edit_level import EditLevel
+from .edit_level import EditLevel, ObjectPositionLevel
 from .play_level import PlayLevel
 from .world import (
     ObjectTypes, RoomExit, RoomObject, StoryWorld, WorldAction, WorldAmbiance,
@@ -46,6 +46,6 @@ __all__.extend(
     thing.__name__ for thing in [
         RoomExit, RoomObject, StoryWorld, WorldAction, WorldAmbiance,
         WorldMessages, WorldRoom, WorldState, WorldStateCategories,
-        EditLevel, PlayLevel, StoryContext
+        EditLevel, ObjectPositionLevel, PlayLevel, StoryContext
     ]
 )
