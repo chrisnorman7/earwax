@@ -29,3 +29,11 @@ class Credit:
     url: str
     sound: Optional[Path] = None
     loop: bool = True
+
+    @classmethod
+    def earwax_credit(cls) -> 'Credit':
+        """Get an earwax credit."""
+        return cls(
+            'Chris Norman (the Earwax game engine)',
+            'https://www.github.com/chrisnorman7/earwax'
+        )
