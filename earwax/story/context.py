@@ -139,21 +139,37 @@ class StoryContext:
 
     def load(self) -> None:
         """Load an existing game, and start it."""
-        if self.config_file.is_file():
-            self.logger.info(
-                'Loading configuration file %s.' % self.config_file
-            )
-            with self.config_file.open('r') as f:
-                d: Dict[str, Any] = load(f, Loader=CLoader)
-                self.logger.info('Loaded configuration data: %r.' % d)
-            self.state = WorldState(self.world, **d)
-            self.game.output('Game loaded.')
-            if self.game.level is self.main_level:
-                self.main_level.set_room(self.state.room)
+
+        def yes() -> None:
+            """Perform the load."""
+            if self.config_file.is_file():
+                self.logger.info(
+                    'Loading configuration file %s.' % self.config_file
+                )
+                with self.config_file.open('r') as f:
+                    d: Dict[str, Any] = load(f, Loader=CLoader)
+                    self.logger.info('Loaded configuration data: %r.' % d)
+                self.state = WorldState(self.world, **d)
+                self.game.output('Game loaded.')
+                if len(self.game.levels) > 1:
+                    self.game.pop_level()
+                if self.game.level is self.main_level:
+                    self.main_level.set_room(self.state.room)
+                else:
+                    self.play()
             else:
-                self.play()
+                self.game.output(self.world.messages.no_saved_game)
+
+        def no() -> None:
+            """Don't do anything."""
+            self.game.output('Cancelled.')
+            self.game.pop_level()
+
+        if self.game.level is self.main_level:
+            m: Menu = Menu.yes_no(self.game, yes, no)
+            self.game.push_level(m)
         else:
-            self.game.output(self.world.messages.no_saved_game)
+            yes()
 
     def push_credits(self) -> None:
         """Push the credits menu."""
