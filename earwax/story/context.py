@@ -177,7 +177,10 @@ class StoryContext:
             self.game.pop_level()
 
         if self.game.level is self.main_level:
-            m: Menu = Menu.yes_no(self.game, yes, no)
+            m: Menu = Menu.yes_no(
+                self.game, yes, no,
+                title='Do you want to load your saved game?'
+            )
             self.game.push_level(m)
         else:
             yes()
