@@ -249,6 +249,7 @@ class EditLevel(PlayLevel):
         self.action('Sounds menu', symbol=key.S)(self.sounds_menu)
         self.action('Ambiances menu', symbol=key.A)(self.ambiances_menu)
         self.action('Reposition object', symbol=key.X)(self.reposition_object)
+        self.action('Delete', symbol=key.DELETE)(self.delete)
         return super().__attrs_post_init__()
 
     @property
@@ -694,3 +695,70 @@ class EditLevel(PlayLevel):
         )
         l: ObjectPositionLevel = ObjectPositionLevel(self.game, obj, self)
         self.game.push_level(l)
+
+    def delete(self) -> None:
+        """Delete the currently focused object."""
+        msg: Optional[str] = None
+        obj: Optional[ObjectTypes] = self.object
+        if obj is None:
+            msg = 'You must first select something.'
+        if isinstance(obj, WorldRoom):
+            if obj.exits:
+                msg = 'You cannot delete a room which has exits.'
+            elif obj.objects:
+                msg = 'The room must be empty before deleting.'
+            elif obj is self.world.initial_room:
+                msg = 'First change the initial room from the main menu.'
+            elif len(self.world.rooms) == 1:
+                msg = 'You cannot delete the only room.'
+            else:
+                r: WorldRoom
+                for r in self.get_rooms():
+                    if r.name.startswith('#') and r.name[1:] == obj.id:
+                        msg = "First stop shadowing this room's name."
+                        break
+                    if (
+                        r.description.startswith('#') and
+                        r.description[1:] == obj.id
+                    ):
+                        msg = "First stop shadowing this room's description."
+                        break
+                    x: RoomExit
+                    for x in r.exits:
+                        if x.destination is obj:
+                            msg = (
+                                'There is an entrance to this room from '
+                                f'{r.get_name()} via {x.action.name}'
+                            )
+        if msg is not None:
+            return self.game.output(msg)
+
+        def yes() -> None:
+            if isinstance(obj, WorldRoom):
+                assert self.world.initial_room is not None
+                assert self.world.initial_room_id is not None
+                del self.world.rooms[obj.id]
+                self.state.room_id = self.world.initial_room_id
+                self.set_room(self.world.initial_room)
+            elif isinstance(obj, RoomExit):
+                obj.location.exits.remove(obj)
+            elif isinstance(obj, RoomObject):
+                del obj.location.objects[obj.id]
+                self.set_room(self.room)
+                if obj.id in self.state.inventory_ids:
+                    self.state.inventory_ids.remove(obj.id)
+            else:
+                self.game.output('No clue how to destroy %r.' % obj)
+                return self.game.pop_level()
+            self.game.pop_level()
+            self.game.output('Done.')
+
+        def no() -> None:
+            self.game.output('Cancelled.')
+            self.game.pop_level()
+
+        m: Menu = Menu.yes_no(
+            self.game, yes, no,
+            title=f'Are you sure you want to delete {obj!s}?'
+        )
+        self.game.push_level(m)
