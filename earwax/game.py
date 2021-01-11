@@ -564,27 +564,28 @@ class Game(RegisterEventMixin):
     def do_run(self, initial_level: Optional[Level]) -> None:
         """Really run the game."""
         self.dispatch_event('setup')
-        self.audio_context.gain = self.config.sound.master_volume.value
-        source: Source = DirectSource(self.audio_context)
-        manager: SoundManager = SoundManager(
-            self.audio_context, source, buffer_cache=self.buffer_cache
-        )
-        manager.gain = self.config.sound.sound_volume.value
-        self.interface_sound_manager = manager
-        source = DirectSource(self.audio_context)
-        manager = SoundManager(
-            self.audio_context, source, should_loop=True,
-            buffer_cache=self.buffer_cache
-        )
-        manager.gain = self.config.sound.music_volume.value
-        self.music_sound_manager = manager
-        source = DirectSource(self.audio_context)
-        manager = SoundManager(
-            self.audio_context, source, should_loop=True,
-            buffer_cache=self.buffer_cache
-        )
-        manager.gain = self.config.sound.ambiance_volume.value
-        self.ambiance_sound_manager = manager
+        if self.audio_context is not None:
+            self.audio_context.gain = self.config.sound.master_volume.value
+            source: Source = DirectSource(self.audio_context)
+            manager: SoundManager = SoundManager(
+                self.audio_context, source, buffer_cache=self.buffer_cache
+            )
+            manager.gain = self.config.sound.sound_volume.value
+            self.interface_sound_manager = manager
+            source = DirectSource(self.audio_context)
+            manager = SoundManager(
+                self.audio_context, source, should_loop=True,
+                buffer_cache=self.buffer_cache
+            )
+            manager.gain = self.config.sound.music_volume.value
+            self.music_sound_manager = manager
+            source = DirectSource(self.audio_context)
+            manager = SoundManager(
+                self.audio_context, source, should_loop=True,
+                buffer_cache=self.buffer_cache
+            )
+            manager.gain = self.config.sound.ambiance_volume.value
+            self.ambiance_sound_manager = manager
         if initial_level is not None:
             self.push_level(initial_level)
         self.dispatch_event('before_run')
