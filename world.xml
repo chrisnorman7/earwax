@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <world>
+	<cursorsound>D:\sounds\A Sound Effect SFX sampler 2016\Digtal_Rain_Lab_Lethal Energies\Construction Kit\CK_Sensors\CK_Sensors-06.wav</cursorsound>
 	<config>editors:
   hat_alphabet: ' abcdefghijklmnopqrstuvwxyz.,1234567890@ABCDEFGHIJKLMNOPQRSTUVWXYZ-#[]{}'
 menus:

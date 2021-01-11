@@ -543,6 +543,13 @@ class StoryWorld:
     :ivar ~earwax.story.StoryWorld.main_menu_musics: A list of filenames to
         play as music while the main menu is being shown.
 
+    :ivar ~earwax.story.StoryWorld.cursor_sound: The sound that will play when
+        moving over objects.
+
+        If this value is ``None``, no sound will be heard.
+
+        This value is provided in XML with the ``<cursorsound>`` tag.
+
         This value is provided in XML as a series of ``<menumusic>`` tags::
 
             <menumusic>music_1.wav</menumusic>
@@ -571,6 +578,7 @@ class StoryWorld:
     author: str = 'Unknown'
 
     main_menu_musics: List[str] = Factory(list)
+    cursor_sound: Optional[str] = None
     rooms: Dict[str, WorldRoom] = Factory(dict)
     initial_room_id: Optional[str] = None
     messages: WorldMessages = Factory(WorldMessages)
@@ -590,6 +598,8 @@ class StoryWorld:
         e.append(get_element('config', text=configuration))
         e.append(get_element('name', text=self.name))
         e.append(get_element('author', text=self.author))
+        if self.cursor_sound is not None:
+            e.append(get_element('cursorsound', text=self.cursor_sound))
         music: str
         for music in self.main_menu_musics:
             e.append(get_element('menumusic', text=music))

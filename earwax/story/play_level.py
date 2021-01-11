@@ -50,6 +50,7 @@ class PlayLevel(Level):
     action_sounds: List[Sound] = attrib(
         default=Factory(list), init=False, repr=False
     )
+    cursor_sound: Optional[Sound] = None
 
     def __attrs_post_init__(self) -> None:
         """Bind actions."""
@@ -157,6 +158,9 @@ class PlayLevel(Level):
 
     def cycle_object(self, direction: int) -> None:
         """Cycle through objects."""
+        if self.cursor_sound is not None:
+            self.cursor_sound.destroy(destroy_source=True)
+            self.cursor_sound = None
         data: List[str]
         room: WorldRoom = self.state.room
         category: WorldStateCategories = self.state.category
@@ -174,6 +178,7 @@ class PlayLevel(Level):
                 message = self.world.messages.no_exits
             self.game.output(message)
         else:
+            position: Optional[Point] = None
             index: int
             if self.state.object_index is None:
                 index = 0
@@ -183,6 +188,9 @@ class PlayLevel(Level):
                 index = len(data) - 1
             self.state.object_index = index
             self.game.output(data[self.state.object_index])
+            if category is WorldStateCategories.objects:
+                position = room.get_objects()[self.state.object_index].position
+            self.play_cursor_sound(position)
 
     def use_exit(self, x: RoomExit) -> None:
         """Use the given exit.
@@ -251,6 +259,22 @@ class PlayLevel(Level):
             self.game.output(action.message)
         if action.sound is not None:
             self.play_action_sound(action.sound, position=position)
+
+    def play_cursor_sound(self, position: Optional[Point]) -> None:
+        """Play and set the cursor sound."""
+        if self.world.cursor_sound is None:
+            return
+        source: Source
+        if position is None:
+            source = DirectSource(self.game.audio_context)
+        else:
+            source = Source3D(self.game.audio_context)
+            source.gain = self.game.config.sound.sound_volume.value
+            source.position = position.coordinates
+        self.cursor_sound = Sound.from_path(
+            self.game.audio_context, source, self.game.buffer_cache,
+            Path(self.world.cursor_sound)
+        )
 
     def play_action_sound(
         self, sound: str, position: Optional[Point] = None

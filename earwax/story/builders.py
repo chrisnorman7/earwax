@@ -247,3 +247,16 @@ def set_config(world: StoryWorld, element: Element) -> None:
     text: str = unescape(element.text)
     data: Dict[str, Any] = load(text, Loader=CLoader)
     world.game.config.populate_from_dict(data)
+
+
+@world_builder.parser('cursorsound')
+def set_cursor_sound(world: StoryWorld, element: Element) -> None:
+    """Set the cursor sound."""
+    if element.text is None:
+        raise RuntimeError('Empty cursor sound value provided.')
+    elif not os.path.exists(element.text):
+        raise RuntimeError(
+            'Invalid cursor sound provided: %s. Path does not exist.' %
+            element.text
+        )
+    world.cursor_sound = element.text
