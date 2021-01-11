@@ -1,6 +1,7 @@
 """Provides the StoryLevel class."""
 
 from pathlib import Path
+from .. import hat_directions
 from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List,
                     Optional)
 
@@ -54,24 +55,44 @@ class PlayLevel(Level):
 
     def __attrs_post_init__(self) -> None:
         """Bind actions."""
-        self.action('Next category', symbol=key.DOWN)(self.next_category)
-        self.action('Previous category', symbol=key.UP)(self.previous_category)
-        self.action('Next object', symbol=key.RIGHT)(self.next_object)
-        self.action('Previous object', symbol=key.LEFT)(self.previous_object)
-        self.action('Activate object', symbol=key.RETURN)(self.activate)
-        self.action('Return to main menu', symbol=key.ESCAPE)(self.main_menu)
+        self.action(
+            'Next category', symbol=key.DOWN, hat_direction=hat_directions.DOWN
+        )(self.next_category)
+        self.action(
+            'Previous category', symbol=key.UP, hat_direction=hat_directions.UP
+        )(self.previous_category)
+        self.action(
+            'Next object', symbol=key.RIGHT, hat_direction=hat_directions.RIGHT
+        )(self.next_object)
+        self.action(
+            'Previous object', symbol=key.LEFT,
+            hat_direction=hat_directions.LEFT
+        )(self.previous_object)
+        self.action(
+            'Activate object', symbol=key.RETURN, joystick_button=0
+        )(self.activate)
+        self.action(
+            'Return to main menu', symbol=key.ESCAPE, joystick_button=9
+        )(self.main_menu)
         self.action('Play or pause sounds', symbol=key.P)(self.pause)
         self.action(
-            'Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT
+            'Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT,
+            joystick_button=6
         )(self.game.push_action_menu)
-        self.action('Volume down', symbol=key.PAGEDOWN, interval=0.1)(
+        self.action(
+            'Volume down', symbol=key.PAGEDOWN, interval=0.1, joystick_button=4
+        )(
             self.game.change_volume(-0.05)
         )
-        self.action('Volume Up', symbol=key.PAGEUP, interval=0.1)(
+        self.action(
+            'Volume Up', symbol=key.PAGEUP, interval=0.1, joystick_button=5
+        )(
             self.game.change_volume(0.05)
         )
-        self.action('Save game', symbol=key.F3)(self.save)
-        self.action('Load game', symbol=key.F4)(self.world_context.load)
+        self.action('Save game', symbol=key.F3, joystick_button=7)(self.save)
+        self.action(
+            'Load game', symbol=key.F4, joystick_button=8
+        )(self.world_context.load)
         return super().__attrs_post_init__()
 
     def pause(self) -> None:
@@ -354,7 +375,8 @@ class PlayLevel(Level):
 
     def activate(self) -> None:
         """Activate the currently focussed object."""
-        assert self.state.object_index is not None
+        if self.state.object_index is None:
+            self.state.object_index = 0
         room: WorldRoom = self.state.room
         category: WorldStateCategories = self.state.category
         if category is WorldStateCategories.room:
