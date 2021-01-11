@@ -40,10 +40,6 @@ speech:
 		<ambiance>D:\sounds\CORE 2 Free Sampler\Musical\Song &amp; Phrase\MUSCSong_Alexion Full Mix_001_PSE_AMO_G4cHe.wav</ambiance>
 		<object x="-2.0" y="2.0" z="2.0" id="f86C8BT6Jg6gCjtuDvvQVo">
 			<type>stuck</type>
-			<takeaction>
-				<name>Take</name>
-				<message>You take {}.</message>
-			</takeaction>
 			<mainaction>
 				<name>Main Action</name>
 				<sound>D:\sounds\CORE 2 Free Sampler\Musical\Misc\MUSCMisc_Metal Impact Detuned High Tension Long Tail 227_PSE_SONBM_3btfq.wav</sound>
@@ -55,6 +51,10 @@ speech:
 				<name>Examine</name>
 				<message>This is a tall carved stone. It has lots of writing carved into it by unknown hands.</message>
 				<sound>D:\sounds\A Sound Effect SFX sampler 2016\SoundBits_Handwriting\Handwriting_Stone_007.wav</sound>
+			</action>
+			<action>
+				<name>Inspect Writing</name>
+				<message>You lean closer to examine the writing. You can make out strange pictures, but have no idea what they mean.</message>
 			</action>
 		</object>
 		<object x="1.0" y="-1.0" z="-1.0" id="LXFHCyXjAYxCZumWMzDVJu">
@@ -68,7 +68,15 @@ speech:
 			</action>
 		</object>
 		<object x="1.0" y="-7.0" z="-7.0" id="cJ3mxX5kcDAEw7iiW7gtUt">
-			<type>takeable</type>
+			<type>droppable</type>
+			<takeaction>
+				<name>Pick up</name>
+				<message>You bend down and retrieve {}.</message>
+			</takeaction>
+			<mainaction>
+				<name>Main Action</name>
+				<message>You walk over to {}.</message>
+			</mainaction>
 			<name>a broken stick</name>
 		</object>
 		<exit destination="jungle_2">
@@ -140,6 +148,9 @@ speech:
 	<message id="no_actions">There is nothing you can do with this object.</message>
 	<message id="no_exits">There is no way out of this room.</message>
 	<message id="no_use">You cannot use {}.</message>
+	<message id="nothing_to_use">You have nothing that can be used.</message>
+	<message id="nothing_to_drop">You have nothing that can be dropped.</message>
+	<message id="empty_inventory">You aren't carrying anything.</message>
 	<message id="room_activate">You cannot do that.</message>
 	<message id="room_category">Location</message>
 	<message id="objects_category">Objects</message>

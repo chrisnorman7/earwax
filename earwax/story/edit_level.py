@@ -34,6 +34,12 @@ message_descriptions: Dict[str, str] = {
     'actions',
     'no_exits': 'The message which is shown when focusing an empty exit list',
     'no_use': 'The message which is shown when an object cannot be used',
+    'nothing_to_use': 'The message which is shown when the player has nothing '
+    'to  use',
+    'nothing_to_drop': 'The message which is shown when the player has '
+    'nothing to drop',
+    'empty_inventory': 'The message which is shown when the player has an '
+    'empty inventory',
     'room_activate': 'The message which is shown when trying to activate a '
     'room name or description',
     'room_category': 'The name of the room category',
@@ -251,6 +257,9 @@ class EditLevel(PlayLevel):
         self.action('Sounds menu', symbol=key.S)(self.sounds_menu)
         self.action('Change object type', symbol=key.T)(self.set_object_type)
         self.action('Ambiances menu', symbol=key.A)(self.ambiances_menu)
+        self.action(
+            'Actions menu', symbol=key.A, modifiers=key.MOD_SHIFT
+        )(self.object_actions)
         self.action('Reposition object', symbol=key.X)(self.reposition_object)
         self.action('Delete', symbol=key.DELETE)(self.delete)
         return super().__attrs_post_init__()
@@ -783,4 +792,136 @@ class EditLevel(PlayLevel):
                 self.game.output('Object type set.')
 
             m.add_item(inner, title=description)
+        self.game.push_level(m)
+
+    def add_action(self, obj: RoomObject, name: str) -> Callable[[], None]:
+        """Add a new action to the given object.
+
+        :param obj: The object to assign the new action to.
+
+        :param name: The attribute name to use.
+        """
+        assert (
+            name in RoomObject.__annotations__
+            and RoomObject.__annotations__[name] is Optional[WorldAction]
+        )
+
+        def inner() -> None:
+            self.game.reveal_level(self)
+            action: WorldAction = WorldAction()
+            setattr(obj, name, action)
+            if action is obj.take_action:
+                action.name = 'Take'
+            elif action is obj.use_action:
+                action.name = 'Use'
+            elif action is obj.drop_action:
+                action.name = 'Drop'
+            self.game.output('Action created.')
+
+        return inner
+
+    def edit_action(
+        self, obj: RoomObject, action: WorldAction
+    ) -> Callable[[], None]:
+        """Push a menu that allows editing of the action.
+
+        :param obj: The object the action is attached to.
+
+        :param action: The action to edit (or delete).
+        """
+
+        def inner() -> None:
+
+            def set_name() -> Generator[None, None, None]:
+                yield from self.set_name(action)
+
+            def set_message() -> Generator[None, None, None]:
+                yield from self.set_message(action)
+
+            def set_sound() -> Generator[None, None, None]:
+                yield from self.set_sound(action)
+
+            def delete() -> None:
+                def yes() -> None:
+                    self.game.reveal_level(self)
+                    if action is obj.take_action:
+                        obj.take_action = None
+                    elif action is obj.use_action:
+                        obj.use_action = None
+                    elif action is obj.drop_action:
+                        obj.drop_action = None
+                    elif action in obj.actions:
+                        obj.actions.remove(action)
+                    else:
+                        return self.game.output(
+                            f'No idea how to remove the {action.name} action '
+                            f'from the {obj.name} object.'
+                        )
+                    self.game.output('Action deleted.')
+
+                def no() -> None:
+                    self.game.pop_level()
+                    self.game.output('Cancelled.')
+
+                m: Menu = Menu.yes_no(self.game, yes, no)
+                self.game.push_level(m)
+
+            m: Menu = Menu(self.game, 'Edit Action')
+            m.add_item(set_name, title=f'Rename ({action.name})')
+            m.add_item(
+                set_message, title=f'Set message ({action.message})'
+            )
+            m.add_item(
+                set_sound, title=f'Set sound ({action.sound})'
+            )
+            m.add_item(delete, title='Delete')
+            self.game.push_level(m)
+
+        return inner
+
+    def object_actions(self) -> Generator[None, None, None]:
+        """Push a menu that lets you configure object actions."""
+        obj: Optional[ObjectTypes] = self.object
+        if not isinstance(obj, RoomObject):
+            return self.game.output('First select a room object.')
+
+        def add() -> None:
+            assert isinstance(obj, RoomObject)
+            action: WorldAction = WorldAction()
+            obj.actions.append(action)
+            self.edit_action(obj, action)()
+
+        m: Menu = Menu(self.game, 'Object Actions')
+        if obj.take_action is None:
+            m.add_item(
+                self.add_action(obj, 'take_action'), title='Add take action'
+            )
+        else:
+            m.add_item(
+                self.edit_action(obj, obj.take_action),
+                title='Edit take action'
+            )
+        if obj.use_action is None:
+            m.add_item(
+                self.add_action(obj, 'use_action'), title='Add use action'
+            )
+        else:
+            m.add_item(
+                self.edit_action(obj, obj.use_action),
+                title='Edit take action'
+            )
+        if obj.drop_action is None:
+            m.add_item(
+                self.add_action(obj, 'drop_action'), title='Add drop action'
+            )
+        else:
+            m.add_item(
+                self.edit_action(obj, obj.drop_action),
+                title='Edit drop action'
+            )
+        m.add_item(add, title='Add Action')
+        action: WorldAction
+        for action in obj.actions:
+            m.add_item(self.edit_action(obj, action), title=action.name)
+        yield
         self.game.push_level(m)

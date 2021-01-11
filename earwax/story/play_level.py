@@ -80,20 +80,10 @@ class PlayLevel(Level):
         )(self.inventory_menu)
         self.action(
             'Use object', symbol=key.U, joystick_button=3
-        )(
-            self.objects_menu(
-                [obj for obj in self.inventory if obj.is_usable],
-                self.use_object, 'Use Object'
-            )
-        )
+        )(self.use_object_menu)
         self.action(
             'Drop object', symbol=key.D, joystick_button=1
-        )(
-            self.objects_menu(
-                [obj for obj in self.inventory if obj.is_droppable],
-                self.drop_object, 'Drop Object'
-            )
-        )
+        )(self.drop_object_menu)
         self.action(
             'Return to main menu', symbol=key.ESCAPE, joystick_button=9
         )(self.main_menu)
@@ -541,7 +531,9 @@ class PlayLevel(Level):
         return inner
 
     def inventory_menu(self) -> None:
-        """Show the inventory music."""
+        """Show the inventory menu."""
+        if not self.inventory:
+            return self.game.output(self.world.messages.empty_inventory)
         m: Menu = Menu(self.game, self.world.messages.inventory_menu)
         obj: RoomObject
         for obj in self.inventory:
@@ -591,14 +583,28 @@ class PlayLevel(Level):
         self, objects: List[RoomObject],
         func: Callable[[RoomObject], Callable[[], None]],
         title: str
-    ) -> Callable[[], None]:
-        """Return a function that'll show a menu of objects."""
+    ) -> None:
+        """Push a menu of objects."""
+        m: Menu = Menu(self.game, title)
+        obj: RoomObject
+        for obj in objects:
+            m.add_item(func(obj), title=obj.name)
+        self.game.push_level(m)
 
-        def inner() -> None:
-            m: Menu = Menu(self.game, title)
-            obj: RoomObject
-            for obj in objects:
-                m.add_item(func(obj), title=obj.name)
-            self.game.push_level(m)
+    def drop_object_menu(self) -> None:
+        """Push a menu that can be used to drop an object."""
+        objects: List[RoomObject] = [
+            x for x in self.inventory if x.is_droppable
+        ]
+        if objects:
+            self.objects_menu(objects, self.drop_object, 'Drop Object')
+        else:
+            self.game.output(self.world.messages.nothing_to_drop)
 
-        return inner
+    def use_object_menu(self) -> None:
+        """Push a menu that allows using an object."""
+        objects: List[RoomObject] = [x for x in self.inventory if x.is_usable]
+        if objects:
+            self.objects_menu(objects, self.use_object, 'Use Object')
+        else:
+            self.game.output(self.world.messages.nothing_to_use)

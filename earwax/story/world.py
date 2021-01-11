@@ -219,12 +219,15 @@ class RoomObject:
     @property
     def is_takeable(self) -> bool:
         """Return ``True`` if this object can be taken."""
-        return self.type is RoomObjectTypes.takeable
+        return (
+            self.type is RoomObjectTypes.takeable
+            or self.type is RoomObjectTypes.droppable
+        )
 
     @property
     def is_droppable(self) -> bool:
         """Return ``True`` if this object can be dropped."""
-        return self.type is RoomObjectTypes.takeable
+        return self.type is RoomObjectTypes.droppable
 
     @property
     def is_usable(self) -> bool:
@@ -503,6 +506,15 @@ class WorldMessages:
     :ivar ~earwax.story.WorldMessages.no_use: The message which is shown when
         the player tries to use an object which cannot be used.
 
+    :ivar ~earwax.story.WorldMessages.nothing_to_use: The message which is
+        shown when accessing the use menu with no usable objects.
+
+    :ivar ~earwax.story.WorldMessages.nothing_to_drop: The message which is
+        shown when accessing the drop menu with no droppable items.
+
+    :ivar ~earwax.story.WorldMessages.empty_inventory: The message which is
+        shown when trying to access an empty inventory menu.
+
     :ivar ~earwax.story.WorldMessages.room_activate: The message which is shown
         when enter is pressed with the room category selected.
 
@@ -558,6 +570,9 @@ class WorldMessages:
     no_actions: str = 'There is nothing you can do with this object.'
     no_exits: str = 'There is no way out of this room.'
     no_use: str = 'You cannot use {}.'
+    nothing_to_use: str = 'You have nothing that can be used.'
+    nothing_to_drop: str = 'You have nothing that can be dropped.'
+    empty_inventory: str = "You aren't carrying anything."
     room_activate: str = 'You cannot do that.'
 
     # Category names:
