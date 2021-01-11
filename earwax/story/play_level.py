@@ -85,7 +85,7 @@ class PlayLevel(Level):
             'Drop object', symbol=key.D, joystick_button=1
         )(self.drop_object_menu)
         self.action(
-            'Return to main menu', symbol=key.ESCAPE, joystick_button=9
+            'Return to main menu', symbol=key.Q, joystick_button=9
         )(self.main_menu)
         self.action('Play or pause sounds', symbol=key.P)(self.pause)
         self.action(
