@@ -19,8 +19,8 @@ except ImportError:
 
 from ..game import Game
 from ..point import Point
-from .world import (RoomExit, RoomObject, StoryWorld, WorldAction,
-                    WorldAmbiance, WorldRoom)
+from .world import (RoomExit, RoomObject, RoomObjectTypes, StoryWorld,
+                    WorldAction, WorldAmbiance, WorldRoom)
 
 NoneType = type(None)
 
@@ -54,7 +54,7 @@ def set_ambiance(
 
 
 def make_action(
-    obj: Union[RoomExit, RoomObject], element: Element
+    obj: Union[RoomExit, RoomObject, StoryWorld], element: Element
 ) -> WorldAction:
     """Make a new action."""
     action: WorldAction = WorldAction()
@@ -63,9 +63,29 @@ def make_action(
     elif isinstance(obj, RoomObject):
         if element.tag == 'action':
             obj.actions.append(action)
-        else:
+        elif element.tag == 'mainaction':
             obj.actions_action = action
-            action.name = 'Main Action'
+            action.name = 'Main'
+        elif element.tag == 'dropaction':
+            obj.drop_action = action
+            action.name = 'Drop'
+        elif element.tag == 'takeaction':
+            obj.take_action = action
+            action.name = 'Take'
+        elif element.tag == 'useaction':
+            obj.use_action = action
+            action.name = 'Use'
+        else:
+            raise RuntimeError('Invalid action tag: <%s>.' % element.tag)
+    elif isinstance(obj, StoryWorld):
+        if element.tag == 'dropaction':
+            obj.drop_action = action
+            action.name = obj.drop_action.name
+        elif element.tag == 'takeaction':
+            obj.take_action = action
+            action.name = obj.take_action.name
+        else:
+            raise RuntimeError('Invalid action tag: <%s>.' % element.tag)
     else:
         raise RuntimeError('Invalid action placement: below object %r.' % obj)
     return action
@@ -138,9 +158,26 @@ object_builder: Builder[WorldRoom, RoomObject] = Builder(
         'ambiance': set_ambiance
     }, builders={
         'action': action_builder,
-        'mainaction': action_builder
+        'mainaction': action_builder,
+        'takeaction': action_builder,
+        'dropaction': action_builder,
+        'useaction': action_builder,
     }
 )
+
+
+@object_builder.parser('type')
+def set_type(obj: RoomObject, element: Element) -> None:
+    """Set the type of an object."""
+    if element.text is None:
+        raise RuntimeError(
+            'Empty <type> tag received for object %s.' % obj.name
+        )
+    elif element.text not in RoomObjectTypes.__members__:
+        raise RuntimeError(
+            'Invalid object type for %s: %s.' % (obj.name, element.text)
+        )
+    obj.type = RoomObjectTypes.__members__[element.text]
 
 
 def make_exit(room: WorldRoom, element: Element) -> RoomExit:
@@ -223,7 +260,9 @@ def make_world(parent: Game, element: Element) -> StoryWorld:
 world_builder: Builder[Game, StoryWorld] = Builder(
     make_world, name='Story', builders={
         'room': room_builder,
-        'credit': credit_builder
+        'credit': credit_builder,
+        'dropaction': action_builder,
+        'takeaction': action_builder
     },
     parsers={'name': set_name}
 )

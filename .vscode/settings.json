@@ -88,8 +88,5 @@
         "wx",
         "wxpython"
     ],
-    "cSpell.enableFiletypes": [
-        "python"
-    ],
     "cSpell.enabled": true
 }

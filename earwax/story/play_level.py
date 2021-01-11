@@ -1,12 +1,13 @@
 """Provides the StoryLevel class."""
 
 from pathlib import Path
-from .. import hat_directions
 from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List,
                     Optional)
 
 from attr import Factory, attrib, attrs
 from yaml import dump
+
+from .. import hat_directions
 
 try:
     from yaml import CDumper
@@ -19,8 +20,9 @@ from ..menu import Menu
 from ..point import Point
 from ..sound import Sound
 from ..track import Track, TrackTypes
-from .world import (RoomExit, RoomObject, StoryWorld, WorldAction,
-                    WorldAmbiance, WorldRoom, WorldState, WorldStateCategories)
+from .world import (
+    ObjectTypes, RoomExit, RoomObject, StoryWorld, WorldAction, WorldAmbiance,
+    WorldRoom, WorldState, WorldStateCategories)
 
 try:
     from pyglet.window import key
@@ -52,6 +54,7 @@ class PlayLevel(Level):
         default=Factory(list), init=False, repr=False
     )
     cursor_sound: Optional[Sound] = None
+    inventory: List[RoomObject] = Factory(list)
 
     def __attrs_post_init__(self) -> None:
         """Bind actions."""
@@ -71,6 +74,9 @@ class PlayLevel(Level):
         self.action(
             'Activate object', symbol=key.RETURN, joystick_button=0
         )(self.activate)
+        self.action('Inventory', symbol=key.I, joystick_button=1)(
+            self.inventory_menu
+        )
         self.action(
             'Return to main menu', symbol=key.ESCAPE, joystick_button=9
         )(self.main_menu)
@@ -95,6 +101,17 @@ class PlayLevel(Level):
         )(self.world_context.load)
         return super().__attrs_post_init__()
 
+    def get_objects(self) -> List[RoomObject]:
+        """Return a list of objects that the player can see.
+
+        This method will exclude objects which are in the as yet unimplemented
+        player inventory.
+        """
+        return [
+            obj for obj in self.state.room.objects.values()
+            if obj not in self.state.inventory_ids
+        ]
+
     def pause(self) -> None:
         """Pause All the currently-playing room sounds."""
         a: Ambiance
@@ -118,6 +135,24 @@ class PlayLevel(Level):
     def world(self) -> StoryWorld:
         """Get the attached world."""
         return self.world_context.world
+
+    @property
+    def object(self) -> Optional[ObjectTypes]:
+        """Return the object from ``self.state``."""
+        room: WorldRoom = self.state.room
+        category: WorldStateCategories = self.state.category
+        if category is WorldStateCategories.room:
+            return room
+        elif category is WorldStateCategories.objects:
+            if self.state.object_index is not None:
+                obj: RoomObject = self.get_objects()[self.state.object_index]
+                return obj
+        else:
+            assert category is WorldStateCategories.exits
+            if self.state.object_index is not None:
+                x: RoomExit = room.exits[self.state.object_index]
+                return x
+        return None
 
     def stop_action_sounds(self) -> None:
         """Stop all action sounds."""
@@ -188,7 +223,7 @@ class PlayLevel(Level):
         if category is WorldStateCategories.room:
             data = [room.get_name(), room.get_description()]
         elif category is WorldStateCategories.objects:
-            data = [o.name for o in room.get_objects()]
+            data = [o.name for o in self.get_objects()]
         else:
             data = [x.action.name for x in room.exits]
         if not data:
@@ -210,7 +245,7 @@ class PlayLevel(Level):
             self.state.object_index = index
             self.game.output(data[self.state.object_index])
             if category is WorldStateCategories.objects:
-                position = room.get_objects()[self.state.object_index].position
+                position = self.get_objects()[self.state.object_index].position
             self.play_cursor_sound(position)
 
     def use_exit(self, x: RoomExit) -> None:
@@ -371,6 +406,14 @@ class PlayLevel(Level):
         action: WorldAction
         for action in obj.actions:
             m.add_item(self.perform_action(obj, action), title=action.name)
+        if obj.is_takeable:
+            if obj.take_action is None:
+                action = self.world.take_action
+            else:
+                action = obj.take_action
+            m.add_item(
+                self.take_object(obj), title=action.name.format(obj.name)
+            )
         self.game.push_level(m)
 
     def activate(self) -> None:
@@ -389,7 +432,7 @@ class PlayLevel(Level):
                 self.game.output(self.world.messages.no_exits)
         else:
             if room.objects:
-                obj: RoomObject = room.get_objects()[self.state.object_index]
+                obj: RoomObject = self.get_objects()[self.state.object_index]
                 self.actions_menu(obj)
             else:
                 self.game.output(self.world.messages.no_objects)
@@ -420,3 +463,77 @@ class PlayLevel(Level):
         except Exception as e:
             self.game.output('Unable to create save file: %s' % e)
             self.world_context.logger.exception('Failed to create save file.')
+
+    def object_menu(self, obj: RoomObject) -> Callable[[], None]:
+        """Return a callable which shows the inventory menu for an object."""
+
+        def inner() -> None:
+            m: Menu = Menu(self.game, title=obj.name)
+            if obj.use_action is not None:
+                m.add_item(
+                    self.use_object(obj),
+                    title=obj.use_action.name.format(obj.name)
+                )
+            if obj.is_droppable:
+                action: WorldAction
+                if obj.drop_action is None:
+                    action = self.world.drop_action
+                else:
+                    action = obj.drop_action
+                m.add_item(
+                    self.drop_object(obj), title=action.name.format(obj.name)
+                )
+            self.game.push_level(m)
+
+        return inner
+
+    def inventory_menu(self) -> None:
+        """Show the inventory music."""
+        m: Menu = Menu(self.game, self.world.messages.inventory_menu)
+        obj: RoomObject
+        for obj in self.inventory:
+            m.add_item(self.object_menu(obj), title=obj.name)
+        self.game.push_level(m)
+
+    def take_object(self, obj: RoomObject) -> Callable[[], None]:
+        """Return a callable that can be used to take an object."""
+
+        def inner() -> None:
+            action: WorldAction
+            if obj.take_action is None:
+                action = self.world.take_action
+            else:
+                action = obj.take_action
+            self.do_action(action)
+            self.inventory.append(obj)
+            del obj.location.objects[obj.id]
+            self.state.inventory_ids.append(obj.id)
+
+        return inner
+
+    def drop_object(self, obj: RoomObject) -> Callable[[], None]:
+        """Return a callable that can be used to drop an object."""
+
+        def inner() -> None:
+            self.game.pop_levels(2)
+            action: WorldAction
+            if obj.drop_action is None:
+                action = self.world.drop_action
+            else:
+                action = obj.drop_action
+            self.do_action(action)
+            self.state.room.objects[obj.id] = obj
+            self.state.inventory_ids.remove(obj.id)
+            self.inventory.remove(obj)
+
+        return inner
+
+    def use_object(self, obj: RoomObject) -> Callable[[], None]:
+        """Return a callable that can be used to use an object."""
+
+        def inner() -> None:
+            self.game.pop_levels(2)
+            if obj.use_action is not None:
+                self.do_action(obj.use_action)
+
+        return inner

@@ -2,15 +2,15 @@
 
 from xml.etree.ElementTree import Element
 
-from earwax import Point
+from earwax import Game, Point
 from earwax.story import (RoomExit, RoomObject, StoryWorld, WorldAction,
                           WorldAmbiance, WorldMessages, WorldRoom,
                           world_builder)
 
 
-def test_builder() -> None:
+def test_builder(game: Game) -> None:
     """Test initialisation."""
-    w: StoryWorld = StoryWorld()
+    w: StoryWorld = StoryWorld(game)
     assert w.name == 'Untitled World'
     assert w.author == 'Unknown'
     assert w.main_menu_musics == []
@@ -19,9 +19,9 @@ def test_builder() -> None:
     assert isinstance(w.messages, WorldMessages)
 
 
-def test_to_xml() -> None:
+def test_to_xml(game: Game) -> None:
     """Test the to_xml method."""
-    w: StoryWorld = StoryWorld(name='Test World', author='Earwax')
+    w: StoryWorld = StoryWorld(game, name='Test World', author='Earwax')
     room_1: WorldRoom = WorldRoom(w, 'first_room')
     room_2: WorldRoom = WorldRoom(w, 'world_2')
     w.rooms[room_1.id] = room_1
@@ -54,7 +54,7 @@ def test_to_xml() -> None:
     )
     e: Element = w.to_xml()
     assert isinstance(e, Element)
-    w2: StoryWorld = world_builder.build(None, e)
+    w2: StoryWorld = world_builder.build(game, e)
     assert w2.initial_room_id == w.initial_room_id
     assert len(w2.rooms) == 2
     r1: WorldRoom

@@ -727,6 +727,14 @@ class Game(RegisterEventMixin):
         if self.level is not None:
             self.level.dispatch_event('on_reveal')
 
+    def pop_levels(self, n: int) -> None:
+        """Pop the given number of levels.
+
+        :param n: The number of times to call :meth:`~earwax.Game.pop_level`.
+        """
+        for x in range(n):
+            self.pop_level()
+
     def clear_levels(self) -> None:
         """Pop all levels.
 

@@ -33,12 +33,14 @@ message_descriptions: Dict[str, str] = {
     'no_actions': 'The message which is shown when there are no object '
     'actions',
     'no_exits': 'The message which is shown when focusing an empty exit list',
+    'no_use': 'The message which is shown when an object cannot be used',
     'room_activate': 'The message which is shown when trying to activate a '
     'room name or description',
     'room_category': 'The name of the room category',
     'objects_category': 'The name of the objects category',
     'exits_category': 'The name of the exits category',
     'actions_menu': 'The default title of the object actions menu',
+    'inventory_menu': 'The title of the inventory menu',
     'main_menu': 'The title of the main menu',
     'play_game': 'The title of the play game entry of the main menu',
     'load_game': 'The title of the load game entry of the main menu',
@@ -256,11 +258,6 @@ class EditLevel(PlayLevel):
     def room(self) -> WorldRoom:
         """Return the current room."""
         return self.state.room
-
-    @property
-    def object(self) -> Optional[ObjectTypes]:
-        """Return the object from ``self.state``."""
-        return self.state.object
 
     def get_rooms(self, include_current: bool = True) -> List[WorldRoom]:
         """Return a list of rooms from this world.

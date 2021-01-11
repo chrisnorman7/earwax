@@ -100,6 +100,28 @@ class WorldAction:
         return self.name
 
 
+class RoomObjectTypes(Enum):
+    """The type of a room object.
+
+    :ivar ~earwax.story.world.WorldObjectTypes.stuck: This object cannot be
+        moved.
+
+    :ivar ~earwax.story.world.WorldObjectTypes.takeable: This object can be
+        picked up.
+
+    :ivar ~earwax.story.world.WorldObjectTypes.droppable: This object can be
+        dropped.
+
+        This value automatically implies
+        :attr:`~earwax.story.world.WorldObjectTypes.takeable`.
+    """
+
+    stuck = 0
+    takeable = 1
+    droppable = 2
+    usable: int = 4
+
+
 @attrs(auto_attribs=True)
 class RoomObject:
     """An object in the story.
@@ -161,6 +183,20 @@ class RoomObject:
 
     :ivar ~earwax.story.RoomObject.actions: A list of actions that can be
         performed on this object.
+
+    :ivar ~earwax.story.world.RoomObject.drop_action: The action that will be
+        used when this object is dropped by the player.
+
+    :ivar ~earwax.story.world.RoomObject.take_action: The action that will be
+        used when this object is taken by the player.
+
+    :ivar ~earwax.story.world.RoomObject.use_action: The action that will be
+        used when this object is used by the player.
+
+        If this value is ``None``, then this object is considered unusable.
+
+    :ivar ~earwax.story.world.RoomObject.type: Specifies what sort of object
+        this is.
     """
 
     id: str
@@ -170,10 +206,47 @@ class RoomObject:
     actions_action: Optional[WorldAction] = None
     ambiances: List[WorldAmbiance] = Factory(list)
     actions: List[WorldAction] = Factory(list)
+    drop_action: Optional[WorldAction] = None
+    take_action: Optional[WorldAction] = None
+    use_action: Optional[WorldAction] = None
+    type: RoomObjectTypes = Factory(lambda: RoomObjectTypes.stuck)
+
+    @property
+    def is_stuck(self) -> bool:
+        """Return ``True`` if this object is stuck."""
+        return self.type is RoomObjectTypes.stuck
+
+    @property
+    def is_takeable(self) -> bool:
+        """Return ``True`` if this object can be taken."""
+        return self.type is RoomObjectTypes.takeable
+
+    @property
+    def is_droppable(self) -> bool:
+        """Return ``True`` if this object can be dropped."""
+        return self.type is RoomObjectTypes.takeable
+
+    @property
+    def is_usable(self) -> bool:
+        """Return ``True`` if this object can be used."""
+        return self.use_action is not None
 
     def to_xml(self) -> Element:
         """Dump this object."""
         e: Element = get_element('object')
+        e.append(get_element('type', text=self.type.name))
+        if self.drop_action is not None:
+            drop_action_element: Element = self.drop_action.to_xml()
+            drop_action_element.tag = 'dropaction'
+            e.append(drop_action_element)
+        if self.take_action is not None:
+            take_action_element: Element = self.take_action.to_xml()
+            take_action_element.tag = 'takeaction'
+            e.append(take_action_element)
+        if self.use_action is not None:
+            use_action_element: Element = self.use_action.to_xml()
+            use_action_element.tag = 'useaction'
+            e.append(use_action_element)
         if self.position is not None:
             e.attrib = {
                 'x': str(self.position.x),
@@ -374,14 +447,6 @@ class WorldRoom:
             return f'!! ERROR: Invalid room ID {description} !!'
         return description
 
-    def get_objects(self) -> List[RoomObject]:
-        """Return a list of objects that the player can see.
-
-        This will eventually exclude objects which are in the as yet
-        unimplemented player inventory.
-        """
-        return list(self.objects.values())
-
     def to_xml(self) -> Element:
         """Dump this room."""
         e: Element = get_element('room', attrib={'id': self.id})
@@ -435,6 +500,9 @@ class WorldMessages:
     :ivar ~earwax.story.WorldMessages.no_exits: The message which is shown when
             the player cycles to an empty list of exits.
 
+    :ivar ~earwax.story.WorldMessages.no_use: The message which is shown when
+        the player tries to use an object which cannot be used.
+
     :ivar ~earwax.story.WorldMessages.room_activate: The message which is shown
         when enter is pressed with the room category selected.
 
@@ -452,6 +520,9 @@ class WorldMessages:
 
     :ivar ~earwax.story.WorldMessages.actions_menu: The message which is shown
         when the actions menu is activated.
+
+    :ivar ~earwax.story.WorldMessages.inventory_menu: The title of the
+        inventory menu.
 
         You can include the name of the object in question, by including a set
         of braces::
@@ -486,6 +557,7 @@ class WorldMessages:
     no_objects: str = 'This room is empty.'
     no_actions: str = 'There is nothing you can do with this object.'
     no_exits: str = 'There is no way out of this room.'
+    no_use: str = 'You cannot use {}.'
     room_activate: str = 'You cannot do that.'
 
     # Category names:
@@ -495,6 +567,7 @@ class WorldMessages:
 
     # Menu messages:
     actions_menu: str = 'You step up to {}.'
+    inventory_menu: str = 'Inventory'
     main_menu: str = 'Main Menu'
     play_game: str = 'Start new game'
     load_game: str = 'Load game'
@@ -591,6 +664,12 @@ class StoryWorld:
     rooms: Dict[str, WorldRoom] = Factory(dict)
     initial_room_id: Optional[str] = None
     messages: WorldMessages = Factory(WorldMessages)
+    take_action: WorldAction = Factory(
+        lambda: WorldAction(name='Take', message='You take {}.')
+    )
+    drop_action: WorldAction = Factory(
+        lambda: WorldAction(name='Drop', message='You drop {}.')
+    )
 
     @property
     def initial_room(self) -> Optional[WorldRoom]:
@@ -605,6 +684,14 @@ class StoryWorld:
         configuration: str = dump(data, Dumper=CDumper)
         e: Element = get_element('world')
         e.append(get_element('config', text=configuration))
+        if self.drop_action is not None:
+            drop_action_element: Element = self.drop_action.to_xml()
+            drop_action_element.tag = 'dropaction'
+            e.append(drop_action_element)
+        if self.take_action is not None:
+            take_action_element: Element = self.take_action.to_xml()
+            take_action_element.tag = 'takeaction'
+            e.append(take_action_element)
         e.append(get_element('name', text=self.name))
         e.append(get_element('author', text=self.author))
         if self.cursor_sound is not None:
@@ -726,24 +813,6 @@ class WorldState:
     def category(self) -> WorldStateCategories:
         """Return the current category."""
         return list(WorldStateCategories)[self.category_index]
-
-    @property
-    def object(self) -> Optional[ObjectTypes]:
-        """Return the currently focused object."""
-        room: WorldRoom = self.room
-        category: WorldStateCategories = self.category
-        if category is WorldStateCategories.room:
-            return room
-        elif category is WorldStateCategories.objects:
-            if self.object_index is not None:
-                obj: RoomObject = room.get_objects()[self.object_index]
-                return obj
-        else:
-            assert category is WorldStateCategories.exits
-            if self.object_index is not None:
-                x: RoomExit = room.exits[self.object_index]
-                return x
-        return None
 
     def dump(self) -> Dict[str, Any]:
         """Dump this object as a dictionary for saving."""

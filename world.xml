@@ -8,7 +8,7 @@ menus:
 sound:
   ambiance_volume: 0.4
   default_cache_size: 524288000
-  master_volume: 1.0
+  master_volume: 0.4999999999999996
   max_volume: 1.0
   music_volume: 0.4
   sound_volume: 0.5
@@ -16,6 +16,14 @@ speech:
   braille: true
   speak: true
 </config>
+	<dropaction>
+		<name>Drop</name>
+		<message>You drop {}.</message>
+	</dropaction>
+	<takeaction>
+		<name>Take</name>
+		<message>You take {}.</message>
+	</takeaction>
 	<name>Chris's World</name>
 	<author>Chris Norman &lt;chris.norman2@googlemail.com&gt;</author>
 	<cursorsound>D:\sounds\A Sound Effect SFX sampler 2016\Digtal_Rain_Lab_Lethal Energies\Construction Kit\CK_Sensors\CK_Sensors-06.wav</cursorsound>
@@ -30,7 +38,12 @@ speech:
 		<description>This path stretches away into the distance, hemmed in on both sides by the tall trees that are so common in this jungle.</description>
 		<ambiance>D:\sounds\A Sound Effect - The Sound Pack Tree Free SFX\The Nature Pack\059200 - Amazon Jungle Night - Loop.wav</ambiance>
 		<ambiance>D:\sounds\CORE 2 Free Sampler\Musical\Song &amp; Phrase\MUSCSong_Alexion Full Mix_001_PSE_AMO_G4cHe.wav</ambiance>
-		<object x="-2" y="2" z="2" id="f86C8BT6Jg6gCjtuDvvQVo">
+		<object x="-2.0" y="2.0" z="2.0" id="f86C8BT6Jg6gCjtuDvvQVo">
+			<type>stuck</type>
+			<takeaction>
+				<name>Take</name>
+				<message>You take {}.</message>
+			</takeaction>
 			<mainaction>
 				<name>Main Action</name>
 				<sound>D:\sounds\CORE 2 Free Sampler\Musical\Misc\MUSCMisc_Metal Impact Detuned High Tension Long Tail 227_PSE_SONBM_3btfq.wav</sound>
@@ -45,6 +58,7 @@ speech:
 			</action>
 		</object>
 		<object x="1.0" y="-1.0" z="-1.0" id="LXFHCyXjAYxCZumWMzDVJu">
+			<type>stuck</type>
 			<name>an ancient tree</name>
 			<ambiance>D:\sounds\King Collection - Volume 1\Ambience - Rural\Cornfield_Windy_CU_Leaves_Scrape_Rustle_KCV1-01.wav</ambiance>
 			<action>
@@ -52,6 +66,10 @@ speech:
 				<message>You gaze at the tree. The bark is old and rugged, with claw marks from small animals criss-crossing it.</message>
 				<sound>D:\sounds\CORE 2 Free Sampler\Swooshes\Swish\SWSH_Palm Frond Whoosh Fast Stereo 090_PSE_WPA_0Vcbe.wav</sound>
 			</action>
+		</object>
+		<object x="1" y="-7" z="-7" id="cJ3mxX5kcDAEw7iiW7gtUt">
+			<type>stuck</type>
+			<name>Unnamed Object</name>
 		</object>
 		<exit destination="jungle_2">
 			<action>
@@ -121,11 +139,13 @@ speech:
 	<message id="no_objects">You see nothing special.</message>
 	<message id="no_actions">There is nothing you can do with this object.</message>
 	<message id="no_exits">There is no way out of this room.</message>
+	<message id="no_use">You cannot use {}.</message>
 	<message id="room_activate">You cannot do that.</message>
 	<message id="room_category">Location</message>
 	<message id="objects_category">Objects</message>
 	<message id="exits_category">Exits</message>
 	<message id="actions_menu">You step up to {}.</message>
+	<message id="inventory_menu">Inventory</message>
 	<message id="main_menu">Main Menu</message>
 	<message id="play_game">Play</message>
 	<message id="load_game">Load game</message>
