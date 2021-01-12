@@ -133,7 +133,7 @@ class DumpLoadMixin:
     __value_key__: str = '__value__'
     __excluded_attribute_names__: Optional[List[str]] = None
 
-    def _get_dump_value(self, type_: Type, value: Any) -> Any:
+    def get_dump_value(self, type_: Type, value: Any) -> Any:
         """Get a value for dumping.
 
         :param value: The value that is present on the instance.
@@ -177,8 +177,8 @@ class DumpLoadMixin:
                 else:
                     dump_object = self
                 return_value[
-                    self._get_dump_value(key_type, k)
-                ] = dump_object._get_dump_value(value_type, v)
+                    self.get_dump_value(key_type, k)
+                ] = dump_object.get_dump_value(value_type, v)
             return return_value
         else:
             raise RuntimeError(
@@ -197,11 +197,11 @@ class DumpLoadMixin:
                 and name in cls.__excluded_attribute_names__
             ):
                 continue
-            dump_value[name] = self._get_dump_value(type_, getattr(self, name))
+            dump_value[name] = self.get_dump_value(type_, getattr(self, name))
         return {cls.__type_key__: cls.__name__, cls.__value_key__: dump_value}
 
     @classmethod
-    def _get_load_value(cls, expected_type: Type, value: Any) -> Any:
+    def get_load_value(cls, expected_type: Type, value: Any) -> Any:
         """Return a loaded value.
 
         In the event that the dumped value represents a instance of
@@ -255,7 +255,7 @@ class DumpLoadMixin:
                 value_type: Type
                 key_type, value_type = get_args(expected_type)
                 return {
-                    cls._get_load_value(key_type, k): cls._get_load_value(
+                    cls.get_load_value(key_type, k): cls.get_load_value(
                         value_type, v
                     ) for k, v in value.items()
                 }
@@ -264,7 +264,7 @@ class DumpLoadMixin:
                 t: Type[DumpLoadMixin]
                 for t in get_args(expected_type):
                     if type_name == t.__name__:
-                        return t._get_load_value(t, value)
+                        return t.get_load_value(t, value)
                 else:
                     raise RuntimeError(
                         'unable to load a union value without a type hint.'
@@ -277,7 +277,7 @@ class DumpLoadMixin:
                 )
 
     @classmethod
-    def load(cls, data: Dict[str, Any]) -> Any:
+    def load(cls, data: Dict[str, Any], *args) -> Any:
         """Load and return an instance from the provided data.
 
         It is worth noting that only keys that are also found in the
@@ -286,6 +286,8 @@ class DumpLoadMixin:
         ignored.
 
         :param data: The data to load from.
+
+        :param args: Extra positional arguments to pass to the constructor.
         """
         type_name: Optional[str] = data.get(cls.__type_key__, None)
         if type_name is None or type_name != cls.__name__:
@@ -305,5 +307,5 @@ class DumpLoadMixin:
                     continue
                 if name.startswith('_'):
                     continue
-                kwargs[name] = cls._get_load_value(type_, data[name])
-        return cls(**kwargs)  # type: ignore[call-arg]
+                kwargs[name] = cls.get_load_value(type_, data[name])
+        return cls(*args, **kwargs)  # type: ignore[call-arg]
