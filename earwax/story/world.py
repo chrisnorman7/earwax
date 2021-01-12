@@ -57,9 +57,13 @@ class WorldAmbiance(DumpLoadMixin):
     :class:`~WorldRoom` instance, or a :class:`~RoomObject` instance.
 
     :ivar ~earwax.story.WorldAmbiance.path: The path to a sound file.
+
+    :ivar ~earwax.story.WorldAmbiance.volume_multiplier: A value to multiply
+        the ambiance volume by to get the volume for this sound..
     """
 
     path: str
+    volume_multiplier: float = 1.0
 
     def __str__(self) -> str:
         """Return a string."""

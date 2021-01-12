@@ -201,8 +201,8 @@ class PlayLevel(Level):
     def on_push(self) -> None:
         """Set the initial room.
 
-        When game saving is implemented, this will be the world from the
-        :attr:`state` object, rather than the :attr:`~StoryWorld.initial_room`.
+        The room is the world from the :attr:`state` object, rather than the
+        :attr:`~StoryWorld.initial_room`.
         """
         super().on_push()
         self.set_room(self.state.room)
@@ -302,6 +302,15 @@ class PlayLevel(Level):
             self.game.interface_sound_manager.play_path(Path(a.sound), True)
         self.set_room(x.destination)
 
+    def get_gain(self, type: TrackTypes, multiplier: float) -> float:
+        """Return the proper gain."""
+        start: float
+        if type is TrackTypes.music:
+            start = self.game.config.sound.music_volume.value
+        else:
+            start = self.game.config.sound.ambiance_volume.value
+        return start * multiplier
+
     def set_room(self, room: WorldRoom) -> None:
         """Move to a new room."""
         assert self.game.ambiance_sound_manager is not None
@@ -311,21 +320,30 @@ class PlayLevel(Level):
         self.stop_action_sounds()
         self.stop_ambiances()
         self.ambiances.clear()
-        ambiance_paths: List[str] = [a.path for a in room.ambiances]
+        ambiances: Dict[str, WorldAmbiance] = {
+            a.path: a for a in room.ambiances
+        }
         loaded_paths: List[str] = []
         track: Track
         for track in self.tracks.copy():
-            if track.path not in ambiance_paths:
+            if track.path not in ambiances:
                 self.tracks.remove(track)
                 track.stop()
             else:
+                assert track.sound is not None
+                track.sound.source.gain = self.get_gain(
+                    track.track_type, ambiances[track.path].volume_multiplier
+                )
                 loaded_paths.append(track.path)
         a: WorldAmbiance
         for a in room.ambiances:
-            path_str: str = str(a.path)
-            if path_str not in loaded_paths:
-                track = Track('file', path_str, TrackTypes.ambiance)
+            if a.path not in loaded_paths:
+                track = Track('file', a.path, TrackTypes.ambiance)
                 track.play(self.game.ambiance_sound_manager)
+                assert track.sound is not None
+                track.sound.source.gain = self.get_gain(
+                    track.track_type, a.volume_multiplier
+                )
                 self.tracks.append(track)
         obj: RoomObject
         for obj in room.objects.values():
