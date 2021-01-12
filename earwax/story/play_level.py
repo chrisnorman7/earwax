@@ -270,6 +270,8 @@ class PlayLevel(Level):
             self.game.output(data[self.state.object_index])
             if category is WorldStateCategories.objects:
                 position = self.get_objects()[self.state.object_index].position
+            elif category is WorldStateCategories.exits:
+                position = room.exits[self.state.object_index].position
             self.play_cursor_sound(position)
 
     def use_exit(self, x: RoomExit) -> None:

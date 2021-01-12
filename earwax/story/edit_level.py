@@ -8,6 +8,11 @@ from typing import (Callable, Dict, Generator, List, Optional, Tuple, Union,
 from attr import Attribute, attrib, attrs
 
 try:
+    from pyglet.window import key
+except ModuleNotFoundError:
+    key = None
+
+try:
     from synthizer import DirectSource, Source, Source3D
 except ModuleNotFoundError:
     DirectSource, Source, Source3D = (object, object, object)
@@ -21,11 +26,6 @@ from ..types import OptionalGenerator
 from .play_level import PlayLevel
 from .world import (ObjectTypes, RoomExit, RoomObject, RoomObjectTypes,
                     WorldAction, WorldAmbiance, WorldMessages, WorldRoom)
-
-try:
-    from pyglet.window import key
-except ModuleNotFoundError:
-    key = None
 
 message_descriptions: Dict[str, str] = {
     'no_objects': 'The message shown when focusing an empty object list',
@@ -61,14 +61,14 @@ message_descriptions: Dict[str, str] = {
 class ObjectPositionLevel(Level):
     """A level for editing the position of an object.
 
-    :ivar ~earwax.story.edit_level.ObjectPositionLevel.object: The object
-        whose position will be edited.
+    :ivar ~earwax.story.edit_level.ObjectPositionLevel.object: The object or
+    exit whose position will be edited.
 
     :ivar ~earwax.story.edit_level.ObjectPositionLevel.level: The edit level
         which pushed this level.
     """
 
-    object: RoomObject
+    object: Union[RoomObject, RoomExit]
     level: 'EditLevel'
 
     initial_position: Optional[Point] = attrib()
@@ -158,7 +158,7 @@ class ObjectPositionLevel(Level):
             self.game.output('Object unmoved.')
         else:
             self.game.output('Finished editing.')
-        self.game.pop_level()
+        self.game.reveal_level(self.level)
 
     def cancel(self) -> None:
         """Undo the move, and return everything to how it was."""
@@ -692,13 +692,20 @@ class EditLevel(PlayLevel):
     def reposition_object(self) -> None:
         """Reposition the currently selected object."""
         obj: Optional[ObjectTypes] = self.object
-        if not isinstance(obj, RoomObject):
-            return self.game.output('You must first select an object.')
+        if not isinstance(obj, (RoomObject, RoomExit)):
+            return self.game.output(
+                'You can only reposition objects or exits.'
+            )
         position: str = 'Not set'
         if obj.position is not None:
             position = f'{obj.position.x}, {obj.position.y}, {obj.position.z}'
+        name: str
+        if isinstance(obj, RoomObject):
+            name = obj.name
+        else:
+            name = obj.action.name
         self.game.output(
-            f'Repositioning {obj.name}. '
+            f'Repositioning {name}. '
             f'Current position: {position}.'
         )
         l: ObjectPositionLevel = ObjectPositionLevel(self.game, obj, self)

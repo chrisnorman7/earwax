@@ -26,6 +26,29 @@ class StringMixin:
         return f'{self.name} (#{self.id})'
 
 
+class PointDumper(DumpLoadMixin):
+    """This class allows points to be dumped along with everything else."""
+
+    def get_dump_value(self, type_: Type, value: Any) -> Any:
+        """Dump points properly."""
+        if type_ is Optional[Point]:
+            if value is None:
+                return None
+            else:
+                return [value.x, value.y, value.z]
+        return super().get_dump_value(type_, value)
+
+    @classmethod
+    def get_load_value(cls, expected_type: Type, value: Any) -> Any:
+        """Parse points properly."""
+        if expected_type is Optional[Point]:
+            if value is None:
+                return None
+            else:
+                return Point(*value)
+        return super().get_load_value(expected_type, value)
+
+
 @attrs(auto_attribs=True)
 class WorldAmbiance(DumpLoadMixin):
     """An ambiance.
@@ -99,7 +122,7 @@ class RoomObjectTypes(Enum):
 
 
 @attrs(auto_attribs=True)
-class RoomObject(DumpLoadMixin, StringMixin):
+class RoomObject(StringMixin, PointDumper):
     """An object in the story.
 
     Instances of this class will either sit in a room, or be in the player's
@@ -122,11 +145,6 @@ class RoomObject(DumpLoadMixin, StringMixin):
         object will be removed from the location's
         :attr:`~earwax.story.world.WorldRoom.objects` dictionary.
 
-    :ivar ~earwax.story.RoomObject.position: The position of this object.
-
-        If this value is ``None``, then any :attr:`ambiances` will not be
-        panned.
-
     :ivar ~earwax.story.RoomObject.name: The name of this object.
 
         This value will be used in any list of objects.
@@ -143,6 +161,11 @@ class RoomObject(DumpLoadMixin, StringMixin):
 
     :ivar ~earwax.story.RoomObject.actions: A list of actions that can be
         performed on this object.
+
+    :ivar ~earwax.story.world.RoomObject.position: The position of this object.
+
+        If this value is ``None``, then any :attr:`ambiances` will not be
+        panned.
 
     :ivar ~earwax.story.world.RoomObject.drop_action: The action that will be
         used when this object is dropped by the player.
@@ -168,11 +191,11 @@ class RoomObject(DumpLoadMixin, StringMixin):
     """
 
     id: str = Factory(uuid)
-    position: Optional[Point] = None
     name: str = 'Unnamed Object'
     actions_action: Optional[WorldAction] = None
     ambiances: List[WorldAmbiance] = Factory(list)
     actions: List[WorldAction] = Factory(list)
+    position: Optional[Point] = None
     drop_action: Optional[WorldAction] = None
     take_action: Optional[WorldAction] = None
     use_action: Optional[WorldAction] = None
@@ -204,28 +227,9 @@ class RoomObject(DumpLoadMixin, StringMixin):
         """Return ``True`` if this object can be used."""
         return self.use_action is not None
 
-    def get_dump_value(self, type_: Type, value: Any) -> Any:
-        """Dump points properly."""
-        if type_ is Optional[Point]:
-            if value is None:
-                return None
-            else:
-                return [value.x, value.y, value.z]
-        return super().get_dump_value(type_, value)
-
-    @classmethod
-    def get_load_value(cls, expected_type: Type, value: Any) -> Any:
-        """Parse points properly."""
-        if expected_type is Optional[Point]:
-            if value is None:
-                return None
-            else:
-                return Point(*value)
-        return super().get_load_value(expected_type, value)
-
 
 @attrs(auto_attribs=True)
-class RoomExit(DumpLoadMixin):
+class RoomExit(PointDumper):
     """An exit between two rooms.
 
     Instances of this class rely on their :attr:`action` property to show
@@ -234,20 +238,26 @@ class RoomExit(DumpLoadMixin):
     The actual destination can be retrieved with the :attr:`destination`
     property.
 
+    :ivar ~earwax.story.world.RoomExit.destination_id: The ID of the room on
+        the other side of this exit.
+
     :ivar ~earwax.story.RoomExit.location: The location of this exit.
 
         This value is provided by the containing
         :class:`~earwax.story.world.StoryWorld` class.
 
-    :ivar ~earwax.story.RoomExit.destination_id: The ID of the room on the
-        other side of this exit.
-
     :ivar ~earwax.story.RoomExit.action: An action to perform when using this
         exit.
+
+    :ivar ~earwax.story.world.RoomExit.position: The position of this exit.
+
+        If this value is ``None``, then any :attr:`ambiances` will not be
+        panned.
     """
 
     destination_id: str
     action: WorldAction = Factory(WorldAction)
+    position: Optional[Point] = None
     location: 'WorldRoom' = attrib(init=False, repr=False)
 
     __excluded_attribute_names__ = ['location']
