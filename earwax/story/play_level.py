@@ -433,32 +433,49 @@ class PlayLevel(Level):
 
         return inner
 
-    def actions_menu(self, obj: RoomObject) -> None:
+    def actions_menu(
+        self, obj: RoomObject, menu_action: Optional[WorldAction] = None
+    ) -> None:
         """Show a menu of object actions."""
         actions: List[WorldAction] = obj.actions.copy()
         action: WorldAction
-        if obj.is_takeable:
+        if obj.is_takeable and obj not in self.inventory:
             if obj.take_action is None:
                 action = self.world.take_action
             else:
                 action = obj.take_action
             actions.append(action)
+        if obj.is_droppable and obj in self.inventory:
+            if obj.drop_action is None:
+                action = self.world.drop_action
+            else:
+                action = obj.drop_action
+            actions.append(action)
         if not actions:
             return self.game.output(self.world.messages.no_actions)
         msg: str
-        if (
-            obj.actions_action is not None and
-            obj.actions_action.message is not None
-        ):
-            msg = obj.actions_action.message
+        sound: Optional[str] = None
+        if menu_action is None:
+            if (
+                obj.actions_action is not None and
+                obj.actions_action.message is not None
+            ):
+                msg = obj.actions_action.message
+            else:
+                msg = self.world.messages.actions_menu
+            if obj.take_action is None:
+                sound = self.world.take_action.sound
+            else:
+                sound = obj.take_action.sound
         else:
-            msg = self.world.messages.actions_menu
+            sound = menu_action.sound
+            if menu_action.message is None:
+                msg = msg = self.world.messages.actions_menu
+            else:
+                msg = menu_action.message
         m: Menu = Menu(self.game, msg.format(obj.name))
-        if (
-            obj.actions_action is not None and
-            obj.actions_action.sound is not None
-        ):
-            self.play_action_sound(obj.actions_action.sound)
+        if sound is not None:
+            self.play_action_sound(sound)
         for action in actions:
             m.add_item(
                 self.perform_action(obj, action),
@@ -582,8 +599,7 @@ class PlayLevel(Level):
 
         def inner() -> None:
             self.game.reveal_level(self)
-            if obj.use_action is not None:
-                self.do_action(obj.use_action, obj, pan=False)
+            return self.actions_menu(obj, menu_action=obj.use_action)
 
         return inner
 
