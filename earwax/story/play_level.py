@@ -5,32 +5,27 @@ from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List,
                     Optional, Union)
 
 from attr import Factory, attrib, attrs
-from yaml import dump
-
-from .. import hat_directions
 
 try:
-    from yaml import CDumper
-except ImportError:
-    from yaml import Dumper as CDumper  # type: ignore[misc]
+    from pyglet.window import key
+    from synthizer import DirectSource, PannerStrategy, Source, Source3D
+except ModuleNotFoundError:
+    key = None
+    DirectSource, PannerStrategy, Source, Source3D = (
+        object, object, object, object
+    )
 
+from .. import hat_directions
 from ..ambiance import Ambiance
 from ..level import Level
 from ..menu import Menu
 from ..point import Point
 from ..sound import Sound
 from ..track import Track, TrackTypes
+from ..yaml import CDumper, dump
 from .world import (
     ObjectTypes, RoomExit, RoomObject, StoryWorld, WorldAction, WorldAmbiance,
     WorldRoom, WorldState, WorldStateCategories)
-
-try:
-    from pyglet.window import key
-    from synthizer import DirectSource, Source, Source3D
-except ModuleNotFoundError:
-    key = None
-    DirectSource, Source, Source3D = (object, object, object)
-
 
 if TYPE_CHECKING:
     from .context import StoryContext
@@ -124,6 +119,25 @@ class PlayLevel(Level):
                 if obj.id in self.state.inventory_ids:
                     self.inventory.append(obj)
                     del room.objects[obj.id]
+
+    def get_source(self, position: Optional[Point], volume: float) -> Source:
+        """Return a suitable source.
+
+        :param position: The position of the new sound.
+
+            If this value is ``None``, then the sound will not be panned.
+
+        :param volume: The volume of the resulting source.
+        """
+        source: Source
+        if position is None:
+            source = DirectSource(self.game.audio_context)
+        else:
+            source = Source3D(self.game.audio_context)
+            source.position = position.coordinates
+            source.panner_strategy = PannerStrategy[self.world.panner_strategy]
+        source.gain = volume
+        return source
 
     def get_objects(self) -> List[RoomObject]:
         """Return a list of objects that the player can see.
@@ -359,13 +373,9 @@ class PlayLevel(Level):
         """Play and set the cursor sound."""
         if self.world.cursor_sound is None:
             return
-        source: Source
-        if position is None:
-            source = DirectSource(self.game.audio_context)
-        else:
-            source = Source3D(self.game.audio_context)
-            source.gain = self.game.config.sound.sound_volume.value
-            source.position = position.coordinates
+        source: Source = self.get_source(
+            position, self.game.config.sound.sound_volume.value
+        )
         self.cursor_sound = Sound.from_path(
             self.game.audio_context, source, self.game.buffer_cache,
             Path(self.world.cursor_sound)
@@ -382,13 +392,9 @@ class PlayLevel(Level):
 
             If this value is ``None``, the sound will not be panned.
         """
-        source: Source
-        if position is None:
-            source = DirectSource(self.game.audio_context)
-        else:
-            source = Source3D(self.game.audio_context)
-            source.position = position.coordinates
-        source.gain = self.game.config.sound.sound_volume.value
+        source: Source = self.get_source(
+            position, self.game.config.sound.sound_volume.value
+        )
         s: Sound = Sound.from_path(
             self.game.audio_context, source, self.game.buffer_cache,
             Path(sound)

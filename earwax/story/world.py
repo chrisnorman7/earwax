@@ -513,6 +513,7 @@ class StoryWorld(DumpLoadMixin):
     drop_action: WorldAction = Factory(
         lambda: WorldAction(name='Drop', message='You drop {}.')
     )
+    panner_strategy: str = Factory(lambda: 'HRTF')
 
     __excluded_attribute_names__ = ['game']
 

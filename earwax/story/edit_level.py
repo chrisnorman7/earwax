@@ -13,9 +13,11 @@ except ModuleNotFoundError:
     key = None
 
 try:
-    from synthizer import DirectSource, Source, Source3D
+    from synthizer import DirectSource, PannerStrategy, Source, Source3D
 except ModuleNotFoundError:
-    DirectSource, Source, Source3D = (object, object, object)
+    DirectSource, PannerStrategy, Source, Source3D = (
+        object, object, object, object
+    )
 
 from ..editor import Editor
 from ..game import Game
@@ -261,6 +263,9 @@ class EditLevel(PlayLevel):
         )(self.object_actions)
         self.action('Reposition object', symbol=key.X)(self.reposition_object)
         self.action('Delete', symbol=key.DELETE)(self.delete)
+        self.action(
+            'Change panner strategy', symbol=key.P, modifiers=key.MOD_SHIFT
+        )(self.set_panner_strategy)
         return super().__attrs_post_init__()
 
     @property
@@ -932,4 +937,26 @@ class EditLevel(PlayLevel):
         for action in obj.actions:
             m.add_item(self.edit_action(obj, action), title=action.name)
         yield
+        self.game.push_level(m)
+
+    def set_panner_strategy(self) -> None:
+        """Allow the changing of the panner strategy."""
+
+        def set_strategy(strategy: PannerStrategy) -> Callable[[], None]:
+
+            def inner() -> None:
+                self.world.panner_strategy = strategy.name
+                self.game.output(
+                    f'Panner strategy changed to {self.world.panner_strategy}.'
+                )
+                self.game.pop_level()
+
+            return inner
+
+        m: Menu = Menu(
+            self.game, f'Panner Strategy ({self.world.panner_strategy})'
+        )
+        strategy: PannerStrategy
+        for strategy in PannerStrategy.__members__.values():
+            m.add_item(set_strategy(strategy), title=strategy.name)
         self.game.push_level(m)
