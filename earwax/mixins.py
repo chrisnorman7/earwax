@@ -121,6 +121,9 @@ class DumpLoadMixin:
 
     By default, the only collection types that are allowed are ``list``, and
     ``dict``.
+
+    If you wish to exclude attributes from being dumped or loaded, create a
+    ``__excluded_attributes__`` list, and add all names there.
     """
 
     __allowed_basic_types__: List[Type] = [
@@ -128,6 +131,7 @@ class DumpLoadMixin:
     ]
     __type_key__: str = '__type__'
     __value_key__: str = '__value__'
+    __excluded_attribute_names__: Optional[List[str]] = None
 
     def _get_dump_value(self, type_: Type, value: Any) -> Any:
         """Get a value for dumping.
@@ -184,11 +188,16 @@ class DumpLoadMixin:
     def dump(self) -> Dict[str, Any]:
         """Dump this instance as a dictionary."""
         cls: Type[DumpLoadMixin] = type(self)
-        dump_value: Dict[str, Any] = {
-            name: self._get_dump_value(type_, getattr(self, name))
-            for name, type_ in cls.__annotations__.items()
-            if not name.startswith('_')
-        }
+        dump_value: Dict[str, Any] = {}
+        for name, type_ in cls.__annotations__.items():
+            if name.startswith('_'):
+                continue
+            if (
+                cls.__excluded_attribute_names__ is not None
+                and name in cls.__excluded_attribute_names__
+            ):
+                continue
+            dump_value[name] = self._get_dump_value(type_, getattr(self, name))
         return {cls.__type_key__: cls.__name__, cls.__value_key__: dump_value}
 
     @classmethod
@@ -272,7 +281,9 @@ class DumpLoadMixin:
         """Load and return an instance from the provided data.
 
         It is worth noting that only keys that are also found in the
-        ``__annotations__`` dictionary will be loaded. All others are ignored.
+        ``__annotations__`` dictionary, and not found in the
+        ``__excluded_attribute_names__`` list will be loaded. All others are
+        ignored.
 
         :param data: The data to load from.
         """
@@ -284,8 +295,15 @@ class DumpLoadMixin:
                 )
             )
         data = data.get(cls.__value_key__, {})
-        kwargs: Dict[str, Any] = {
-            name: cls._get_load_value(type_, data[name])
-            for name, type_ in cls.__annotations__.items() if name in data
-        }
+        kwargs: Dict[str, Any] = {}
+        for name, type_ in cls.__annotations__.items():
+            if name in data:
+                if (
+                    cls.__excluded_attribute_names__ is not None
+                    and name in cls.__excluded_attribute_names__
+                ):
+                    continue
+                if name.startswith('_'):
+                    continue
+                kwargs[name] = cls._get_load_value(type_, data[name])
         return cls(**kwargs)  # type: ignore[call-arg]

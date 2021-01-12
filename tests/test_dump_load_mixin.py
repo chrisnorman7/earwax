@@ -140,3 +140,23 @@ def test_load() -> None:
     data: Dict[str, Any] = c.dump()
     c2: Company = Company.load(data)
     assert c2 == c
+
+
+def test_excluded_attribute_names() -> None:
+    """Test the __excluded_attribute_names__ attribute."""
+
+    @attrs(auto_attribs=True)
+    class Thing(DumpLoadMixin):
+        """Test thing."""
+
+        name: str = 'Whatever'
+        gender: str = 'No idea'
+        __excluded_attribute_names__ = ['gender']
+
+    t: Thing = Thing(name='Chris Norman', gender='Male')
+    data: Dict[str, Any] = t.dump()
+    assert data[Thing.__value_key__] == {'name': t.name}
+    data[Thing.__value_key__]['gender'] = 'Female'
+    t = Thing.load(data)
+    assert t.name == 'Chris Norman'
+    assert t.gender == 'No idea'
