@@ -3,17 +3,16 @@
 import os
 from argparse import Namespace
 from logging import Logger, getLogger
-from xml.etree.ElementTree import Element, ElementTree, parse
+from typing import Any, Dict
 
 try:
     from pyglet.window import Window
 except ModuleNotFoundError:
     Window = object
-from xml_python import Builder, UnhandledElement
 
-from earwax import Game
-from earwax.story import (EditLevel, StoryContext, StoryWorld, WorldRoom,
-                          world_builder)
+from ...game import Game
+from ...story import EditLevel, StoryContext, StoryWorld, WorldRoom
+from ...yaml import CDumper, dump
 
 logger: Logger = getLogger(__name__)
 
@@ -28,26 +27,7 @@ def play_story(args: Namespace, edit: bool = False) -> None:
         print(f'There is no file named {filename}.')
         raise SystemExit
     game: Game = Game()
-    tree: ElementTree = parse(filename)
-    e: Element = tree.getroot()
-    try:
-        world: StoryWorld = world_builder.build(game, e)
-    except (RuntimeError, UnhandledElement) as e:
-        print('Error loading story:')
-        print()
-        if isinstance(e, RuntimeError):
-            print(e)
-        else:
-            assert isinstance(e, UnhandledElement)
-            builder: Builder
-            element: Element
-            builder, element = e.args
-            print(
-                'You cannot use a <%s> tag inside of a <%s> tag.' % (
-                    element.tag, builder.name
-                )
-            )
-        raise SystemExit
+    world: StoryWorld = StoryWorld.from_filename(filename, game)
     game.name = world.name
     ctx: StoryContext
     try:
@@ -78,11 +58,12 @@ def create_story(args: Namespace) -> None:
     else:
         game: Game = Game()
         w: StoryWorld = StoryWorld(game, name='Untitled World')
-        r: WorldRoom = WorldRoom(w, 'first_room')
+        r: WorldRoom = WorldRoom(id='first_room', name='first_room')
         w.rooms[r.id] = r
         w.initial_room_id = r.id
+        data: Dict[str, Any] = w.dump()
         with open(filename, 'w') as f:
-            f.write(w.to_string())
+            dump(data, f, Dumper=CDumper)
         print('Created %s.' % w.name)
 
 

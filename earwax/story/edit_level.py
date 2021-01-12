@@ -2,11 +2,12 @@
 
 import os.path
 from inspect import isgenerator
-from typing import (Callable, Dict, Generator, List, Optional, Tuple, Union,
-                    cast)
+from typing import (Any, Callable, Dict, Generator, List, Optional, Tuple,
+                    Union, cast)
 
 from attr import Attribute, attrib, attrs
-from shortuuid import uuid
+
+from ..yaml import CDumper, dump
 
 try:
     from synthizer import DirectSource, Source, Source3D
@@ -282,10 +283,11 @@ class EditLevel(PlayLevel):
 
     def save(self) -> None:
         """Save the world."""
-        assert self.filename
+        assert self.filename is not None
         try:
+            data: Dict[str, Any] = self.world.dump()
             with open(self.filename, 'w') as f:
-                f.write(self.world.to_string())
+                dump(data, f, Dumper=CDumper)
             self.game.output('Saved.')
         except Exception as e:
             self.game.output(str(e))
@@ -362,7 +364,8 @@ class EditLevel(PlayLevel):
 
         def inner(destination: WorldRoom) -> None:
             """Create the exit."""
-            x: RoomExit = RoomExit(room, destination.id)
+            x: RoomExit = RoomExit(destination.id)
+            x.location = destination
             room.exits.append(x)
             self.game.output('Exit created.')
 
@@ -374,14 +377,16 @@ class EditLevel(PlayLevel):
         """Create a new object in the current room."""
         self.game.pop_level()
         room: WorldRoom = self.room
-        obj: RoomObject = RoomObject(uuid(), room)
+        obj: RoomObject = RoomObject()
+        obj.location = room
         room.objects[obj.id] = obj
         self.game.output('Object created.')
 
     def create_room(self) -> None:
         """Create a new room."""
         self.game.pop_level()
-        r: WorldRoom = WorldRoom(self.world, uuid())
+        r: WorldRoom = WorldRoom()
+        r.world = self.world
         self.world.add_room(r)
         self.set_room(r)
         self.game.output(r.get_name())

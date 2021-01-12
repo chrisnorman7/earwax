@@ -1,22 +1,16 @@
 """Provides various classes relating to worlds."""
 
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
-from xml.dom.minidom import Document, parseString
-from xml.etree.ElementTree import Element, tostring
+from typing import (TYPE_CHECKING, Any, Dict, List, Optional, TextIO, Type,
+                    Union)
 
 from attr import Factory, attrib, attrs
-from yaml import dump
+from shortuuid import uuid
 
 from ..credit import Credit
-
-try:
-    from yaml import CDumper
-except ImportError:
-    from yaml import Dumper as CDumper  # type: ignore[misc]
-
+from ..mixins import DumpLoadMixin
 from ..point import Point
-from .util import get_element, stringify
+from ..yaml import CLoader, load
 
 if TYPE_CHECKING:
     from ..game import Game
@@ -24,8 +18,17 @@ if TYPE_CHECKING:
 ObjectTypes = Union['WorldRoom', 'RoomObject', 'RoomExit']
 
 
+class StringMixin:
+    """Provides an ``__str__`` method."""
+
+    def __str__(self) -> str:
+        """Return this object as a string."""
+        assert isinstance(self, (WorldRoom, RoomObject))
+        return f'{self.name} (#{self.id})'
+
+
 @attrs(auto_attribs=True)
-class WorldAmbiance:
+class WorldAmbiance(DumpLoadMixin):
     """An ambiance.
 
     This class represents a looping sound, which is either attached to a
@@ -40,17 +43,13 @@ class WorldAmbiance:
 
     path: str
 
-    def to_xml(self) -> Element:
-        """Dump this ambiance."""
-        return get_element('ambiance', text=self.path)
-
     def __str__(self) -> str:
         """Return a string."""
         return f'Ambiance {self.path}'
 
 
 @attrs(auto_attribs=True)
-class WorldAction:
+class WorldAction(DumpLoadMixin):
     """An action that can be performed.
 
     Actions are used by the :class:`RoomObject` and :class:`RoomExit` classes.
@@ -85,16 +84,6 @@ class WorldAction:
     message: Optional[str] = None
     sound: Optional[str] = None
 
-    def to_xml(self) -> Element:
-        """Dump this object."""
-        e: Element = get_element('action')
-        e.append(get_element('name', text=self.name))
-        if self.message is not None:
-            e.append(get_element('message', text=self.message))
-        if self.sound is not None:
-            e.append(get_element('sound', text=self.sound))
-        return e
-
     def __str__(self) -> str:
         """Return a string."""
         return self.name
@@ -123,7 +112,7 @@ class RoomObjectTypes(Enum):
 
 
 @attrs(auto_attribs=True)
-class RoomObject:
+class RoomObject(DumpLoadMixin, StringMixin):
     """An object in the story.
 
     Instances of this class will either sit in a room, or be in the player's
@@ -199,8 +188,7 @@ class RoomObject:
         this is.
     """
 
-    id: str
-    location: 'WorldRoom'
+    id: str = Factory(uuid)
     position: Optional[Point] = None
     name: str = 'Unnamed Object'
     actions_action: Optional[WorldAction] = None
@@ -210,6 +198,9 @@ class RoomObject:
     take_action: Optional[WorldAction] = None
     use_action: Optional[WorldAction] = None
     type: RoomObjectTypes = Factory(lambda: RoomObjectTypes.stuck)
+    location: 'WorldRoom' = attrib(init=False, repr=False)
+
+    __excluded_attribute_names__ = ['location']
 
     @property
     def is_stuck(self) -> bool:
@@ -234,49 +225,28 @@ class RoomObject:
         """Return ``True`` if this object can be used."""
         return self.use_action is not None
 
-    def to_xml(self) -> Element:
-        """Dump this object."""
-        e: Element = get_element('object')
-        e.append(get_element('type', text=self.type.name))
-        if self.drop_action is not None:
-            drop_action_element: Element = self.drop_action.to_xml()
-            drop_action_element.tag = 'dropaction'
-            e.append(drop_action_element)
-        if self.take_action is not None:
-            take_action_element: Element = self.take_action.to_xml()
-            take_action_element.tag = 'takeaction'
-            e.append(take_action_element)
-        if self.use_action is not None:
-            use_action_element: Element = self.use_action.to_xml()
-            use_action_element.tag = 'useaction'
-            e.append(use_action_element)
-        if self.position is not None:
-            e.attrib = {
-                'x': str(self.position.x),
-                'y': str(self.position.y),
-                'z': str(self.position.y)
-            }
-        e.attrib['id'] = self.id
-        if self.actions_action is not None:
-            actions_action_element: Element = self.actions_action.to_xml()
-            actions_action_element.tag = 'mainaction'
-            e.append(actions_action_element)
-        e.append(get_element('name', text=self.name))
-        ambiance: WorldAmbiance
-        for ambiance in self.ambiances:
-            e.append(ambiance.to_xml())
-        action: WorldAction
-        for action in self.actions:
-            e.append(action.to_xml())
-        return e
+    def get_dump_value(self, type_: Type, value: Any) -> Any:
+        """Dump points properly."""
+        if type_ is Optional[Point]:
+            if value is None:
+                return None
+            else:
+                return [value.x, value.y, value.z]
+        return super().get_dump_value(type_, value)
 
-    def __str__(self) -> str:
-        """Return a string."""
-        return stringify(self)
+    @classmethod
+    def get_load_value(cls, expected_type: Type, value: Any) -> Any:
+        """Parse points properly."""
+        if expected_type is Optional[Point]:
+            if value is None:
+                return None
+            else:
+                return Point(*value)
+        return super().get_load_value(expected_type, value)
 
 
 @attrs(auto_attribs=True)
-class RoomExit:
+class RoomExit(DumpLoadMixin):
     """An exit between two rooms.
 
     Instances of this class rely on their :attr:`action` property to show
@@ -311,9 +281,11 @@ class RoomExit:
         exit.
     """
 
-    location: 'WorldRoom'
     destination_id: str
     action: WorldAction = Factory(WorldAction)
+    location: 'WorldRoom' = attrib(init=False, repr=False)
+
+    __excluded_attribute_names__ = ['location']
 
     @property
     def destination(self) -> 'WorldRoom':
@@ -323,22 +295,13 @@ class RoomExit:
         """
         return self.location.world.rooms[self.destination_id]
 
-    def to_xml(self) -> Element:
-        """Dump this exit."""
-        e: Element = get_element(
-            'exit', attrib={'destination': self.destination_id}
-        )
-        e.append(self.action.to_xml())
-        return e
-        return e
-
     def __str__(self) -> str:
         """Return a string."""
         return self.action.name or 'Unnamed Exit'
 
 
 @attrs(auto_attribs=True)
-class WorldRoom:
+class WorldRoom(DumpLoadMixin, StringMixin):
     """A room in a world.
 
     Rooms can contain exits and object.
@@ -416,19 +379,15 @@ class WorldRoom:
         This value is provided in XML as a series of ``<exit>`` tags.
     """
 
-    world: 'StoryWorld'
-    id: str
+    id: str = Factory(uuid)
     name: str = 'Unnamed Room'
     description: str = 'Not described.'
-    ambiances: List[WorldAmbiance] = attrib(
-        default=Factory(list), init=False, repr=False
-    )
-    objects: Dict[str, RoomObject] = attrib(
-        default=Factory(dict), init=False, repr=False
-    )
-    exits: List[RoomExit] = attrib(
-        default=Factory(list), init=False, repr=False
-    )
+    ambiances: List[WorldAmbiance] = Factory(list)
+    objects: Dict[str, RoomObject] = Factory(dict)
+    exits: List[RoomExit] = Factory(list)
+    world: 'StoryWorld' = attrib(init=False, repr=False)
+
+    __excluded_attribute_names__ = ['world']
 
     def get_name(self) -> str:
         """Return the actual name of this room."""
@@ -450,30 +409,9 @@ class WorldRoom:
             return f'!! ERROR: Invalid room ID {description} !!'
         return description
 
-    def to_xml(self) -> Element:
-        """Dump this room."""
-        e: Element = get_element('room', attrib={'id': self.id})
-        e.append(get_element('name', text=self.name))
-        e.append(get_element('description', text=self.description))
-        ambiance: WorldAmbiance
-        for ambiance in self.ambiances:
-            e.append(ambiance.to_xml())
-        obj: RoomObject
-        # Don't use ``get_objects``, because we want to include all objects.
-        for obj in self.objects.values():
-            e.append(obj.to_xml())
-        x: RoomExit
-        for x in self.exits:
-            e.append(x.to_xml())
-        return e
-
-    def __str__(self) -> str:
-        """Return a string."""
-        return stringify(self)
-
 
 @attrs(auto_attribs=True)
-class WorldMessages:
+class WorldMessages(DumpLoadMixin):
     """All the messages that can be shown to the player.
 
     Unlike the other classes, this class does not have its own ``to_xml``
@@ -598,7 +536,7 @@ class WorldMessages:
 
 
 @attrs(auto_attribs=True)
-class StoryWorld:
+class StoryWorld(DumpLoadMixin):
     """The top level world object.
 
     Worlds can contain rooms and messages, as well as various pieces of
@@ -686,60 +624,26 @@ class StoryWorld:
         lambda: WorldAction(name='Drop', message='You drop {}.')
     )
 
+    __excluded_attribute_names__ = ['game']
+
+    def __attrs_post_init__(self) -> None:
+        """Set all the location attributes."""
+        room: WorldRoom
+        for room in self.rooms.values():
+            room.world = self
+            obj: RoomObject
+            for obj in room.objects.values():
+                obj.location = room
+            x: RoomExit
+            for x in room.exits:
+                x.location = room
+
     @property
     def initial_room(self) -> Optional[WorldRoom]:
         """Return the initial room for this world."""
         if self.initial_room_id is not None:
             return self.rooms[self.initial_room_id]
         return None
-
-    def to_xml(self) -> Element:
-        """Dump this world."""
-        data: Dict[str, Any] = self.game.config.dump()
-        configuration: str = dump(data, Dumper=CDumper)
-        e: Element = get_element('world')
-        e.append(get_element('config', text=configuration))
-        if self.drop_action is not None:
-            drop_action_element: Element = self.drop_action.to_xml()
-            drop_action_element.tag = 'dropaction'
-            e.append(drop_action_element)
-        if self.take_action is not None:
-            take_action_element: Element = self.take_action.to_xml()
-            take_action_element.tag = 'takeaction'
-            e.append(take_action_element)
-        e.append(get_element('name', text=self.name))
-        e.append(get_element('author', text=self.author))
-        if self.cursor_sound is not None:
-            e.append(get_element('cursorsound', text=self.cursor_sound))
-        music: str
-        for music in self.main_menu_musics:
-            e.append(get_element('menumusic', text=music))
-        credit: Credit
-        for credit in self.game.credits:
-            credit_element: Element = Element('credit')
-            credit_element.extend(
-                [
-                    get_element('name', text=credit.name),
-                    get_element('url', credit.url),
-                ]
-            )
-            if credit.sound is not None:
-                e.append(get_element('sound', text=str(credit.sound)))
-            e.append(credit_element)
-        room: WorldRoom
-        for room in self.rooms.values():
-            e.append(room.to_xml())
-        if self.initial_room_id is not None:
-            e.append(get_element('entrance', text=self.initial_room_id))
-        name: str
-        type_: Type
-        for name, type_ in self.messages.__annotations__.items():
-            if type_ is str:
-                value: str = getattr(self.messages, name)
-                e.append(
-                    get_element('message', text=value, attrib={'id': name})
-                )
-        return e
 
     def add_room(self, room: WorldRoom) -> None:
         """Add a room to this world.
@@ -748,19 +652,39 @@ class StoryWorld:
         """
         self.rooms[room.id] = room
 
-    def to_document(self) -> Document:
-        """Return this object as an XML document."""
-        s: bytes = tostring(self.to_xml())
-        return parseString(s)
-
-    def to_string(self) -> str:
-        """Return this object as pretty-printed XML."""
-        d: Document = self.to_document()
-        return d.toprettyxml()
-
     def __str__(self) -> str:
         """Return a string."""
         return f'World({self.name!r})'
+
+    def dump(self) -> Dict[str, Any]:
+        """Dump this world."""
+        data: Dict[str, Any] = super().dump()
+        credits_list: List[Dict[str, Any]] = []
+        credit: Credit
+        for credit in self.game.credits:
+            credits_list.append(
+                {
+                    'name': credit.name,
+                    'url': credit.url,
+                    'sound': None
+                    if credit.sound is None else str(credit.sound),
+                    'loop': credit.loop
+                }
+            )
+        data[StoryWorld.__value_key__]['credits'] = credits_list
+        return data
+
+    @classmethod
+    def from_file(cls, f: TextIO, game: 'Game') -> 'StoryWorld':
+        """Return a world from a file object."""
+        data: Dict[str, Any] = load(f, Loader=CLoader)
+        return cls.load(data, game)
+
+    @classmethod
+    def from_filename(cls, filename: str, game: 'Game') -> 'StoryWorld':
+        """Load an instance from a filename."""
+        with open(filename, 'r') as f:
+            return cls.from_file(f, game)
 
 
 class WorldStateCategories(Enum):
@@ -782,7 +706,7 @@ class WorldStateCategories(Enum):
 
 
 @attrs(auto_attribs=True)
-class WorldState:
+class WorldState(DumpLoadMixin):
     """The state of a story.
 
     With the exception of the :attr:`world` attribute, this class should only
@@ -815,9 +739,12 @@ class WorldState:
         """
         assert instance.world.initial_room_id is not None
         return instance.world.initial_room_id
+
     inventory_ids: List[str] = Factory(list)
     category_index: int = Factory(int)
     object_index: Optional[int] = None
+
+    __excluded_attribute_names__ = ['world']
 
     @property
     def room(self) -> WorldRoom:
@@ -828,11 +755,3 @@ class WorldState:
     def category(self) -> WorldStateCategories:
         """Return the current category."""
         return list(WorldStateCategories)[self.category_index]
-
-    def dump(self) -> Dict[str, Any]:
-        """Dump this object as a dictionary for saving."""
-        d: Dict[str, Any] = {
-            'room_id': self.room_id,
-            'inventory_ids': self.inventory_ids,
-        }
-        return d

@@ -1,14 +1,13 @@
 """Test story classes."""
 
-from xml.etree.ElementTree import Element
+from typing import Any, Dict
 
 from earwax import Game, Point
 from earwax.story import (RoomExit, RoomObject, StoryWorld, WorldAction,
-                          WorldAmbiance, WorldMessages, WorldRoom,
-                          world_builder)
+                          WorldAmbiance, WorldMessages, WorldRoom)
 
 
-def test_builder(game: Game) -> None:
+def test_init(game: Game) -> None:
     """Test initialisation."""
     w: StoryWorld = StoryWorld(game)
     assert w.name == 'Untitled World'
@@ -19,25 +18,31 @@ def test_builder(game: Game) -> None:
     assert isinstance(w.messages, WorldMessages)
 
 
-def test_to_xml(game: Game) -> None:
-    """Test the to_xml method."""
+def test_dump(game: Game) -> None:
+    """Test the dump method."""
     w: StoryWorld = StoryWorld(game, name='Test World', author='Earwax')
-    room_1: WorldRoom = WorldRoom(w, 'first_room')
-    room_2: WorldRoom = WorldRoom(w, 'world_2')
+    room_1: WorldRoom = WorldRoom('first_room')
+    room_1.world = w
+    room_2: WorldRoom = WorldRoom('world_2')
+    room_2.world = w
     w.rooms[room_1.id] = room_1
     w.rooms[room_2.id] = room_2
     w.initial_room_id = room_1.id
-    exit_1: RoomExit = RoomExit(room_1, room_2.id)
+    exit_1: RoomExit = RoomExit(room_2.id)
+    exit_1.location = room_1
     assert exit_1.destination is room_2
     room_1.exits.append(exit_1)
-    exit_2: RoomExit = RoomExit(room_2, room_1.id)
+    exit_2: RoomExit = RoomExit(room_1.id)
+    exit_2.location = room_2
     room_2.exits.append(exit_2)
     assert exit_2.destination is room_1
     object_1: RoomObject = RoomObject(
-        'object_1', room_1, position=Point(1, 2, 3), name='Object 1'
+        id='object_1', position=Point(1, 2, 3), name='Object 1'
     )
+    object_1.location = room_1
     room_1.objects[object_1.id] = object_1
-    object_2: RoomObject = RoomObject('object_2', room_2)
+    object_2: RoomObject = RoomObject(id='object_2')
+    object_2.location = room_2
     room_2.objects[object_2.id] = object_2
     room_1.ambiances.append(WorldAmbiance('sound.wav'))
     object_1.ambiances.append(WorldAmbiance('move.wav'))
@@ -52,9 +57,8 @@ def test_to_xml(game: Game) -> None:
             )
         ]
     )
-    e: Element = w.to_xml()
-    assert isinstance(e, Element)
-    w2: StoryWorld = world_builder.build(game, e)
+    data: Dict[str, Any] = w.dump()
+    w2: StoryWorld = StoryWorld.load(data, game)
     assert w2.initial_room_id == w.initial_room_id
     assert len(w2.rooms) == 2
     r1: WorldRoom

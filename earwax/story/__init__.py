@@ -29,8 +29,6 @@ to add extra actions, tasks, or whatever else you can think of.
 
 from typing import List
 
-from .builders import (action_builder, exit_builder, object_builder,
-                       room_builder, world_builder)
 from .context import StoryContext
 from .edit_level import EditLevel, ObjectPositionLevel
 from .play_level import PlayLevel
@@ -38,10 +36,7 @@ from .world import (
     ObjectTypes, RoomExit, RoomObject, StoryWorld, WorldAction, WorldAmbiance,
     WorldMessages, WorldRoom, WorldState, WorldStateCategories)
 
-__all__: List[str] = [
-    'action_builder', 'exit_builder', 'object_builder', 'room_builder',
-    'world_builder', 'ObjectTypes'
-]
+__all__: List[str] = ['ObjectTypes']
 __all__.extend(
     thing.__name__ for thing in [
         RoomExit, RoomObject, StoryWorld, WorldAction, WorldAmbiance,

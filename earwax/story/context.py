@@ -7,19 +7,13 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Generator, List, Type
 
 from attr import Factory, attrib, attrs
-from yaml import load
-
-from ..editor import Editor
-
-try:
-    from yaml import CLoader
-except ImportError:
-    from yaml import FullLoader as CLoader  # type: ignore[misc]
 
 from ..credit import Credit
+from ..editor import Editor
 from ..game import Game
 from ..menu import ConfigMenu, Menu
 from ..track import Track, TrackTypes
+from ..yaml import CLoader, load
 from .edit_level import EditLevel, push_rooms_menu
 from .play_level import PlayLevel
 from .world import RoomExit, StoryWorld, WorldRoom, WorldState
