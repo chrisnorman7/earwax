@@ -64,7 +64,7 @@ class ObjectPositionLevel(Level):
     """A level for editing the position of an object.
 
     :ivar ~earwax.story.edit_level.ObjectPositionLevel.object: The object or
-    exit whose position will be edited.
+        exit whose position will be edited.
 
     :ivar ~earwax.story.edit_level.ObjectPositionLevel.level: The edit level
         which pushed this level.
