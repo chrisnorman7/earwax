@@ -3,7 +3,6 @@
 import os
 from argparse import Namespace
 from logging import Logger, getLogger
-from typing import Any, Dict
 
 try:
     from pyglet.window import Window
@@ -12,7 +11,6 @@ except ModuleNotFoundError:
 
 from ...game import Game
 from ...story import EditLevel, StoryContext, StoryWorld, WorldRoom
-from ...yaml import CDumper, dump
 
 logger: Logger = getLogger(__name__)
 
@@ -59,11 +57,9 @@ def create_story(args: Namespace) -> None:
         game: Game = Game()
         w: StoryWorld = StoryWorld(game, name='Untitled World')
         r: WorldRoom = WorldRoom(id='first_room', name='first_room')
-        w.rooms[r.id] = r
+        w.add_room(r)
         w.initial_room_id = r.id
-        data: Dict[str, Any] = w.dump()
-        with open(filename, 'w') as f:
-            dump(data, f, Dumper=CDumper)
+        w.save(filename)
         print('Created %s.' % w.name)
 
 

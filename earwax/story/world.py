@@ -1,8 +1,8 @@
 """Provides various classes relating to worlds."""
 
 from enum import Enum
-from typing import (TYPE_CHECKING, Any, Dict, List, Optional, TextIO, Type,
-                    Union)
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 from attr import Factory, attrib, attrs
 from shortuuid import uuid
@@ -10,7 +10,6 @@ from shortuuid import uuid
 from ..credit import Credit
 from ..mixins import DumpLoadMixin
 from ..point import Point
-from ..yaml import CLoader, load
 
 if TYPE_CHECKING:
     from ..game import Game
@@ -34,10 +33,6 @@ class WorldAmbiance(DumpLoadMixin):
     This class represents a looping sound, which is either attached to a
     :class:`~WorldRoom` instance, or a :class:`~RoomObject` instance.
 
-    Instances are created with the ``<ambiance>`` tag::
-
-        <ambiance>Loop.wav</ambiance>
-
     :ivar ~earwax.story.WorldAmbiance.path: The path to a sound file.
     """
 
@@ -58,14 +53,6 @@ class WorldAction(DumpLoadMixin):
     :attr:`~WorldAction.name` will appear in the :meth:`action menu
     <StoryWorld.actions_menu>`. If attached to a :class:`~RoomExit` instance,
     then its :attr:`~WorldAction.name` will appear in the exits list.
-
-    Instances are created with the ``<action>`` tag::
-
-        <action>
-            <name>Action name</name>
-            <sound>sound.wav</sound>
-            <message>The message shown when this action is performed.</message>
-        </action>
 
     :ivar ~earwax.story.WorldAction.name: The name of this action.
 
@@ -118,22 +105,6 @@ class RoomObject(DumpLoadMixin, StringMixin):
     Instances of this class will either sit in a room, or be in the player's
     inventory.
 
-    You can create instances of this class with the ``<object>`` tag::
-
-        <object x="-2" y="2" z="0">
-            <name>Object Name</name>
-            <ambiance>sound.wav</ambiance>
-            <action>...</action>
-            <mainaction>
-                <sound>music.wav</sound>
-                <message>You step up to {}.</message>
-            </mainaction>
-        </object>
-
-    Without a ``mainaction`` child tag, no music will play when viewing the
-    actions menu for this object, and the
-    :attr:`~earwax.story.WorldMessages.actions_menu` message will be shown.
-
     :ivar ~earwax.story.RoomObject.id: The unique ID of this object. If this ID
         is not provided, then picking it up will not be reliable, as the ID
         will be randomly generated.
@@ -144,28 +115,28 @@ class RoomObject(DumpLoadMixin, StringMixin):
     :ivar ~earwax.story.RoomObject.location: The room where this object is
         located.
 
-        You do not set this attribute in XML, as it is inferred from which room
-        holds the ``<object>`` tag.
+        This value is set by the :meth:`~earwax.story.world.StoryWorld` which
+        holds this instance.
 
-        If this object is picked up, the location will not change, it will just
-        not show up in the objects list.
+        If this object is picked up, the location will not change, but this
+        object will be removed from the location's
+        :attr:`~earwax.story.world.WorldRoom.objects` dictionary.
 
     :ivar ~earwax.story.RoomObject.position: The position of this object.
-
-        This value is provided in XML with the ``x``, ``y``, and ``z``
-        attributes.
 
         If this value is ``None``, then any :attr:`ambiances` will not be
         panned.
 
     :ivar ~earwax.story.RoomObject.name: The name of this object.
 
-        You can provide this value in XML, with a ``<name>`` tag.
+        This value will be used in any list of objects.
 
     :ivar ~earwax.story.RoomObject.actions_action: An action object which will
         be used when viewing the actions menu for this object.
 
-        This value is provided in XML with the ``<mainaction>`` tag.
+        If this value is ``None``, no music will play when viewing the actions
+        menu for this object, and the
+        :attr:`~earwax.story.WorldMessages.actions_menu` message will be shown.
 
     :ivar ~earwax.story.RoomObject.ambiances: A list of ambiances to play at
         the :attr:`~earwax.story.RoomObject.position` of this object.
@@ -176,8 +147,16 @@ class RoomObject(DumpLoadMixin, StringMixin):
     :ivar ~earwax.story.world.RoomObject.drop_action: The action that will be
         used when this object is dropped by the player.
 
+        If this value is ``None``, the containing world's
+        :attr:`~earwax.story.world.StoryWorld.drop_action` attribute will be
+        used.
+
     :ivar ~earwax.story.world.RoomObject.take_action: The action that will be
         used when this object is taken by the player.
+
+        If this value is ``None``, the containing world's
+        :attr:`~earwax.story.world.StoryWorld.take_action` attribute will be
+        used.
 
     :ivar ~earwax.story.world.RoomObject.use_action: The action that will be
         used when this object is used by the player.
@@ -252,30 +231,16 @@ class RoomExit(DumpLoadMixin):
     Instances of this class rely on their :attr:`action` property to show
     messages and play sounds, as well as for the name of the exit.
 
-    Instances of this class are created with the ``<exit>`` tag::
-
-        <exit destination="jungle_2">
-            <action>...</action>
-        </exit>
-
-    The ``destination`` attribute will be converted to :attr:`destination_id`.
-
     The actual destination can be retrieved with the :attr:`destination`
     property.
 
     :ivar ~earwax.story.RoomExit.location: The location of this exit.
 
-        You cannot set this in XML, as it is inferred from the room which
-        contains the ``<exit>`` tag.
+        This value is provided by the containing
+        :class:`~earwax.story.world.StoryWorld` class.
 
     :ivar ~earwax.story.RoomExit.destination_id: The ID of the room on the
         other side of this exit.
-
-        You provide this in XML with the ``destination`` attribute.
-
-        *note*: The XML attribute is not called ``id``, as it might become
-        possible to give exits IDs in the future so that extra code can be
-        placed upon them.
 
     :ivar ~earwax.story.RoomExit.action: An action to perform when using this
         exit.
@@ -306,42 +271,21 @@ class WorldRoom(DumpLoadMixin, StringMixin):
 
     Rooms can contain exits and object.
 
-    You can create instances of this class with the ``<room>`` tag::
-
-        <room id="jungle_2">
-            <name>Room Name (or #room_id)</name>
-            <description>Room description (or #room_id).</description>
-            <ambiance>Loop.wav</ambiance>
-            <exit>...</exit>
-            <object>...</object>
-        </room>
-
     It is worth noting that both the room :attr:`name` and :attr:`description`
     can either be straight text, or they can consist of a hash character (#)
     followed by the ID of another room, from which the relevant attribute will
     be presented at runtime.
 
-    For example::
+    If this is the case, changing the name or description of the referenced
+    room will change the corresponding attribute on the first instance.
 
-        <room id="provider">
-            <name>Test Room</name>
-            <description>This is a test room.</description>
-        </room>
-        <room>
-            <name>#provider<name>
-            <description>#provider</description>
-        </room>
-
-    The above room definition would result in two rooms with the same name and
-    description.
-
-    If you changed the name on the room with the id ``provider``, the name of
-    the other room would also change.
+    This convertion can only happen once, as otherwise there is a risk of
+    circular dependencies, causing a ``RecursionError`` to be raised.
 
     :ivar ~earwax.story.WorldRoom.world: The world this room is part of.
 
-        You cannot set this value in XML, as it is inferred from the tag the
-        ``<room>`` tag is part of.
+        This value is set by the containing
+        :class:`~earwax.story.world.StoryRoom` instance.
 
     :ivar ~earwax.story.WorldRoom.id: The unique ID of this room.
 
@@ -354,29 +298,19 @@ class WorldRoom(DumpLoadMixin, StringMixin):
     :ivar ~earwax.story.WorldRoom.name: The name of this room, or the #id of a
         room to inherit the name from.
 
-        This value is provided in XML with the ``<name>`` tag.
-
     :ivar ~earwax.story.WorldRoom.description: The description of this room, or
         the #id of another room to inherit the description from.
-
-        This value is provided in XML with the ``<description>`` tag.
 
     :ivar ~earwax.story.WorldRoom.ambiances: A list of ambiances to play when
         this room is in focus.
 
-        This value is provided in XML with a series of ``<ambiance>`` tags.
-
     :ivar ~earwax.story.WorldRoom.objects: A mapping of object ids to objects.
 
         To get a list of objects, the canonical way is to use the
-        :meth:`get_objects` method, as this will properly hide objects which
-        should not be shown because they are in the player's inventory.
-
-        This value is provided in XML with a series of ``<object>`` tags.
+        :meth:`earwax.story.play_level.PlayLevel.get_objects` method, as this
+        will properly hide objects which are in the player's inventory.
 
     :ivar ~earwax.story.WorldRoom.exits: A list of exits from this room.
-
-        This value is provided in XML as a series of ``<exit>`` tags.
     """
 
     id: str = Factory(uuid)
@@ -414,23 +348,9 @@ class WorldRoom(DumpLoadMixin, StringMixin):
 class WorldMessages(DumpLoadMixin):
     """All the messages that can be shown to the player.
 
-    Unlike the other classes, this class does not have its own ``to_xml``
-    method. Instead, for brevity, when dumped, a :class:`StoryWorld` instance
-    will include its :attr:`~StoryWorld.messages` as a series of ``<message>``
-    tags.
-
-    As a result, to create an instance, simply include ``message`` tags with
-    the appropriate IDs in your ``<world>`` tag::
-
-        <world>
-            ...
-            <message id="no_objects">You see nothing special.</message>
-            <message id="no_actions">This is a boring object.</message>
-            ...
-        </world>
-
-    Providing an ID which is *not* an attribute of this object will raise
-    ``RuntimeError``, with a list of valid IDs.
+    When adding a message to this class, make sure to add the same message and
+    an appropriate description to the ``message_descriptions`` in
+    ``earwax/story/edit_level.py``.
 
     :ivar ~earwax.story.WorldMessages.no_objects: The message which is shown
         when the player cycles to an empty list of objects.
@@ -542,38 +462,14 @@ class StoryWorld(DumpLoadMixin):
     Worlds can contain rooms and messages, as well as various pieces of
     information about themselves.
 
-    They can be created with the ``<world>`` tag::
-
-        <world>
-            <name>World Name</name>
-            <author>Chris Norman &lt;chris.norman2@googlemail.com&gt;</author>
-        </world>
-
-    Credits can be added with the ``<credit>`` tag::
-
-        <credit>
-            <name>Chris Norman (Earwax game engine)</name>
-            <url>https://www.github.com/chrisnorman7/earwax.git</url>
-        </credit>
-
-    Worlds can be returned as an XML string with the :meth:`to_string` def
-
     :ivar ~earwax.story.StoryWorld.game: The game this world is part of.
 
     :ivar ~earwax.story.StoryWorld.name: The name of this world.
-
-        This value is provided in XML with the ``<name>`` tag.
 
     :ivar ~earwax.story.StoryWorld.author: The author of this world.
 
         The format of this value is arbitrary, although
         ``Author Name <author@domain.com>`` is recommended.
-
-        Don't forget to escape any special characters, such as ``<`` and ``>``.
-
-        This value is provided in XML with the ``<author>`` tag::
-
-            <author>Chris Norman &lt;chris.norman2@googlemail.com&gt;</author>
 
     :ivar ~earwax.story.StoryWorld.main_menu_musics: A list of filenames to
         play as music while the main menu is being shown.
@@ -583,29 +479,13 @@ class StoryWorld(DumpLoadMixin):
 
         If this value is ``None``, no sound will be heard.
 
-        This value is provided in XML with the ``<cursorsound>`` tag.
-
-        This value is provided in XML as a series of ``<menumusic>`` tags::
-
-            <menumusic>music_1.wav</menumusic>
-            <menumusic>music_2.wav</menumusic>
-
     :ivar ~earwax.story.StoryWorld.rooms: A mapping of room IDs to rooms.
-
-        This value is provided in XML as a series of ``<room>`` tags.
 
     :ivar ~earwax.story.StoryWorld.initial_room_id: The ID of the room to be
         used when first starting the game.
 
-        This value is provided in XML with the ``<entrance>`` tag::
-
-            <entrance>room_id</entrance>
-
     :ivar ~earwax.story.StoryWorld.messages: The messages object used by this
         world.
-
-        This value is provided in XML with a series of <:class:`message
-        <WorldMessages>`> tags.
     """
 
     game: 'Game'
@@ -638,6 +518,27 @@ class StoryWorld(DumpLoadMixin):
             for x in room.exits:
                 x.location = room
 
+    @classmethod
+    def load(cls, data: Dict[str, Any], *args) -> Any:
+        """Load credits before anything else."""
+        world: StoryWorld = super().load(data, *args)
+        config_data: Dict[str, Any] = data.get('config', None)
+        if config_data is not None:
+            world.game.config.populate_from_dict(config_data)
+        credit_data: Dict[str, Any]
+        for credit_data in data.get('credits', []):
+            path: Optional[Path] = None
+            p: Optional[str] = credit_data.get('sound', None)
+            if p is not None:
+                path = Path(p)
+            world.game.credits.append(
+                Credit(
+                    credit_data['name'], credit_data['url'], sound=path,
+                    loop=credit_data.get('loo', True)
+                )
+            )
+        return world
+
     @property
     def initial_room(self) -> Optional[WorldRoom]:
         """Return the initial room for this world."""
@@ -651,6 +552,7 @@ class StoryWorld(DumpLoadMixin):
         :param room: The room to add.
         """
         self.rooms[room.id] = room
+        room.world = self
 
     def __str__(self) -> str:
         """Return a string."""
@@ -659,6 +561,7 @@ class StoryWorld(DumpLoadMixin):
     def dump(self) -> Dict[str, Any]:
         """Dump this world."""
         data: Dict[str, Any] = super().dump()
+        data['config'] = self.game.config.dump()
         credits_list: List[Dict[str, Any]] = []
         credit: Credit
         for credit in self.game.credits:
@@ -671,20 +574,8 @@ class StoryWorld(DumpLoadMixin):
                     'loop': credit.loop
                 }
             )
-        data[StoryWorld.__value_key__]['credits'] = credits_list
+        data['credits'] = credits_list
         return data
-
-    @classmethod
-    def from_file(cls, f: TextIO, game: 'Game') -> 'StoryWorld':
-        """Return a world from a file object."""
-        data: Dict[str, Any] = load(f, Loader=CLoader)
-        return cls.load(data, game)
-
-    @classmethod
-    def from_filename(cls, filename: str, game: 'Game') -> 'StoryWorld':
-        """Load an instance from a filename."""
-        with open(filename, 'r') as f:
-            return cls.from_file(f, game)
 
 
 class WorldStateCategories(Enum):

@@ -3,8 +3,8 @@
 from datetime import datetime
 from enum import Enum
 from inspect import isclass
-from typing import (TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type,
-                    get_args, get_origin)
+from typing import (TYPE_CHECKING, Any, Dict, List, Optional, TextIO, Tuple,
+                    Type, get_args, get_origin)
 
 from attr import attrs
 from typing_inspect import is_union_type
@@ -13,6 +13,8 @@ try:
     from pyglet.event import EventDispatcher
 except ModuleNotFoundError:
     EventDispatcher = object
+
+from .yaml import CDumper, CLoader, dump, load
 
 if TYPE_CHECKING:
     from .game import Game
@@ -309,3 +311,29 @@ class DumpLoadMixin:
                     continue
                 kwargs[name] = cls.get_load_value(type_, data[name])
         return cls(*args, **kwargs)  # type: ignore[call-arg]
+
+    @classmethod
+    def from_file(cls, f: TextIO, *args) -> Any:
+        """Return an instance from a file object.
+
+        :param f: A file which has already been opened.
+
+        :param args: Extra positional arguments to pass to the ``load``
+            constructor.
+        """
+        data: Dict[str, Any] = load(f, Loader=CLoader)
+        return cls.load(data, *args)
+
+    @classmethod
+    def from_filename(cls, filename: str, *args) -> Any:
+        """Load an instance from a filename."""
+        with open(filename, 'r') as f:
+            return cls.from_file(f, *args)
+
+    def save(self, filename: str) -> None:
+        """Write this object to the provided filename.
+
+        :param filename: The name of the file to dump to.
+        """
+        with open(filename, 'w') as f:
+            dump(self.dump(), f, Dumper=CDumper)

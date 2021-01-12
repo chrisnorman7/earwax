@@ -2,12 +2,10 @@
 
 import os.path
 from inspect import isgenerator
-from typing import (Any, Callable, Dict, Generator, List, Optional, Tuple,
-                    Union, cast)
+from typing import (Callable, Dict, Generator, List, Optional, Tuple, Union,
+                    cast)
 
 from attr import Attribute, attrib, attrs
-
-from ..yaml import CDumper, dump
 
 try:
     from synthizer import DirectSource, Source, Source3D
@@ -285,9 +283,7 @@ class EditLevel(PlayLevel):
         """Save the world."""
         assert self.filename is not None
         try:
-            data: Dict[str, Any] = self.world.dump()
-            with open(self.filename, 'w') as f:
-                dump(data, f, Dumper=CDumper)
+            self.world.save(self.filename)
             self.game.output('Saved.')
         except Exception as e:
             self.game.output(str(e))
