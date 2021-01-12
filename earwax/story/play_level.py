@@ -427,9 +427,11 @@ class PlayLevel(Level):
             """Actually perform the action."""
             if action is obj.take_action or action is self.world.take_action:
                 self.take_object(obj)
+            elif action is obj.drop_action or action is self.world.drop_action:
+                self.drop_object(obj)()
             else:
                 self.do_action(action, obj)
-            self.game.pop_level()
+                self.game.pop_level()
 
         return inner
 
@@ -576,6 +578,7 @@ class PlayLevel(Level):
         self.inventory.append(obj)
         del obj.location.objects[obj.id]
         self.state.inventory_ids.append(obj.id)
+        self.game.reveal_level(self)
 
     def drop_object(self, obj: RoomObject) -> Callable[[], None]:
         """Return a callable that can be used to drop an object."""

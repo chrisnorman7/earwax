@@ -921,7 +921,7 @@ class EditLevel(PlayLevel):
         else:
             m.add_item(
                 self.edit_action(obj, obj.use_action),
-                title='Edit take action'
+                title='Edit use action'
             )
         if obj.drop_action is None:
             m.add_item(
