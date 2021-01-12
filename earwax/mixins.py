@@ -224,11 +224,11 @@ class DumpLoadMixin:
         If the type of the value is ``dict``, one of two things will occur:
 
         * If ``expected_type`` is also a dict, then the given value will have
-        its keys and values loaded with this function.
+            its keys and values loaded with this function.
 
         * If ``expected_type`` is also a subclass of
-        :class:`earwax.mixins.DumpLoadMixin`, then it will be loaded with that
-        class's ``load`` method.
+            :class:`earwax.mixins.DumpLoadMixin`, then it will be loaded with
+            that class's ``load`` method.
 
         * If neither of these things are true, ``RuntimeError`` will be raised.
 
