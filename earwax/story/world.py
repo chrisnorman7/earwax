@@ -2,7 +2,7 @@
 
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from attr import Factory, attrib, attrs
 from shortuuid import uuid
@@ -26,27 +26,8 @@ class StringMixin:
         return f'{self.name} (#{self.id})'
 
 
-class PointDumper(DumpLoadMixin):
-    """This class allows points to be dumped along with everything else."""
-
-    def get_dump_value(self, type_: Type, value: Any) -> Any:
-        """Dump points properly."""
-        if type_ is Optional[Point]:
-            if value is None:
-                return None
-            else:
-                return [value.x, value.y, value.z]
-        return super().get_dump_value(type_, value)
-
-    @classmethod
-    def get_load_value(cls, expected_type: Type, value: Any) -> Any:
-        """Parse points properly."""
-        if expected_type is Optional[Point]:
-            if value is None:
-                return None
-            else:
-                return Point(*value)
-        return super().get_load_value(expected_type, value)
+class DumpablePoint(DumpLoadMixin, Point):
+    """A point that can be dumped and loaded."""
 
 
 @attrs(auto_attribs=True)
@@ -126,7 +107,7 @@ class RoomObjectTypes(Enum):
 
 
 @attrs(auto_attribs=True)
-class RoomObject(StringMixin, PointDumper):
+class RoomObject(StringMixin, DumpLoadMixin):
     """An object in the story.
 
     Instances of this class will either sit in a room, or be in the player's
@@ -199,7 +180,7 @@ class RoomObject(StringMixin, PointDumper):
     actions_action: Optional[WorldAction] = None
     ambiances: List[WorldAmbiance] = Factory(list)
     actions: List[WorldAction] = Factory(list)
-    position: Optional[Point] = None
+    position: Optional[DumpablePoint] = None
     drop_action: Optional[WorldAction] = None
     take_action: Optional[WorldAction] = None
     use_action: Optional[WorldAction] = None
@@ -233,7 +214,7 @@ class RoomObject(StringMixin, PointDumper):
 
 
 @attrs(auto_attribs=True)
-class RoomExit(PointDumper):
+class RoomExit(DumpLoadMixin):
     """An exit between two rooms.
 
     Instances of this class rely on their :attr:`action` property to show
@@ -261,7 +242,7 @@ class RoomExit(PointDumper):
 
     destination_id: str
     action: WorldAction = Factory(WorldAction)
-    position: Optional[Point] = None
+    position: Optional[DumpablePoint] = None
     location: 'WorldRoom' = attrib(init=False, repr=False)
 
     __excluded_attribute_names__ = ['location']
