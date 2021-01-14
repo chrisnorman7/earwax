@@ -154,6 +154,7 @@ def test_menu_sound(game: Game) -> None:
     assert m.current_item is looping
     sound = m.select_sound
     assert isinstance(sound, Sound)
+    assert sound.looping is True
     sleep(0.2)
     assert sound.generator.looping is True
     m.on_pop()

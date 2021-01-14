@@ -1,8 +1,8 @@
 """Provides the story subcommand."""
 
-import os
 from argparse import Namespace
 from logging import Logger, getLogger
+from pathlib import Path
 
 try:
     from pyglet.window import Window
@@ -17,9 +17,9 @@ logger: Logger = getLogger(__name__)
 
 def play_story(args: Namespace, edit: bool = False) -> None:
     """Load and play a story."""
-    filename: str = args.filename
+    filename: Path = Path(args.filename)
     logger.info('Attempting to load worl file %s.', filename)
-    if not os.path.isfile(filename):
+    if not filename.is_file():
         print('File not found.')
         print()
         print(f'There is no file named {filename}.')
@@ -48,8 +48,8 @@ def play_story(args: Namespace, edit: bool = False) -> None:
 
 def create_story(args: Namespace) -> None:
     """Create a new story."""
-    filename: str = args.filename
-    if os.path.exists(filename):
+    filename: Path = Path(args.filename)
+    if filename.exists():
         print('Error: Path already exists: %s.' % filename)
         print()
         print('Perhaps you meant the `story play` subcommand?')
@@ -58,7 +58,6 @@ def create_story(args: Namespace) -> None:
         w: StoryWorld = StoryWorld(game, name='Untitled World')
         r: WorldRoom = WorldRoom(id='first_room', name='first_room')
         w.add_room(r)
-        w.initial_room_id = r.id
         w.save(filename)
         print('Created %s.' % w.name)
 

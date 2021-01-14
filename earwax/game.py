@@ -60,7 +60,7 @@ class GameNotRunning(Exception):
     """This game is not running."""
 
 
-@attrs(auto_attribs=True, repr=False)
+@attrs(auto_attribs=True)
 class Game(RegisterEventMixin):
     """The main game object.
 
@@ -133,18 +133,52 @@ class Game(RegisterEventMixin):
         :meth:`~earwax.Game.remove_task` method.
     """
 
-    name: str = __name__
-
     window: Optional[Window] = attrib(
         default=Factory(NoneType), init=False, repr=False
     )
     config: EarwaxConfig = attrib(
         default=Factory(EarwaxConfig), init=False, repr=False
     )
+
+    levels: List[Level] = attrib(default=Factory(list), init=False, repr=False)
+
+    triggered_actions: 'ActionListType' = attrib(
+        default=Factory(list), init=False, repr=False
+    )
+
+    key_release_generators: ReleaseGeneratorDictType = attrib(
+        default=Factory(dict), init=False, repr=False
+    )
+
+    mouse_release_generators: ReleaseGeneratorDictType = attrib(
+        default=Factory(dict), init=False, repr=False
+    )
+
+    joybutton_release_generators: JoyButtonReleaseGeneratorDictType = attrib(
+        default=Factory(dict), init=False, repr=False
+    )
+
+    joyhat_release_generators: List[Generator[None, None, None]] = attrib(
+        default=Factory(list), init=False, repr=False
+    )
+
+    event_matchers: Dict[str, EventMatcher] = attrib(
+        default=Factory(dict), init=False, repr=False
+    )
+
+    joysticks: List[Joystick] = attrib(
+        default=Factory(list), init=False, repr=False
+    )
+    sdl_joysticks: List[Any] = attrib(
+        default=Factory(list), init=False, repr=False
+    )
+    tasks: List[Task] = attrib(default=Factory(list), init=False, repr=False)
+
+    name: str = __name__
+
     audio_context: Optional[Context] = attrib(
         default=Factory(NoneType), repr=False
     )
-
     buffer_cache: BufferCache = attrib(repr=False)
 
     @buffer_cache.default
@@ -156,44 +190,13 @@ class Game(RegisterEventMixin):
         return BufferCache(instance.config.sound.default_cache_size.value)
 
     interface_sound_manager: SoundManager = attrib(
-        default=Factory(NoneType), init=False, repr=False
+        default=Factory(NoneType), repr=False
     )
     music_sound_manager: Optional[SoundManager] = attrib(
-        default=Factory(NoneType), init=False, repr=False
+        default=Factory(NoneType), repr=False
     )
     ambiance_sound_manager: Optional[SoundManager] = attrib(
-        default=Factory(NoneType), init=False, repr=False
-    )
-
-    levels: List[Level] = attrib(default=Factory(list), init=False)
-
-    triggered_actions: 'ActionListType' = attrib(
-        default=Factory(list), init=False
-    )
-
-    key_release_generators: ReleaseGeneratorDictType = attrib(
-        default=Factory(dict), init=False
-    )
-
-    mouse_release_generators: ReleaseGeneratorDictType = attrib(
-        default=Factory(dict), init=False
-    )
-
-    joybutton_release_generators: JoyButtonReleaseGeneratorDictType = attrib(
-        default=Factory(dict), init=False
-    )
-
-    joyhat_release_generators: List[Generator[None, None, None]] = attrib(
-        default=Factory(list), init=False
-    )
-
-    event_matchers: Dict[str, EventMatcher] = attrib(
-        default=Factory(dict), init=False, repr=False
-    )
-
-    joysticks: List[Joystick] = attrib(default=Factory(list), init=False)
-    sdl_joysticks: List[Any] = attrib(
-        default=Factory(list), init=False, repr=False
+        default=Factory(NoneType), repr=False
     )
 
     thread_pool: Executor = attrib(
@@ -202,7 +205,6 @@ class Game(RegisterEventMixin):
         ), repr=False
     )
 
-    tasks: List[Task] = attrib(default=Factory(list), init=False, repr=False)
     credits: List[Credit] = attrib(default=Factory(list), repr=False)
 
     def __attrs_post_init__(self) -> None:
@@ -564,35 +566,57 @@ class Game(RegisterEventMixin):
         import sdl2
         sdl2.SDL_Init(sdl2.SDL_INIT_EVERYTHING)
 
-    def do_run(self, initial_level: Optional[Level]) -> None:
-        """Really run the game."""
+    def setup_run(self, initial_level: Optional[Level]) -> None:
+        """Get ready to run the game.
+
+        This method dispatches the :meth:`~earwax.Game.setup` event, and sets
+        up sound managers.
+
+        Finally, it pushes the initial level, if necessary.
+
+        :param initial_level: The initial level to be pushed.
+        """
         self.dispatch_event('setup')
         if self.audio_context is not None:
             self.audio_context.gain = self.config.sound.master_volume.value
-            source: Source = DirectSource(self.audio_context)
-            manager: SoundManager = SoundManager(
-                self.audio_context, source, buffer_cache=self.buffer_cache
-            )
-            manager.gain = self.config.sound.sound_volume.value
-            self.interface_sound_manager = manager
-            source = DirectSource(self.audio_context)
-            manager = SoundManager(
-                self.audio_context, source, should_loop=True,
-                buffer_cache=self.buffer_cache
-            )
-            manager.gain = self.config.sound.music_volume.value
-            self.music_sound_manager = manager
-            source = DirectSource(self.audio_context)
-            manager = SoundManager(
-                self.audio_context, source, should_loop=True,
-                buffer_cache=self.buffer_cache
-            )
-            manager.gain = self.config.sound.ambiance_volume.value
-            self.ambiance_sound_manager = manager
+            if self.interface_sound_manager is None:
+                self.interface_sound_manager = SoundManager(
+                    self.audio_context, buffer_cache=self.buffer_cache,
+                    name='Interface sound manager',
+                    default_gain=self.config.sound.sound_volume.value
+                )
+            if self.music_sound_manager is None:
+                self.music_sound_manager = SoundManager(
+                    self.audio_context, buffer_cache=self.buffer_cache,
+                    name='Music sound manager',
+                    default_gain=self.config.sound.music_volume.value,
+                    default_looping=True
+                )
+            if self.ambiance_sound_manager is None:
+                self.ambiance_sound_manager = SoundManager(
+                    self.audio_context, buffer_cache=self.buffer_cache,
+                    name='Ambiance sound manager',
+                    default_gain=self.config.sound.ambiance_volume.value,
+                    default_looping=True
+                )
         if initial_level is not None:
             self.push_level(initial_level)
+
+    def finalise_run(self) -> None:
+        """Perform the final steps of running the game.
+
+        * Dispatch the :meth:`~earwax.Game.before_run` event.
+
+        * Call ``pyglet.app.run()`.
+
+        * Unload Cytolk.
+
+        * Dispatch the :meth:`~earwax.Game.after_run` event.
+        """
         self.dispatch_event('before_run')
         app.run()
+        unload()
+        self.dispatch_event('after_run')
 
     def run(
         self, window: Window, mouse_exclusive: bool = True,
@@ -616,22 +640,12 @@ class Game(RegisterEventMixin):
 
         * call :meth:`~earwax.Game.open_joysticks`.
 
-        * Enter a ``synthizer.initialized`` contextmanager.
+        * If no :attr:`~earwax.Game.audio_context` is present, enter a
+            ``synthizer.initialized`` contextmanager.
 
-        * Dispatch the :meth:`~earwax.Game.setup` event.
+        * Call the :meth:`~earwax.Game.setup_run` method.
 
-        * populate :attr:`~earwax.Game.interface_sound_manager`,
-            :attr:`~earwax.Game.music_sound_manager`, and
-            :attr:`~earwax.Game.ambiance_sound_manager`, and set the
-            appropriate gains from :attr:`~earwax.Game.config`.
-
-        * if ``initial_level`` is not ``None``, push the given level.
-
-        * Dispatch the :meth:`~earwax.Game.before_run` event.
-
-        * Start the pyglet event loop.
-
-        * unload cytolk.
+        * Call the :meth:`~earwax.Game.finalise_run` method.
 
         :param window: The pyglet window that will form the game's interface.
 
@@ -655,11 +669,11 @@ class Game(RegisterEventMixin):
         if self.audio_context is None:
             with initialized():
                 self.audio_context = Context()
-                self.do_run(initial_level)
+                self.setup_run(initial_level)
+                self.finalise_run()
         else:
-            self.do_run(initial_level)
-        unload()
-        self.dispatch_event('after_run')
+            self.setup_run(initial_level)
+            self.finalise_run()
 
     def open_joysticks(self) -> None:
         """Open and attach events to all attached joysticks."""

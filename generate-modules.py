@@ -7,6 +7,7 @@ from typing import Any, List
 import wx
 from jinja2 import Environment, Template
 from pyglet.window import key, mouse
+from synthizer import GlobalFdnReverb, Context, initialized
 
 from earwax import hat_directions as _hat_directions
 
@@ -110,8 +111,29 @@ def make_wx_module() -> None:
         f.write(wx_code + '\n'.join(wx_lines) + '\n')
 
 
+def make_reverb_module() -> None:
+    """Make a typed reverb module."""
+    code: str = '"""Provides the Reverb class."""\n\nfrom attr import attrs\n'
+    code += '\n\n@attrs(auto_attribs=True)\nclass Reverb:\n'
+    code += '    """A reverb class with type hints.\n\n    '
+    code += 'This module is automatically generated.\n    """\n\n'
+    with initialized():
+        c: Context = Context()
+        r: GlobalFdnReverb = GlobalFdnReverb(c)
+        name: str
+        value: Any
+        for name in dir(r):
+            value = getattr(r, name)
+            if isinstance(value, float):
+                code += f'    {name}: float = {value}\n'
+        r.destroy()
+    with Path('earwax/reverb.py').open('w') as f:
+        f.write(code)
+
+
 if __name__ == '__main__':
     get_keys()
     make_keys_module()
     get_wx_lines()
     make_wx_module()
+    make_reverb_module()

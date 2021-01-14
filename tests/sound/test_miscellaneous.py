@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Optional
 
 from attr.exceptions import FrozenInstanceError
-from pyglet.clock import schedule_once
 from pyglet.window import Window
 from pytest import raises
 from synthizer import Buffer, SynthizerError
@@ -27,13 +26,14 @@ def test_get_buffer(buffer_cache: BufferCache):
     b = buffer_cache.get_buffer('file', 'sound.wav')
     assert isinstance(b, Buffer)
     assert len(buffer_cache.buffer_uris) == 1
-    uri: str = buffer_cache.buffer_uris[0]
+    uri: str = buffer_cache.get_uri('file', 'sound.wav')
+    assert uri == buffer_cache.buffer_uris[0]
     assert buffer_cache.buffers[uri] is b
     assert buffer_cache.current_size == buffer_cache.get_size(b)
     # Try to get a non existant file.
     with raises(SynthizerError):
         buffer_cache.get_buffer('file', 'invalid.wav')
-    # Try to open an invalid file.
+    # Try to open a non sound file.
     with raises(SynthizerError):
         buffer_cache.get_buffer('file', __file__)
     # Try to open a directory.
@@ -55,15 +55,19 @@ def test_current_size(buffer_cache: BufferCache) -> None:
 
 
 def test_pop_buffer(buffer_cache: BufferCache) -> None:
-    """Test that maximum size is respected."""
+    """Test the pop_buffer method."""
     buffer_cache.get_buffer('file', 'sound.wav')
     uri: str = buffer_cache.buffer_uris[0]
     buffer_cache.get_buffer('file', 'move.wav')
+    assert len(buffer_cache.buffer_uris) == 2
     assert uri == buffer_cache.buffer_uris[-1]
     buffer_cache.pop_buffer()
     assert uri not in buffer_cache.buffer_uris
     assert len(buffer_cache.buffer_uris) == 1
     assert len(buffer_cache.buffers) == 1
+    assert buffer_cache.current_size == buffer_cache.get_size(
+        buffer_cache.buffers[buffer_cache.buffer_uris[0]]
+    )
 
 
 def test_max_size(buffer_cache: BufferCache) -> None:
@@ -77,8 +81,6 @@ def test_max_size(buffer_cache: BufferCache) -> None:
     s2: int = buffer_cache.get_size(b2)
     assert len(buffer_cache.buffer_uris) == 1
     assert buffer_cache.current_size == s2
-    with raises(SynthizerError):
-        b1.destroy()
     assert buffer_cache.buffers[buffer_cache.buffer_uris[0]] is b2
 
 
@@ -111,27 +113,18 @@ def test_buffer_directory(buffer_cache: BufferCache):
 
 def test_gains(game: Game, window: Window, level: Level) -> None:
     """Test the gain of the various sound managers."""
-
-    def do_test(dt: float) -> None:
-        manager: Optional[SoundManager] = game.interface_sound_manager
-        expected: float = game.config.sound.sound_volume.value
-        assert isinstance(manager, SoundManager)
-        assert manager.source.gain == expected
-        assert manager.gain == expected
-        manager = game.music_sound_manager
-        expected = game.config.sound.music_volume.value
-        assert isinstance(manager, SoundManager)
-        assert manager.source.gain == expected
-        assert manager.gain == expected
-        manager = game.ambiance_sound_manager
-        expected = game.config.sound.ambiance_volume.value
-        assert isinstance(manager, SoundManager)
-        assert manager.source.gain == expected
-        assert manager.gain == expected
-        window.close()
-
-    @game.event
-    def before_run() -> None:
-        schedule_once(do_test, 0.5)
-
-    game.run(window, initial_level=level)
+    manager: Optional[SoundManager] = game.interface_sound_manager
+    assert isinstance(manager, SoundManager)
+    assert manager.default_gain == game.config.sound.sound_volume.value
+    assert manager.default_position is None
+    assert manager.default_looping is False
+    manager = game.music_sound_manager
+    assert isinstance(manager, SoundManager)
+    assert manager.default_gain == game.config.sound.music_volume.value
+    assert manager.default_position is None
+    assert manager.default_looping is True
+    manager = game.ambiance_sound_manager
+    assert isinstance(manager, SoundManager)
+    assert manager.default_gain == game.config.sound.ambiance_volume.value
+    assert manager.default_position is None
+    assert manager.default_looping is True

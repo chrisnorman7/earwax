@@ -6,8 +6,9 @@ from typing import List
 from pyglet.clock import schedule_once
 from pyglet.window import Window, key
 from pytest import raises
+from synthizer import Context, DirectSource, Source3D, StreamingGenerator
 
-from earwax import (Action, Ambiance, Game, IntroLevel, Level, Sound,
+from earwax import (Action, Ambiance, Game, IntroLevel, Level, Point, Sound,
                     SoundManager, Track, TrackTypes)
 
 
@@ -126,9 +127,11 @@ def test_on_cover(game: Game, level: Level) -> None:
     assert game.level is level
 
 
-def test_start_ambiances(game: Game, level: Level, window: Window) -> None:
+def test_start_ambiances(
+    context: Context, game: Game, level: Level, window: Window
+) -> None:
     """Test that ambiances start correctly."""
-    a: Ambiance = Ambiance.from_path(Path('sound.wav'))
+    a: Ambiance = Ambiance.from_path(Path('sound.wav'), Point(0, 0, 0))
     level.ambiances.append(a)
 
     @level.event
@@ -137,11 +140,12 @@ def test_start_ambiances(game: Game, level: Level, window: Window) -> None:
 
         def inner(dt: float) -> None:
             assert isinstance(a.sound, Sound)
-            assert isinstance(a.sound_manager, SoundManager)
-            assert a.sound_manager.context is game.audio_context
+            assert a.sound.context is context
+            assert a.sound.position == a.coordinates
+            assert isinstance(a.sound.source, Source3D)
+            assert a.sound.source.position == a.coordinates.coordinates
             assert (
-                a.sound_manager.source.gain ==
-                game.config.sound.ambiance_volume.value
+                a.sound.source.gain == game.config.sound.ambiance_volume.value
             )
             assert a.sound.generator.looping is True
             window.close()
@@ -151,10 +155,16 @@ def test_start_ambiances(game: Game, level: Level, window: Window) -> None:
     game.run(window, initial_level=level)
 
 
-def test_start_tracks(game: Game, level: Level, window: Window) -> None:
+def test_start_tracks(
+    context: Context, game: Game, level: Level, window: Window
+) -> None:
     """Test that tracks start properly."""
     music: Track = Track.from_path(Path('sound.wav'), TrackTypes.music)
-    ambiance: Track = Track.from_path(Path('sound.wav'), TrackTypes.ambiance)
+    assert music.protocol == 'file'
+    assert music.path == 'sound.wav'
+    ambiance: Track = Track.from_path(Path('move.wav'), TrackTypes.ambiance)
+    assert ambiance.protocol == 'file'
+    assert ambiance.path == 'move.wav'
     level.tracks.extend([ambiance, music])
 
     @level.event
@@ -162,12 +172,18 @@ def test_start_tracks(game: Game, level: Level, window: Window) -> None:
         """Schedule the real test function."""
 
         def inner(dt: float) -> None:
-            assert ambiance.sound_manager is game.ambiance_sound_manager
             assert isinstance(ambiance.sound, Sound)
+            assert isinstance(ambiance.sound.generator, StreamingGenerator)
             assert ambiance.sound.generator.looping is True
-            assert music.sound_manager is game.music_sound_manager
+            assert ambiance.sound.position is None
+            assert isinstance(ambiance.sound.source, DirectSource)
+            assert ambiance.sound.gain == game.config.sound.music_volume.value
             assert isinstance(music.sound, Sound)
+            assert isinstance(music.sound.generator, StreamingGenerator)
             assert music.sound.generator.looping is True
+            assert music.sound.position is None
+            assert isinstance(music.sound.source, DirectSource)
+            assert music.sound.gain == game.config.sound.music_volume.value
             window.close()
 
         schedule_once(inner, 0.25)
@@ -180,7 +196,7 @@ def test_del(game: Game, sound_manager: SoundManager) -> None:
     game.music_sound_manager = sound_manager
     l: Level = Level(game)
     t: Track = Track.from_path(Path('sound.wav'), TrackTypes.music)
-    a: Ambiance = Ambiance.from_path(Path('sound.wav'))
+    a: Ambiance = Ambiance.from_path(Path('sound.wav'), Point(0, 0, 0))
     l.ambiances.append(a)
     l.tracks.append(t)
     l.on_push()
@@ -210,15 +226,17 @@ def test_intro_level(window: Window, level: Level, game: Game) -> None:
             game, level, Path('sound.wav'), skip_after=5.0, looping=True
         )
     intro = IntroLevel(game, level, Path('sound.wav'))
-    assert intro.sound_manager is None
+    assert isinstance(intro.sound_manager, SoundManager)
+    assert intro.sound_manager is game.interface_sound_manager
+    assert intro.sound_path == Path('sound.wav')
     assert intro.sound is None
 
     @intro.event
     def on_push() -> None:
         def inner(dt: float) -> None:
             assert isinstance(intro.sound_manager, SoundManager)
-            assert intro.sound_manager.should_loop is intro.looping
             assert isinstance(intro.sound, Sound)
+            assert intro.sound_manager is game.interface_sound_manager
 
         schedule_once(inner, 0.5)
 
@@ -228,6 +246,8 @@ def test_intro_level(window: Window, level: Level, game: Game) -> None:
     schedule_once(f, 2.0)
     game.run(window, initial_level=intro)
     assert game.level is intro
+    assert isinstance(intro.sound_manager, SoundManager)
+    assert intro.sound_manager is game.interface_sound_manager
 
 
 def test_intro_level_skip_after(
@@ -247,7 +267,7 @@ def test_intro_level_skip_after(
 
     game.run(window, initial_level=intro)
     assert game.level is level
-    assert intro.sound_manager is None
+    assert intro.sound_manager is game.interface_sound_manager
     assert intro.sound is None
 
 
@@ -295,5 +315,5 @@ def test_intro_level_skip(window: Window, level: Level, game: Game) -> None:
     schedule_once(f, 0.5)
     game.run(window, initial_level=intro)
     assert game.level is level
-    assert intro.sound_manager is None
+    assert intro.sound_manager is game.interface_sound_manager
     assert intro.sound is None

@@ -8,8 +8,9 @@ from typing import Generator
 from _pytest.fixtures import FixtureRequest
 from pyglet.window import Window
 from pytest import fixture
-from synthizer import (Context, GlobalFdnReverb, Source3D, StreamingGenerator,
-                       initialized)
+from synthizer import (Context, GlobalFdnReverb, LoggingBackend, LogLevel,
+                       StreamingGenerator, configure_logging_backend,
+                       initialized, set_log_level)
 
 from earwax import (ActionMap, Box, BoxLevel, BufferCache, DialogueTree, Door,
                     Editor, Game, GameBoard, Level, Menu, NetworkConnection,
@@ -38,17 +39,15 @@ def get_game(context: Context, thread_pool: ThreadPoolExecutor) -> Generator[
 ]:
     """Get a new ``Game`` instance."""
     g: Game = Game(audio_context=context, thread_pool=thread_pool)
+    g.setup_run(None)
+    assert g.ambiance_sound_manager is not None
+    assert g.interface_sound_manager is not None
+    assert g.music_sound_manager is not None
     yield g
     g.buffer_cache.destroy_all()
-    if g.ambiance_sound_manager is not None:
-        g.ambiance_sound_manager.destroy_all()
-        g.ambiance_sound_manager.source.destroy()
-    if g.music_sound_manager is not None:
-        g.music_sound_manager.destroy_all()
-        g.music_sound_manager.source.destroy()
-    if g.interface_sound_manager is not None:
-        g.interface_sound_manager.destroy_all()
-        g.interface_sound_manager.source.destroy()
+    g.ambiance_sound_manager.destroy_all()
+    g.interface_sound_manager.destroy_all()
+    g.music_sound_manager.destroy_all()
 
 
 @fixture(name='menu')
@@ -76,6 +75,8 @@ def get_editor(game: Game, window: Window) -> Editor:
 @fixture(scope='session', autouse=True)
 def initialise_tests() -> Generator[None, None, None]:
     """Initialise and shutdown Synthizer."""
+    configure_logging_backend(LoggingBackend.STDERR)
+    set_log_level(LogLevel.DEBUG)
     with initialized():
         if not scripts_directory.is_dir():
             scripts_directory.mkdir()
@@ -133,25 +134,21 @@ def get_streaming_generator(context: Context) -> StreamingGenerator:
     return StreamingGenerator(context, 'file', 'sound.wav')
 
 
-@fixture(name='source')
-def get_source_3d(context: Context) -> Source3D:
-    """Get a new ``Source3D`` instance."""
-    return Source3D(context)
-
-
 @fixture(name='sound_manager')
 def get_sound_manager(
-    buffer_cache: BufferCache, context: Context, source: Source3D
+    buffer_cache: BufferCache, context: Context
 ) -> SoundManager:
     """Get a new sound manager instance."""
-    return SoundManager(context, source, buffer_cache=buffer_cache)
+    return SoundManager(
+        context, buffer_cache=buffer_cache, name='Test sound manager'
+    )
 
 
 @fixture(name='sound')
-def get_sound(game: Game, context: Context, source: Source3D) -> Sound:
+def get_sound(buffer_cache: BufferCache, context: Context) -> Sound:
     """Get a new sound."""
     return Sound.from_path(
-        context, source, game.buffer_cache, Path('sound.wav')
+        context, buffer_cache, Path('sound.wav')
     )
 
 

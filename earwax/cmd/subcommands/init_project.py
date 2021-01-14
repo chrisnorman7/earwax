@@ -45,7 +45,7 @@ def init_project(args: Namespace) -> None:
         )
     else:
         project: Project = Project(name='Untitled Project')
-        project.save()
+        project.save(project_filename)
         print(f'Created {project.name}.')
     update()
     print('Updated.')

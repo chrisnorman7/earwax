@@ -59,18 +59,21 @@ from .game import Game, GameNotRunning
 from .game_board import GameBoard, NoSuchTile
 from .level import IntroLevel, Level
 from .mapping import (Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door,
-                      NearestBox, NotADoor, Portal, ReverbSettingsDict)
+                      NearestBox, NotADoor, Portal)
 from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                    TypeHandler, UnknownTypeError)
-from .mixins import CoordinatesMixin, DismissibleMixin, TitleMixin
+from .mixins import (CoordinatesMixin, DismissibleMixin, DumpLoadMixin,
+                     TitleMixin)
 from .networking import (AlreadyConnected, AlreadyConnecting, ConnectionError,
                          ConnectionStates, NetworkConnection, NotConnectedYet)
 from .point import Point, PointDirections
 from .promises import (Promise, PromiseStates, StaggeredPromise,
                        ThreadedPromise, staggered_promise)
+from .reverb import Reverb
 from .rumble_effects import RumbleEffect, RumbleSequence, RumbleSequenceLine
-from .sound import (AlreadyDestroyed, BufferCache, BufferDirectory, NoCache,
-                    Sound, SoundError, SoundManager)
+from .sound import (AlreadyDestroyed, BufferCache, BufferDirectory,
+                    InvalidPannerStrategy, NoCache, PannerStrategies, Sound,
+                    SoundError, SoundManager)
 from .speech import tts
 from .task import IntervalFunction, Task, TaskFunction
 from .track import Track, TrackTypes
@@ -107,12 +110,12 @@ __all__: List[str] = [
     'IntroLevel', 'Level',
     # mapping/__init__.py:
     'Box', 'BoxBounds', 'BoxLevel', 'BoxTypes', 'CurrentBox', 'Door',
-    'NearestBox', 'NotADoor', 'Portal', 'ReverbSettingsDict',
+    'NearestBox', 'NotADoor', 'Portal',
     # menu/__init__.py:
     'ActionMenu', 'ConfigMenu', 'FileMenu', 'Menu', 'MenuItem', 'TypeHandler',
     'UnknownTypeError',
     # mixins.py:
-    'CoordinatesMixin', 'DismissibleMixin', 'TitleMixin',
+    'CoordinatesMixin', 'DismissibleMixin', 'DumpLoadMixin', 'TitleMixin',
     # networking.py:
     'AlreadyConnected', 'AlreadyConnecting', 'ConnectionError',
     'ConnectionStates', 'NetworkConnection', 'NotConnectedYet',
@@ -121,10 +124,13 @@ __all__: List[str] = [
     # promises/__init__.py:
     'Promise', 'PromiseStates', 'StaggeredPromise', 'ThreadedPromise',
     'staggered_promise',
+    # reverb.py:
+    'Reverb',
     # rumble_effects.py:
     'RumbleEffect', 'RumbleSequence', 'RumbleSequenceLine',
     # sound.py:
-    'AlreadyDestroyed', 'BufferCache', 'BufferDirectory', 'NoCache', 'Sound',
+    'AlreadyDestroyed', 'BufferCache', 'BufferDirectory',
+    'InvalidPannerStrategy', 'NoCache', 'PannerStrategies', 'Sound',
     'SoundError', 'SoundManager',
     # speech.py:
     'tts',

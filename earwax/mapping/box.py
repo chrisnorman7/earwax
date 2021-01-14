@@ -10,14 +10,10 @@ from attr import Factory, attrib, attrs
 
 try:
     from pyglet.clock import schedule_once, unschedule
-    from synthizer import (Context, GlobalFdnReverb, PannerStrategy, Source3D,
-                           SynthizerError)
+    from synthizer import GlobalFdnReverb
 except ModuleNotFoundError:
     schedule_once, unschedule = (None, None)
-    Context, GlobalFdnReverb, PannerStrategy, Source3d = (
-        None, None, None, None
-    )
-    SynthizerError = Exception
+    GlobalFdnReverb = object
 
 from ..mixins import RegisterEventMixin
 from ..point import Point
@@ -32,7 +28,6 @@ if TYPE_CHECKING:
 
 IntCoordinates = Tuple[int, int, int]
 T = TypeVar('T')
-ReverbSettingsDict = Dict[str, float]
 
 
 class BoxError(Exception):
@@ -235,16 +230,15 @@ class Box(Generic[T], RegisterEventMixin):
     data: Optional[T] = None
     stationary: bool = Factory(lambda: True)
     bounds: BoxBounds = attrib(repr=False, init=False)
-    reverb_settings: ReverbSettingsDict = Factory(dict)
     centre: Point = attrib(init=False, repr=False)
 
     reverb: Optional[GlobalFdnReverb] = attrib(
         default=Factory(lambda: None), repr=False
     )
-    sound_manager: Optional[SoundManager] = attrib(
-        default=Factory(lambda: None), repr=False
-    )
     box_level: Optional['BoxLevel'] = None
+    _sound_manager: Optional[SoundManager] = attrib(
+        default=Factory(lambda: None), init=False, repr=False
+    )
 
     def __attrs_post_init__(self) -> None:
         """Configure bounds, parents and children."""
@@ -422,6 +416,22 @@ class Box(Generic[T], RegisterEventMixin):
         """Return ``True`` if this box is a portal."""
         return isinstance(self.data, Portal)
 
+    @property
+    def sound_manager(self) -> Optional[SoundManager]:
+        """Return a suitable sound manager."""
+        if self._sound_manager is None:
+            if self.game.audio_context is not None:
+                self._sound_manager = SoundManager(
+                    self.game.audio_context,
+                    buffer_cache=self.game.buffer_cache,
+                    default_position=self.centre,
+                    default_gain=self.game.config.sound.sound_volume.value,
+                    default_reverb=self.reverb
+                )
+                if self.name is not None:
+                    self._sound_manager.name = self.name
+        return self._sound_manager
+
     def on_footstep(self, bearing: float, coordinates: Point) -> None:
         """Play an appropriate surface sound.
 
@@ -498,46 +508,6 @@ class Box(Generic[T], RegisterEventMixin):
         :param box: The box whose bounds will be checked.
         """
         return self.contains_point(box.start) and self.contains_point(box.end)
-
-    def get_sound_manager(self) -> SoundManager:
-        """Make a sound manager suitable for this box.
-
-        The resulting sound manager will be at the correct coordinates, but
-        will need to have a reverb connected if :attr:`self.reverb_settings
-        <earwax.Box.reverb_settings>` is not ``None``.
-
-        A suitable reverb can be created with the
-        :meth:`~earwax.Box.make_reverb` method.
-        """
-        assert self.game.audio_context is not None
-        source: Source3D = Source3D(self.game.audio_context)
-        source.position = self.centre.coordinates
-        source.panner_strategy = PannerStrategy.HRTF
-        return SoundManager(
-            self.game.audio_context, source,
-            buffer_cache=self.game.buffer_cache
-        )
-
-    def get_reverb(self) -> GlobalFdnReverb:
-        """Make a reverb suitable for this box."""
-        assert self.game.audio_context is not None
-        reverb: GlobalFdnReverb = GlobalFdnReverb(self.game.audio_context)
-        name: str
-        value: float
-        for name, value in self.reverb_settings.items():
-            setattr(reverb, name, value)
-        return reverb
-
-    def make_sound_manager(self) -> None:
-        """Make a sound manager, and reverb if necessary."""
-        assert self.game.audio_context is not None
-        if self.sound_manager is None:
-            self.sound_manager = self.get_sound_manager()
-        if self.reverb is None and self.reverb_settings != {}:
-            self.reverb = self.get_reverb()
-            self.game.audio_context.config_route(
-                self.sound_manager.source, self.reverb
-            )
 
     def is_wall(self, p: Point) -> bool:
         """Return ``True`` if the provided point is inside a wall.
@@ -621,11 +591,17 @@ class Box(Generic[T], RegisterEventMixin):
             if p.level is not self.box_level:
                 self.game.replace_level(p.level)
             p.level.set_coordinates(p.coordinates)
+            b: Optional[Box] = p.level.get_current_box()
+            reverb: Optional[GlobalFdnReverb] = None
+            if b is not None:
+                reverb = b.reverb
             if (
-                p.level.player_sound_manager is not None and
-                p.exit_sound is not None
+                self.game.interface_sound_manager is not None
+                and p.exit_sound is not None
             ):
-                p.level.player_sound_manager.play_path(p.exit_sound, True)
+                self.game.interface_sound_manager.play_path(
+                    p.exit_sound, True, reverb=reverb
+                )
             bearing: int = self.box_level.bearing
             if p.bearing is not None:
                 bearing = p.bearing
@@ -668,10 +644,3 @@ class Box(Generic[T], RegisterEventMixin):
         else:
             z = point.z
         return Point(x, y, z)
-
-    def __del__(self) -> None:
-        """Delete everything."""
-        try:
-            self.reverb.destroy()  # type:ignore[union-attr]
-        except (SynthizerError, AttributeError):
-            pass

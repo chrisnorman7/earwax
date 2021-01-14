@@ -196,7 +196,7 @@ class PlayLevel(Level):
         """Stop all action sounds."""
         while self.action_sounds:
             s: Sound = self.action_sounds.pop()
-            s.destroy(destroy_source=True)
+            s.destroy()
 
     def on_push(self) -> None:
         """Set the initial room.
@@ -253,7 +253,7 @@ class PlayLevel(Level):
     def cycle_object(self, direction: int) -> None:
         """Cycle through objects."""
         if self.cursor_sound is not None:
-            self.cursor_sound.destroy(destroy_source=True)
+            self.cursor_sound.destroy()
             self.cursor_sound = None
         data: List[str]
         room: WorldRoom = self.state.room
@@ -331,8 +331,11 @@ class PlayLevel(Level):
                 track.stop()
             else:
                 assert track.sound is not None
-                track.sound.source.gain = self.get_gain(
-                    track.track_type, ambiances[track.path].volume_multiplier
+                track.sound.set_gain(
+                    self.get_gain(
+                        track.track_type,
+                        ambiances[track.path].volume_multiplier
+                    )
                 )
                 loaded_paths.append(track.path)
         a: WorldAmbiance
@@ -341,8 +344,10 @@ class PlayLevel(Level):
                 track = Track('file', a.path, TrackTypes.ambiance)
                 track.play(self.game.ambiance_sound_manager)
                 assert track.sound is not None
-                track.sound.source.gain = self.get_gain(
-                    track.track_type, a.volume_multiplier
+                track.sound.set_gain(
+                    self.get_gain(
+                        track.track_type, a.volume_multiplier
+                    )
                 )
                 self.tracks.append(track)
         obj: RoomObject
@@ -391,12 +396,9 @@ class PlayLevel(Level):
         """Play and set the cursor sound."""
         if self.world.cursor_sound is None:
             return
-        source: Source = self.get_source(
-            position, self.game.config.sound.sound_volume.value
-        )
-        self.cursor_sound = Sound.from_path(
-            self.game.audio_context, source, self.game.buffer_cache,
-            Path(self.world.cursor_sound)
+
+        self.cursor_sound = self.game.interface_sound_manager.play_path(
+            Path(self.world.cursor_sound), False, position=position
         )
 
     def play_action_sound(
@@ -410,12 +412,8 @@ class PlayLevel(Level):
 
             If this value is ``None``, the sound will not be panned.
         """
-        source: Source = self.get_source(
-            position, self.game.config.sound.sound_volume.value
-        )
-        s: Sound = Sound.from_path(
-            self.game.audio_context, source, self.game.buffer_cache,
-            Path(sound)
+        s: Sound = self.game.interface_sound_manager.play_path(
+            Path(sound), True, position=position
         )
         self.action_sounds.append(s)
 

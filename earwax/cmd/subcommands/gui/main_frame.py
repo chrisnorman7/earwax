@@ -14,16 +14,10 @@ except ModuleNotFoundError:
     from . import pretend_wx as wx
     Context = object
 
-from yaml import dump, load
-
-try:
-    from yaml import CDumper, CLoader
-except ImportError:
-    from yaml import FullLoader as CLoader  # type: ignore[misc]
-    from yaml import Dumper as CDumper  # type: ignore[misc]
-
 from earwax.cmd.project import Project
+from earwax.yaml import CDumper, CLoader, dump, load
 
+from ...constants import project_filename
 from .events import EVT_SAVE, SaveEvent
 from .panels.credits_panel import CreditsPanel
 from .panels.levels_panel import LevelsPanel
@@ -47,7 +41,7 @@ class MainFrame(wx.Frame):
         """Initialise the window."""
         self.context: Context = Context()
         super().__init__(None, title='Earwax')
-        self.project: Project = Project.from_file()
+        self.project: Project = Project.from_filename(project_filename)
         self.set_title()
         self.Bind(EVT_SAVE, self.on_save)
         p: wx.Panel = wx.Panel(self)
@@ -90,7 +84,7 @@ class MainFrame(wx.Frame):
 
     def on_save(self, event: SaveEvent) -> None:
         """Perform the save."""
-        self.project.save()
+        self.project.save(project_filename)
         event.Skip()
 
     def on_close(self, event: wx.CloseEvent) -> None:

@@ -1,28 +1,63 @@
 """Provides sound-related functions and classes."""
 
 from concurrent.futures import Executor
+from enum import Enum
 from pathlib import Path
 from random import choice
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from attr import Factory, attrib, attrs
+
+from .utils import random_file as _random_file
 
 try:
     from pyglet.clock import schedule_once
 except ModuleNotFoundError:
     pass
+
 try:
     from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
-                           Generator, GlobalFdnReverb, Source, Source3D,
+                           Generator, GlobalFdnReverb, PannedSource,
+                           PannerStrategy, Source, Source3D,
                            StreamingGenerator, SynthizerError)
 except ModuleNotFoundError:
     (
-        Buffer, BufferGenerator, Context, DirectSource, Generator, Source,
-        Source3D, StreamingGenerator, GlobalFdnReverb
-    ) = (None, None, None, None, None, None, None, None, None)
+        Buffer, BufferGenerator, Context, DirectSource, Generator,
+        GlobalFdnReverb, PannedSource, PannerStrategy, Source, Source3D,
+        StreamingGenerator
+    ) = (
+        object, object, object, object, object, object, object, object, object,
+        object, object
+    )
     SynthizerError = Exception
 
-OnDestroyFunction = Callable[[], None]
+from .point import Point
+
+OnDestroyType = Callable[['Sound'], None]
+PositionType = Optional[Union[float, Point]]
+
+
+class PannerStrategies(Enum):
+    """Panning strategies.
+
+    :ivar ~earwax.PannerStrategies.default: Synthizer's default will be used.
+
+    :ivar ~earwax.PannerStrategies.stereo: A stereo strategy will be used.
+
+    :ivar ~earwax.PannerStrategies.hrtf: A HRTF strategy will be used.
+
+    :ivar ~earwax.PannerStrategies.best: This strategy will choose the best
+        listening experience.
+
+        If your sound has no position, then
+        :attr:`~earwax.PannerStrategies.default will be used. Otherwise,
+        :attr:`~earwax.PannerStrategies.hrtf` will be used.
+    """
+
+    default = 0
+    stereo = 1
+    hrtf = 2
+    best = 3
 
 
 @attrs(auto_attribs=True)
@@ -31,6 +66,9 @@ class BufferCache:
 
     :ivar ~earwax.BufferCache.max_size: The maximum size (in bytes) the cache
         will be allowed to grow before pruning.
+
+        For reference, 1 KB is ``1024``,  1 MB is ``1024 ** 2``, and 1 GB is
+        ``1024 ** 3``.
 
     :ivar ~earwax.BufferCache.buffer_uris: The URIs of the buffers that are
         loaded. Least recently used first.
@@ -56,6 +94,16 @@ class BufferCache:
         :param buffer: The buffer to get the size of.
         """
         return buffer.get_channels() * buffer.get_length_in_samples() * 2
+
+    def get_uri(self, protocol: str, path: str) -> str:
+        """Return a URI for the given protocol and path.
+
+        This meth is used by :meth:`~earwax.BufferCache.get_buffer`.
+        :param protocol: The protocol to use.
+
+        :param path: The path to use.
+        """
+        return f'{protocol}://{path}'
 
     def get_buffer(self, protocol: str, path: str) -> Buffer:
         """Load and return a Buffer instance.
@@ -95,7 +143,7 @@ class BufferCache:
 
         :param path: The path to whatever data your buffer will contain.
         """
-        uri: str = f'{protocol}://{path}'
+        uri: str = self.get_uri(protocol, path)
         if uri not in self.buffers:
             # Firstly load the buffer.
             buffer: Buffer = Buffer.from_stream(protocol, path)
@@ -133,6 +181,10 @@ class SoundError(Exception):
     """The base exception for all sounds exceptions."""
 
 
+class InvalidPannerStrategy(SoundError):
+    """The given panner strategy was invalid for the sound."""
+
+
 class AlreadyDestroyed(SoundError):
     """This sound has already been destroyed."""
 
@@ -143,32 +195,72 @@ class Sound:
 
     :ivar ~earwax.Sound.context: The synthizer context to connect to.
 
-    :ivar ~earwax.Sound.source: The synthizer source to play through.
-
     :ivar ~earwax.Sound.generator: The sound generator.
 
     :ivar ~earwax.Sound.buffer: The buffer that feeds
         :attr:`~earwax.Sound.generator`.
 
         If this value is ``None``, then this sound is a stream.
+
+    :ivar ~earwax.Sound.gain: The gain of the new sound.
+
+    :ivar ~earwax.Sound.loop: Whether or not this sound should loop.
+
+    :ivar ~earwax.Sound.position: The position of this sound.
+
+        If this value is ``None``, this sound will not be panned.
+
+        If this value is an :class:`earwax.Point` value, then this sound
+        will be a 3d sound, and the position of its
+        :attr:`~earwax.Sound.source` will be set to the coordinates of the
+        given point.
+
+        If this value is a number, this sound will be panned in 2d, and
+        the value will be a panning scalar, which should range between
+        ``-1.0`` (hard left), and ``1.0`` (hard right).
+
+    :ivar ~earwax.Sound.panner_strategy: The panning strategy to use.
+
+        If ``position`` is ``None``, and this value is anything other than
+        :attr:`~earwax.PanningStrategies.default` or
+        :attr:`earwax.PannerStrategy.best`,
+        :class:earwax.sound.InvalidPanningStrategy` will be raised.
+
+    :ivar ~earwax.Sound.on_destroy: A function to be called when this sound is
+        destroyed.
+
+    :ivar ~earwax.Sound.source: The synthizer source to play through.
     """
 
     context: Context
-    source: Source
     generator: Generator
-    buffer: Optional[Buffer]
-    _valid: bool = Factory(lambda: True)
-    _paused: bool = False
+    buffer: Optional[Buffer] = None
+    gain: float = 1.0
+    looping: bool = False
+    position: PositionType = None
+    panner_strategy: PannerStrategies = Factory(
+        lambda: PannerStrategies.default
+    )
+    reverb: Optional[GlobalFdnReverb] = None
+    on_destroy: Optional[OnDestroyType] = None
+    _destroyed: bool = attrib(default=Factory(bool), init=False)
+    _paused: bool = attrib(default=Factory(bool), init=False)
+    source: Optional[Source] = attrib(
+        default=Factory(type(None)), init=False, repr=False
+    )
+
+    def __attrs_post_init__(self) -> None:
+        """Finish setting up this sound."""
+        self.generator.looping = self.looping
+        self.reset_source()
 
     @classmethod
     def from_stream(
-        cls, context: Context, source: Source, protocol: str, path: str
+        cls, context: Context, protocol: str, path: str, **kwargs
     ) -> 'Sound':
         """Create a sound that streams from the given arguments.
 
         :param context: The synthizer context to use.
-
-        :param source: The source to play through.
 
         :param protocol: The protocol argument for
             ``synthizer.StreamingGenerator``.
@@ -178,19 +270,15 @@ class Sound:
         generator: StreamingGenerator = StreamingGenerator(
             context, protocol, path
         )
-        source.add_generator(generator)
-        return cls(context, source, generator, None)
+        return cls(context, generator, None, **kwargs)
 
     @classmethod
     def from_path(
-        cls, context: Context, source: Source, buffer_cache: BufferCache,
-        path: Path
+        cls, context: Context, buffer_cache: BufferCache, path: Path, **kwargs
     ) -> 'Sound':
         """Create a sound that plays the given path.
 
         :param context: The synthizer context to use.
-
-        :param source: The synthizer source to play through.
 
         :param cache: The buffer cache to load buffers from.
 
@@ -198,16 +286,15 @@ class Sound:
 
             If the given path is a directory, then a random file from that
             directory will be chosen.
+
+        :parm kwargs: Extra keyword arguments to pass to the
+            :attr:`~earwax.Sound` constructor.
         """
-        if path.is_dir():
-            return cls.from_path(
-                context, source, buffer_cache, choice(list(path.iterdir()))
-            )
+        path = _random_file(path)
         buffer: Buffer = buffer_cache.get_buffer('file', str(path))
         generator: BufferGenerator = BufferGenerator(context)
         generator.buffer = buffer
-        source.add_generator(generator)
-        return cls(context, source, generator, buffer)
+        return cls(context, generator, buffer, **kwargs)
 
     @property
     def is_stream(self) -> bool:
@@ -231,6 +318,73 @@ class Sound:
         else:
             self.play()
 
+        def on_destroy(self) -> None:
+            """Handle this sound being destroyed."""
+            pass
+
+    def reset_source(self) -> Source:
+        """Return an appropriate source."""
+        if self.source is not None:
+            self.source.destroy()
+            self.source = None
+        source: Source
+        if self.position is None:
+            if self.panner_strategy not in [
+                PannerStrategies.best, PannerStrategies.default
+            ]:
+                raise InvalidPannerStrategy(self)
+            source = DirectSource(self.context)
+        else:
+            if isinstance(self.position, Point):
+                source = Source3D(self.context)
+                source.position = self.position.coordinates
+            else:
+                assert isinstance(self.position, float)
+                source = PannedSource(self.context)
+                source.panning_scalar = self.position
+            if self.panner_strategy in [
+                PannerStrategies.best, PannerStrategies.hrtf
+            ]:
+                source.panner_strategy = PannerStrategy.HRTF
+        source.add_generator(self.generator)
+        source.gain = self.gain
+        if self.reverb is not None:
+            self.connect_reverb(self.reverb)
+        self.source = source
+
+    def set_position(self, position: PositionType) -> None:
+        """Change the position of this sound.
+
+        If the provided position is of a different type than the :attr:`current
+        one <earwax.Sound.position>`, then the underlying
+        :attr:`~earwax.Sound.source` object will need to changee. This may
+        cause audio stuttering.
+
+        :param position: The new position.
+        """
+        self.position = position
+        if (
+            isinstance(position, Point) and not isinstance(
+                self.source, Source3D
+            )
+        ) or (
+            isinstance(position, float) and not isinstance(
+                self.source, PannedSource
+            )
+        ) or (
+            position is None and not isinstance(self.source, DirectSource)
+        ):
+            self.reset_source()
+
+    def set_gain(self, gain: float) -> None:
+        """Change the gain of this sound.
+
+        :param gain: The new gain value.
+        """
+        self.gain = gain
+        if self.source is not None:
+            self.source.gain = gain
+
     def pause(self) -> None:
         """Pause this sound."""
         self._paused = True
@@ -241,27 +395,48 @@ class Sound:
         self._paused = False
         self.generator.play()
 
-    def destroy(self, destroy_source: bool = False) -> None:
+    def destroy_generator(self) -> None:
+        """Destroy the :attr:`~earwax.Sound.generator`.
+
+        This method will leave the :attr:`~earwax.Sound.source` intact, and
+        will raise :class:`~earwax.AlreadyDestroyed` if the generator is still
+        valid.
+        """
+        if self._destroyed:
+            raise AlreadyDestroyed(self)
+        self.generator.destroy()
+        self._destroyed = True
+
+    def destroy_source(self) -> None:
+        """Destroy the attached :attr:`~earwax.Sound.source`.
+
+        If the source has already been destroyed,
+        :class:`~earwax.AlreadyDestroyed` will be raised.
+        """
+        if self.source is None:
+            raise AlreadyDestroyed(self)
+        self.source.destroy()
+        self.source = None
+
+    def destroy(self) -> None:
         """Destroy this sound.
 
-        This method will destroy the attached :attr:`~earwax.Sound.generator`.
+        This method will destroy the attached :attr:`~earwax.Sound.generator`
+        and :attr:`~earwax.Sound.source`.
 
         If this sound has already been destroyed, then
         :class:`~earwax.Sound.AlreadyDestroyed` will be raised.
-
-        :param destroy_source: If this value is ``True``, then the attached
-            :attr:`~earwax.Sound.source` will be destroyed as well.
         """
-        if not self._valid:
-            raise AlreadyDestroyed(self)
-        self.generator.destroy()
-        if destroy_source:
-            self.source.destroy()
-        self._valid = False
+        if self.reverb is not None:
+            self.disconnect_reverb()
+        self.destroy_generator()
+        if self.source is not None:
+            self.destroy_source()
+        self._destroyed = True
+        if self.on_destroy is not None:
+            self.on_destroy(self)
 
-    def _destroy(
-        self, dt: float, on_destroy: Optional[OnDestroyFunction]
-    ) -> None:
+    def _destroy(self, dt: float) -> None:
         """Call :meth:`self.destroy <earwax.Sound.destroy>`.
 
         This method will be called by pyglet. To schedule destruction, use the
@@ -269,37 +444,34 @@ class Sound:
 
         :param dt: The ``dt`` parameter expected by the pyglet schedule
             functions.
-
-        :param on_destroy: A function to be called after this sound has been
-            destroyed.
         """
         self.destroy()
-        if on_destroy is not None:
-            on_destroy()
 
-    def schedule_destruction(
-        self, on_destroy: Optional[OnDestroyFunction] = None
-    ) -> None:
+    def schedule_destruction(self) -> None:
         """Schedule this sound for destruction.
 
         If this instance's :attr:`~earwax.Sound.buffer` attribute is ``None``,
         then ``RuntimeError`` will be raised.
-
-        :param on_destroy: A function to be called after this sound has been
-            destroyed.
         """
         if self.buffer is None:
-            raise RuntimeError('This sound has no buffer to destroy.')
-        schedule_once(
-            self._destroy, self.buffer.get_length_in_seconds() * 2, on_destroy
-        )
+            raise RuntimeError(
+                'Cannot schedule destruction for streaming sounds.'
+            )
+        schedule_once(self._destroy, self.buffer.get_length_in_seconds() * 2)
 
     def connect_reverb(self, reverb: GlobalFdnReverb) -> None:
         """Connect a reverb to the source of this sound.
 
         :param reverb: The reverb object to connect.
         """
+        self.reverb = reverb
         self.context.config_route(self.source, reverb)
+
+    def disconnect_reverb(self) -> None:
+        """Disconnect the connected :attr:`~earwax.Sound.reverb` object."""
+        if self.reverb is not None:
+            self.context.remove_route(self.source, self.reverb)
+            self.reverb = None
 
     def restart(self) -> None:
         """Start this sound playing from the beginning."""
@@ -320,46 +492,49 @@ class SoundManager:
 
     :ivar ~earwax.SoundManager.context: The synthizer context to use.
 
-    :ivar ~earwax.SoundManager.source: The synthizer source to play sounds
-        through.
-
-    :ivar ~earwax.SoundManager.should_loop: Whether or not to start new
-        generators looping when using the various play methods.
-
     :ivar ~earwax.SoundManager.cache: The buffer cache to get buffers from.
 
-    :ivar ~earwax.SoundManager.sounds: A list of sounds that are playing.
+    :ivar ~earwax.SoundManager.name: An optional name to set this manager aside
+        from other sound managers when debugging.
 
-    :ivar ~earwax.SoundManager.gain: The gain of the connected
-        :attr:`~earwax.SoundManager.source`.
+    :ivar ~earwax.SoundManager.default_gain: The default
+        :attr:`~earwax.Sound.gain` attribute for sounds created by this
+        manager.
+
+    :ivar ~earwax.SoundManager.default_looping: The default
+        :attr:`~earwax.Sound.looping` attribute for sounds created by this
+        manager.
+
+    :ivar ~earwax.SoundManager.default_position: The default
+        :attr:`~earwax.Sound.position` attribute for sounds created by this
+        manager.
+
+    :ivar ~earwax.SoundManager.default_panner_strategy: The default
+        :attr:`~earwax.Sound.panner_strategy` attribute for sounds created by
+        this manager.
+
+    :ivar ~earwax.SoundManager.default_reverb: The default
+        :attr:`~earwax.Sound.reverb` attribute for sounds created by this
+        manager.
+
+    :ivar ~earwax.SoundManager.sounds: A list of sounds that are playing.
     """
 
-    context: Context
-    source: Source
-    should_loop: bool = Factory(bool)
-    buffer_cache: Optional[BufferCache] = None
+    context: Context = attrib(repr=False)
+    buffer_cache: Optional[BufferCache] = attrib(
+        default=Factory(type(None)), repr=False
+    )
+
+    name: str = 'Untitled sound manager'
+    default_gain: float = 1.0
+    default_looping: bool = False
+    default_position: PositionType = None
+    default_panner_strategy: PannerStrategies = Factory(
+        lambda: PannerStrategies.default
+    )
+    default_reverb: Optional[GlobalFdnReverb] = None
 
     sounds: List[Sound] = attrib(Factory(list), init=False, repr=False)
-    _gain: float = attrib(init=False)
-
-    @_gain.default
-    def get_default_gain(instance: 'SoundManager') -> float:
-        """Get the default rain."""
-        return instance.source.gain
-
-    @property
-    def gain(self) -> float:
-        """Get the current gain."""
-        return self._gain
-
-    @gain.setter
-    def gain(self, value: float) -> None:
-        """Set the gain.
-
-        :param value: The new gain.
-        """
-        self._gain = value
-        self.source.gain = value
 
     def register_sound(self, sound: Sound) -> None:
         """Register a sound with this instance.
@@ -372,49 +547,60 @@ class SoundManager:
         """Remove a sound from the :attr:`~earwax.SoundManager.sounds` list."""
         self.sounds.remove(sound)
 
-    def destroy_sound(self, sound: Sound) -> None:
-        """Destroy the given sound.
-
-        This method will call the given sound's :meth:`~earwax.Sound.destroy`
-        method, and remove it from the :attr:`~earwax.SoundManager.sounds`
-        list.
-
-        :param sound: The sound to be destroyed.
-        """
-        sound.destroy()
-        self.remove_sound(sound)
-
     def destroy_all(self) -> None:
         """Destroy all the sounds associated with this manager."""
         while self.sounds:
-            self.destroy_sound(self.sounds[0])
+            try:
+                self.sounds[0].destroy()
+            except AlreadyDestroyed:
+                pass  # Someone else got there first.
 
-    def play_path(self, path: Path, schedule_destruction: bool) -> Sound:
+    def update_kwargs(self, kwargs: Dict[str, Any]) -> None:
+        """Update the passed kwargs with the defaults from this manager.
+
+        :param kwargs: The dictionary of keyword arguments to update.
+
+            The ``setdefault`` method will be used with each of the default
+            values from this object..
+        """
+        kwargs.setdefault('gain', self.default_gain)
+        kwargs.setdefault('panner_strategy', self.default_panner_strategy)
+        kwargs.setdefault('looping', self.default_looping)
+        kwargs.setdefault('position', self.default_position)
+        kwargs.setdefault('reverb', self.default_reverb)
+        kwargs.setdefault('on_destroy', self.remove_sound)
+
+    def play_path(
+        self, path: Path, schedule_destruction: bool, **kwargs
+    ) -> Sound:
         """Play a sound from a path.
 
         The resulting sound will be added to
         :attr:`~earwax.SoundManager.sounds` and returned.
 
-        The created generator will have its ``looping`` property set to the
-        value of :attr:`~earwax.SoundManager.should_loop`.
-
         :param path: The path to play.
 
         :param schedule_destruction: Whether or not to schedule the newly
             created sound for destruction when it has finished playing.
+
+        :param kwargs: Extra keyword arguments to pass to the constructor of
+            :class:`earwax.Sound`.
+
+            This value will be updated by the
+            :meth:`~earwax.SoundManager.update_kwargs` method.
         """
         if self.buffer_cache is None:
             raise NoCache(self)
+        self.update_kwargs(kwargs)
         sound: Sound = Sound.from_path(
-            self.context, self.source, self.buffer_cache, path
+            self.context, self.buffer_cache, path, **kwargs
         )
-        sound.generator.looping = self.should_loop
         self.sounds.append(sound)
         if schedule_destruction:
             sound.schedule_destruction()
         return sound
 
-    def play_stream(self, protocol: str, path: str) -> Sound:
+    def play_stream(self, protocol: str, path: str, **kwargs) -> Sound:
         """Stream a sound.
 
         The resulting sound will be added to
@@ -426,20 +612,19 @@ class SoundManager:
         :param protocol: The protocol to use.
 
         :param path: The path to use.
+
+        :param kwargs: Extra keyword arguments to pass to the constructor of
+            the :class:`earwax.Sound` class.
+
+            This value will be updated by the
+            :meth:`~earwax.SoundManager.update_kwargs` method.
         """
+        self.update_kwargs(kwargs)
         sound: Sound = Sound.from_stream(
-            self.context, self.source, protocol, path
+            self.context, protocol, path, **kwargs
         )
-        sound.generator.looping = self.should_loop
         self.sounds.append(sound)
         return sound
-
-    def __del__(self) -> None:
-        """Stop all sounds."""
-        try:
-            self.source.destroy()
-        except (SynthizerError, AttributeError):
-            pass
 
 
 @attrs(auto_attribs=True, frozen=True)

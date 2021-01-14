@@ -1,6 +1,8 @@
 """Provides various utility functions used by Earwax."""
 
 from datetime import timedelta
+from pathlib import Path
+from random import choice
 from typing import List, Optional
 
 
@@ -132,3 +134,14 @@ def format_timedelta(td: timedelta, *args, **kwargs) -> str:
     items.append(f'{minutes} {pluralise(minutes, "minute")}')
     items.append(f'{seconds} {pluralise(seconds, "second")}')
     return english_list(items, *args, **kwargs)
+
+
+def random_file(path: Path) -> Path:
+    """Call recursively until a file is reached.
+
+    :param path: The path to start with.
+    """
+    if path.is_dir():
+        path = choice(list(path.iterdir()))
+        return random_file(path)
+    return path

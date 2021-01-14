@@ -10,10 +10,8 @@ from attr import Factory, attrib, attrs
 
 try:
     from pyglet.window import key
-    from synthizer import DirectSource
 except ModuleNotFoundError:
     key = None
-    DirectSource = object
 
 from ..action import ActionFunctionType, OptionalGenerator
 from ..credit import Credit
@@ -250,14 +248,9 @@ class Menu(Level, TitleMixin, DismissibleMixin):
             :meth:`~earwax.Menu.show_selection`, and may have been loaded from
             the menu item itself, or the main earwax configuration.
         """
-        assert self.game.audio_context  # Keeps mypy happy.
-        source: DirectSource = DirectSource(self.game.audio_context)
-        sound: Sound = Sound.from_path(
-            self.game.audio_context, source, self.game.buffer_cache, path
+        return self.game.interface_sound_manager.play_path(
+            path, False, looping=item.loop_select_sound
         )
-        sound.generator.looping = item.loop_select_sound
-        source.gain = self.game.config.sound.ambiance_volume.value
-        return sound
 
     def show_selection(self) -> None:
         """Speak the menu item at the current position.
@@ -279,13 +272,13 @@ class Menu(Level, TitleMixin, DismissibleMixin):
                 self.game.output(item.title)
             item.dispatch_event('on_selected')
             sound_path: Optional[Path] = (
-                item.select_sound_path or
-                self.item_select_sound_path or
-                self.game.config.menus.default_item_select_sound.value
+                item.select_sound_path
+                or self.item_select_sound_path
+                or self.game.config.menus.default_item_select_sound.value
             )
             if (
-                sound_path is not None and
-                self.game.audio_context is not None
+                sound_path is not None
+                and self.game.interface_sound_manager is not None
             ):
                 self.select_sound = self.make_sound(item, sound_path)
 

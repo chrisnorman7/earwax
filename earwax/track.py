@@ -7,6 +7,7 @@ from typing import Optional
 from attr import Factory, attrib, attrs
 
 from .sound import Sound, SoundManager
+from .utils import random_file
 
 
 class TrackTypes(Enum):
@@ -44,11 +45,6 @@ class Track:
         This value determines which sound manager an instance will be connected
         to.
 
-    :ivar ~earwax.Track.sound_manager: sound manager to play sounds with.
-
-        This value is initialised as part of the :meth:`~earwax.Track.play`
-        method.
-
     :ivar ~earwax.Track.sound: The currently playing sound instance.
 
         This value is initialised as part of the :meth:`~earwax.Track.play`
@@ -59,9 +55,6 @@ class Track:
     path: str
     track_type: TrackTypes
 
-    sound_manager: Optional[SoundManager] = attrib(
-        default=Factory(type(None)), init=False, repr=False
-    )
     sound: Optional[Sound] = attrib(
         default=Factory(type(None)), init=False, repr=False
     )
@@ -72,25 +65,26 @@ class Track:
 
         :param path: The path to build the track from.
 
+            If this value is a directory, a random file will be selected.
+
         :param type: The type of the new track.
         """
+        path = random_file(path)
         return cls('file', str(path), type)
 
-    def play(self, manager: SoundManager) -> None:
+    def play(self, manager: SoundManager, **kwargs) -> None:
         """Play this track on a loop.
 
-        To alter how ``sound_path`` is played, override
-        :meth:`earwax.Track.load_sound`.
-
         :param manager: The sound manager to play through.
+
+        :param kwargs: The extra keyword arguments to send to the given
+            manager's :meth:`~earwax.SoundManager.play_stream` method.
         """
-        self.sound_manager = manager
-        self.sound = manager.play_stream(self.protocol, self.path)
+        kwargs.setdefault('looping', True)
+        self.sound = manager.play_stream(self.protocol, self.path, **kwargs)
 
     def stop(self) -> None:
         """Stop this track playing."""
-        if self.sound_manager is not None:
-            if self.sound is not None:
-                self.sound_manager.destroy_sound(self.sound)
-                self.sound = None
-            self.sound_manager = None
+        if self.sound is not None:
+            self.sound.destroy()
+            self.sound = None

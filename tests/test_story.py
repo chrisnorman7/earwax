@@ -2,9 +2,9 @@
 
 from typing import Any, Dict
 
-from earwax import Game, Point
-from earwax.story import (RoomExit, RoomObject, StoryWorld, WorldAction,
-                          WorldAmbiance, WorldMessages, WorldRoom)
+from earwax import Game
+from earwax.story import (DumpablePoint, RoomExit, RoomObject, StoryWorld,
+                          WorldAction, WorldAmbiance, WorldMessages, WorldRoom)
 
 
 def test_init(game: Game) -> None:
@@ -22,28 +22,28 @@ def test_dump(game: Game) -> None:
     """Test the dump method."""
     w: StoryWorld = StoryWorld(game, name='Test World', author='Earwax')
     room_1: WorldRoom = WorldRoom('first_room')
-    room_1.world = w
+    w.add_room(room_1)
+    assert w.initial_room is room_1
     room_2: WorldRoom = WorldRoom('world_2')
-    room_2.world = w
-    w.rooms[room_1.id] = room_1
-    w.rooms[room_2.id] = room_2
-    w.initial_room_id = room_1.id
-    exit_1: RoomExit = RoomExit(room_2.id)
-    exit_1.location = room_1
+    w.add_room(room_2)
+    assert w.initial_room is room_1
+    exit_1: RoomExit = room_1.create_exit(room_2)
+    assert exit_1.destination_id == room_2.id
     assert exit_1.destination is room_2
-    room_1.exits.append(exit_1)
-    exit_2: RoomExit = RoomExit(room_1.id)
-    exit_2.location = room_2
-    room_2.exits.append(exit_2)
+    assert exit_1 in room_1.exits
+    assert exit_1.location is room_1
+    exit_2: RoomExit = room_2.create_exit(room_1)
+    assert exit_2.destination_id == room_1.id
     assert exit_2.destination is room_1
-    object_1: RoomObject = RoomObject(
-        id='object_1', position=Point(1, 2, 3), name='Object 1'
+    assert exit_2 in room_2.exits
+    object_1: RoomObject = room_1.create_object(
+        id='object_1', position=DumpablePoint(1, 2, 3), name='Object 1'
     )
-    object_1.location = room_1
-    room_1.objects[object_1.id] = object_1
-    object_2: RoomObject = RoomObject(id='object_2')
-    object_2.location = room_2
-    room_2.objects[object_2.id] = object_2
+    assert object_1.location is room_1
+    assert room_1.objects[object_1.id] is object_1
+    object_2: RoomObject = room_2.create_object(id='object_2')
+    assert object_2.location is room_2
+    assert room_2.objects[object_2.id] is object_2
     room_1.ambiances.append(WorldAmbiance('sound.wav'))
     object_1.ambiances.append(WorldAmbiance('move.wav'))
     object_1.actions.extend(

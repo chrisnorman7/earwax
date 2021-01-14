@@ -1,28 +1,25 @@
 """Test the Box class."""
 
-from time import sleep
-from typing import List
+from typing import List, Optional
 
 from pytest import raises
-from synthizer import GlobalFdnReverb, PannerStrategy, Source3D, SynthizerError
 
 from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, Game, NotADoor,
-                    Point, Portal, SoundManager)
+                    PannerStrategies, Point, Portal, SoundManager)
 
 
 def test_init(box_level: BoxLevel, game: Game, box: Box) -> None:
     """Test that boxes initialise properly."""
     assert isinstance(box, Box)
     assert box.reverb is None
-    assert box.sound_manager is None
+    assert isinstance(box.sound_manager, SoundManager)
+    assert box.sound_manager.name == 'Untitled sound manager'
     assert box.game is game
     assert box.start == Point(1, 2, 3)
     assert box.end == Point(4, 5, 6)
     assert box.type is BoxTypes.empty
     assert box.data is None
     assert box.box_level is None
-    box = Box(game, box.start, box.end, reverb_settings={'gain': 0.5})
-    assert box.reverb_settings == {'gain': 0.5}
     box = Box(game, box.start, box.end, box_level=box_level)
     assert box.box_level is box_level
     assert box_level.boxes == [box]
@@ -167,7 +164,6 @@ def test_create_row_on_create(game: Game) -> None:
 def test_open(game: Game, door: Door) -> None:
     """Test door opening."""
     b: Box = Box(game, Point(0, 0, 0), Point(0, 0, 0))
-    assert b.reverb_settings == {}
     assert b.reverb is None
 
     @b.event
@@ -187,12 +183,6 @@ def test_open(game: Game, door: Door) -> None:
 
     b.open()
     assert door.open is False
-    b = Box(game, b.start, b.end, reverb_settings={'gain': 0.5}, data=b.data)
-    b.data.open = False
-    b.open()
-    assert isinstance(b.reverb, GlobalFdnReverb)
-    sleep(0.2)
-    assert b.reverb.gain == b.reverb_settings['gain']
 
 
 def test_close(game: Game, door: Door) -> None:
@@ -208,8 +198,6 @@ def test_close(game: Game, door: Door) -> None:
     b.data = door
     b.close()
     assert door.open is False
-    assert isinstance(b.sound_manager, SoundManager)
-    assert isinstance(b.sound_manager.source, Source3D)
 
     @b.event
     def on_close() -> None:
@@ -217,12 +205,6 @@ def test_close(game: Game, door: Door) -> None:
 
     b.close()
     assert door.open is True
-    b = Box(game, b.start, b.end, reverb_settings={'gain': 0.5}, data=b.data)
-    b.data.open = True
-    b.close()
-    assert isinstance(b.reverb, GlobalFdnReverb)
-    sleep(0.2)
-    assert b.reverb.gain == b.reverb_settings['gain']
 
 
 def test_bounds(game: Game) -> None:
@@ -313,46 +295,18 @@ def test_centre(game: Game) -> None:
     assert b.centre == Point(5.0, 6.0, 7.0)
 
 
-def test_make_sound_manager(game: Game) -> None:
+def test_sound_manager(game: Game) -> None:
     """Test making a sound manager."""
-    b: Box = Box(
-        game, Point(0, 0, 0), Point(3, 3, 3), reverb_settings={'gain': 0.2}
-    )
-    m: SoundManager = b.get_sound_manager()
+    b: Box = Box(game, Point(0, 0, 0), Point(3, 3, 3))
+    assert b._sound_manager is None
+    m: Optional[SoundManager] = b.sound_manager
     assert isinstance(m, SoundManager)
-    assert isinstance(m.source, Source3D)
-    sleep(0.2)
-    assert m.source.position == b.centre.coordinates
-    assert m.source.panner_strategy is PannerStrategy.HRTF
+    assert m.default_position == b.centre
     assert b.reverb is None
-
-
-def test_make_reverb(game: Game, box: Box) -> None:
-    """Test the make_reverb method."""
-    r: GlobalFdnReverb = box.get_reverb()
-    assert isinstance(r, GlobalFdnReverb)
-    sleep(0.2)
-    assert r.gain == 1.0
-    box = Box(
-        game, Point(0, 0, 0), Point(3, 3, 3), reverb_settings={'gain': 0.5}
-    )
-    r = box.get_reverb()
-    assert isinstance(r, GlobalFdnReverb)
-    sleep(0.2)
-    assert r.gain == 0.5
-
-
-def test_del(game: Game) -> None:
-    """Test deleting boxes."""
-    b: Box = Box(
-        game, Point(0, 0, 0), Point(3, 3, 3), reverb_settings={'gain': 0.2}
-    )
-    r: GlobalFdnReverb = b.get_reverb()
-    b.reverb = r
-    assert isinstance(b.reverb, GlobalFdnReverb)
-    del b
-    with raises(SynthizerError):
-        r.destroy()
+    assert m.default_gain == game.config.sound.sound_volume.value
+    assert m.default_looping is False
+    assert m.default_panner_strategy is PannerStrategies.default
+    assert m.default_reverb is None
 
 
 def test_is_door(game: Game, box: Box) -> None:

@@ -2,6 +2,7 @@
 
 import os.path
 from inspect import isgenerator
+from pathlib import Path
 from typing import (Callable, Dict, Generator, List, Optional, Tuple, Type,
                     Union, cast)
 
@@ -12,23 +13,16 @@ try:
 except ModuleNotFoundError:
     key = None
 
-try:
-    from synthizer import DirectSource, PannerStrategy, Source, Source3D
-except ModuleNotFoundError:
-    DirectSource, PannerStrategy, Source, Source3D = (
-        object, object, object, object
-    )
-
 from ..editor import Editor
 from ..game import Game
 from ..level import Level
 from ..menu import Menu
-from ..point import Point
+from ..sound import PannerStrategies
 from ..types import OptionalGenerator
 from .play_level import PlayLevel
-from .world import (ObjectTypes, RoomExit, RoomObject, RoomObjectTypes,
-                    StoryWorld, WorldAction, WorldAmbiance, WorldMessages,
-                    WorldRoom)
+from .world import (DumpablePoint, ObjectTypes, RoomExit, RoomObject,
+                    RoomObjectTypes, StoryWorld, WorldAction, WorldAmbiance,
+                    WorldMessages, WorldRoom)
 
 message_descriptions: Dict[str, str] = {
     'no_objects': 'The message shown when focusing an empty object list',
@@ -74,12 +68,12 @@ class ObjectPositionLevel(Level):
     object: Union[RoomObject, RoomExit]
     level: 'EditLevel'
 
-    initial_position: Optional[Point] = attrib()
+    initial_position: Optional[DumpablePoint] = attrib()
 
     @initial_position.default
     def get_initial_position(
         instance: 'ObjectPositionLevel'
-    ) -> Optional[Point]:
+    ) -> Optional[DumpablePoint]:
         """Get the object position."""
         return instance.object.position
 
@@ -121,9 +115,11 @@ class ObjectPositionLevel(Level):
     def move(self, x: int = 0, y: int = 0, z: int = 0) -> None:
         """Change the position of this object."""
         if self.object.position is None:
-            self.object.position = Point(x, y, z)
+            self.object.position = DumpablePoint(x, y, z)
         else:
-            self.object.position += Point(x, y, z)
+            self.object.position.x += x
+            self.object.position.y += y
+            self.object.position.z += z
         self.reset()
 
     def clear(self) -> None:
@@ -233,7 +229,7 @@ def push_actions_menu(
 class EditLevel(PlayLevel):
     """A level for editing stories."""
 
-    filename: Optional[str] = None
+    filename: Optional[Path] = None
 
     def __attrs_post_init__(self) -> None:
         """Add some more actions."""
@@ -366,9 +362,7 @@ class EditLevel(PlayLevel):
 
         def inner(destination: WorldRoom) -> None:
             """Create the exit."""
-            x: RoomExit = RoomExit(destination.id)
-            x.location = destination
-            room.exits.append(x)
+            room.create_exit(destination)
             self.game.output('Exit created.')
 
         push_rooms_menu(
@@ -379,16 +373,13 @@ class EditLevel(PlayLevel):
         """Create a new object in the current room."""
         self.game.pop_level()
         room: WorldRoom = self.room
-        obj: RoomObject = RoomObject()
-        obj.location = room
-        room.objects[obj.id] = obj
+        room.create_object()
         self.game.output('Object created.')
 
     def create_room(self) -> None:
         """Create a new room."""
         self.game.pop_level()
         r: WorldRoom = WorldRoom()
-        r.world = self.world
         self.world.add_room(r)
         self.set_room(r)
         self.game.output(r.get_name())
@@ -1027,7 +1018,7 @@ class EditLevel(PlayLevel):
     def set_panner_strategy(self) -> None:
         """Allow the changing of the panner strategy."""
 
-        def set_strategy(strategy: PannerStrategy) -> Callable[[], None]:
+        def set_strategy(strategy: PannerStrategies) -> Callable[[], None]:
 
             def inner() -> None:
                 self.world.panner_strategy = strategy.name
@@ -1041,7 +1032,7 @@ class EditLevel(PlayLevel):
         m: Menu = Menu(
             self.game, f'Panner Strategy ({self.world.panner_strategy})'
         )
-        strategy: PannerStrategy
-        for strategy in PannerStrategy.__members__.values():
+        strategy: PannerStrategies
+        for strategy in PannerStrategies.__members__.values():
             m.add_item(set_strategy(strategy), title=strategy.name)
         self.game.push_level(m)

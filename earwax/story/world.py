@@ -29,6 +29,10 @@ class StringMixin:
 class DumpablePoint(DumpLoadMixin, Point):
     """A point that can be dumped and loaded."""
 
+    x: float
+    y: float
+    z: float
+
 
 @attrs(auto_attribs=True)
 class WorldAmbiance(DumpLoadMixin):
@@ -241,9 +245,9 @@ class RoomExit(DumpLoadMixin):
     """
 
     destination_id: str
-    action: WorldAction = Factory(WorldAction)
+    action: WorldAction = attrib(Factory(WorldAction), repr=False)
     position: Optional[DumpablePoint] = None
-    location: 'WorldRoom' = attrib(init=False, repr=False)
+    location: 'WorldRoom' = attrib(init=False)
 
     __excluded_attribute_names__ = ['location']
 
@@ -257,7 +261,10 @@ class RoomExit(DumpLoadMixin):
 
     def __str__(self) -> str:
         """Return a string."""
-        return self.action.name or 'Unnamed Exit'
+        return (
+            f'{self.action.name} ({self.location.get_name()} -> '
+            f'{self.destination.get_name()})'
+        )
 
 
 @attrs(auto_attribs=True)
@@ -337,6 +344,40 @@ class WorldRoom(DumpLoadMixin, StringMixin):
                 return self.world.rooms[description].description
             return f'!! ERROR: Invalid room ID {description} !!'
         return description
+
+    def create_exit(self, destination: 'WorldRoom', **kwargs) -> RoomExit:
+        """Create and return an exit that links this room to another.
+
+        This method will add the new exits to this room's
+        :attr:`~earwax.story.world.WorldRoom.exits` list, and set the
+        appropriate :attr:`~earwax.story.world.RoomExit.location` on the new
+        exit.
+
+        :param destination: The destination whose ID will become the new exit's
+            :attr:`~earwax.story.world.RoomExit.destination_id`.
+
+        :param kwargs: Extra keyword arguments to pass to the
+            :class:`~earwax.story.world.RoomExit` constructor..
+        """
+        x: RoomExit = RoomExit(destination.id, **kwargs)
+        x.location = self
+        self.exits.append(x)
+        return x
+
+    def create_object(self, **kwargs) -> RoomObject:
+        """Create and return an exit from the provided ``kwargs``.
+
+        This method will add the created object to this room's
+        :attr:`~earwax.story.world.WorldRoom.objects` dictionary, and set the
+        appropriate :attr:`~earwax.story.world.RoomObject.location` attribute.
+
+        :param kwargs: Keyword arguments to pass to the constructor of
+            :class:`~earwax.story.world.RoomObject`.
+        """
+        obj: RoomObject = RoomObject(**kwargs)
+        obj.location = self
+        self.objects[obj.id] = obj
+        return obj
 
 
 @attrs(auto_attribs=True)
@@ -542,13 +583,24 @@ class StoryWorld(DumpLoadMixin):
             return self.rooms[self.initial_room_id]
         return None
 
-    def add_room(self, room: WorldRoom) -> None:
+    def add_room(
+        self, room: WorldRoom, initial: Optional[bool] = None
+    ) -> None:
         """Add a room to this world.
 
         :param room: The room to add.
+
+        :param initial: An optional boolean to specify whether the given room
+            should become the :attr:`~earwax.story.world.StoryWorld.initial_room` or not.
+
+            If this value is ``None``, then this room will be set as default if
+            :attr:`~earwax.story.world.StoryWorld.initial_room_id` is itself
+            ``None``.
         """
         self.rooms[room.id] = room
         room.world = self
+        if initial or (initial is None and self.initial_room_id is None):
+            self.initial_room_id = room.id
 
     def __str__(self) -> str:
         """Return a string."""

@@ -1,7 +1,6 @@
 """Test the BoxLevel class."""
 
 from math import dist
-from time import sleep
 from typing import Callable, List, Optional
 
 from pytest import raises
@@ -296,49 +295,23 @@ def test_get_angle_between(game: Game) -> None:
     assert l.get_angle_between(Point(1, -1, 0)) == 225
 
 
-def test_connect_reverb(reverb: GlobalFdnReverb, box_level: BoxLevel) -> None:
-    """Test the connect_reverb method."""
-    assert box_level.reverb is None
-    box_level.connect_reverb(reverb)
-    assert box_level.reverb is reverb
-
-
-def test_disconnect_reverb(
-    box_level: BoxLevel, reverb: GlobalFdnReverb
-) -> None:
-    """Test the disconnect_reverb method."""
-    box_level.connect_reverb(reverb)
-    box_level.disconnect_reverb()
-    assert box_level.reverb is None
-
-
 def test_handle_box(
     game: Game, reverb: GlobalFdnReverb, box_level: BoxLevel
 ) -> None:
     """Make sure boxes are handled properly."""
     start: Point = Point(0, 0, 0)
     end: Point = Point(3, 3, 3)
-    a: Box = Box(game, start, end, reverb_settings={'gain': 0.1})
-    b: Box = Box(game, start, end, reverb_settings={'gain': 0.5})
-    box_level.connect_reverb(reverb)
+    a: Box = Box(game, start, end)
+    b: Box = Box(game, start, end)
+    assert box_level.current_box is None
     box_level.handle_box(a)
-    sleep(0.5)
-    assert reverb.gain == 0.1
+    cb: Optional[CurrentBox] = box_level.current_box
+    assert isinstance(cb, CurrentBox)
+    assert cb.box is a
     box_level.handle_box(b)
-    sleep(0.5)
-    assert reverb.gain == 0.5
-
-
-def test_update_reverb(box_level: BoxLevel, reverb: GlobalFdnReverb) -> None:
-    """Make sure we can update the reverb."""
-    box_level.connect_reverb(reverb)
-    box_level.update_reverb({'gain': 0.5})
-    sleep(0.5)
-    assert reverb.gain == 0.5
-    box_level.update_reverb({'gain': 0.75, 't60': 0.5})
-    sleep(0.5)
-    assert reverb.gain == 0.75
-    assert reverb.t60 == 0.5
+    cb = box_level.current_box
+    assert cb is not None
+    assert cb.box is b
 
 
 def test_nearest_door(game: Game, door: Door) -> None:

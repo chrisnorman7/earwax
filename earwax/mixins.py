@@ -3,6 +3,7 @@
 from datetime import datetime
 from enum import Enum
 from inspect import isclass
+from pathlib import Path
 from typing import (TYPE_CHECKING, Any, Dict, List, Optional, TextIO, Tuple,
                     Type, get_args, get_origin)
 
@@ -325,15 +326,18 @@ class DumpLoadMixin:
         return cls.load(data, *args)
 
     @classmethod
-    def from_filename(cls, filename: str, *args) -> Any:
-        """Load an instance from a filename."""
-        with open(filename, 'r') as f:
+    def from_filename(cls, filename: Path, *args) -> Any:
+        """Load an instance from a filename.
+
+        :param filename: The path to load from.
+        """
+        with filename.open('r') as f:
             return cls.from_file(f, *args)
 
-    def save(self, filename: str) -> None:
+    def save(self, filename: Path) -> None:
         """Write this object to the provided filename.
 
-        :param filename: The name of the file to dump to.
+        :param filename: The path to the file to dump to.
         """
-        with open(filename, 'w') as f:
+        with filename.open('w') as f:
             dump(self.dump(), f, Dumper=CDumper)

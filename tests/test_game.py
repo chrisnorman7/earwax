@@ -167,13 +167,16 @@ def test_run(
     @level.event
     def on_push() -> None:
         assert game.level is level
-        assert isinstance(game.music_sound_manager, SoundManager)
-        assert game.music_sound_manager.should_loop is True
-        assert isinstance(game.ambiance_sound_manager, SoundManager)
-        assert game.ambiance_sound_manager.should_loop is True
-        assert isinstance(game.interface_sound_manager, SoundManager)
-        assert game.interface_sound_manager.should_loop is False
         assert game.audio_context is context
+        assert isinstance(game.music_sound_manager, SoundManager)
+        assert game.music_sound_manager.context is game.audio_context
+        assert game.music_sound_manager.default_looping is True
+        assert isinstance(game.ambiance_sound_manager, SoundManager)
+        assert game.ambiance_sound_manager.context is game.audio_context
+        assert game.ambiance_sound_manager.default_looping is True
+        assert isinstance(game.interface_sound_manager, SoundManager)
+        assert game.interface_sound_manager.context is game.audio_context
+        assert game.interface_sound_manager.default_looping is False
         schedule_once(lambda dt: window.close(), 0.2)
 
     game.run(window, initial_level=level)
@@ -230,14 +233,12 @@ def test_push_action_menu(game: Game, level: Level) -> None:
     assert len(menu.items) == 1
 
 
-def test_push_credits_menu(context: Context) -> None:
+def test_push_credits_menu(game: Game) -> None:
     """Test the push_credits_menu method."""
-    game: Game = Game(
-        audio_context=context, credits=[
-            Credit('Test 1', 'example.com'),
-            Credit('Test 2', 'test.org')
-        ]
-    )
+    game.credits = [
+        Credit('Test 1', 'example.com'),
+        Credit('Test 2', 'test.org')
+    ]
     m: Menu = game.push_credits_menu()
     assert isinstance(m, Menu)
     assert m is game.level

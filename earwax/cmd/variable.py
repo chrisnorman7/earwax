@@ -75,12 +75,12 @@ class Variable(Generic[T], DumpLoadMixin):
             raise TypeError('Unknown type for %r.' % self)
 
     @classmethod
-    def load(cls, data: Dict[str, Any]) -> 'Variable':
+    def load(cls, data: Dict[str, Any], *args) -> 'Variable':
         """Load a variable, and check its type.
 
         :param value: The value to load.
         """
-        v: Variable = super().load(data)
+        v: Variable = super().load(data, *args)
         if v.type is not v.get_type():
             raise TypeError(
                 'Loaded type %r but expected %r from data %r.' % (

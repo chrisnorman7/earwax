@@ -1,7 +1,8 @@
 """Provides classes for working with levels."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Generator, List, Optional, cast
+from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List,
+                    Optional, cast)
 
 from attr import Factory, attrib, attrs
 
@@ -11,10 +12,10 @@ from .types import EventType
 
 try:
     from pyglet.clock import schedule_once
-    from synthizer import Context, DirectSource, SynthizerError
+    from synthizer import Context, DirectSource
 except ModuleNotFoundError:
     schedule_once = None
-    Context, DirectSource, SynthizerError = (object, object, Exception)
+    Context, DirectSource = (object, object)
 
 from .ambiance import Ambiance
 from .mixins import RegisterEventMixin
@@ -75,14 +76,13 @@ class Level(RegisterEventMixin, ActionMap):
 
     def start_ambiances(self) -> None:
         """Start all the ambiances on this instance."""
-        audio_context: Optional[Context] = self.game.audio_context
-        if audio_context is None:
-            raise RuntimeError('Unable to start ambiances with no context.')
+        if self.game.ambiance_sound_manager is None:
+            raise RuntimeError(
+                'Unable to start ambiances with no ambiance sound manager.'
+            )
         ambiance: Ambiance
         for ambiance in self.ambiances:
-            ambiance.play(
-                audio_context, self.game.config.sound.ambiance_volume.value
-            )
+            ambiance.play(self.game.ambiance_sound_manager)
 
     def stop_ambiances(self) -> None:
         """Stop all the ambiances on this instance."""
@@ -189,11 +189,11 @@ class Level(RegisterEventMixin, ActionMap):
         """Stop tracks ETC."""
         try:
             self.stop_ambiances()
-        except (SynthizerError, AttributeError):
+        except AlreadyDestroyed:
             pass
         try:
             self.stop_tracks()
-        except (SynthizerError, AttributeError, AlreadyDestroyed):
+        except AlreadyDestroyed:
             pass
 
 
@@ -231,6 +231,17 @@ class IntroLevel(Level):
 
         If this value is ``None``, then the sound will not be playing.
 
+        This value default to :attr:`earwax.Game.interface_sound_manager`.
+
+    :ivar ~earwax.IntroLevel.play_kwargs: Extra arguments to pass to the
+        :meth:`~earwax.SoundManager.play` method of the
+        :attr:`~earwax.IntroLevel.sound_manager`.
+
+        When the :meth:`~earwax.IntroLevel.on_push` event is dispatched, an
+        error will be raised if this dictionary contains a ``looping`` key, as
+        2 ``looping`` arguments would be passed to
+        :meth:`self.sound_manager.play_path <earwax.SoundManager.play_path>`.
+
     :ivar ~earwax.IntroLevel.sound: The sound object which represents the
         playing sound.
 
@@ -242,9 +253,17 @@ class IntroLevel(Level):
     skip_after: Optional[float] = None
     looping: bool = False
 
-    sound_manager: Optional[SoundManager] = attrib(
-        default=Factory(type(None)), init=False, repr=False
-    )
+    sound_manager: Optional[SoundManager] = attrib(repr=False)
+
+    @sound_manager.default
+    def get_default_sound_manager(
+        instance: 'IntroLevel'
+    ) -> Optional[SoundManager]:
+        """Return a suitable sound manager."""
+        return instance.game.interface_sound_manager
+
+    play_kwargs: Dict[str, Any] = Factory(dict)
+
     sound: Optional[Sound] = attrib(
         default=Factory(type(None)), init=False, repr=False
     )
@@ -258,21 +277,16 @@ class IntroLevel(Level):
         """Run code when this level has been pushed.
 
         Starts playing :attr:`self.sound_path <earwax.IntroLevel.sound_path>`,
-        and optionally schedule an automatic skip.
+        and optionally schedules an automatic skip.
         """
         super().on_push()
-        audio_context: Optional[Context] = self.game.audio_context
-        if audio_context is None:
+        if self.sound_manager is None:
             raise RuntimeError(
-                'Cannot start playing without a valid audio context.'
+                'Cannot start playing without a valid sound manager.'
             )
-        source: DirectSource = DirectSource(audio_context)
-        self.sound_manager = SoundManager(
-            audio_context, source, should_loop=self.looping,
-            buffer_cache=self.game.buffer_cache
-        )
         self.sound = self.sound_manager.play_path(
-            self.sound_path, not self.looping
+            self.sound_path, not self.looping, looping=self.looping,
+            **self.play_kwargs
         )
         if self.skip_after is not None:
             schedule_once(
@@ -282,18 +296,8 @@ class IntroLevel(Level):
             )
 
     def on_pop(self) -> None:
-        """Destroy synthizer objects.
-
-        Destroys the :attr:`~earwax.IntroLevel.sound_manager`, and
-        :attr:`~earwax.IntroLevel.sound`.
-        """
+        """Destroy any created :meth:`~earwax.IntroLevel.sound`."""
         super().on_pop()
-        if (
-            self.sound_manager is not None and
-            self.sound_manager.source is not None
-        ):
-            self.sound_manager.source.destroy()
-        self.sound_manager = None
         if self.sound is not None and self.looping:
             try:
                 self.sound.destroy()
