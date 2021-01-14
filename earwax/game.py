@@ -607,7 +607,7 @@ class Game(RegisterEventMixin):
 
         * Dispatch the :meth:`~earwax.Game.before_run` event.
 
-        * Call ``pyglet.app.run()`.
+        * Call ``pyglet.app.run()``.
 
         * Unload Cytolk.
 
