@@ -68,6 +68,7 @@
         "modindex",
         "msg",
         "nargs",
+        "noqa",
         "obj",
         "ound",
         "pathlib",

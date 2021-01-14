@@ -2,7 +2,7 @@
 
 from inspect import isclass
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Tuple
 
 import wx
 from jinja2 import Environment, Template
@@ -10,6 +10,8 @@ from pyglet.window import key, mouse
 from synthizer import GlobalFdnReverb, Context, initialized
 
 from earwax import hat_directions as _hat_directions
+
+e: Environment = Environment()
 
 keys_code: str = '''"""Provides keys for templates."""
 
@@ -53,6 +55,39 @@ wx_code: str = '''"""Provides a pretend WX module."""
 
 wx_lines: List[str] = []
 
+reverb_code: str = '''"""Reverb module."""
+
+from attr import attrs
+try:
+    from synthizer import Context, GlobalFdnReverb
+except ModuleNotFoundError:
+    Context, GlobalFdnReverb = (object, object)
+
+
+@attrs(auto_attribs=True)
+class Reverb:
+    """A reverb preset.
+
+    This class can be used to make reverb presets, which you can then upgrade
+    to full reverbs by way of the :meth:`~earwax.Reverb.make_reverb` method.
+    """
+{% for name, value in items %}
+    {{ name }}: float = {{value}}{% endfor %}
+
+    def make_reverb(self, context: Context) -> GlobalFdnReverb:
+        """Return a synthizer reverb built from this object.
+
+        All the settings contained by this object will be present on the new
+        reverb.
+
+        :param context: The synthizer context to use.
+        """
+        r: GlobalFdnReverb = GlobalFdnReverb(context){% for name, value in items %}
+        r.{{ name}} = self.{{ name}}  # noqa: E501{% endfor %}
+        return r
+
+'''
+
 
 def get_keys() -> None:
     """Build the keys and modifiers lists."""
@@ -68,7 +103,6 @@ def get_keys() -> None:
 def make_keys_module() -> None:
     """Build the module."""
     filename: Path = Path.cwd() / 'earwax/cmd/keys.py'
-    e: Environment = Environment()
     t: Template = e.from_string(keys_code)
     rendered: str = t.render(
         keys=keys, modifiers=modifiers, hat_directions=hat_directions,
@@ -113,10 +147,7 @@ def make_wx_module() -> None:
 
 def make_reverb_module() -> None:
     """Make a typed reverb module."""
-    code: str = '"""Provides the Reverb class."""\n\nfrom attr import attrs\n'
-    code += '\n\n@attrs(auto_attribs=True)\nclass Reverb:\n'
-    code += '    """A reverb class with type hints.\n\n    '
-    code += 'This module is automatically generated.\n    """\n\n'
+    items: List[Tuple[str, float]] = []
     with initialized():
         c: Context = Context()
         r: GlobalFdnReverb = GlobalFdnReverb(c)
@@ -125,8 +156,10 @@ def make_reverb_module() -> None:
         for name in dir(r):
             value = getattr(r, name)
             if isinstance(value, float):
-                code += f'    {name}: float = {value}\n'
+                items.append((name, value))
         r.destroy()
+    t: Template = e.from_string(reverb_code)
+    code: str = t.render(items=items)
     with Path('earwax/reverb.py').open('w') as f:
         f.write(code)
 
