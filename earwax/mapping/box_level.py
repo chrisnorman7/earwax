@@ -10,9 +10,9 @@ from ..types import EventType
 from .box import BoxBounds
 
 try:
-    from synthizer import Context, GlobalFdnReverb, Source3D
+    from synthizer import Context, GlobalFdnReverb
 except ModuleNotFoundError:
-    Context, Source3D, GlobalFdnReverb = (None, None, None)
+    Context, GlobalFdnReverb = (object, object)
 
 from ..level import Level
 from ..point import Point, PointDirections
