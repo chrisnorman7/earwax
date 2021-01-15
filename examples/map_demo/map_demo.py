@@ -8,11 +8,10 @@ from pathlib import Path
 from typing import List
 
 from pyglet.window import Window, key
-from synthizer import DirectSource, GlobalFdnReverb
+from synthizer import GlobalFdnReverb
 
 from earwax import (ActionMenu, Ambiance, Box, BoxLevel, BoxTypes, Credit,
-                    Door, Game, Level, Menu, Point, ReverbSettingsDict,
-                    SoundManager, Track, TrackTypes)
+                    Door, Game, Level, Menu, Point, Reverb, Track, TrackTypes)
 
 sounds_directory: Path = Path('sounds')
 wall_sound: Path = sounds_directory / 'collide.wav'
@@ -22,15 +21,9 @@ doors_directory: Path = sounds_directory / 'doors'
 walls: List[Box] = []
 doors: List[Box] = []
 
-office_reverb: ReverbSettingsDict = {
-    'gain': 0.25,
-    't60': 0.9
-}
+office_reverb: Reverb = Reverb(gain=00.25, t60=0.9)
 
-corridor_reverb: ReverbSettingsDict = {
-    'gain': 0.25,
-    't60': 1.0
-}
+corridor_reverb: Reverb = Reverb(gain=0.25, t60=1.0)
 
 game: Game = Game(
     name='Map Demo', credits=[
@@ -50,10 +43,6 @@ game: Game = Game(
 def before_run() -> None:
     """Create rooms and level."""
     boxes: List[Box] = []
-    player_sound_manager: SoundManager = SoundManager(
-        game.audio_context, DirectSource(game.audio_context),
-        buffer_cache=game.buffer_cache
-    )
     ambiances: List[Ambiance] = []
 
     def finalise_office(office: Box):
@@ -68,7 +57,7 @@ def before_run() -> None:
         end: Point = Point(start.x + 1, start.y, office.end.z)
         b: Box[Door] = Box(
             game, start, end, data=door, name=f'Door to {office.name}',
-            surface_sound=office.surface_sound, reverb_settings=office_reverb
+            surface_sound=office.surface_sound, reverb=office_reverb.make_reverb(game.audio_context)
         )
         boxes.append(b)
         a: Ambiance = Ambiance.from_path(
@@ -97,14 +86,14 @@ def before_run() -> None:
         game, Point(0, 4, 0), Point(7, 10, 2), 3, Point(2, 0, 0),
         get_name=lambda i: f'Office {i + 1}', on_create=finalise_office,
         surface_sound=footsteps_directory / 'office',
-        reverb_settings=office_reverb, wall_sound=wall_sound
+        reverb=office_reverb.make_reverb(game.audio_context), wall_sound=wall_sound
     )
     boxes.append(
         Box(
             game, offices[0].bounds.bottom_back_left - Point(0, 4, 0),
             offices[-1].bounds.top_back_right - Point(0, 1, 0),
             name='Corridor', surface_sound=footsteps_directory / 'corridor',
-            reverb_settings=corridor_reverb, wall_sound=wall_sound
+            reverb=corridor_reverb.make_reverb(game.audio_context), wall_sound=wall_sound
         )
     )
     boxes.extend(offices)
@@ -115,16 +104,12 @@ def before_run() -> None:
             wall_sound=wall_sound
         )
     )
-    reverb: GlobalFdnReverb = GlobalFdnReverb(game.audio_context)
     music: Track = Track.from_path(
         sounds_directory / 'music.mp3', TrackTypes.music
     )
-    level: BoxLevel = BoxLevel(
-        game, boxes=boxes, player_sound_manager=player_sound_manager
-    )
+    level: BoxLevel = BoxLevel(game, boxes=boxes)
     level.tracks.append(music)
     level.ambiances.extend(ambiances)
-    level.connect_reverb(reverb)
     level.action('Show coordinates', symbol=key.C)(level.show_coordinates())
     level.action('Show facing direction', symbol=key.F)(level.show_facing())
     level.action('Walk forwards', symbol=key.W, interval=0.5)(level.move())
