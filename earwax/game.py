@@ -13,34 +13,22 @@ from attr import Factory, attrib, attrs
 from .credit import Credit
 from .menu import Menu
 from .menu.action_menu import ActionMenu
+from .pyglet import (EVENT_HANDLED, EVENT_UNHANDLED, Joystick, Window, app,
+                     get_joysticks, get_settings_path, schedule_interval,
+                     unschedule)
 from .sound import BufferCache
 from .task import IntervalFunction, Task, TaskFunction
 from .types import EventType
 
 try:
-    from pyglet.event import EVENT_HANDLED, EVENT_UNHANDLED
-    from synthizer import Context, DirectSource, Source, initialized
+    from cytolk.tolk import detect_screen_reader, load, unload
 except ModuleNotFoundError:
-    EVENT_HANDLED = True
-    EVENT_UNHANDLED = None
-    Context, DirectSource, Source, initialized = (None, None, None, None)
+    detect_screen_reader, load, unload = (None, None, None)
 
 try:
-    from cytolk.tolk import detect_screen_reader, load, unload
-    from pyglet import app, clock
-    from pyglet.input import Joystick, get_joysticks
-    from pyglet.resource import get_settings_path
-    from pyglet.window import Window
+    from synthizer import Context, initialized
 except ModuleNotFoundError:
-    detect_screen_reader = None
-    load = None
-    unload = None
-    app = None
-    clock = None
-    Joystick = None
-    get_joysticks = None
-    get_settings_path = None
-    Window = None
+    Context, initialized = (object, None)
 
 from .action import Action, HatDirection, OptionalGenerator
 from .configuration import EarwaxConfig
@@ -232,7 +220,7 @@ class Game(RegisterEventMixin):
         """
         if a.interval is not None:
             self.triggered_actions.append(a)
-            clock.schedule_interval(a.run, a.interval)
+            schedule_interval(a.run, a.interval)
         return a.run(None)
 
     def stop_action(self, a: Action) -> None:
@@ -248,7 +236,7 @@ class Game(RegisterEventMixin):
         :param a: The :class:`earwax.Action` instance that should be stopped.
         """
         self.triggered_actions.remove(a)
-        clock.unschedule(a.run)
+        unschedule(a.run)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool:
         """Handle a pressed key.

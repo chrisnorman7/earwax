@@ -5,11 +5,7 @@ from typing import Optional
 from attr import attrs
 
 from .hat_directions import DOWN, LEFT, RIGHT, UP
-
-try:
-    from pyglet.window import key
-except ModuleNotFoundError:
-    key = None
+from .pyglet import key
 
 try:
     from pyperclip import copy, paste

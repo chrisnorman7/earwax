@@ -64,8 +64,9 @@ from .menu import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                    TypeHandler, UnknownTypeError)
 from .mixins import (CoordinatesMixin, DismissibleMixin, DumpLoadMixin,
                      TitleMixin)
-from .networking import (AlreadyConnected, AlreadyConnecting, ConnectionError,
-                         ConnectionStates, NetworkConnection, NotConnectedYet)
+from .networking import (
+    AlreadyConnected, AlreadyConnecting, ConnectionStates, NetworkConnection,
+    NetworkingConnectionError, NotConnectedYet)
 from .point import Point, PointDirections
 from .promises import (Promise, PromiseStates, StaggeredPromise,
                        ThreadedPromise, staggered_promise)
@@ -117,8 +118,8 @@ __all__: List[str] = [
     # mixins.py:
     'CoordinatesMixin', 'DismissibleMixin', 'DumpLoadMixin', 'TitleMixin',
     # networking.py:
-    'AlreadyConnected', 'AlreadyConnecting', 'ConnectionError',
-    'ConnectionStates', 'NetworkConnection', 'NotConnectedYet',
+    'AlreadyConnected', 'AlreadyConnecting', 'ConnectionStates',
+    'NetworkConnection', 'NetworkingConnectionError', 'NotConnectedYet',
     # point.py:
     'Point', 'PointDirections',
     # promises/__init__.py:

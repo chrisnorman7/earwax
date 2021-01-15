@@ -6,20 +6,12 @@ from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List,
 
 from attr import Factory, attrib, attrs
 
-try:
-    from pyglet.window import key
-    from synthizer import DirectSource, PannerStrategy, Source, Source3D
-except ModuleNotFoundError:
-    key = None
-    DirectSource, PannerStrategy, Source, Source3D = (
-        object, object, object, object
-    )
-
 from .. import hat_directions
 from ..ambiance import Ambiance
 from ..level import Level
 from ..menu import Menu
 from ..point import Point
+from ..pyglet import key
 from ..sound import Sound
 from ..track import Track, TrackTypes
 from ..yaml import CDumper, dump
@@ -119,25 +111,6 @@ class PlayLevel(Level):
                 if obj.id in self.state.inventory_ids:
                     self.inventory.append(obj)
                     del room.objects[obj.id]
-
-    def get_source(self, position: Optional[Point], volume: float) -> Source:
-        """Return a suitable source.
-
-        :param position: The position of the new sound.
-
-            If this value is ``None``, then the sound will not be panned.
-
-        :param volume: The volume of the resulting source.
-        """
-        source: Source
-        if position is None:
-            source = DirectSource(self.game.audio_context)
-        else:
-            source = Source3D(self.game.audio_context)
-            source.position = position.coordinates
-            source.panner_strategy = PannerStrategy[self.world.panner_strategy]
-        source.gain = volume
-        return source
 
     def get_objects(self) -> List[RoomObject]:
         """Return a list of objects that the player can see.

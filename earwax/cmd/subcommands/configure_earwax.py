@@ -3,12 +3,8 @@
 from argparse import Namespace
 from pathlib import Path
 
-try:
-    from pyglet.window import Window
-except ModuleNotFoundError:
-    Window = object
-
 from ... import ConfigMenu, Game
+from ...pyglet import Window
 from ..constants import options_path
 
 

@@ -10,11 +10,7 @@ from typing import (TYPE_CHECKING, Any, Dict, List, Optional, TextIO, Tuple,
 from attr import attrs
 from typing_inspect import is_union_type
 
-try:
-    from pyglet.event import EventDispatcher
-except ModuleNotFoundError:
-    EventDispatcher = object
-
+from .pyglet import EventDispatcher
 from .yaml import CDumper, CLoader, dump, load
 
 if TYPE_CHECKING:

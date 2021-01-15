@@ -4,12 +4,8 @@ from argparse import Namespace
 from logging import Logger, getLogger
 from pathlib import Path
 
-try:
-    from pyglet.window import Window
-except ModuleNotFoundError:
-    Window = object
-
 from ...game import Game
+from ...pyglet import Window
 from ...story import EditLevel, StoryContext, StoryWorld, WorldRoom
 
 logger: Logger = getLogger(__name__)

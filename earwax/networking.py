@@ -7,20 +7,15 @@ from typing import List, Optional
 
 from attr import Factory, attrib, attrs
 
-try:
-    from pyglet.clock import schedule, unschedule
-except ModuleNotFoundError:
-    schedule = None
-    unschedule = None
-
 from .mixins import RegisterEventMixin
+from .pyglet import schedule, unschedule
 
 
-class ConnectionError(Exception):
+class NetworkingConnectionError(Exception):
     """Base class for connection errors."""
 
 
-class AlreadyConnecting(ConnectionError):
+class AlreadyConnecting(NetworkingConnectionError):
     """Already connecting.
 
     An attempt was made to call :meth:`~earwax.NetworkConnection.connect` on an
@@ -29,7 +24,7 @@ class AlreadyConnecting(ConnectionError):
     """
 
 
-class AlreadyConnected(ConnectionError):
+class AlreadyConnected(NetworkingConnectionError):
     """Already connected.
 
     Attempted to call :meth:`~earwax.NetworkConnection.connect` on an already
@@ -37,7 +32,7 @@ class AlreadyConnected(ConnectionError):
     """
 
 
-class NotConnectedYet(ConnectionError):
+class NotConnectedYet(NetworkingConnectionError):
     """Tried to send data on a connection which is not yet connected."""
 
 

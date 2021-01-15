@@ -4,10 +4,7 @@ from typing import Callable
 
 from attr import Factory, attrib, attrs
 
-try:
-    from pyglet.clock import schedule_once, unschedule
-except ModuleNotFoundError:
-    schedule_once, unschedule = (None, None)
+from .pyglet import schedule_once, unschedule
 
 IntervalFunction = Callable[[], float]
 TaskFunction = Callable[[float], None]

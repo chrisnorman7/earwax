@@ -591,7 +591,8 @@ class StoryWorld(DumpLoadMixin):
         :param room: The room to add.
 
         :param initial: An optional boolean to specify whether the given room
-            should become the :attr:`~earwax.story.world.StoryWorld.initial_room` or not.
+            should become the
+            :attr:`~earwax.story.world.StoryWorld.initial_room` or not.
 
             If this value is ``None``, then this room will be set as default if
             :attr:`~earwax.story.world.StoryWorld.initial_room_id` is itself

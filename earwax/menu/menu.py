@@ -8,16 +8,12 @@ from typing import TYPE_CHECKING, Callable, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
 
-try:
-    from pyglet.window import key
-except ModuleNotFoundError:
-    key = None
-
 from ..action import ActionFunctionType, OptionalGenerator
 from ..credit import Credit
 from ..hat_directions import DOWN, LEFT, RIGHT, UP
 from ..level import Level
 from ..mixins import DismissibleMixin, TitleMixin
+from ..pyglet import key
 from ..sound import Sound
 from .menu_item import MenuItem
 

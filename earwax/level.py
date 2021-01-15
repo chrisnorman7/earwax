@@ -7,15 +7,14 @@ from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List,
 from attr import Factory, attrib, attrs
 
 from .action_map import ActionMap
+from .pyglet import schedule_once
 from .sound import AlreadyDestroyed, Sound, SoundManager
 from .types import EventType
 
 try:
-    from pyglet.clock import schedule_once
-    from synthizer import Context, DirectSource
+    from synthizer import Context
 except ModuleNotFoundError:
-    schedule_once = None
-    Context, DirectSource = (object, object)
+    Context = object
 
 from .ambiance import Ambiance
 from .mixins import RegisterEventMixin

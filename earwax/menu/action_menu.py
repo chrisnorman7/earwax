@@ -3,14 +3,9 @@
 from inspect import isgenerator
 from typing import Iterator, Tuple, cast
 
-try:
-    from pyglet.window import key, mouse
-except ModuleNotFoundError:
-    key = None
-    mouse = None
-
 from ..action import Action
 from ..hat_directions import DEFAULT, DOWN, LEFT, RIGHT, UP
+from ..pyglet import key, mouse
 from ..types import ActionFunctionType, OptionalGenerator
 from .menu import Menu
 

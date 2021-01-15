@@ -8,11 +8,11 @@ from typing import (TYPE_CHECKING, Any, Callable, Dict, Generic, List,
 
 from attr import Factory, attrib, attrs
 
+from ..pyglet import schedule_once, unschedule
+
 try:
-    from pyglet.clock import schedule_once, unschedule
     from synthizer import GlobalFdnReverb
 except ModuleNotFoundError:
-    schedule_once, unschedule = (None, None)
     GlobalFdnReverb = object
 
 from ..mixins import RegisterEventMixin

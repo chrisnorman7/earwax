@@ -8,15 +8,11 @@ from typing import (Callable, Dict, Generator, List, Optional, Tuple, Type,
 
 from attr import Attribute, attrib, attrs
 
-try:
-    from pyglet.window import key
-except ModuleNotFoundError:
-    key = None
-
 from ..editor import Editor
 from ..game import Game
 from ..level import Level
 from ..menu import Menu
+from ..pyglet import key
 from ..sound import PannerStrategies
 from ..types import OptionalGenerator
 from .play_level import PlayLevel
