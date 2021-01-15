@@ -31,14 +31,11 @@ def play_story(args: Namespace, edit: bool = False) -> None:
         print()
         print(e)
         raise SystemExit
-    caption: str = world.name
-    if edit:
-        caption += f' ({filename})'
         assert isinstance(ctx.main_level, EditLevel), (
             'Invalid level %r' % ctx.main_level
         )
-        ctx.main_level.filename = filename
-    window: Window = Window(caption=caption)
+    ctx.main_level.filename = filename
+    window: Window = Window(caption=ctx.get_window_caption())
     game.run(window, initial_level=ctx.get_main_menu())
 
 

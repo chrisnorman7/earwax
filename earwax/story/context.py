@@ -105,6 +105,13 @@ class StoryContext:
                     self.world.panner_strategy
                 ]
 
+    def get_window_caption(self) -> str:
+        """Return a suitable window title."""
+        caption: str = self.world.name
+        if isinstance(self.main_level, EditLevel):
+            caption += f' ({self.main_level.filename})'
+        return caption
+
     def earwax_bug(self) -> None:
         """Open the Earwax new issue URL."""
         webbrowser.open('https://github.com/chrisnorman7/earwax/issues/new')
@@ -139,6 +146,7 @@ class StoryContext:
             m.add_item(self.credits_menu, title='Add or remove credits')
             m.add_item(self.set_initial_room, title='Set initial room')
             m.add_item(self.configure_music, title='Main menu music')
+            m.add_item(self.world_options, title='World options')
         if self.game.credits:
             m.add_item(
                 self.push_credits, title=self.world.messages.show_credits
@@ -389,4 +397,29 @@ class StoryContext:
         music: str
         for music in self.world.main_menu_musics:
             m.add_item(delete(music), title=music)
+        self.game.push_level(m)
+
+    def world_options(self) -> None:
+        """Configure the world."""
+
+        def set_name() -> Generator[None, None, None]:
+            e: Editor = Editor(self.game, text=self.world.name)
+
+            @e.event
+            def on_submit(text: str) -> None:
+                if not text:
+                    self.game.output('Cancelled.')
+                else:
+                    self.world.name = text
+                    self.game.output('World renamed.')
+                    if self.game.window is not None:
+                        self.game.window.set_caption(self.get_window_caption())
+                self.game.pop_level()
+
+            self.game.output(f'Enter a new world name: {self.world.name}')
+            yield
+            self.game.push_level(e)
+
+        m: Menu = Menu(self.game, 'World Options')
+        m.add_item(set_name, title='Rename')
         self.game.push_level(m)
