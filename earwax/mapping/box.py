@@ -210,12 +210,9 @@ class Box(Generic[T], RegisterEventMixin):
 
     :ivar ~earwax.Box.bounds: The bounds of this box.
 
-    :ivar ~earwax.Box.reverb_settings: Extra reverb settings for this box.
-
     :ivar ~earwax.Box.centre: The point that lies at the centre of this box.
 
-    :ivar ~earwax.Box.sound_manager: A sound manager to use for playing sounds
-        that emanate from this box.
+    :ivar ~earwax.Box.reverb: The reverb that is assigned to this box.
     """
 
     game: 'Game'

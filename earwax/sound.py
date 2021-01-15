@@ -348,9 +348,9 @@ class Sound:
                 source.panner_strategy = PannerStrategy.HRTF
         source.add_generator(self.generator)
         source.gain = self.gain
+        self.source = source
         if self.reverb is not None:
             self.connect_reverb(self.reverb)
-        self.source = source
 
     def set_position(self, position: PositionType) -> None:
         """Change the position of this sound.

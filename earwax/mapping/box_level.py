@@ -195,7 +195,7 @@ class BoxLevel(Level):
             box is not None and box.sound_manager is not None
             and box.surface_sound is not None
         ):
-            box.sound_manager.play_path(box.surface_sound, True)
+            box.sound_manager.play_path(box.surface_sound, True, position=None)
 
     def on_move_fail(
         self, distance: float, vertical: Optional[float], bearing: int,
