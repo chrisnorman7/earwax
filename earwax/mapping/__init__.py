@@ -14,7 +14,6 @@ from .portal import Portal
 __all__ = [
     # box.py:
     'Box', 'BoxBounds', 'BoxTypes', 'NotADoor', 'NotAPortal',
-    'ReverbSettingsDict',
     # box_level.py:
     'BoxLevel', 'CurrentBox', 'NearestBox',
     # door.py:

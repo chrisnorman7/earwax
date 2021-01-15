@@ -5,7 +5,8 @@ This module exists to prevent ReadTheDocs from kicking off when docs are built.
 
 try:
     from pyglet import app
-    from pyglet.clock import schedule, schedule_once, unschedule
+    from pyglet.clock import (schedule, schedule_interval, schedule_once,
+                              unschedule)
     from pyglet.event import EVENT_HANDLED, EVENT_UNHANDLED, EventDispatcher
     from pyglet.input import Joystick, get_joysticks
     from pyglet.resource import get_settings_path
