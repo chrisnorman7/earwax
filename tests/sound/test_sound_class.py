@@ -252,16 +252,28 @@ def test_set_position(sound: Sound) -> None:
     """Test the set_position method."""
     assert sound.position is None
     assert isinstance(sound.source, DirectSource)
+    sound.set_position(None)
+    assert isinstance(sound.source, DirectSource)
     sound.set_position(-1)
     assert sound.position == -1
     assert isinstance(sound.source, PannedSource)
     sleep(0.2)
-    assert sound.source.position == -1
+    assert sound.source.panning_scalar == -1
+    sound.set_position(1)
+    assert sound.position == 1
+    assert isinstance(sound.source, PannedSource)
+    sleep(0.2)
+    assert sound.source.panning_scalar == 1
     sound.set_position(Point(3, 2, 1))
     assert sound.position == Point(3, 2, 1)
     assert isinstance(sound.source, Source3D)
     sleep(0.2)
     assert sound.source.position == (3, 2, 1)
+    sound.set_position(Point(5, 8, 9))
+    assert sound.position == Point(5, 8, 9)
+    assert isinstance(sound.source, Source3D)
+    sleep(0.2)
+    assert sound.source.position == (5, 8, 9)
     sound.set_position(None)
     assert sound.position is None
     assert isinstance(sound.source, DirectSource)

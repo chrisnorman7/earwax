@@ -4,7 +4,7 @@ import os.path
 import webbrowser
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List, Type
+from typing import Any, Callable, Dict, Generator, List, Optional, Type
 
 from attr import Factory, attrib, attrs
 
@@ -12,6 +12,7 @@ from ..credit import Credit
 from ..editor import Editor
 from ..game import Game
 from ..menu import ConfigMenu, Menu
+from ..sound import PannerStrategies, SoundManager
 from ..track import Track, TrackTypes
 from ..yaml import CLoader, load
 from .edit_level import EditLevel, push_rooms_menu
@@ -90,6 +91,19 @@ class StoryContext:
             cls = PlayLevel
         self.logger.info('Creating %r.', cls)
         self.main_level = cls(self.game, self)
+        self.game.event(self.before_run)
+
+    def before_run(self) -> None:
+        """Set the default panning strategy."""
+        manager: Optional[SoundManager]
+        for manager in (
+            self.game.interface_sound_manager,
+            self.game.ambiance_sound_manager, self.game.music_sound_manager
+        ):
+            if manager is not None:
+                manager.default_panner_strategy = PannerStrategies[
+                    self.world.panner_strategy
+                ]
 
     def earwax_bug(self) -> None:
         """Open the Earwax new issue URL."""

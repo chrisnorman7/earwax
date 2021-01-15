@@ -12,7 +12,7 @@ from ..level import Level
 from ..menu import Menu
 from ..point import Point
 from ..pyglet import key
-from ..sound import Sound
+from ..sound import AlreadyDestroyed, Sound
 from ..track import Track, TrackTypes
 from ..yaml import CDumper, dump
 from .world import (
@@ -169,7 +169,10 @@ class PlayLevel(Level):
         """Stop all action sounds."""
         while self.action_sounds:
             s: Sound = self.action_sounds.pop()
-            s.destroy()
+            try:
+                s.destroy()
+            except AlreadyDestroyed:
+                pass
 
     def on_push(self) -> None:
         """Set the initial room.
@@ -315,10 +318,8 @@ class PlayLevel(Level):
         for a in room.ambiances:
             if a.path not in loaded_paths:
                 track = Track('file', a.path, TrackTypes.ambiance)
-                track.play(self.game.ambiance_sound_manager)
-                assert track.sound is not None
-                track.sound.set_gain(
-                    self.get_gain(
+                track.play(
+                    self.game.ambiance_sound_manager, gain=self.get_gain(
                         track.track_type, a.volume_multiplier
                     )
                 )
@@ -326,14 +327,15 @@ class PlayLevel(Level):
         obj: RoomObject
         for obj in room.objects.values():
             for a in obj.ambiances:
+                gain = self.get_gain(TrackTypes.ambiance, a.volume_multiplier)
                 if obj.position is None:
                     track = Track('file', a.path, TrackTypes.ambiance)
                     self.tracks.append(track)
-                    track.play(self.game.ambiance_sound_manager)
+                    track.play(self.game.ambiance_sound_manager, gain=gain)
                 else:
                     ambiance: Ambiance = Ambiance('file', a.path, obj.position)
                     self.ambiances.append(ambiance)
-        self.start_ambiances()
+                    ambiance.play(self.game.ambiance_sound_manager, gain=gain)
 
     def do_action(
         self, action: WorldAction, obj: Union[RoomObject, RoomExit],
@@ -444,29 +446,26 @@ class PlayLevel(Level):
             actions.append(action)
         if not actions:
             return self.game.output(self.world.messages.no_actions)
-        msg: str
+        msg: str = self.world.messages.actions_menu
         sound: Optional[str] = None
         if menu_action is None:
-            if (
-                obj.actions_action is not None and
-                obj.actions_action.message is not None
-            ):
-                msg = obj.actions_action.message
-            else:
-                msg = self.world.messages.actions_menu
-            if obj.take_action is None:
-                sound = self.world.take_action.sound
-            else:
-                sound = obj.take_action.sound
+            if obj.actions_action is not None:
+                sound = obj.actions_action.sound
+                if obj.actions_action.message is not None:
+                    msg = obj.actions_action.message
         else:
             sound = menu_action.sound
-            if menu_action.message is None:
-                msg = msg = self.world.messages.actions_menu
-            else:
+            if menu_action.message is not None:
                 msg = menu_action.message
         m: Menu = Menu(self.game, msg.format(obj.name))
         if sound is not None:
-            self.play_action_sound(sound)
+            path: Path = Path(sound)
+            if obj.position is None:
+                t: Track = Track.from_path(path, TrackTypes.ambiance)
+                m.tracks.append(t)
+            else:
+                a: Ambiance = Ambiance.from_path(path, obj.position)
+                m.ambiances.append(a)
         for action in actions:
             m.add_item(
                 self.perform_action(obj, action),
@@ -488,12 +487,11 @@ class PlayLevel(Level):
                 self.use_exit(x)
             else:
                 self.game.output(self.world.messages.no_exits)
+        elif room.objects:
+            obj: RoomObject = self.get_objects()[self.state.object_index]
+            self.actions_menu(obj)
         else:
-            if room.objects:
-                obj: RoomObject = self.get_objects()[self.state.object_index]
-                self.actions_menu(obj)
-            else:
-                self.game.output(self.world.messages.no_objects)
+            self.game.output(self.world.messages.no_objects)
 
     def save(self) -> None:
         """Save the current state."""

@@ -184,17 +184,6 @@ class Level(RegisterEventMixin, ActionMap):
         """
         pass
 
-    def __del__(self) -> None:
-        """Stop tracks ETC."""
-        try:
-            self.stop_ambiances()
-        except AlreadyDestroyed:
-            pass
-        try:
-            self.stop_tracks()
-        except AlreadyDestroyed:
-            pass
-
 
 @attrs(auto_attribs=True)
 class IntroLevel(Level):

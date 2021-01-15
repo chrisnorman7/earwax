@@ -339,7 +339,7 @@ class Sound:
                 source = Source3D(self.context)
                 source.position = self.position.coordinates
             else:
-                assert isinstance(self.position, float)
+                assert isinstance(self.position, (float, int))
                 source = PannedSource(self.context)
                 source.panning_scalar = self.position
             if self.panner_strategy in [
@@ -357,24 +357,24 @@ class Sound:
 
         If the provided position is of a different type than the :attr:`current
         one <earwax.Sound.position>`, then the underlying
-        :attr:`~earwax.Sound.source` object will need to changee. This may
-        cause audio stuttering.
+        :attr:`~earwax.Sound.source` object will need to changee. This will
+        probably cause audio stuttering.
 
         :param position: The new position.
         """
+        old_position: PositionType = self.position
         self.position = position
-        if (
-            isinstance(position, Point) and not isinstance(
-                self.source, Source3D
-            )
-        ) or (
-            isinstance(position, float) and not isinstance(
-                self.source, PannedSource
-            )
-        ) or (
-            position is None and not isinstance(self.source, DirectSource)
-        ):
+        if not isinstance(position, type(old_position)):
             self.reset_source()
+        elif isinstance(position, Point):
+            assert isinstance(self.source, Source3D)
+            self.source.position = position.coordinates
+        elif isinstance(position, (float, int)):
+            assert isinstance(self.source, PannedSource)
+            self.source.panning_scalar = position
+        else:
+            assert isinstance(self.source, DirectSource)
+            assert position is None
 
     def set_gain(self, gain: float) -> None:
         """Change the gain of this sound.
@@ -445,7 +445,8 @@ class Sound:
         :param dt: The ``dt`` parameter expected by the pyglet schedule
             functions.
         """
-        self.destroy()
+        if not self._destroyed:
+            self.destroy()
 
     def schedule_destruction(self) -> None:
         """Schedule this sound for destruction.

@@ -71,7 +71,9 @@ class ObjectPositionLevel(Level):
         instance: 'ObjectPositionLevel'
     ) -> Optional[DumpablePoint]:
         """Get the object position."""
-        return instance.object.position
+        if instance.object.position is None:
+            return instance.object.position
+        return DumpablePoint(*instance.object.position.coordinates)
 
     def __attrs_post_init__(self) -> None:
         """Add actions."""
@@ -657,7 +659,7 @@ class EditLevel(PlayLevel):
                 self.game.reveal_level(self)
                 value: float
                 if not text:
-                    value = 0
+                    value = 1.0
                 else:
                     try:
                         value = float(text)
