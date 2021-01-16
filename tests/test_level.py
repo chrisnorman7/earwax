@@ -191,22 +191,6 @@ def test_start_tracks(
     game.run(window, initial_level=level)
 
 
-def test_del(game: Game, sound_manager: SoundManager) -> None:
-    """Test deleting levels."""
-    game.music_sound_manager = sound_manager
-    l: Level = Level(game)
-    t: Track = Track.from_path(Path('sound.wav'), TrackTypes.music)
-    a: Ambiance = Ambiance.from_path(Path('sound.wav'), Point(0, 0, 0))
-    l.ambiances.append(a)
-    l.tracks.append(t)
-    l.on_push()
-    assert isinstance(a.sound, Sound)
-    assert isinstance(t.sound, Sound)
-    del l
-    assert a.sound is None
-    assert t.sound is None
-
-
 def test_register_and_bind(level: Level) -> None:
     """Make sure the register_and_bind method works properly."""
 
