@@ -137,11 +137,13 @@ class PlayLevel(Level):
 
         This method will exclude objects which are in the as yet unimplemented
         player inventory.
+
+        The resulting list will be sorted with Python's ``sorted`` builtin.
         """
-        return [
+        return sorted(
             obj for obj in self.state.room.objects.values()
             if obj not in self.inventory
-        ]
+        )
 
     def pause(self) -> None:
         """Pause All the currently-playing room sounds."""
