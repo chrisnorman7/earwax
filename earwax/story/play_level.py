@@ -35,6 +35,21 @@ class PlayLevel(Level):
         this story.
 
     :ivar action_sounds: The sounds which were started by object actions.
+
+    :ivar cursor_sound: The sound that plays when moving through objects and
+        ambiances.
+
+    :ivar inventory: The list of :class:`~earwax.story.world.Roomobject`
+        instances that the player is carrying.
+
+    :ivar ~earwax.story.edit_level.EditLevel.reverb: The reverb object for the
+        current room.
+
+    :ivar object_ambiances: The ambiances for a all objects in the room,
+        excluding those in the players' :attr:`inventory`.
+
+    :ivar object_tracks: The tracks for each object in the current room,
+        excluding those objects that are in the player's :attr:`inventory`.
     """
 
     world_context: 'StoryContext'
@@ -45,6 +60,8 @@ class PlayLevel(Level):
     cursor_sound: Optional[Sound] = None
     inventory: List[RoomObject] = Factory(list)
     reverb: Optional['GlobalFdnReverb'] = None
+    object_ambiances: Dict[str, List[Ambiance]] = Factory(dict)
+    object_tracks: Dict[str, List[Track]] = Factory(dict)
 
     def __attrs_post_init__(self) -> None:
         """Load inventory and bind actions."""
@@ -338,20 +355,48 @@ class PlayLevel(Level):
                 )
                 self.tracks.append(track)
         obj: RoomObject
-        for obj in room.objects.values():
-            for a in obj.ambiances:
-                gain = self.get_gain(TrackTypes.ambiance, a.volume_multiplier)
-                if obj.position is None:
-                    track = Track('file', a.path, TrackTypes.ambiance)
-                    self.tracks.append(track)
-                    track.play(
-                        self.game.ambiance_sound_manager, gain=gain,
-                        reverb=self.reverb
-                    )
-                else:
-                    ambiance: Ambiance = Ambiance('file', a.path, obj.position)
-                    self.ambiances.append(ambiance)
-                    ambiance.play(self.game.ambiance_sound_manager, gain=gain)
+        for obj in self.get_objects():
+            self.play_object_ambiances(obj)
+
+    def play_object_ambiances(self, obj: RoomObject) -> None:
+        """Play all the ambiances for the given object.
+
+        :param obj: The object whose ambiances will be played.
+        """
+        assert self.game.ambiance_sound_manager is not None
+        self.object_ambiances[obj.id] = []
+        self.object_tracks[obj.id] = []
+        for a in obj.ambiances:
+            gain = self.get_gain(TrackTypes.ambiance, a.volume_multiplier)
+            if obj.position is None:
+                track = Track('file', a.path, TrackTypes.ambiance)
+                self.tracks.append(track)
+                track.play(
+                    self.game.ambiance_sound_manager, gain=gain,
+                    reverb=self.reverb
+                )
+                self.object_tracks[obj.id].append(track)
+            else:
+                ambiance: Ambiance = Ambiance('file', a.path, obj.position)
+                self.ambiances.append(ambiance)
+                ambiance.play(self.game.ambiance_sound_manager, gain=gain)
+                self.object_ambiances[obj.id].append(ambiance)
+
+    def stop_object_ambiances(self, obj: RoomObject) -> None:
+        """Stop all the ambiances for the given object.
+
+        :param obj: The object whose ambiances will be stopped.
+        """
+        track: Track
+        ambiance: Ambiance
+        while self.object_tracks.get(obj.id, []):
+            track = self.object_tracks[obj.id].pop()
+            self.tracks.remove(track)
+            track.stop()
+        while self.object_ambiances.get(obj.id, []):
+            ambiance = self.object_ambiances[obj.id].pop()
+            self.ambiances.remove(ambiance)
+            ambiance.stop()
 
     def do_action(
         self, action: WorldAction, obj: Union[RoomObject, RoomExit],
@@ -590,6 +635,7 @@ class PlayLevel(Level):
         del obj.location.objects[obj.id]
         self.state.inventory_ids.append(obj.id)
         self.game.reveal_level(self)
+        self.stop_object_ambiances(obj)
 
     def drop_object(self, obj: RoomObject) -> Callable[[], None]:
         """Return a callable that can be used to drop an object."""
@@ -605,6 +651,7 @@ class PlayLevel(Level):
             self.state.room.objects[obj.id] = obj
             self.state.inventory_ids.remove(obj.id)
             self.inventory.remove(obj)
+            self.play_object_ambiances(obj)
 
         return inner
 
