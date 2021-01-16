@@ -427,8 +427,7 @@ class Sound:
         If this sound has already been destroyed, then
         :class:`~earwax.Sound.AlreadyDestroyed` will be raised.
         """
-        if self.reverb is not None:
-            self.disconnect_reverb()
+        self.disconnect_reverb()
         self.destroy_generator()
         if self.source is not None:
             self.destroy_source()
@@ -470,7 +469,7 @@ class Sound:
 
     def disconnect_reverb(self) -> None:
         """Disconnect the connected :attr:`~earwax.Sound.reverb` object."""
-        if self.reverb is not None:
+        if self.reverb is not None and self.source is not None:
             self.context.remove_route(self.source, self.reverb)
             self.reverb = None
 
