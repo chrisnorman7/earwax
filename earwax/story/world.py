@@ -10,6 +10,7 @@ from shortuuid import uuid
 from ..credit import Credit
 from ..mixins import DumpLoadMixin
 from ..point import Point
+from ..reverb import Reverb
 
 if TYPE_CHECKING:
     from ..game import Game
@@ -26,12 +27,12 @@ class StringMixin:
         return f'{self.name} (#{self.id})'
 
 
-class DumpablePoint(DumpLoadMixin, Point):
+class DumpablePoint(Point, DumpLoadMixin):
     """A point that can be dumped and loaded."""
 
-    x: float
-    y: float
-    z: float
+
+class DumpableReverb(Reverb, DumpLoadMixin):
+    """A reverb that can be dumped."""
 
 
 @attrs(auto_attribs=True)
@@ -321,6 +322,7 @@ class WorldRoom(DumpLoadMixin, StringMixin):
     ambiances: List[WorldAmbiance] = Factory(list)
     objects: Dict[str, RoomObject] = Factory(dict)
     exits: List[RoomExit] = Factory(list)
+    reverb: Optional[DumpableReverb] = None
     world: 'StoryWorld' = attrib(init=False, repr=False)
 
     __excluded_attribute_names__ = ['world']
