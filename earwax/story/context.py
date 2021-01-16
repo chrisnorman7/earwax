@@ -433,26 +433,32 @@ class StoryContext:
     def world_options(self) -> None:
         """Configure the world."""
 
-        def set_name() -> Generator[None, None, None]:
-            e: Editor = Editor(self.game, text=self.world.name)
+        def set_value(name: str) -> Callable[[], Generator[None, None, None]]:
+            def inner() -> Generator[None, None, None]:
+                e: Editor = Editor(self.game, text=getattr(self.world, name))
 
-            @e.event
-            def on_submit(text: str) -> None:
-                if not text:
-                    self.game.output('Cancelled.')
-                else:
-                    self.world.name = text
-                    self.game.output('World renamed.')
-                    if self.game.window is not None:
-                        self.game.window.set_caption(self.get_window_caption())
-                self.game.pop_level()
+                @e.event
+                def on_submit(text: str) -> None:
+                    if not text:
+                        self.game.output('Cancelled.')
+                    else:
+                        setattr(self.world, name, text)
+                        self.game.output('Done.')
+                        if name == 'name' and self.game.window is not None:
+                            self.game.window.set_caption(
+                                self.get_window_caption()
+                            )
+                    self.game.pop_level()
 
-            self.game.output(f'Enter a new world name: {self.world.name}')
-            yield
-            self.game.push_level(e)
+                self.game.output(getattr(self.world, name))
+                yield
+                self.game.push_level(e)
+
+            return inner
 
         m: Menu = Menu(self.game, 'World Options')
-        m.add_item(set_name, title='Rename')
+        m.add_item(set_value('name'), title='Rename')
+        m.add_item(set_value('author'), title='Author')
         m.add_item(
             self.set_panner_strategy,
             title='Set panning strategy (requires restart)'
