@@ -20,6 +20,8 @@ from .world import (
     WorldRoom, WorldState, WorldStateCategories)
 
 if TYPE_CHECKING:
+    from synthizer import GlobalFdnReverb
+
     from .context import StoryContext
 
 
@@ -42,6 +44,7 @@ class PlayLevel(Level):
     )
     cursor_sound: Optional[Sound] = None
     inventory: List[RoomObject] = Factory(list)
+    reverb: Optional['GlobalFdnReverb'] = None
 
     def __attrs_post_init__(self) -> None:
         """Load inventory and bind actions."""
@@ -289,6 +292,16 @@ class PlayLevel(Level):
 
     def set_room(self, room: WorldRoom) -> None:
         """Move to a new room."""
+        if (
+            self.state.room is not room
+            and self.state.room.reverb != room.reverb
+            and self.reverb is not None
+        ):
+            self.reverb.destroy()
+            self.reverb = None
+        if room.reverb is not None:
+            assert self.game.audio_context is not None
+            self.reverb = room.reverb.make_reverb(self.game.audio_context)
         assert self.game.ambiance_sound_manager is not None
         self.state.room_id = room.id
         self.state.object_index = None
@@ -331,7 +344,10 @@ class PlayLevel(Level):
                 if obj.position is None:
                     track = Track('file', a.path, TrackTypes.ambiance)
                     self.tracks.append(track)
-                    track.play(self.game.ambiance_sound_manager, gain=gain)
+                    track.play(
+                        self.game.ambiance_sound_manager, gain=gain,
+                        reverb=self.reverb
+                    )
                 else:
                     ambiance: Ambiance = Ambiance('file', a.path, obj.position)
                     self.ambiances.append(ambiance)
@@ -371,9 +387,9 @@ class PlayLevel(Level):
         """Play and set the cursor sound."""
         if self.world.cursor_sound is None:
             return
-
         self.cursor_sound = self.game.interface_sound_manager.play_path(
-            Path(self.world.cursor_sound), False, position=position
+            Path(self.world.cursor_sound), False, position=position,
+            reverb=self.reverb
         )
 
     def play_action_sound(
@@ -388,7 +404,7 @@ class PlayLevel(Level):
             If this value is ``None``, the sound will not be panned.
         """
         s: Sound = self.game.interface_sound_manager.play_path(
-            Path(sound), True, position=position
+            Path(sound), True, position=position, reverb=self.reverb
         )
         self.action_sounds.append(s)
 

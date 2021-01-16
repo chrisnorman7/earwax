@@ -15,9 +15,9 @@ from ..menu import Menu
 from ..pyglet import key
 from ..types import OptionalGenerator
 from .play_level import PlayLevel
-from .world import (DumpablePoint, ObjectTypes, RoomExit, RoomObject,
-                    RoomObjectTypes, StoryWorld, WorldAction, WorldAmbiance,
-                    WorldMessages, WorldRoom)
+from .world import (DumpablePoint, DumpableReverb, ObjectTypes, RoomExit,
+                    RoomObject, RoomObjectTypes, StoryWorld, WorldAction,
+                    WorldAmbiance, WorldMessages, WorldRoom)
 
 message_descriptions: Dict[str, str] = {
     'no_objects': 'The message shown when focusing an empty object list',
@@ -256,6 +256,9 @@ class EditLevel(PlayLevel):
             'Actions menu', symbol=key.A, modifiers=key.MOD_SHIFT
         )(self.object_actions)
         self.action('Reposition object', symbol=key.X)(self.reposition_object)
+        self.action(
+            'Configure room reverb', symbol=key.V
+        )(self.configure_reverb)
         self.action('Delete', symbol=key.DELETE)(self.delete)
         return super().__attrs_post_init__()
 
@@ -1007,4 +1010,37 @@ class EditLevel(PlayLevel):
                 )
         m.title = f'{name} Actions'
         yield
+        self.game.push_level(m)
+
+    def configure_reverb(self) -> None:
+        """Configure the reverb for the current room."""
+        room: WorldRoom = self.state.room
+
+        def delete_reverb() -> None:
+
+            def yes() -> None:
+                if self.reverb is not None:
+                    self.reverb.destroy()
+                self.reverb = None
+                room.reverb = None
+                self.game.output('Reverb deleted.')
+                self.game.reveal_level(self)
+
+            def no() -> None:
+                self.game.output('Cancelled.')
+                self.game.reveal_level(self)
+
+            m: Menu = Menu.yes_no(self.game, yes, no)
+            self.game.push_level(m)
+
+        if room.reverb is None:
+            room.reverb = DumpableReverb()
+            self.set_room(room)
+
+        m: Menu = Menu(self.game, 'Reverb')
+        name: str
+        value: float
+        for name in DumpableReverb.__annotations__:
+            m.add_item(self.game.pop_level, title=name)
+        m.add_item(delete_reverb, title='Delete')
         self.game.push_level(m)
