@@ -445,7 +445,13 @@ class PlayLevel(Level):
     def actions_menu(
         self, obj: RoomObject, menu_action: Optional[WorldAction] = None
     ) -> None:
-        """Show a menu of object actions."""
+        """Show a menu of object actions.
+
+        :param obj: The object which the menu will be shown for.
+
+        :param menu_action: The action which will be used instead of the
+            default :attr:`~earwax.story.World.RoomObject.actions_action`.
+        """
         actions: List[WorldAction] = obj.actions.copy()
         action: WorldAction
         if obj.is_takeable and obj not in self.inventory:
@@ -557,6 +563,8 @@ class PlayLevel(Level):
                 )
             if obj.is_droppable or obj.is_usable:
                 self.game.push_level(m)
+            else:
+                self.game.output(self.world.messages.no_actions)
 
         return inner
 
