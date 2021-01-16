@@ -470,7 +470,10 @@ class Sound:
     def disconnect_reverb(self) -> None:
         """Disconnect the connected :attr:`~earwax.Sound.reverb` object."""
         if self.reverb is not None and self.source is not None:
-            self.context.remove_route(self.source, self.reverb)
+            try:
+                self.context.remove_route(self.source, self.reverb)
+            except SynthizerError:
+                pass
             self.reverb = None
 
     def restart(self) -> None:
