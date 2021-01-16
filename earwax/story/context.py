@@ -49,12 +49,14 @@ class StoryContext:
         return WorldState(instance.world)
 
     main_level: PlayLevel = attrib(init=False, repr=False)
+    errors: List[str] = Factory(list)
+    warnings: List[str] = Factory(list)
 
     def __attrs_post_init__(self) -> None:
         """Make sure everything is in working order."""
         if self.world.initial_room_id is None:
             self.logger.critical('Initial room ID is None.')
-            raise RuntimeError(
+            self.errors.append(
                 'You must set the initial room for your world, with a '
                 '<entrance> tag inside your <world> tag.'
             )
@@ -62,10 +64,12 @@ class StoryContext:
             self.logger.critical(
                 'Invalid initial room ID: %s.', self.world.initial_room_id
             )
-            raise RuntimeError(
+            self.errors.append(
                 'Invalid room id for <entrance> tag: %s.' %
                 self.world.initial_room_id
             )
+        else:
+            self.state.room_id = self.world.initial_room_id
         room: WorldRoom
         inaccessible_rooms: List[WorldRoom] = list(self.world.rooms.values())
         for room in self.world.rooms.values():
@@ -74,7 +78,7 @@ class StoryContext:
                 did: str = x.destination_id
                 if did not in self.world.rooms:
                     self.logger.critical('Invalid exit destination: %s.', did)
-                    raise RuntimeError(
+                    self.errors.append(
                         'Invalid destination %r for exit %s of room %s.' % (
                             did, x.action.name, room.name
                         )
@@ -82,8 +86,14 @@ class StoryContext:
                 if x.destination in inaccessible_rooms:
                     inaccessible_rooms.remove(x.destination)
         for room in inaccessible_rooms:
-            self.logger.warning('There is no way to access %s.', room)
-        self.state.room_id = self.world.initial_room_id
+            msg: str = 'There is no way to access the %s room.' % room
+            self.logger.warning(msg)
+            self.warnings.append(msg)
+        music: str
+        for music in self.world.main_menu_musics:
+            if not os.path.exists(music):
+                self.logger.critical('Invalid main menu music %s.', music)
+                self.errors.append(f'Main menu music does not exist: {music}.')
         cls: Type[PlayLevel]
         if self.edit:
             cls = EditLevel
@@ -112,6 +122,14 @@ class StoryContext:
             caption += f' ({self.main_level.filename})'
         return caption
 
+    def show_warnings(self) -> None:
+        """Show any generated warnings."""
+        m: Menu = Menu(self.game, 'Warnings')
+        warning: str
+        for warning in self.warnings:
+            m.add_item(self.game.pop_level, title=warning)
+        self.game.push_level(m)
+
     def earwax_bug(self) -> None:
         """Open the Earwax new issue URL."""
         webbrowser.open('https://github.com/chrisnorman7/earwax/issues/new')
@@ -131,27 +149,40 @@ class StoryContext:
 
     def get_main_menu(self) -> Menu:
         """Create a main menu for this world."""
-        m: Menu = Menu(
-            self.game, self.world.messages.main_menu, dismissible=False
-        )
-        path: str
-        for path in self.world.main_menu_musics:
-            t: Track = Track('file', path, TrackTypes.music)
-            m.tracks.append(t)
-        m.add_item(self.play, title=self.world.messages.play_game)
-        m.add_item(self.load, title=self.world.messages.load_game)
-        if isinstance(self.main_level, EditLevel):
-            m.add_item(self.main_level.save, title='Save story')
-            m.add_item(self.configure_earwax, title='Configure Earwax')
-            m.add_item(self.credits_menu, title='Add or remove credits')
-            m.add_item(self.set_initial_room, title='Set initial room')
-            m.add_item(self.configure_music, title='Main menu music')
-            m.add_item(self.world_options, title='World options')
-        if self.game.credits:
-            m.add_item(
-                self.push_credits, title=self.world.messages.show_credits
+        m: Menu
+        if self.errors:
+            m = Menu(self.game, 'Errors', dismissible=False)
+            error: str
+            for error in self.errors:
+                m.add_item(self.game.stop, title=error)
+            m.add_item(self.earwax_bug, title='Submit bug report to Earwax')
+        else:
+            m = Menu(
+                self.game, self.world.messages.main_menu, dismissible=False
             )
-        m.add_item(self.earwax_bug, title='Report Earwax Bug')
+            path: str
+            for path in self.world.main_menu_musics:
+                t: Track = Track('file', path, TrackTypes.music)
+                m.tracks.append(t)
+            m.add_item(self.play, title=self.world.messages.play_game)
+            m.add_item(self.load, title=self.world.messages.load_game)
+            if isinstance(self.main_level, EditLevel):
+                if self.warnings:
+                    m.add_item(
+                        self.show_warnings, title='Show warnings (%d)' %
+                        len(self.warnings)
+                    )
+                m.add_item(self.main_level.save, title='Save story')
+                m.add_item(self.configure_earwax, title='Configure Earwax')
+                m.add_item(self.credits_menu, title='Add or remove credits')
+                m.add_item(self.set_initial_room, title='Set initial room')
+                m.add_item(self.configure_music, title='Main menu music')
+                m.add_item(self.world_options, title='World options')
+            if self.game.credits:
+                m.add_item(
+                    self.push_credits, title=self.world.messages.show_credits
+                )
+            m.add_item(self.earwax_bug, title='Report Earwax Bug')
         m.add_item(self.game.stop, title=self.world.messages.exit)
         return m
 
