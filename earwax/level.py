@@ -286,12 +286,13 @@ class IntroLevel(Level):
     def on_pop(self) -> None:
         """Destroy any created :meth:`~earwax.IntroLevel.sound`."""
         super().on_pop()
-        if self.sound is not None and self.looping:
+        if self.sound is not None:
             try:
                 self.sound.destroy()
             except AlreadyDestroyed:
                 pass
-        self.sound = None
+            finally:
+                self.sound = None
 
     def skip(self) -> Generator[None, None, None]:
         """Skip this level.

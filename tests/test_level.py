@@ -8,8 +8,8 @@ from pyglet.window import Window, key
 from pytest import raises
 from synthizer import Context, DirectSource, Source3D, StreamingGenerator
 
-from earwax import (Action, Ambiance, Game, IntroLevel, Level, Point, Sound,
-                    SoundManager, Track, TrackTypes)
+from earwax import (Action, AlreadyDestroyed, Ambiance, Game, IntroLevel,
+                    Level, Point, Sound, SoundManager, Track, TrackTypes)
 
 
 class OnCoverWorks(Exception):
@@ -282,18 +282,23 @@ def test_intro_level_looping(window: Window, level: Level, game: Game) -> None:
 
 def test_intro_level_skip(window: Window, level: Level, game: Game) -> None:
     """Test skipping an IntroLevel instance."""
+    sounds: List[Sound] = []
     intro: IntroLevel = IntroLevel(
         game, level, Path('sound.wav'), skip_after=5.0
     )
 
     @level.event
     def on_push() -> None:
+        assert intro.sound is None
+
         def inner(dt: float) -> None:
             window.close()
 
         schedule_once(inner, 0.2)
 
     def f(dt: float) -> None:
+        assert isinstance(intro.sound, Sound)
+        sounds.append(intro.sound)
         list(intro.skip())
 
     schedule_once(f, 0.5)
@@ -301,3 +306,5 @@ def test_intro_level_skip(window: Window, level: Level, game: Game) -> None:
     assert game.level is level
     assert intro.sound_manager is game.interface_sound_manager
     assert intro.sound is None
+    with raises(AlreadyDestroyed):
+        sounds[0].destroy()
