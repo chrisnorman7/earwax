@@ -1,13 +1,12 @@
-pyglet
-synthizer
-cytolk
-attrs
-pyyaml
-typing_inspect
-shortuuid
-movement_2d
-pysdl2
-pysdl2-dll
-xml_python
-default_argparse
-jinja2
+pyglet >= 1.5.14
+synthizer >= 0.8.7
+cytolk >= 0.1.6
+attrs >= 20.3.0
+pyyaml >= 5.3.1
+typing_inspect >= 0.6.0
+shortuuid >= 1.0.1
+movement_2d >= 1.1.1
+pysdl2 >= 0.9.7
+pysdl2-dll >= 2.0.14
+default_argparse >= 0.0.1
+jinja2 >= 2.11.2
