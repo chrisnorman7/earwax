@@ -1,4 +1,17 @@
-"""Provides the main function, and registers subcommands.
+"""The Earwax command line utility.
+
+This module provides the ``cmd_main`` function, and all sub commands.
+
+To run the client:
+
+* Make sure Earwax and all its dependencies are up to date.
+
+* In the folder where you wish to work, type ``earwax``. This is a standard
+    command line utility, which should provide enough of its own help that no
+    replication is required in this document.
+
+*NOTE*: At the time of writing, only the ``earwax story`` command actually does
+all that much that is useful. Everything else needs fleshing out.
 
 If you want to create more subcommands, add them in the subcommands directory,
 then register them with the :meth:`subcommand` method.
