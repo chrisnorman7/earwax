@@ -212,7 +212,7 @@ class IntroLevel(Level):
         loop.
 
         If this value is ``True``, then :attr:`~earwax.IntroLevel.skip_after`
-            must be ``None``, otherwise ``AssertionError`` will be raised.
+        must be ``None``, otherwise ``AssertionError`` will be raised.
 
     :ivar ~earwax.IntroLevel.sound_manager: The sound manager to use to play
         the sound.
