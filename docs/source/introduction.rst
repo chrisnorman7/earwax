@@ -37,7 +37,7 @@ The below code is a full -albeit minimal -  code example::
 
     @l.action('Key speak', symbol=key.S)
     def key_speak():
-        """"Say something when the s key is pressed."""
+        """Say something when the s key is pressed."""
         g.output('You pressed the s key.')
 
 
