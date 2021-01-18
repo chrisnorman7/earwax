@@ -545,10 +545,17 @@ class SoundManager:
         :param sound: The sound to register.
         """
         self.sounds.append(sound)
+        if sound.on_destroy is None:
+            sound.on_destroy = self.remove_sound
 
     def remove_sound(self, sound: Sound) -> None:
-        """Remove a sound from the :attr:`~earwax.SoundManager.sounds` list."""
+        """Remove a sound from the :attr:`~earwax.SoundManager.sounds` list.
+
+        :param sound: The sound that will be removed
+        """
         self.sounds.remove(sound)
+        if sound.on_destroy == self.remove_sound:
+            sound.on_destroy = None
 
     def destroy_all(self) -> None:
         """Destroy all the sounds associated with this manager."""

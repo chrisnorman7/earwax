@@ -7,8 +7,7 @@ from pyglet.window import Window
 from pytest import raises
 from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
                        Generator, GlobalFdnReverb, PannedSource,
-                       PannerStrategy, Source3D, StreamingGenerator,
-                       SynthizerError)
+                       PannerStrategy, Source3D, StreamingGenerator)
 
 from earwax import AlreadyDestroyed, BufferCache, Game, Point, Sound
 from earwax.sound import PannerStrategies
@@ -227,7 +226,7 @@ def test_paused(sound: Sound) -> None:
 def test_destroy_generator(context: Context, sound: Sound) -> None:
     """Test that only the generator can be destroyed."""
     sound.destroy_generator()
-    with raises(SynthizerError):
+    with raises(KeyError):
         sound.generator.destroy()
     assert sound.source is not None
     sound.source.destroy()

@@ -7,7 +7,7 @@ from pyglet.clock import schedule_once
 from pyglet.window import Window
 from pytest import raises
 from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
-                       Source3D, StreamingGenerator, SynthizerError)
+                       StreamingGenerator)
 
 from earwax import AlreadyDestroyed, BufferCache, NoCache, Sound, SoundManager
 from earwax.sound import PannerStrategies
@@ -30,18 +30,23 @@ def test_register_sound(
     sound_manager: SoundManager, sound: Sound
 ) -> None:
     """Check we can register a sound properly."""
+    assert sound.on_destroy is None
     assert sound_manager.sounds == []
     sound_manager.register_sound(sound)
     assert sound_manager.sounds == [sound]
+    assert sound.on_destroy == sound_manager.remove_sound
 
 
 def test_remove_sound(
     sound_manager: SoundManager, sound: Sound
 ) -> None:
     """Make sure we can remove a sound."""
+    assert sound.on_destroy is None
     sound_manager.register_sound(sound)
+    assert sound.on_destroy == sound_manager.remove_sound
     sound_manager.remove_sound(sound)
     assert sound_manager.sounds == []
+    assert sound.on_destroy is None
 
 
 def test_destroy_sound(
@@ -57,14 +62,13 @@ def test_destroy_sound(
     assert sound.source is None
     assert isinstance(sound.buffer, Buffer)
     assert isinstance(sound.generator, BufferGenerator)
+    assert sound.on_destroy is None
     with raises(AlreadyDestroyed) as exc:
         sound.destroy()
     assert exc.value.args == (sound,)
 
 
-def test_destroy_all(
-    sound_manager: SoundManager, context: Context, source: Source3D
-) -> None:
+def test_destroy_all(sound_manager: SoundManager, context: Context) -> None:
     """Make sure we can destroy all sounds."""
     assert sound_manager.buffer_cache is not None
     x: int
@@ -128,18 +132,6 @@ def test_play_stream_looping(sound_manager: SoundManager) -> None:
     s: Sound = sound_manager.play_stream('file', 'sound.wav')
     sleep(0.2)
     assert s.generator.looping is True
-
-
-def test_del(
-    buffer_cache: BufferCache, context: Context, source: Source3D
-) -> None:
-    """Ensure all sounds are destroyed when deleting a sound manager."""
-    manager: SoundManager = SoundManager(context, buffer_cache=buffer_cache)
-    manager.play_path(Path('sound.wav'), False)
-    manager.play_stream('file', 'sound.wav')
-    del manager
-    with raises(SynthizerError):
-        source.destroy()
 
 
 def test_no_cache(
