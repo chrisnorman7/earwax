@@ -385,6 +385,14 @@ class Sound:
         if self.source is not None:
             self.source.gain = gain
 
+    def set_looping(self, looping: bool) -> None:
+        """Set whether or not this sound should loop.
+
+        :param looping: Whether or not to loop.
+        """
+        self.looping = looping
+        self.generator.looping = looping
+
     def pause(self) -> None:
         """Pause this sound."""
         self._paused = True

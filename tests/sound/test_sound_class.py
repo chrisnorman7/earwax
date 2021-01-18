@@ -9,7 +9,8 @@ from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
                        Generator, GlobalFdnReverb, PannedSource,
                        PannerStrategy, Source3D, StreamingGenerator)
 
-from earwax import AlreadyDestroyed, BufferCache, Game, Point, Sound
+from earwax import (AlreadyDestroyed, BufferCache, Game, Point, Sound,
+                    SoundManager)
 from earwax.sound import PannerStrategies
 
 
@@ -276,3 +277,23 @@ def test_set_position(sound: Sound) -> None:
     sound.set_position(None)
     assert sound.position is None
     assert isinstance(sound.source, DirectSource)
+
+
+def test_set_loopng(sound_manager: SoundManager) -> None:
+    """Test the set_looping method."""
+    sound: Sound = sound_manager.play_path(Path('sound.wav'), False)
+    assert sound.looping is False
+    assert sound.generator.looping is False
+    sound.set_looping(False)
+    sleep(0.1)
+    assert sound.looping is False
+    assert sound.generator.looping is False
+    sound.set_looping(True)
+    sleep(0.1)
+    assert sound.looping is True
+    assert sound.generator.looping is True
+    sound.set_looping(False)
+    sleep(0.1)
+    assert sound.looping is False
+    assert sound.generator.looping is False
+    sound.destroy()
