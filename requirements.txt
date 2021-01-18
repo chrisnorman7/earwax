@@ -10,3 +10,4 @@ pysdl2
 pysdl2-dll
 xml_python
 default_argparse
+jinja2

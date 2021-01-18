@@ -80,9 +80,14 @@ from .task import IntervalFunction, Task, TaskFunction
 from .track import Track, TrackTypes
 from .walking_directions import walking_directions
 
+# This next import is intentionally separated from the rest, to prevent
+# circular imports.
+if True:
+    from . import cmd
+
 __all__: List[str] = [
     # General modules:
-    'hat_directions', 'story', 'types', 'utils',
+    'cmd', 'hat_directions', 'story', 'types', 'utils',
     # action.py:
     'Action',
     # action_map.py:
