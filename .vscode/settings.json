@@ -72,6 +72,7 @@
         "obj",
         "ound",
         "pathlib",
+        "pbr",
         "pdate",
         "pyglet",
         "pyperclip",
