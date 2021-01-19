@@ -26,7 +26,6 @@ from typing import Callable
 from default_argparse import parser
 
 from .subcommands.configure_earwax import configure_earwax
-from .subcommands.gui.main import gui
 from .subcommands.init_project import init_project
 from .subcommands.story import (build_story, create_story, edit_story,
                                 play_story)
@@ -91,8 +90,6 @@ subcommand(
     'config', configure_earwax, formatter_class=ArgumentDefaultsHelpFormatter,
     description='Configure the earwax module for use in your project.'
 )
-
-subcommand('gui', gui, description='Create basic games in a GUI')
 
 story_parser: ArgumentParser = commands.add_parser(
     'story', description='Play, edit, or build stories.'

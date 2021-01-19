@@ -78,7 +78,7 @@ class Action:
     modifiers: int = 0
     joystick_button: Optional[int] = None
     hat_direction: Optional[HatDirection] = None
-    interval: Optional[int] = Factory(lambda: None)
+    interval: Optional[int] = None
     last_run: float = attrib(default=Factory(float), init=False)
 
     def run(self, dt: Optional[float]) -> OptionalGenerator:

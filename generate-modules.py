@@ -1,10 +1,8 @@
 """Generates various modules used by Earwax."""
 
-from inspect import isclass
 from pathlib import Path
 from typing import Any, List, Tuple
 
-import wx
 from jinja2 import Environment, Template
 from pyglet.window import key, mouse
 from synthizer import Context, GlobalFdnReverb, initialized
@@ -48,12 +46,6 @@ hat_directions: List[str] = [x for x in dir(_hat_directions) if x.isupper()]
 keys: List[str] = []
 modifiers: List[str] = []
 mouse_buttons: List[str] = sorted(x for x in dir(mouse) if x.isupper())
-
-wx_code: str = '''"""Provides a pretend WX module."""
-
-'''
-
-wx_lines: List[str] = []
 
 reverb_code: str = '''"""Reverb module."""
 
@@ -116,36 +108,6 @@ def make_keys_module() -> None:
     print('Hat Directions: %d' % len(hat_directions))
 
 
-def get_wx_lines() -> None:
-    """Get all the wx lines."""
-    x: str
-    for x in dir(wx):
-        value: Any = getattr(wx, x)
-        value_str: str
-        if x.startswith('_'):
-            continue
-        elif isclass(value):
-            value_str = 'object'
-        elif isinstance(value, int):
-            value_str = str(value)
-        elif isinstance(value, (str, bytes)):
-            value_str = repr(value)
-        elif isinstance(value, wx.PyEventBinder):
-            value_str = 'object()'
-        else:
-            print(f'Skipping {x} = {value!r}')
-            continue
-        wx_lines.append(f'{x} = {value_str}')
-    print('Pretend wx attributes: %d' % len(wx_lines))
-
-
-def make_wx_module() -> None:
-    """Make a pretend wx module."""
-    filename: Path = Path.cwd() / 'earwax/cmd/subcommands/gui/pretend_wx.py'
-    with filename.open('w') as f:
-        f.write(wx_code + '\n'.join(wx_lines) + '\n')
-
-
 def make_reverb_module() -> None:
     """Make a typed reverb module."""
     items: List[Tuple[str, float]] = []
@@ -168,6 +130,4 @@ def make_reverb_module() -> None:
 if __name__ == '__main__':
     get_keys()
     make_keys_module()
-    get_wx_lines()
-    make_wx_module()
     make_reverb_module()
