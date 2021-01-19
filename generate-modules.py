@@ -1,4 +1,4 @@
-"""Generates the earwax.cmd.subcommands.gui.keys module."""
+"""Generates various modules used by Earwax."""
 
 from inspect import isclass
 from pathlib import Path
@@ -7,7 +7,7 @@ from typing import Any, List, Tuple
 import wx
 from jinja2 import Environment, Template
 from pyglet.window import key, mouse
-from synthizer import GlobalFdnReverb, Context, initialized
+from synthizer import Context, GlobalFdnReverb, initialized
 
 from earwax import hat_directions as _hat_directions
 
@@ -58,6 +58,7 @@ wx_lines: List[str] = []
 reverb_code: str = '''"""Reverb module."""
 
 from attr import attrs
+
 try:
     from synthizer import Context, GlobalFdnReverb
 except ModuleNotFoundError:
