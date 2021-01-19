@@ -3,10 +3,9 @@
 from argparse import Namespace
 from pathlib import Path
 
-from ... import EarwaxConfig
-from ..constants import (ambiances_directory, maps_directory, music_directory,
-                         options_path, project_filename, scripts_directory,
-                         sounds_directory, surfaces_directory)
+from ...configuration import EarwaxConfig
+from ..constants import (maps_directory, options_path, project_filename,
+                         scripts_directory)
 from ..project import Project
 
 
@@ -24,10 +23,7 @@ def update() -> None:
         print('Earwax configuration already exists.')
     path: Path
     cwd: Path = Path.cwd()
-    for path in (
-        sounds_directory, surfaces_directory, ambiances_directory,
-        music_directory, maps_directory, scripts_directory
-    ):
+    for path in (maps_directory, scripts_directory):
         if not path.is_dir():
             path.mkdir()
             print(f'Created directory {path.relative_to(cwd)}.')
@@ -46,6 +42,8 @@ def init_project(args: Namespace) -> None:
     else:
         project: Project = Project(name='Untitled Project')
         project.save(project_filename)
-        print(f'Created {project.name}.')
+        print(
+            f'Created {project.name} at {project_filename.relative_to(cwd)}.'
+        )
     update()
     print('Updated.')

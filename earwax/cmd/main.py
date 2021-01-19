@@ -25,12 +25,9 @@ from typing import Callable
 
 from default_argparse import parser
 
-from .constants import surfaces_directory
 from .subcommands.configure_earwax import configure_earwax
 from .subcommands.gui.main import gui
 from .subcommands.init_project import init_project
-from .subcommands.project_surfaces import project_surfaces
-from .subcommands.project_title import project_title
 from .subcommands.story import (build_story, create_story, edit_story,
                                 play_story)
 
@@ -94,24 +91,6 @@ subcommand(
     'config', configure_earwax, formatter_class=ArgumentDefaultsHelpFormatter,
     description='Configure the earwax module for use in your project.'
 )
-
-project_surfaces_parser = subcommand(
-    'surfaces', project_surfaces,
-    formatter_class=ArgumentDefaultsHelpFormatter,
-    description=f'Show the surfaces from the {surfaces_directory} directory.'
-)
-
-project_surfaces_parser.add_argument(
-    'surface', default=None, help='The name of a surface to view files for',
-    nargs='?'
-)
-
-project_title_parser = subcommand(
-    'title', project_title, formatter_class=ArgumentDefaultsHelpFormatter,
-    description='Rename the current project.'
-)
-
-project_title_parser.add_argument('title', nargs='?', help='The new name')
 
 subcommand('gui', gui, description='Create basic games in a GUI')
 

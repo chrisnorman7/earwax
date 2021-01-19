@@ -17,18 +17,3 @@ maps_directory: Path = cd / 'maps'
 
 # Directory where scripts are stored.
 scripts_directory: Path = cd / 'scripts'
-
-# The main sounds directory.
-sounds_directory: Path = cd / 'sounds'
-
-# The directory where surface directories are stored.
-surfaces_directory: Path = sounds_directory / 'surfaces'
-
-# The directory where ambiances are stored.
-ambiances_directory: Path = sounds_directory / 'ambiances'
-
-# The directory where music files are store.
-music_directory: Path = sounds_directory / 'music'
-
-# Where to store the surfaces.py file.
-surfaces_filename: Path = cd / 'surfaces.py'

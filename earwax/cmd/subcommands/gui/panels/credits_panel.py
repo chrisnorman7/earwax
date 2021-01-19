@@ -1,5 +1,6 @@
 """Provides the CreditsPanel class."""
 
+import os
 import webbrowser
 from typing import TYPE_CHECKING, Optional
 
@@ -13,7 +14,6 @@ except ModuleNotFoundError:
     FileBrowseButton, SizedPanel = (object, object)
     from .. import pretend_wx as wx
 
-from earwax.cmd.constants import sounds_directory
 from earwax.cmd.project import Project
 from earwax.cmd.project_credit import ProjectCredit
 
@@ -53,7 +53,7 @@ class CreditsPanel(wx.Panel):
         self.url_ctrl: wx.TextCtrl = wx.TextCtrl(p)
         self.sound_ctrl: FileBrowseButton = FileBrowseButton(
             p, labelText='&Sound', dialogTitle='Choose a sound file',
-            startDirectory=str(sounds_directory)
+            startDirectory=os.getcwd()
         )
         self.loop_ctrl: wx.CheckBox = wx.CheckBox(p, label='&Loop Sound')
         self.loop_ctrl.Disable()
