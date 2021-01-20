@@ -32,7 +32,9 @@ class StoryContext:
     @logger.default
     def get_default_logger(instance: 'StoryContext') -> Logger:
         """Return a default logger."""
-        return getLogger(instance.world.name)
+        logger: Logger = getLogger(instance.world.name)
+        logger.info('Created logger.')
+        return logger
 
     config_file: Path = attrib(init=False, repr=False)
 
@@ -172,7 +174,7 @@ class StoryContext:
                         self.show_warnings, title='Show warnings (%d)' %
                         len(self.warnings)
                     )
-                m.add_item(self.main_level.save, title='Save story')
+                m.add_item(self.main_level.save_world, title='Save story')
                 m.add_item(self.configure_earwax, title='Configure Earwax')
                 m.add_item(self.credits_menu, title='Add or remove credits')
                 m.add_item(self.set_initial_room, title='Set initial room')
@@ -189,7 +191,6 @@ class StoryContext:
     def play(self) -> None:
         """Push the world level."""
         self.game.output(self.world.messages.welcome)
-        self.state = WorldState(self.world)
         self.game.replace_level(self.main_level)
 
     def load(self) -> None:
@@ -204,7 +205,7 @@ class StoryContext:
                 with self.config_file.open('r') as f:
                     d: Dict[str, Any] = load(f, Loader=CLoader)
                     self.logger.info('Loaded configuration data: %r.' % d)
-                self.state = WorldState(self.world, **d)
+                self.state = WorldState.load(d, self.world)
                 # Remove any duplicates.
                 self.state.inventory_ids = list(set(self.state.inventory_ids))
                 self.main_level.build_inventory()

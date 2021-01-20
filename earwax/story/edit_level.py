@@ -231,7 +231,7 @@ class EditLevel(PlayLevel):
     def __attrs_post_init__(self) -> None:
         """Add some more actions."""
         self.action('Save world', symbol=key.S, modifiers=key.MOD_CTRL)(
-            self.save
+            self.save_world
         )
         self.action('Go to another room', symbol=key.G)(self.goto_room)
         self.action('Creation menu', symbol=key.C)(self.create_menu)
@@ -278,7 +278,7 @@ class EditLevel(PlayLevel):
             rooms.remove(self.room)
         return rooms
 
-    def save(self) -> None:
+    def save_world(self) -> None:
         """Save the world."""
         assert self.filename is not None
         try:
@@ -486,7 +486,9 @@ class EditLevel(PlayLevel):
             m.add_item(inner, title=title)
         self.game.push_level(m)
 
-    def set_sound(self, action: WorldAction) -> Generator[None, None, None]:
+    def set_action_sound(
+        self, action: WorldAction
+    ) -> Generator[None, None, None]:
         """Set the sound on the given action.
 
         :param action: The action whose sound will be changed.
@@ -516,40 +518,47 @@ class EditLevel(PlayLevel):
         yield
         self.game.push_level(e)
 
-    def set_cursor_sound(self) -> Generator[None, None, None]:
-        """Set the cursor sound."""
-        sound: str = ''
-        if self.world.cursor_sound is not None:
-            sound = self.world.cursor_sound
-        e: Editor = Editor(self.game, text=sound)
+    def set_world_sound(
+        self, name: str
+    ) -> Callable[[], Generator[None, None, None]]:
+        """Set the given sound.
 
-        @e.event
-        def on_submit(text: str) -> None:
-            self.game.pop_level()
-            if not text:
-                self.world.cursor_sound = None
-                self.game.output('Cursor sound cleared.')
-            elif not os.path.exists(text):
-                self.game.output('Pat does not exist: %s.' % text)
-            else:
-                self.world.cursor_sound = text
-                self.game.output('Cursor sound set.')
+        :param name: The name of the sound to edit.
+        """
 
-        self.game.output(
-            'Enter a new path for the cursor sound: %s' %
-            self.world.cursor_sound
-        )
-        yield
-        self.game.push_level(e)
+        def inner() -> Generator[None, None, None]:
+            sound: str = getattr(self.world, name) or ''
+            e: Editor = Editor(self.game, text=sound)
+
+            @e.event
+            def on_submit(text: str) -> None:
+                self.game.pop_level()
+                if not text:
+                    setattr(self.world, name, text)
+                    self.game.output('Sound cleared.')
+                elif not os.path.exists(text):
+                    self.game.output('Pat does not exist: %s.' % text)
+                else:
+                    setattr(self.world, name, text)
+                    self.game.output('Sound set.')
+
+            self.game.output(
+                'Enter a new sound path: %s' %
+                getattr(self.world, name)
+            )
+            yield
+            self.game.push_level(e)
+
+        return inner
 
     def sounds_menu(self) -> OptionalGenerator:
         """Add or remove ambiances for the currently focused object."""
         obj: Optional[ObjectTypes] = self.object
         if isinstance(obj, RoomExit):
-            yield from self.set_sound(obj.action)
+            yield from self.set_action_sound(obj.action)
         elif isinstance(obj, RoomObject):
             yield
-            push_actions_menu(self.game, obj.actions, self.set_sound)
+            push_actions_menu(self.game, obj.actions, self.set_action_sound)
             assert isinstance(self.game.level, Menu)
             m: Menu = self.game.level
 
@@ -559,11 +568,11 @@ class EditLevel(PlayLevel):
                 self.game.pop_level()
                 if obj.actions_action is None:
                     obj.actions_action = WorldAction(name='Main Action')
-                yield from self.set_sound(obj.actions_action)
+                yield from self.set_action_sound(obj.actions_action)
 
             m.add_item(inner, title='Main actions sound')
         elif isinstance(obj, WorldRoom):
-            yield from self.set_cursor_sound()
+            yield from self.world_sounds()
         else:
             self.game.output('Nothing selected.')
 
@@ -888,7 +897,7 @@ class EditLevel(PlayLevel):
                 yield from self.set_message(action)
 
             def set_sound() -> Generator[None, None, None]:
-                yield from self.set_sound(action)
+                yield from self.set_action_sound(action)
 
             def delete() -> None:
                 def yes() -> None:
@@ -1043,4 +1052,18 @@ class EditLevel(PlayLevel):
         for name in DumpableReverb.__annotations__:
             m.add_item(self.game.pop_level, title=name)
         m.add_item(delete_reverb, title='Delete')
+        self.game.push_level(m)
+
+    def world_sounds(self) -> Generator[None, None, None]:
+        """Push a menu that can be used to configure world sounds."""
+        yield
+        m: Menu = Menu(self.game, 'World Sounds')
+        m.add_item(
+            self.set_world_sound('cursor_sound'),
+            title=f'Cursor sound ({self.world.cursor_sound})'
+        )
+        m.add_item(
+            self.set_world_sound('empty_category_sound'),
+            title=f'Empty category sound ({self.world.empty_category_sound})'
+        )
         self.game.push_level(m)

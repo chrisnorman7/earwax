@@ -109,7 +109,9 @@ class PlayLevel(Level):
         )(
             self.game.change_volume(0.05)
         )
-        self.action('Save game', symbol=key.F3, joystick_button=7)(self.save)
+        self.action(
+            'Save game', symbol=key.F3, joystick_button=7
+        )(self.save_state)
         self.action(
             'Load game', symbol=key.F4, joystick_button=8
         )(self.world_context.load)
@@ -269,6 +271,8 @@ class PlayLevel(Level):
             elif category is WorldStateCategories.exits:
                 message = self.world.messages.no_exits
             self.game.output(message)
+            if self.world.empty_category_sound is not None:
+                self.play_action_sound(self.world.empty_category_sound)
         else:
             position: Optional[Point] = None
             index: int
@@ -562,8 +566,9 @@ class PlayLevel(Level):
         else:
             self.game.output(self.world.messages.no_objects)
 
-    def save(self) -> None:
+    def save_state(self) -> None:
         """Save the current state."""
+        print('Trying to save world state.')
         directory: Path = self.game.get_settings_path()
         if not directory.is_dir():
             try:

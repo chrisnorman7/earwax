@@ -14,8 +14,6 @@ from ...pyglet import Window
 from ...story import (EditLevel, RoomExit, RoomObject, StoryContext,
                       StoryWorld, WorldAction, WorldAmbiance, WorldRoom)
 
-logger: Logger = getLogger(__name__)
-
 code: str = '''"""{{ world.name }}.
 
 Author: {{ world.author }}
@@ -162,6 +160,12 @@ def build_story(args: Namespace) -> None:
         print('Skipping empty cursor sound.')
     else:
         world.cursor_sound = copy_path(world.cursor_sound, sounds_directory)
+    if world.empty_category_sound is None:
+        print('Skipping empty category sound.')
+    else:
+        world.empty_category_sound = copy_path(
+            world.empty_category_sound, sounds_directory
+        )
     actions_directory: Path = sounds_directory / 'actions'
     if world.take_action is not None:
         copy_action(world.take_action, actions_directory, 0)
@@ -216,6 +220,12 @@ def build_story(args: Namespace) -> None:
 
 def play_story(args: Namespace, edit: bool = False) -> None:
     """Load and play a story."""
+    suffix: str
+    if edit:
+        suffix = 'edit_story'
+    else:
+        suffix = 'play_story'
+    logger: Logger = getLogger(f'{__name__}.{suffix}')
     filename: Path = Path(args.filename)
     logger.info('Attempting to load worl file %s.', filename)
     if not filename.is_file():
