@@ -38,7 +38,7 @@ class ActionMap:
         mouse_button: Optional[int] = None, modifiers: int = 0,
         joystick_button: Optional[int] = None,
         hat_direction: Optional[HatDirection] = None,
-        interval: Optional[int] = None
+        interval: Optional[float] = None
     ) -> Callable[[ActionFunctionType], Action]:
         """Add an action to this object.
 

@@ -61,9 +61,8 @@ class Action:
 
         If ``None``, then it is a one-time action. One-time actions should be
         used for things like quitting the game, or passing through exits, where
-        multiple uses in a short space of time would be undesirable. If the
-        value is an integer, it will be the number of seconds which must elapse
-        between runs.
+        multiple uses in a short space of time would be undesirable. Otherwise,
+        it will be the number of seconds which must elapse between runs.
 
     :ivar ~earwax.Action.last_run: The time this action was last run.
 
@@ -78,7 +77,7 @@ class Action:
     modifiers: int = 0
     joystick_button: Optional[int] = None
     hat_direction: Optional[HatDirection] = None
-    interval: Optional[int] = None
+    interval: Optional[float] = None
     last_run: float = attrib(default=Factory(float), init=False)
 
     def run(self, dt: Optional[float]) -> OptionalGenerator:
