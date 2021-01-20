@@ -1,6 +1,6 @@
 # Earwax
 
-An audio game engine with a silly name.
+An audio game engine for fast prototyping.
 
 * [PyPi](https://pypi.org/project/earwax/)
 
