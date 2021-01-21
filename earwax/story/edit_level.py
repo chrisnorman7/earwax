@@ -898,6 +898,58 @@ class EditLevel(PlayLevel):
             def set_sound() -> Generator[None, None, None]:
                 yield from self.set_action_sound(action)
 
+            def set_rumble_value() -> Generator[None, None, None]:
+                e: Editor = Editor(self.game, text=str(action.rumble_value))
+
+                @e.event
+                def on_submit(text: str) -> None:
+                    value: float
+                    try:
+                        value = float(text)
+                    except ValueError:
+                        return self.game.cancel(
+                            message=f'Invalid value: {text}.', level=self
+                        )
+                    if value <= 0:
+                        action.rumble_value = 0
+                        self.game.cancel(message='Value cleared.', level=self)
+                    else:
+                        action.rumble_value = value
+                        self.game.cancel(message='Value set.', level=self)
+
+                self.game.output(
+                    f'Enter a new rumble value: {action.rumble_value}'
+                )
+                yield
+                self.game.push_level(e)
+
+            def set_rumble_duration() -> Generator[None, None, None]:
+                e: Editor = Editor(self.game, text=str(action.rumble_duration))
+
+                @e.event
+                def on_submit(text: str) -> None:
+                    value: int
+                    try:
+                        value = int(text)
+                    except ValueError:
+                        return self.game.cancel(
+                            message=f'Invalid value: {text}.'
+                        )
+                    if value <= 0:
+                        action.rumble_duration = 0
+                        self.game.cancel(
+                            message='Duration cleared.', level=self
+                        )
+                    else:
+                        action.rumble_duration = value
+                        self.game.cancel(message='Duration set.', level=self)
+
+                self.game.output(
+                    f'Enter a new duration: {action.rumble_duration}'
+                )
+                yield
+                self.game.push_level(e)
+
             def delete() -> None:
                 def yes() -> None:
                     self.game.reveal_level(self)
@@ -933,10 +985,17 @@ class EditLevel(PlayLevel):
             m: Menu = Menu(self.game, 'Edit Action')
             m.add_item(set_name, title=f'Rename ({action.name})')
             m.add_item(
-                set_message, title=f'Set message ({action.message})'
+                set_message, title=f'Message ({action.message})'
             )
             m.add_item(
-                set_sound, title=f'Set sound ({action.sound})'
+                set_sound, title=f'Sound ({action.sound})'
+            )
+            m.add_item(
+                set_rumble_value, title=f'Rumble value ({action.rumble_value})'
+            )
+            m.add_item(
+                set_rumble_duration,
+                title=f'Rumble duration ({action.rumble_duration})'
             )
             m.add_item(delete, title='Delete')
             self.game.push_level(m)

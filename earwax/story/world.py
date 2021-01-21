@@ -78,11 +78,25 @@ class WorldAction(DumpLoadMixin):
         action is used.
 
         If this value is omitted, no sound will be heard.
+
+    :ivar ~earwax.story.WorldAction.rumble_value: The power of a rumble
+        triggered by this action.
+
+        This value should be between 0.0 (nothing) and 1.0 (full power).
+
+        If this value is ``0``, no rumble will occur.
+
+    :ivar ~earwax.story.WorldAction.rumble_duration: The time (in seconds) the
+        rumble should continue for.
+
+        If this value is ``0``, no rumble will occur.
     """
 
     name: str = 'Unnamed Action'
     message: Optional[str] = None
     sound: Optional[str] = None
+    rumble_value: float = 0.0
+    rumble_duration: int = 0
 
     def __str__(self) -> str:
         """Return a string."""

@@ -11,7 +11,7 @@ from ..ambiance import Ambiance
 from ..level import Level
 from ..menu import Menu
 from ..point import Point
-from ..pyglet import key
+from ..pyglet import key, Joystick
 from ..sound import AlreadyDestroyed, Sound
 from ..track import Track, TrackTypes
 from ..yaml import CDumper, dump
@@ -450,6 +450,12 @@ class PlayLevel(Level):
             if isinstance(obj, RoomObject) and pan:
                 position = obj.position
             self.play_action_sound(action.sound, position=position)
+        if action.rumble_duration > 0 and action.rumble_value > 0:
+            joystick: Joystick
+            for joystick in self.game.joysticks:
+                self.game.start_rumble(
+                    joystick, action.rumble_value, action.rumble_duration
+                )
 
     def play_cursor_sound(self, position: Optional[Point]) -> None:
         """Play and set the cursor sound."""
