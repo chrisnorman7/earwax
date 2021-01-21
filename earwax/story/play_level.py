@@ -15,9 +15,9 @@ from ..pyglet import key
 from ..sound import AlreadyDestroyed, Sound
 from ..track import Track, TrackTypes
 from ..yaml import CDumper, dump
-from .world import (
-    ObjectTypes, RoomExit, RoomObject, StoryWorld, WorldAction, WorldAmbiance,
-    WorldRoom, WorldState, WorldStateCategories)
+from .world import (DumpablePoint, ObjectTypes, RoomExit, RoomObject,
+                    StoryWorld, WorldAction, WorldAmbiance, WorldRoom,
+                    WorldState, WorldStateCategories)
 
 if TYPE_CHECKING:
     from synthizer import GlobalFdnReverb
@@ -274,14 +274,28 @@ class PlayLevel(Level):
             if self.world.empty_category_sound is not None:
                 self.play_action_sound(self.world.empty_category_sound)
         else:
-            position: Optional[Point] = None
+            position: Optional[DumpablePoint] = None
             index: int
             if self.state.object_index is None:
                 index = 0
             else:
-                index = max(0, self.state.object_index + direction)
+                index = self.state.object_index + direction
+                if index < 0:
+                    index = 0
+                    if self.world.end_of_category_sound is not None:
+                        if category is WorldStateCategories.objects:
+                            position = self.get_objects()[0].position
+                        self.play_action_sound(
+                            self.world.end_of_category_sound, position
+                        )
             if index >= len(data):
                 index = len(data) - 1
+                if self.world.end_of_category_sound is not None:
+                    if category is WorldStateCategories.objects:
+                        position = self.get_objects()[index].position
+                    self.play_action_sound(
+                        self.world.end_of_category_sound, position
+                    )
             self.state.object_index = index
             self.game.output(data[self.state.object_index])
             if category is WorldStateCategories.objects:

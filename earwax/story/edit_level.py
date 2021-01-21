@@ -1066,4 +1066,8 @@ class EditLevel(PlayLevel):
             self.set_world_sound('empty_category_sound'),
             title=f'Empty category sound ({self.world.empty_category_sound})'
         )
+        m.add_item(
+            self.set_world_sound('end_of_category_sound'),
+            title=f'End of category sound ({self.world.end_of_category_sound})'
+        )
         self.game.push_level(m)

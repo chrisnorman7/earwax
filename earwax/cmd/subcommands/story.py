@@ -166,6 +166,12 @@ def build_story(args: Namespace) -> None:
         world.empty_category_sound = copy_path(
             world.empty_category_sound, sounds_directory
         )
+    if world.end_of_category_sound is None:
+        print('Skipping end of category sound.')
+    else:
+        world.end_of_category_sound = copy_path(
+            world.end_of_category_sound, sounds_directory
+        )
     actions_directory: Path = sounds_directory / 'actions'
     if world.take_action is not None:
         copy_action(world.take_action, actions_directory, 0)

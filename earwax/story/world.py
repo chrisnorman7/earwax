@@ -533,6 +533,7 @@ class StoryWorld(DumpLoadMixin):
     main_menu_musics: List[str] = Factory(list)
     cursor_sound: Optional[str] = None
     empty_category_sound: Optional[str] = None
+    end_of_category_sound: Optional[str] = None
     rooms: Dict[str, WorldRoom] = Factory(dict)
     initial_room_id: Optional[str] = None
     messages: WorldMessages = Factory(WorldMessages)
