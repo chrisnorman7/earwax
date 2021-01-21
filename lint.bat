@@ -1,5 +1,5 @@
 @echo off
 echo Running Mypy...
-mypy --ignore-missing-imports earwax tests
+mypy --ignore-missing-imports earwax tests examples
 echo Running Flake8...
-flake8 earwax tests
+flake8 earwax tests examples
