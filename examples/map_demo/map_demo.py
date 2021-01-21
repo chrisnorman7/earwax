@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import List
 
 from pyglet.window import Window, key
-from synthizer import GlobalFdnReverb
 
 from earwax import (ActionMenu, Ambiance, Box, BoxLevel, BoxTypes, Credit,
                     Door, Game, Level, Menu, Point, Reverb, Track, TrackTypes)
@@ -57,7 +56,8 @@ def before_run() -> None:
         end: Point = Point(start.x + 1, start.y, office.end.z)
         b: Box[Door] = Box(
             game, start, end, data=door, name=f'Door to {office.name}',
-            surface_sound=office.surface_sound, reverb=office_reverb.make_reverb(game.audio_context)
+            surface_sound=office.surface_sound,
+            reverb=office_reverb.make_reverb(game.audio_context)
         )
         boxes.append(b)
         a: Ambiance = Ambiance.from_path(
@@ -86,14 +86,16 @@ def before_run() -> None:
         game, Point(0, 4, 0), Point(7, 10, 2), 3, Point(2, 0, 0),
         get_name=lambda i: f'Office {i + 1}', on_create=finalise_office,
         surface_sound=footsteps_directory / 'office',
-        reverb=office_reverb.make_reverb(game.audio_context), wall_sound=wall_sound
+        reverb=office_reverb.make_reverb(game.audio_context),
+        wall_sound=wall_sound
     )
     boxes.append(
         Box(
             game, offices[0].bounds.bottom_back_left - Point(0, 4, 0),
             offices[-1].bounds.top_back_right - Point(0, 1, 0),
             name='Corridor', surface_sound=footsteps_directory / 'corridor',
-            reverb=corridor_reverb.make_reverb(game.audio_context), wall_sound=wall_sound
+            reverb=corridor_reverb.make_reverb(game.audio_context),
+            wall_sound=wall_sound
         )
     )
     boxes.extend(offices)
