@@ -14,10 +14,11 @@ from ..level import Level
 from ..menu import Menu
 from ..pyglet import key
 from ..types import OptionalGenerator
+from ..utils import english_list
 from .play_level import PlayLevel
 from .world import (DumpablePoint, DumpableReverb, ObjectTypes, RoomExit,
-                    RoomObject, RoomObjectTypes, StoryWorld, WorldAction,
-                    WorldAmbiance, WorldMessages, WorldRoom)
+                    RoomObject, RoomObjectClass, RoomObjectTypes, StoryWorld,
+                    WorldAction, WorldAmbiance, WorldMessages, WorldRoom)
 
 message_descriptions: Dict[str, str] = {
     'no_objects': 'The message shown when focusing an empty object list',
@@ -255,6 +256,13 @@ class EditLevel(PlayLevel):
         self.action(
             'Actions menu', symbol=key.A, modifiers=key.MOD_SHIFT
         )(self.object_actions)
+        self.action(
+            'Change the classes assigned to an object', symbol=key.O,
+        )(self.edit_object_class_names)
+        self.action(
+            'Add or remove object classes', symbol=key.O,
+            modifiers=key.MOD_SHIFT
+        )(self.edit_object_classes)
         self.action('Reposition object', symbol=key.X)(self.reposition_object)
         self.action(
             'Configure room reverb', symbol=key.V
@@ -702,13 +710,8 @@ class EditLevel(PlayLevel):
                 self.game.pop_level()
             self.set_room(self.room)
 
-        def no() -> None:
-            """Don't delete."""
-            self.game.output('Cancelled.')
-            self.game.pop_level()
-
         def inner() -> None:
-            m: Menu = Menu.yes_no(self.game, yes, no)
+            m: Menu = Menu.yes_no(self.game, yes, self.game.cancel)
             self.game.push_level(m)
 
         return inner
@@ -814,12 +817,8 @@ class EditLevel(PlayLevel):
             self.game.pop_level()
             self.game.output('Done.')
 
-        def no() -> None:
-            self.game.output('Cancelled.')
-            self.game.pop_level()
-
         m: Menu = Menu.yes_no(
-            self.game, yes, no,
+            self.game, yes, self.game.cancel,
             title=f'Are you sure you want to delete {obj!s}?'
         )
         self.game.push_level(m)
@@ -928,11 +927,7 @@ class EditLevel(PlayLevel):
                         )
                     self.game.output('Action deleted.')
 
-                def no() -> None:
-                    self.game.pop_level()
-                    self.game.output('Cancelled.')
-
-                m: Menu = Menu.yes_no(self.game, yes, no)
+                m: Menu = Menu.yes_no(self.game, yes, self.game.cancel)
                 self.game.push_level(m)
 
             m: Menu = Menu(self.game, 'Edit Action')
@@ -1035,11 +1030,9 @@ class EditLevel(PlayLevel):
                 self.game.output('Reverb deleted.')
                 self.game.reveal_level(self)
 
-            def no() -> None:
-                self.game.output('Cancelled.')
-                self.game.reveal_level(self)
-
-            m: Menu = Menu.yes_no(self.game, yes, no)
+            m: Menu = Menu.yes_no(
+                self.game, yes, lambda: self.game.cancel(level=self)
+            )
             self.game.push_level(m)
 
         if room.reverb is None:
@@ -1070,4 +1063,130 @@ class EditLevel(PlayLevel):
             self.set_world_sound('end_of_category_sound'),
             title=f'End of category sound ({self.world.end_of_category_sound})'
         )
+        self.game.push_level(m)
+
+    def edit_object_class_names(self) -> None:
+        """Push a menu that can edit object class names."""
+        obj: Optional[ObjectTypes] = self.object
+        if obj is None:
+            return self.game.output('You must first select an object.')
+        if not isinstance(obj, RoomObject):
+            return self.game.output('Only objects can have classes.')
+
+        def add(name: str) -> Callable[[], None]:
+            def inner() -> None:
+                assert isinstance(obj, RoomObject)
+                obj.class_names.append(name)
+                self.game.reveal_level(self)
+                self.edit_object_class_names()
+
+            return inner
+
+        def remove(name: str) -> Callable[[], None]:
+            def inner() -> None:
+                assert isinstance(obj, RoomObject)
+                obj.class_names.remove(name)
+                self.game.reveal_level(self)
+                self.edit_object_class_names()
+
+            return inner
+
+        m: Menu = Menu(self.game, 'Classes')
+        name: str
+        for name in obj.class_names:
+            m.add_item(remove(name), title=f'Remove {name}')
+        object_class: RoomObjectClass
+        for object_class in self.world.object_classes:
+            if object_class.name not in obj.class_names:
+                m.add_item(
+                    add(object_class.name), title=f'Add {object_class.name}'
+                )
+        self.game.push_level(m)
+
+    def edit_object_class(self, class_: RoomObjectClass) -> Callable[[], None]:
+        """Push a menu for editing object classes.
+
+        :param class_: The object class to edit.
+        """
+
+        def rename() -> Generator[None, None, None]:
+            e: Editor = Editor(self.game, text=class_.name)
+
+            @e.event
+            def on_submit(text: str):
+                if not text:
+                    self.game.cancel()
+                else:
+                    self.game.output('Renamed.')
+                    obj: RoomObject
+                    for obj in self.world.all_objects():
+                        if class_.name in obj.class_names:
+                            obj.class_names.remove(class_.name)
+                            obj.class_names.append(text)
+                    class_.name = text
+                    self.game.reveal_level(self)
+                    self.edit_object_class(class_)
+
+            self.game.output(f'Enter a new name for the {class_.name} class:')
+            yield
+            self.game.push_level(e)
+
+        def remove() -> None:
+            def yes() -> None:
+                self.world.object_classes.remove(class_)
+                obj: RoomObject
+                for obj in self.world.all_objects():
+                    if class_.name in obj.class_names:
+                        obj.class_names.remove(class_.name)
+                self.game.output('Deleted.')
+                self.game.reveal_level(self)
+                self.edit_object_classes()
+
+            m: Menu = Menu.yes_no(
+                self.game, yes, self.game.cancel,
+                title=f'Really delete the {class_.name} object class?'
+            )
+            self.game.push_level(m)
+
+        def inner() -> None:
+            m: Menu = Menu(self.game, f'Edit {class_.name}')
+            m.add_item(rename, title='Rename')
+            m.add_item(remove, title='Remove')
+            self.game.push_level(m)
+
+        return inner
+
+    def edit_object_classes(self) -> None:
+        """Push a menu for editing object classes."""
+
+        def add() -> Generator[None, None, None]:
+            e: Editor = Editor(self.game)
+
+            @e.event
+            def on_submit(text: str) -> None:
+                if text:
+                    self.world.object_classes.append(RoomObjectClass(text))
+                    self.game.reveal_level(self)
+                    self.edit_object_classes()
+                else:
+                    self.game.cancel()
+
+            self.game.output('Enter the name for the new object class:')
+            yield
+            self.game.push_level(e)
+
+        m: Menu = Menu(self.game, 'Object Classes')
+        m.add_item(add, title='Add class')
+        object_class: RoomObjectClass
+        for object_class in self.world.object_classes:
+            objects: str = english_list(
+                [
+                    x.name for x in self.world.all_objects()
+                    if object_class.name in x.class_names
+                ], empty='No objects'
+            )
+            m.add_item(
+                self.edit_object_class(object_class),
+                title=f'{object_class.name}: {objects}'
+            )
         self.game.push_level(m)

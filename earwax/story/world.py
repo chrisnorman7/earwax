@@ -2,7 +2,7 @@
 
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Union
 
 from attr import Factory, attrib, attrs
 from shortuuid import uuid
@@ -92,23 +92,34 @@ class WorldAction(DumpLoadMixin):
 class RoomObjectTypes(Enum):
     """The type of a room object.
 
-    :ivar ~earwax.story.world.WorldObjectTypes.stuck: This object cannot be
-        moved.
+    :ivar ~earwax.story.RoomObjectTypes.stuck: This object cannot be moved.
 
-    :ivar ~earwax.story.world.WorldObjectTypes.takeable: This object can be
-        picked up.
+    :ivar ~earwax.story.RoomObjectTypes.takeable: This object can be picked up.
 
-    :ivar ~earwax.story.world.WorldObjectTypes.droppable: This object can be
-        dropped.
+    :ivar ~earwax.story.RoomObjectTypes.droppable: This object can be dropped.
 
         This value automatically implies
-        :attr:`~earwax.story.world.WorldObjectTypes.takeable`.
+        :attr:`~earwax.story.RoomObjectTypes.takeable`.
     """
 
     stuck = 0
     takeable = 1
     droppable = 2
     usable: int = 4
+
+
+@attrs(auto_attribs=True)
+class RoomObjectClass(DumpLoadMixin):
+    """Add a class for objects.
+
+    Instances of this class let you organise objects into classes.
+
+    This is used for making exits discriminate.
+
+    :ivar ~earwax.story.RoomObjectClass.name: The name of the class.
+    """
+
+    name: str
 
 
 @attrs(auto_attribs=True)
@@ -124,16 +135,6 @@ class RoomObject(StringMixin, DumpLoadMixin):
 
         Other than the above restriction, you can set the ID to be whatever you
         like.
-
-    :ivar ~earwax.story.RoomObject.location: The room where this object is
-        located.
-
-        This value is set by the :meth:`~earwax.story.world.StoryWorld` which
-        holds this instance.
-
-        If this object is picked up, the location will not change, but this
-        object will be removed from the location's
-        :attr:`~earwax.story.world.WorldRoom.objects` dictionary.
 
     :ivar ~earwax.story.RoomObject.name: The name of this object.
 
@@ -152,32 +153,45 @@ class RoomObject(StringMixin, DumpLoadMixin):
     :ivar ~earwax.story.RoomObject.actions: A list of actions that can be
         performed on this object.
 
-    :ivar ~earwax.story.world.RoomObject.position: The position of this object.
+    :ivar ~earwax.story.RoomObject.position: The position of this object.
 
         If this value is ``None``, then any :attr:`ambiances` will not be
         panned.
 
-    :ivar ~earwax.story.world.RoomObject.drop_action: The action that will be
-        used when this object is dropped by the player.
+    :ivar ~earwax.story.RoomObject.drop_action: The action that will be used
+        when this object is dropped by the player.
 
         If this value is ``None``, the containing world's
-        :attr:`~earwax.story.world.StoryWorld.drop_action` attribute will be
-        used.
+        :attr:`~earwax.story.StoryWorld.drop_action` attribute will be used.
 
-    :ivar ~earwax.story.world.RoomObject.take_action: The action that will be
-        used when this object is taken by the player.
+    :ivar ~earwax.story.RoomObject.take_action: The action that will be used
+        when this object is taken by the player.
 
         If this value is ``None``, the containing world's
-        :attr:`~earwax.story.world.StoryWorld.take_action` attribute will be
-        used.
+        :attr:`~earwax.story.StoryWorld.take_action` attribute will be used.
 
-    :ivar ~earwax.story.world.RoomObject.use_action: The action that will be
-        used when this object is used by the player.
+    :ivar ~earwax.story.RoomObject.use_action: The action that will be used
+        when this object is used by the player.
 
         If this value is ``None``, then this object is considered unusable.
 
-    :ivar ~earwax.story.world.RoomObject.type: Specifies what sort of object
-        this is.
+    :ivar ~earwax.story.RoomObject.type: Specifies what sort of object this is.
+
+    :ivar ~earwax.story.RoomObject.class_names: The names of all the classes
+        this object belongs to.
+
+        If you want a list of :class:`~earwax.story.RoomObjectClass` instances,
+        use the :attr:`~earwax.story.RoomObject.classes` property.
+
+    :ivar ~earwax.story.RoomObject.location: The room where this object is
+        located.
+
+        This value is set by the :meth:`~earwax.story.StoryWorld` which holds
+        this instance.
+
+        If this object is picked up, the location will not change, but this
+        object will be removed from the location's
+        :attr:`~earwax.story.WorldRoom.objects` dictionary.
     """
 
     id: str = Factory(uuid)
@@ -190,6 +204,7 @@ class RoomObject(StringMixin, DumpLoadMixin):
     take_action: Optional[WorldAction] = None
     use_action: Optional[WorldAction] = None
     type: RoomObjectTypes = Factory(lambda: RoomObjectTypes.stuck)
+    class_names: List[str] = Factory(list)
     location: 'WorldRoom' = attrib(init=False, repr=False)
 
     __excluded_attribute_names__ = ['location']
@@ -217,6 +232,16 @@ class RoomObject(StringMixin, DumpLoadMixin):
         """Return ``True`` if this object can be used."""
         return self.use_action is not None
 
+    @property
+    def classes(self) -> List[RoomObjectClass]:
+        """Return a list of classes.
+
+        This value is inferred from the
+        :attr:`~earwax.story.RoomObject.class_names` list.
+        """
+        world: StoryWorld = self.location.world
+        return [c for c in world.object_classes if c.name in self.class_names]
+
 
 @attrs(auto_attribs=True)
 class RoomExit(DumpLoadMixin):
@@ -228,18 +253,18 @@ class RoomExit(DumpLoadMixin):
     The actual destination can be retrieved with the :attr:`destination`
     property.
 
-    :ivar ~earwax.story.world.RoomExit.destination_id: The ID of the room on
-        the other side of this exit.
+    :ivar ~earwax.story.RoomExit.destination_id: The ID of the room on the
+        other side of this exit.
 
     :ivar ~earwax.story.RoomExit.location: The location of this exit.
 
         This value is provided by the containing
-        :class:`~earwax.story.world.StoryWorld` class.
+        :class:`~earwax.story.StoryWorld` class.
 
     :ivar ~earwax.story.RoomExit.action: An action to perform when using this
         exit.
 
-    :ivar ~earwax.story.world.RoomExit.position: The position of this exit.
+    :ivar ~earwax.story.RoomExit.position: The position of this exit.
 
         If this value is ``None``, then any :attr:`ambiances` will not be
         panned.
@@ -288,7 +313,7 @@ class WorldRoom(DumpLoadMixin, StringMixin):
     :ivar ~earwax.story.WorldRoom.world: The world this room is part of.
 
         This value is set by the containing
-        :class:`~earwax.story.world.StoryRoom` instance.
+        :class:`~earwax.story.StoryRoom` instance.
 
     :ivar ~earwax.story.WorldRoom.id: The unique ID of this room.
 
@@ -351,15 +376,14 @@ class WorldRoom(DumpLoadMixin, StringMixin):
         """Create and return an exit that links this room to another.
 
         This method will add the new exits to this room's
-        :attr:`~earwax.story.world.WorldRoom.exits` list, and set the
-        appropriate :attr:`~earwax.story.world.RoomExit.location` on the new
-        exit.
+        :attr:`~earwax.story.WorldRoom.exits` list, and set the appropriate
+        :attr:`~earwax.story.RoomExit.location` on the new exit.
 
         :param destination: The destination whose ID will become the new exit's
-            :attr:`~earwax.story.world.RoomExit.destination_id`.
+            :attr:`~earwax.story.RoomExit.destination_id`.
 
         :param kwargs: Extra keyword arguments to pass to the
-            :class:`~earwax.story.world.RoomExit` constructor..
+            :class:`~earwax.story.RoomExit` constructor..
         """
         x: RoomExit = RoomExit(destination.id, **kwargs)
         x.location = self
@@ -370,11 +394,11 @@ class WorldRoom(DumpLoadMixin, StringMixin):
         """Create and return an exit from the provided ``kwargs``.
 
         This method will add the created object to this room's
-        :attr:`~earwax.story.world.WorldRoom.objects` dictionary, and set the
-        appropriate :attr:`~earwax.story.world.RoomObject.location` attribute.
+        :attr:`~earwax.story.WorldRoom.objects` dictionary, and set the
+        appropriate :attr:`~earwax.story.RoomObject.location` attribute.
 
         :param kwargs: Keyword arguments to pass to the constructor of
-            :class:`~earwax.story.world.RoomObject`.
+            :class:`~earwax.story.RoomObject`.
         """
         obj: RoomObject = RoomObject(**kwargs)
         obj.location = self
@@ -517,6 +541,12 @@ class StoryWorld(DumpLoadMixin):
 
         If this value is ``None``, no sound will be heard.
 
+    :ivar ~earwax.story.StoryWorld.empty_category_sound: The sound which will
+        be heard when cycling to an empty category.
+
+    :ivar ~earwax.story.StoryWorld.end_of_category_sound: The sound which will
+        be heard when cycling to the end of a category.
+
     :ivar ~earwax.story.StoryWorld.rooms: A mapping of room IDs to rooms.
 
     :ivar ~earwax.story.StoryWorld.initial_room_id: The ID of the room to be
@@ -524,6 +554,25 @@ class StoryWorld(DumpLoadMixin):
 
     :ivar ~earwax.story.StoryWorld.messages: The messages object used by this
         world.
+
+    :ivar ~earwax.story.StoryWorld.take_action: The default take action.
+
+        This value will be used when an object is taken with its
+        :attr:`~earwax.story.RoomObject.take_action` attribute set to ``None``.
+
+    :ivar ~earwax.story.StoryWorld.drop_action: The default drop action.
+
+        This value will be used when an object is dropped and has its
+        :attr:`~earwax.story.RoomObject.drop_action` attribute is ``None``.
+
+    :ivar ~earwax.story.StoryWorld.panner_strategy: The name of the default
+        :class:`panner strategy <earwax.PannerStrategies>` to use.
+
+    :ivar ~earwax.story.StoryWorld.object_classes: A list of object classes.
+
+        Objects are mapped to these classes by way of their
+        :attr:`~earwax.story.RoomObject.class_names` and
+        :attr:`~earwax.story.RoomObject.classes` lists.
     """
 
     game: 'Game'
@@ -544,6 +593,7 @@ class StoryWorld(DumpLoadMixin):
         lambda: WorldAction(name='Drop', message='You drop {}.')
     )
     panner_strategy: str = Factory(lambda: 'best')
+    object_classes: List[RoomObjectClass] = Factory(list)
 
     __excluded_attribute_names__ = ['game']
 
@@ -587,6 +637,12 @@ class StoryWorld(DumpLoadMixin):
             return self.rooms[self.initial_room_id]
         return None
 
+    def all_objects(self) -> Iterator[RoomObject]:
+        """Return a generator of every object contained by this world."""
+        room: WorldRoom
+        for room in self.rooms.values():
+            yield from room.objects.values()
+
     def add_room(
         self, room: WorldRoom, initial: Optional[bool] = None
     ) -> None:
@@ -596,10 +652,10 @@ class StoryWorld(DumpLoadMixin):
 
         :param initial: An optional boolean to specify whether the given room
             should become the
-            :attr:`~earwax.story.world.StoryWorld.initial_room` or not.
+            :attr:`~earwax.story.StoryWorld.initial_room` or not.
 
             If this value is ``None``, then this room will be set as default if
-            :attr:`~earwax.story.world.StoryWorld.initial_room_id` is itself
+            :attr:`~earwax.story.StoryWorld.initial_room_id` is itself
             ``None``.
         """
         self.rooms[room.id] = room

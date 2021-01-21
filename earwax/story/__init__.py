@@ -32,15 +32,17 @@ from .context import StoryContext
 from .edit_level import EditLevel, ObjectPositionLevel
 from .play_level import PlayLevel
 from .world import (DumpablePoint, DumpableReverb, ObjectTypes, RoomExit,
-                    RoomObject, StoryWorld, WorldAction, WorldAmbiance,
-                    WorldMessages, WorldRoom, WorldState, WorldStateCategories)
+                    RoomObject, RoomObjectClass, RoomObjectTypes, StoryWorld,
+                    WorldAction, WorldAmbiance, WorldMessages, WorldRoom,
+                    WorldState, WorldStateCategories)
 
 __all__: List[str] = ['ObjectTypes']
 __all__.extend(
     thing.__name__ for thing in [
-        DumpablePoint, DumpableReverb, RoomExit, RoomObject, StoryWorld,
-        WorldAction, WorldAmbiance, WorldMessages, WorldRoom, WorldState,
-        WorldStateCategories, EditLevel, ObjectPositionLevel, PlayLevel,
+        DumpablePoint, DumpableReverb, RoomExit, RoomObject, RoomObjectClass,
+        RoomObjectTypes, StoryWorld, WorldAction, WorldAmbiance, WorldMessages,
+        WorldRoom, WorldState, WorldStateCategories,
+        EditLevel, ObjectPositionLevel, PlayLevel,
         StoryContext
     ]
 )

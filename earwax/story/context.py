@@ -219,14 +219,9 @@ class StoryContext:
             else:
                 self.game.output(self.world.messages.no_saved_game)
 
-        def no() -> None:
-            """Don't do anything."""
-            self.game.output('Cancelled.')
-            self.game.pop_level()
-
         if self.game.level is self.main_level:
             m: Menu = Menu.yes_no(
-                self.game, yes, no,
+                self.game, yes, self.game.cancel,
                 title='Do you want to load your saved game?'
             )
             self.game.push_level(m)
@@ -323,11 +318,7 @@ class StoryContext:
                 self.game.clear_levels()
                 self.game.push_level(self.get_main_menu())
 
-            def no() -> None:
-                self.game.output('Cancelled.')
-                self.game.pop_level()
-
-            m: Menu = Menu.yes_no(self.game, yes, no)
+            m: Menu = Menu.yes_no(self.game, yes, self.game.cancel)
             self.game.push_level(m)
 
         def close_menu() -> Generator[None, None, None]:
@@ -415,12 +406,10 @@ class StoryContext:
                 self.game.output('Deleted.')
                 self.game.replace_level(self.get_main_menu())
 
-            def no() -> None:
-                self.game.pop_level()
-                self.game.output('Cancelled.')
-
             def inner() -> None:
-                self.game.replace_level(Menu.yes_no(self.game, yes, no))
+                self.game.replace_level(
+                    Menu.yes_no(self.game, yes, self.game.cancel)
+                )
 
             return inner
 
