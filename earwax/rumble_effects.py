@@ -13,11 +13,7 @@ from typing import TYPE_CHECKING, Generator, List, Optional
 
 from attr import attrs
 
-try:
-    from pyglet.input import Joystick
-except ModuleNotFoundError:
-    Joystick = object
-
+from .pyglet import Joystick
 from .promises.staggered_promise import StaggeredPromise
 
 if TYPE_CHECKING:
