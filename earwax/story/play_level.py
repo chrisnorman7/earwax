@@ -399,7 +399,10 @@ class PlayLevel(Level):
             else:
                 ambiance: Ambiance = Ambiance('file', a.path, obj.position)
                 self.ambiances.append(ambiance)
-                ambiance.play(self.game.ambiance_sound_manager, gain=gain)
+                ambiance.play(
+                    self.game.ambiance_sound_manager, gain=gain,
+                    reverb=self.reverb
+                )
                 self.object_ambiances[obj.id].append(ambiance)
 
     def stop_object_ambiances(self, obj: RoomObject) -> None:
@@ -453,8 +456,7 @@ class PlayLevel(Level):
         if self.world.cursor_sound is None:
             return
         self.cursor_sound = self.game.interface_sound_manager.play_path(
-            Path(self.world.cursor_sound), False, position=position,
-            reverb=self.reverb
+            Path(self.world.cursor_sound), False, position=position
         )
 
     def play_action_sound(
