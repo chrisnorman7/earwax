@@ -954,3 +954,24 @@ class Game(RegisterEventMixin):
             self.pop_level()
             i += 1
         return i
+
+    def cancel(
+        self, message: str = 'Cancelled', level: Optional[Level] = None
+    ) -> None:
+        """Cancel with an optional message.
+
+        All this method does is output the given message, and either pop the
+        most recent level, or reveal the given level.
+
+        :param message: The message to output.
+
+        :param level: The level to reveal.
+
+            If this value is ``None``, then the most recent level will be
+            popped.
+        """
+        self.output(message)
+        if level is None:
+            self.pop_level()
+        else:
+            self.reveal_level(level)

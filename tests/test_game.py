@@ -291,3 +291,16 @@ def test_reveal_level(game: Game, level: Level) -> None:
     assert game.reveal_level(level) == 2
     assert game.level is level
     assert game.levels == [level]
+
+
+def test_cancel(game: Game, level: Level) -> None:
+    """Test the cancel method."""
+    game.push_level(level)
+    game.cancel()
+    assert game.level is None
+    level_2: Level = Level(game)
+    game.push_level(level)
+    game.push_level(level_2)
+    game.cancel(level=level_2)
+    assert game.level is level_2
+    assert game.levels == [level, level_2]

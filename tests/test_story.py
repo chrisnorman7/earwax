@@ -1,6 +1,7 @@
 """Test story classes."""
 
-from typing import Any, Dict
+from inspect import isgenerator
+from typing import Any, Dict, Iterator, List
 
 from earwax import Game
 from earwax.story import (DumpablePoint, RoomExit, RoomObject, StoryWorld,
@@ -72,3 +73,23 @@ def test_dump(game: Game) -> None:
     assert r2.id == room_2.id
     assert r2.name == room_2.name
     assert r2.description == room_2.description
+
+
+def test_all_objects(game: Game) -> None:
+    """Test the all_objects generator."""
+    w: StoryWorld = StoryWorld(game)
+    room_1: WorldRoom = WorldRoom()
+    w.add_room(room_1)
+    o1: RoomObject = room_1.create_object()
+    o2: RoomObject = room_1.create_object()
+    room_2: WorldRoom = WorldRoom()
+    w.add_room(room_2)
+    o3: RoomObject = room_2.create_object()
+    room_3: WorldRoom = WorldRoom()
+    w.add_room(room_3)
+    o4: RoomObject = room_3.create_object()
+    o5: RoomObject = room_3.create_object()
+    i: Iterator[RoomObject] = w.all_objects()
+    assert isgenerator(i)
+    objects_list: List[RoomObject] = list(i)
+    assert objects_list == [o1, o2, o3, o4, o5]
