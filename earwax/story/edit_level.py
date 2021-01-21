@@ -11,7 +11,7 @@ from attr import Attribute, attrib, attrs
 from ..editor import Editor
 from ..game import Game
 from ..level import Level
-from ..menu import Menu
+from ..menus import Menu, ReverbEditor
 from ..pyglet import key
 from ..types import OptionalGenerator
 from ..utils import english_list
@@ -668,7 +668,7 @@ class EditLevel(PlayLevel):
         """
 
         def inner() -> Generator[None, None, None]:
-            e: Editor = Editor(self.game, str(ambiance.volume_multiplier))
+            e: Editor = Editor(self.game, text=str(ambiance.volume_multiplier))
 
             @e.event
             def on_submit(text: str) -> None:
@@ -1097,12 +1097,10 @@ class EditLevel(PlayLevel):
         if room.reverb is None:
             room.reverb = DumpableReverb()
             self.set_room(room)
-
-        m: Menu = Menu(self.game, 'Reverb')
-        name: str
-        value: float
-        for name in DumpableReverb.__annotations__:
-            m.add_item(self.game.pop_level, title=name)
+        m: ReverbEditor = ReverbEditor(
+            self.game, 'Reverb',  # type: ignore[arg-type]
+            reverb=self.reverb, settings=room.reverb
+        )
         m.add_item(delete_reverb, title='Delete')
         self.game.push_level(m)
 

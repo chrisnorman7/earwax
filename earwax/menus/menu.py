@@ -98,7 +98,8 @@ class Menu(Level, TitleMixin, DismissibleMixin):
     def __attrs_post_init__(self) -> None:
         """Initialise the menu."""
         self.action(
-            'Activate item', symbol=key.RETURN, hat_direction=RIGHT, joystick_button=0
+            'Activate item', symbol=key.RETURN, hat_direction=RIGHT,
+            joystick_button=0
         )(self.activate)
         self.action('Dismiss', symbol=key.ESCAPE, hat_direction=LEFT)(
             self.dismiss

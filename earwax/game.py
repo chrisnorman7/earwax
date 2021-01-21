@@ -11,8 +11,7 @@ from warnings import warn
 from attr import Factory, attrib, attrs
 
 from .credit import Credit
-from .menu import Menu
-from .menu.action_menu import ActionMenu
+from .menus import ActionMenu, Menu
 from .pyglet import (EVENT_HANDLED, EVENT_UNHANDLED, Joystick, Window, app,
                      get_joysticks, get_settings_path, schedule_interval,
                      unschedule)

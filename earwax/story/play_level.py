@@ -9,9 +9,9 @@ from attr import Factory, attrib, attrs
 from .. import hat_directions
 from ..ambiance import Ambiance
 from ..level import Level
-from ..menu import Menu
+from ..menus import Menu
 from ..point import Point
-from ..pyglet import key, Joystick
+from ..pyglet import Joystick, key
 from ..sound import AlreadyDestroyed, Sound
 from ..track import Track, TrackTypes
 from ..yaml import CDumper, dump

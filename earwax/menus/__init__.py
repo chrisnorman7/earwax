@@ -20,8 +20,9 @@ from .config_menu import ConfigMenu, TypeHandler, UnknownTypeError
 from .file_menu import FileMenu
 from .menu import Menu
 from .menu_item import MenuItem
+from .reverb_editor import ReverbEditor
 
 __all__ = [
     'Menu', 'MenuItem', 'ActionMenu', 'FileMenu', 'ConfigMenu', 'TypeHandler',
-    'UnknownTypeError'
+    'UnknownTypeError', 'ReverbEditor'
 ]

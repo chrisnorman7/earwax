@@ -11,7 +11,7 @@ from attr import Factory, attrib, attrs
 from ..credit import Credit
 from ..editor import Editor
 from ..game import Game
-from ..menu import ConfigMenu, Menu
+from ..menus import ConfigMenu, Menu
 from ..sound import PannerStrategies, SoundManager
 from ..track import Track, TrackTypes
 from ..yaml import CLoader, load
