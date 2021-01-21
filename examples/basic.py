@@ -1,6 +1,10 @@
 """A quick example game."""
 
 import sys
+
+if True:
+    sys.path.insert(0, '..')
+
 from pathlib import Path
 from typing import Generator, Optional
 
@@ -115,15 +119,16 @@ def menu() -> OptionalGenerator:
 
     def play_sound(path: Optional[Path]) -> None:
         """Call player.play in a try block."""
-        if g.interface_sound_player is not None and path is not None:
+        if g.interface_sound_manager is not None and path is not None:
             try:
-                g.interface_sound_player.play_path(path)
+                g.interface_sound_manager.play_path(path, True)
             except SynthizerError:
                 pass  # Not a sound file.
 
     yield
     menu: FileMenu = FileMenu(
-        g, 'Select A File', func=play_sound, path=Path.cwd(),
+        g, 'Select A File',  # type: ignore[arg-type]
+        func=play_sound, path=Path.cwd(),
     )
     g.push_level(menu)
 
@@ -132,7 +137,10 @@ def menu() -> OptionalGenerator:
 def options() -> Generator[None, None, None]:
     """Show the options menu."""
     yield
-    m: ConfigMenu = ConfigMenu(g, 'Options', config=config)
+    m: ConfigMenu = ConfigMenu(
+        g, 'Options',  # type: ignore[arg-type]
+        config=config
+    )
     g.push_level(m)
 
 
@@ -140,7 +148,9 @@ def options() -> Generator[None, None, None]:
 def configure_earwax() -> Generator[None, None, None]:
     """Configure the earwax library."""
     yield
-    m: ConfigMenu = ConfigMenu(g, 'Earwax Configuration')
+    m: ConfigMenu = ConfigMenu(
+        g, 'Earwax Configuration'  # type: ignore[arg-type]
+    )
     g.push_level(m)
 
 
