@@ -94,5 +94,14 @@
         "wx",
         "wxpython"
     ],
-    "cSpell.enabled": true
+    "cSpell.enabled": true,
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        },
+        "gitlens.codeLens.symbolScopes": [
+            "!Module"
+        ],
+        "editor.wordBasedSuggestions": false
+    },
 }
