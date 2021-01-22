@@ -5,5 +5,4 @@ pyyaml
 movement_2d
 typing_inspect
 shortuuid
-xml_python
 default_argparse
