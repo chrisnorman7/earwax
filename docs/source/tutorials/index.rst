@@ -12,3 +12,5 @@ This section contains various tutorials that will show you how to use the differ
    sounds/index.rst
 
    promises/index.rst
+
+   stories.rst
