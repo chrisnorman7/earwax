@@ -1,5 +1,5 @@
-Stories
-#######
+Story Editor
+############
 
 Stories are a way to create simple games using Earwax with no code. Stories consist of rooms, which contain exits and objects. Objects and exits in turn have actions which can be performed on them.
 
@@ -138,20 +138,23 @@ Start Game
 
 Choosing the first option "Start new game", you will be placed into the first room.
 
+Rooms
+=====
+
 This room doesn't really have that much going for it: It's called "first_room", which incidentally is also its ID, and it has no meaningful description. Let's change that now.
 
-Renaming a Room
-===============
+Renaming Rooms
+--------------
 
 There are two ways to rename a room: With a new textual name, or by "shadowing" the name of another room.
 
 Simple Renaming
----------------
+^^^^^^^^^^^^^^^
 
 You can rename anything with this first method. Press the ``r`` key on any object you want to rename, and you can type in a new name, before pressing enter.
 
 Shadowing Names
----------------
+^^^^^^^^^^^^^^^
 
 Shadowing room names is only possible for rooms. It involves using the ID of another room, to "shadow" the name.
 
@@ -160,8 +163,173 @@ To do this, press ``shift + r``. A menu will appear, showing every other room in
 It is worth noting that shadowing room names and descriptions can only work for one level of rooms. That is, you cannot have room 1 shadow the name of room 2 which shadows the name of room 3. This is because you could also then have room 3 shadowing the name of room 1, which would cause an infinite loop.
 
 Describing a Room
-=================
+-----------------
 
 Rooms are the only things in stories which can be described. You can describe a room with the ``e`` key. The ``d`` key is not used, since this would conflict with dropping objects.
 
 The key combination ``shift + e`` allows you to shadow the description of another room. Shadowing descriptions follows the same rules as shadowing names.
+
+Adding New Rooms
+----------------
+
+A world wouldn't be much with only one room to visit. The way to create rooms - and incidentally exits and objects - is with the ``c`` key.
+
+If you press the ``c`` key, a menu will appear, allowing you to select what you would like to create.
+
+Selecting ``Room`` from the bottom of this menu, will create - and move you to - another empty room.
+
+Moving Between Rooms
+--------------------
+
+While exits are the primary way for *players* to move between rooms, it is helpful to have a quicker way as a builder.
+
+Pressing the ``g`` key brings up a menu of rooms you can use to move quickly between rooms. This obviously bypasses exits, allowing you to get to as yet unlinked rooms.
+
+Exits
+=====
+
+Exits are the only way for *players* to move between rooms. They must be built to link rooms, otherwise there will be no way to access them.
+
+Incidentally, unlinked (or inaccessible) rooms will result in warnings when editing worlds.
+
+Building Exits
+--------------
+
+To create an exit, again use the ``c`` (create) key, and select ``Exit``.
+
+This will bring up a list of rooms (excluding the current one), which - when selected - will construct the exit.
+
+Renaming Exits
+--------------
+
+You can rename an exit by first selecting it from the exits list, and pressing the ``r`` key.
+
+Objects
+=======
+
+The second entry in the create menu is for creating objects. You *must* be in the room where you plan to place the object before you create. Taking the object and dropping it elsewhere will not actually "move" the object, and currently there is no way to relocate objects.
+
+This can be looked at if someone is upset by this lack enough to `submit an issue <https://github.com/chrisnorman7/earwax/issues/new?title=Relocating%20Objects%20in%20Stories>`_.
+
+Renaming Objects
+----------------
+
+You can rename an object by selecting it from the objects list, and pressing the ``r`` key.
+
+Object Types
+------------
+
+objects can have one of a couple of different types. You can change the object type with the ``t`` key.
+
+The object types are listed below:
+
+Cannot Be Taken
+^^^^^^^^^^^^^^^
+
+This type is best for stationary objects like scenery. It will not be possible to take such objects.
+
+Can Be Taken
+^^^^^^^^^^^^
+
+Objects of this type can be picked up. Their ``take action`` dictates what message and sound is presented to the player when they are taken.
+
+If an object's ``take action`` is not set, the world's ``take action`` will be used instead.
+
+Objects of this type cannot be dropped. If you think that's stupid, read on (there is another type).
+
+Can Be Dropped
+^^^^^^^^^^^^^^
+
+Objects of this type can both be picked up and dropped.
+
+The object's ``drop action`` will be used to provide a message and a sound for when the object is dropped.
+
+If there is no ``drop action`` on the object in question, the world's default ``drop action`` will be used instead.
+
+Can Be Used
+^^^^^^^^^^^
+
+This final type is ``not`` listed in the types menu. It is only applicable when a ``use action`` is specified for an object. Otherwise, the object is considered unusable.
+
+It is perfectly possible for an object to be usable but not droppable. It is even possible for an object to be usable, but impossible for that object to be picked up in the first place. Note that this would be pointless, since the ``use action`` can only be accessed by the player when the object is in their inventory.
+
+Object Classes
+--------------
+
+Objects can belong to 0 or more ``classes``. These classes are useful for grouping objects, and will be used to make exits allow or disallow player access in the future.
+
+To keep apprised of the work on exits, please track `this issue <https://github.com/chrisnorman7/earwax/issues/5>`_.
+
+To add and remove classes from an object, use the ``o`` key.
+
+Object classes can be added and removed with the key combination ``shift + o``.
+
+Messages
+========
+
+Objects, exits, and the world itself all have messages. To set messages, use the ``m`` key.
+
+This key will set different messages depending on which category is shown:
+
+* When in the ``location`` category, edit the world messages.
+
+* When an entry from the ``objects`` category is selected, you can set the message that is shown when any object action is used.
+
+* When an entry from the ``exits`` category is selected, you can set the message which is shown when using that exit.
+
+Sounds
+======
+
+You can set sounds for objects and exits, as well as the world itself.
+
+To set sounds, use the ``s`` key. This key performs different actions, depending on which category is shown:
+
+* When in the ``location`` category, edit the world sounds.
+
+* When an entry from the ``objects`` category is selected, you can set the sound which is heard when any object action is used.
+
+* When an entry from the ``exits`` category is selected, you can set the sound which is heard when using that exit.
+
+Ambiances
+=========
+
+Using the ``a`` key, you can edit ambiances for the current room, and for objects.
+
+Exits do *not* have ambiances, so the ``a`` key does nothing when in the ``exits`` category.
+
+Actions
+=======
+
+Actions are used throughout stories. They can be edited with the ``shift + a`` shortcut.
+
+* When in the ``location`` category, you can edit (or clear) the default actions for the world.
+
+* When an entry from the ``objects`` category is selected, you can edit (or delete) actions for when an object is taken, dropped, or used, or you can edit the custom actions for the given object.
+
+* When an entry from the ``exits`` category is selected, you can edit (or clear) the action which is used when the exit is traversed.
+
+Saving Stories
+**************
+
+As mentioned in the `Save Story`_ section, you can save your story at any time with the keyboard shortcut ``control + s``.
+
+Building Stories
+################
+
+You can build your story into a Python file with the ``story build`` command.
+
+Assuming you have a world file named ``world.yaml``, you can convert it to python with the command::
+
+    earwax story build world.yaml world.py
+
+This will output ``world.py``. You can then play your story with::
+
+    python world.py
+
+If you wish to consolidate all your sounds, you can use the ``-s`` switch::
+
+    earwax story build world.yaml world.py -s assets
+
+This will copy all your sound files into a folder named ``assets``. Their names will be changed, and the folder structure will be defined by earwax.
+
+A note for screen reader users: It is not recommended that you read the generated python file line-by-line. This is because the line which holds the YAML data for your world can be extremely long, and this negatively impacts screen reader use.
