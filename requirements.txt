@@ -8,5 +8,4 @@ shortuuid >= 1.0.1
 movement_2d >= 1.1.1
 pysdl2 >= 0.9.7
 pysdl2-dll >= 2.0.14
-default_argparse >= 0.0.1
 jinja2 >= 2.11.2

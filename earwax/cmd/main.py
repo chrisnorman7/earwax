@@ -17,13 +17,10 @@ If you want to create more subcommands, add them in the subcommands directory,
 then register them with the :meth:`subcommand` method.
 """
 
-from argparse import (
-    ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace,
-    _SubParsersAction)
-from logging import basicConfig
+from argparse import (ArgumentDefaultsHelpFormatter, ArgumentParser, FileType,
+                      Namespace, _SubParsersAction)
+from logging import _nameToLevel, basicConfig
 from typing import Callable
-
-from default_argparse import parser
 
 from .subcommands.configure_earwax import configure_earwax
 from .subcommands.init_project import init_project
@@ -31,6 +28,17 @@ from .subcommands.story import (build_story, create_story, edit_story,
                                 play_story)
 
 SubcommandFunction = Callable[[Namespace], None]
+
+parser: ArgumentParser = ArgumentParser()
+
+parser.add_argument(
+    '-l', '--log-file', type=FileType('w'), default='-', help='The log file'
+)
+
+parser.add_argument(
+    '-L', '--log-level', choices=list(_nameToLevel), default='INFO',
+    help='The logging level'
+)
 
 commands = parser.add_subparsers(
     metavar='<command>', required=True, description='The subcommand to call.'
@@ -154,7 +162,5 @@ build_story_parser.add_argument(
 def cmd_main() -> None:
     """Run the earwax client."""
     args = parser.parse_args()
-    basicConfig(
-        stream=args.log_file, level=args.log_level, format=args.log_format
-    )
+    basicConfig(stream=args.log_file, level=args.log_level)
     return args.func(args)
