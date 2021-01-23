@@ -5,9 +5,10 @@ from argparse import Namespace
 from logging import Logger, getLogger
 from pathlib import Path
 from shutil import copy
-from typing import List, Union
+from typing import List, Optional, Union
 
 from jinja2 import Environment, Template
+from yaml.error import YAMLError
 
 from ...game import Game
 from ...pyglet import Window
@@ -141,74 +142,88 @@ def build_story(args: Namespace) -> None:
         raise SystemExit
     game: Game = Game()
     print(f'Loading game from {world_filename}.')
-    with open(world_filename, 'r') as in_file:
-        world: StoryWorld = StoryWorld.from_file(in_file, game)
-    sounds_directory: Path = Path('story_sounds')
-    make_directory(sounds_directory)
-    print('Gathering assets:')
-    music_directory = sounds_directory / 'music'
-    make_directory(music_directory)
-    musics: List[str] = world.main_menu_musics
-    world.main_menu_musics = []
-    index: int
-    music: str
-    for index, music in enumerate(musics):
-        filename: str = get_filename(music, index)
-        filename = copy_path(music, music_directory / filename)
-        world.main_menu_musics.append(filename)
-    if world.cursor_sound is None:
-        print('Skipping empty cursor sound.')
-    else:
-        world.cursor_sound = copy_path(world.cursor_sound, sounds_directory)
-    if world.empty_category_sound is None:
-        print('Skipping empty category sound.')
-    else:
-        world.empty_category_sound = copy_path(
-            world.empty_category_sound, sounds_directory
+    try:
+        world: StoryWorld = StoryWorld.from_filename(
+            Path(world_filename), game
         )
-    if world.end_of_category_sound is None:
-        print('Skipping end of category sound.')
+    except YAMLError as exc:
+        print(f'Failed to load world from {world_filename}: {exc}.')
+        raise SystemExit
+    sounds_directory: Optional[Path] = None
+    if args.sounds_directory:
+        sounds_directory = Path(args.sounds_directory)
+        make_directory(sounds_directory)
+        print('Gathering assets:')
+        music_directory = sounds_directory / 'music'
+        make_directory(music_directory)
+        musics: List[str] = world.main_menu_musics
+        world.main_menu_musics = []
+        index: int
+        music: str
+        for index, music in enumerate(musics):
+            filename: str = get_filename(music, index)
+            filename = copy_path(music, music_directory / filename)
+            world.main_menu_musics.append(filename)
+        if world.cursor_sound is None:
+            print('Skipping empty cursor sound.')
+        else:
+            world.cursor_sound = copy_path(
+                world.cursor_sound, sounds_directory
+            )
+        if world.empty_category_sound is None:
+            print('Skipping empty category sound.')
+        else:
+            world.empty_category_sound = copy_path(
+                world.empty_category_sound, sounds_directory
+            )
+        if world.end_of_category_sound is None:
+            print('Skipping end of category sound.')
+        else:
+            world.end_of_category_sound = copy_path(
+                world.end_of_category_sound, sounds_directory
+            )
+        actions_directory: Path = sounds_directory / 'actions'
+        if world.take_action is not None:
+            copy_action(world.take_action, actions_directory, 0)
+        if world.drop_action is not None:
+            copy_action(world.drop_action, actions_directory, 1)
+        rooms_directory: Path = sounds_directory / 'rooms'
+        make_directory(rooms_directory)
+        room: WorldRoom
+        action: WorldAction
+        for room in world.rooms.values():
+            room_directory: Path = rooms_directory / room.id
+            make_directory(room_directory)
+            ambiances_directory: Path = room_directory / 'ambiances'
+            copy_ambiances(room.ambiances, ambiances_directory)
+            exits_directory: Path = room_directory / 'exits'
+            x: RoomExit
+            actions: List[WorldAction] = [x.action for x in room.exits]
+            copy_actions(actions, exits_directory)
+            obj: RoomObject
+            objects_directory: Path = room_directory / 'objects'
+            make_directory(objects_directory)
+            for obj in room.objects.values():
+                object_directory: Path = objects_directory / obj.id
+                make_directory(object_directory)
+                ambiances_directory = object_directory / 'ambiances'
+                copy_ambiances(obj.ambiances, ambiances_directory)
+                actions_directory = object_directory / 'actions'
+                make_directory(actions_directory)
+                copy_actions(obj.actions, actions_directory)
+                system_actions_directory: Path = actions_directory / 'system'
+                if obj.take_action is not None:
+                    copy_action(obj.take_action, system_actions_directory, 0)
+                if obj.drop_action is not None:
+                    copy_action(obj.drop_action, system_actions_directory, 1)
+                if obj.use_action is not None:
+                    copy_action(obj.use_action, system_actions_directory, 2)
+                if obj.actions_action is not None:
+                    copy_action(
+                        obj.actions_action, system_actions_directory, 3
+                    )
     else:
-        world.end_of_category_sound = copy_path(
-            world.end_of_category_sound, sounds_directory
-        )
-    actions_directory: Path = sounds_directory / 'actions'
-    if world.take_action is not None:
-        copy_action(world.take_action, actions_directory, 0)
-    if world.drop_action is not None:
-        copy_action(world.drop_action, actions_directory, 1)
-    rooms_directory: Path = sounds_directory / 'rooms'
-    make_directory(rooms_directory)
-    room: WorldRoom
-    action: WorldAction
-    for room in world.rooms.values():
-        room_directory: Path = rooms_directory / room.id
-        make_directory(room_directory)
-        ambiances_directory: Path = room_directory / 'ambiances'
-        copy_ambiances(room.ambiances, ambiances_directory)
-        exits_directory: Path = room_directory / 'exits'
-        x: RoomExit
-        actions: List[WorldAction] = [x.action for x in room.exits]
-        copy_actions(actions, exits_directory)
-        obj: RoomObject
-        objects_directory: Path = room_directory / 'objects'
-        make_directory(objects_directory)
-        for obj in room.objects.values():
-            object_directory: Path = objects_directory / obj.id
-            make_directory(object_directory)
-            ambiances_directory = object_directory / 'ambiances'
-            copy_ambiances(obj.ambiances, ambiances_directory)
-            actions_directory = object_directory / 'actions'
-            copy_actions(obj.actions, actions_directory)
-            system_actions_directory: Path = actions_directory / 'system'
-            if obj.take_action is not None:
-                copy_action(obj.take_action, system_actions_directory, 0)
-            if obj.drop_action is not None:
-                copy_action(obj.drop_action, system_actions_directory, 1)
-            if obj.use_action is not None:
-                copy_action(obj.use_action, system_actions_directory, 2)
-            if obj.actions_action is not None:
-                copy_action(obj.actions_action, system_actions_directory, 3)
+        print('Not copying sounds.')
     yaml_file: Path = Path(python_filename + '.yaml')
     print(f'Dumping temporary world to {yaml_file}.')
     world.save(yaml_file)
@@ -221,6 +236,8 @@ def build_story(args: Namespace) -> None:
     source: str = t.render(filename=world_filename, world=world, data=data)
     with open(python_filename, 'w') as out_file:
         out_file.write(source)
+        print(f'Deleting temporary file {yaml_file}.')
+        yaml_file.unlink()
         print('Done.')
 
 
@@ -240,7 +257,11 @@ def play_story(args: Namespace, edit: bool = False) -> None:
         print(f'There is no file named {filename}.')
         raise SystemExit
     game: Game = Game()
-    world: StoryWorld = StoryWorld.from_filename(filename, game)
+    try:
+        world: StoryWorld = StoryWorld.from_filename(filename, game)
+    except YAMLError as e:
+        print(f'Failed to load world from {filename}: {e}.')
+        raise SystemExit
     game.name = world.name
     ctx: StoryContext
     try:

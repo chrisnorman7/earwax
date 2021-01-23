@@ -145,6 +145,11 @@ build_story_parser.add_argument(
     help='The python file to write to.'
 )
 
+build_story_parser.add_argument(
+    '-s', '--sounds-directory', metavar='<directory>', default=None,
+    help='The directory to copy sounds to.'
+)
+
 
 def cmd_main() -> None:
     """Run the earwax client."""
