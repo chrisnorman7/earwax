@@ -246,10 +246,7 @@ class EditLevel(PlayLevel):
         self.action(
             'Shadow room description', symbol=key.E, modifiers=key.MOD_SHIFT
         )(self.shadow_description)
-        self.action('Change message', symbol=key.M)(self.remessage)
-        self.action(
-            'Change world message', symbol=key.M, modifiers=key.MOD_SHIFT
-        )(self.set_world_messages)
+        self.action('Change messages', symbol=key.M)(self.remessage)
         self.action('Sounds menu', symbol=key.S)(self.sounds_menu)
         self.action('Change object type', symbol=key.T)(self.set_object_type)
         self.action('Ambiances menu', symbol=key.A)(self.ambiances_menu)
@@ -437,7 +434,7 @@ class EditLevel(PlayLevel):
         if obj is None:
             self.game.output('No object selected.')
         elif isinstance(obj, WorldRoom):
-            return self.game.output('Rooms do not have messages.')
+            yield from self.set_world_messages()
         elif isinstance(obj, RoomExit):
             yield from self.set_message(obj.action)
         else:
