@@ -6,6 +6,8 @@ An audio game engine for fast prototyping.
 
 * [Documentation](https://earwax.readthedocs.io/)
 
+* [Tutorials](https://earwax.readthedocs.io/en/latest/tutorials/)
+
 ## Installation
 
 You can install with pip:
