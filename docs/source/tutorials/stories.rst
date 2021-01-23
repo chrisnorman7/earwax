@@ -1,5 +1,5 @@
-Story Editor
-############
+Stories
+#######
 
 Stories are a way to create simple games using Earwax with no code. Stories consist of rooms, which contain exits and objects. Objects and exits in turn have actions which can be performed on them.
 
@@ -35,12 +35,21 @@ You should see something like the following::
 
 The filename can be whatever you want, and you are free to rename or move this file as you wish. Be aware however, that unless the paths to the sound files you use are absolute, moving the file will not work as you expect.
 
+Playing a Story
+***************
+
+Stories can be played with the ``story play`` command, like so::
+
+    earwax story play world.yaml
+
+You can replace ``world.yaml`` in the command above to be whatever filename you have chosen for your world.
+
 Editing a Story
 ***************
 
 Now we have created a story, let's edit it.
 
-When editing stories, you see the same interface as if you were a normal player. There are extra hotkeys obviously, and the main menu changes to present you with extra options for configuring the over all story, as well as Earwax itself.
+When editing stories, you see the same interface as if you were a normal player. There are extra hotkeys of course, and the main menu changes to present you with extra options for configuring the over all story, as well as Earwax itself.
 
 To get started, type::
 
