@@ -61,7 +61,7 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path: List[str] = ['_static']
 
 apidoc_module_dir: str = os.path.abspath('../../earwax')
-apidoc_excluded_paths: List[str] = ['tests']
+apidoc_excluded_paths: List[str] = ['tests', 'cmd/blank_game.py']
 apidoc_separate_modules: bool = True
 autodoc_mock_imports: List[str] = []
 
