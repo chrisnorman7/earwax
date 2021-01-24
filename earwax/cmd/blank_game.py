@@ -18,7 +18,8 @@ game: Game = Game(
 main_menu: Menu = Menu(game, 'Main Menu', dismissible=False)
 
 # Create music for the menu.
-# main_menu.tracks.append(Track('file', 'menu_music.mp3', TrackTypes.music))
+main_menu_music: Track = Track('file', 'menu_music.mp3', TrackTypes.music)
+# main_menu.tracks.append(main_menu_music)
 
 # Create the first level.
 #
@@ -27,7 +28,8 @@ main_menu: Menu = Menu(game, 'Main Menu', dismissible=False)
 level: Level = Level(game)
 
 # Create music for the level.
-# level.tracks.append(Track('file', 'level_music.mp3', TrackTypes.music))
+level_music: Track = Track('file', 'level_music.mp3', TrackTypes.music)
+# level.tracks.append(level_music)
 
 
 @level.action('Return to main menu', symbol=key.Q)
