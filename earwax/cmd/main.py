@@ -23,6 +23,7 @@ from logging import _nameToLevel, basicConfig
 from typing import Callable
 
 from .subcommands.configure_earwax import configure_earwax
+from .subcommands.game import new_game
 from .subcommands.init_project import init_project
 from .subcommands.story import (build_story, create_story, edit_story,
                                 play_story)
@@ -157,6 +158,13 @@ build_story_parser.add_argument(
     '-s', '--sounds-directory', metavar='<directory>', default=None,
     help='The directory to copy sounds to.'
 )
+
+game_parser: ArgumentParser = subcommand(
+    'game', new_game, formatter_class=ArgumentDefaultsHelpFormatter,
+    description='Create a blank game to work from.'
+)
+
+game_parser.add_argument('filename', help='The file to write the new game to')
 
 
 def cmd_main() -> None:
