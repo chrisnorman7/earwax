@@ -13,8 +13,9 @@ from synthizer import (Context, GlobalFdnReverb, LoggingBackend, LogLevel,
                        initialized, set_log_level)
 
 from earwax import (ActionMap, Box, BoxLevel, BufferCache, DialogueTree, Door,
-                    Editor, Game, GameBoard, Level, Menu, NetworkConnection,
-                    Point, Sound, SoundManager, Track, TrackTypes)
+                    Editor, Game, GameBoard, Level, MapEditor,
+                    MapEditorContext, Menu, NetworkConnection, Point, Sound,
+                    SoundManager, Track, TrackTypes)
 from earwax.cmd.constants import scripts_directory
 from earwax.cmd.project_credit import ProjectCredit
 
@@ -193,3 +194,15 @@ def get_buffer_cache(game: Game) -> BufferCache:
 def get_action_map() -> ActionMap:
     """Return a new ActionMap instance."""
     return ActionMap()
+
+
+@fixture(name='map_editor')
+def get_map_editor(game: Game) -> MapEditor:
+    """Return a new map editor instance."""
+    return MapEditor(game)
+
+
+@fixture(name='map_editor_context')
+def get_map_editor_context(map_editor: MapEditor) -> MapEditorContext:
+    """Return an attached context."""
+    return map_editor.context

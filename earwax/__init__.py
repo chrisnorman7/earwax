@@ -59,7 +59,8 @@ from .game import Game, GameNotRunning
 from .game_board import GameBoard, NoSuchTile
 from .level import IntroLevel, Level
 from .mapping import (Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door,
-                      NearestBox, NotADoor, Portal)
+                      MapEditor, MapEditorContext, NearestBox, NotADoor,
+                      Portal)
 from .menus import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                     ReverbEditor, TypeHandler, UnknownTypeError)
 from .mixins import (CoordinatesMixin, DismissibleMixin, DumpLoadMixin,
@@ -116,7 +117,7 @@ __all__: List[str] = [
     'IntroLevel', 'Level',
     # mapping/__init__.py:
     'Box', 'BoxBounds', 'BoxLevel', 'BoxTypes', 'CurrentBox', 'Door',
-    'NearestBox', 'NotADoor', 'Portal',
+    'MapEditor', 'MapEditorContext', 'NearestBox', 'NotADoor', 'Portal',
     # menus/__init__.py:
     'ActionMenu', 'ConfigMenu', 'FileMenu', 'Menu', 'MenuItem', 'ReverbEditor',
     'TypeHandler', 'UnknownTypeError',
