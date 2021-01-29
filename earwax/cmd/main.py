@@ -27,6 +27,7 @@ from .subcommands.game import new_game
 from .subcommands.init_project import init_project
 from .subcommands.story import (build_story, create_story, edit_story,
                                 play_story)
+from .subcommands.vault import compile_vault, new_vault
 
 SubcommandFunction = Callable[[Namespace], None]
 
@@ -120,7 +121,7 @@ play_story_parser: ArgumentParser = subcommand(
     description='Play a story file.'
 )
 
-play_story_parser.add_argument('filename', help='The filename to load from.')
+play_story_parser.add_argument('filename', help='The filename to load from')
 
 create_story_parser: ArgumentParser = subcommand(
     'new', create_story, subparser=story_subcommands,
@@ -128,7 +129,7 @@ create_story_parser: ArgumentParser = subcommand(
     description='Create a new story file.'
 )
 
-create_story_parser.add_argument('filename', help='The filename to create.')
+create_story_parser.add_argument('filename', help='The filename to create')
 
 edit_story_parser: ArgumentParser = subcommand(
     'edit', edit_story, subparser=story_subcommands,
@@ -136,7 +137,7 @@ edit_story_parser: ArgumentParser = subcommand(
     description='Edit a story file.'
 )
 
-edit_story_parser.add_argument('filename', help='The filename to load from.')
+edit_story_parser.add_argument('filename', help='The filename to load from')
 
 build_story_parser: ArgumentParser = subcommand(
     'build', build_story, subparser=story_subcommands,
@@ -146,17 +147,17 @@ build_story_parser: ArgumentParser = subcommand(
 
 build_story_parser.add_argument(
     'world_filename', metavar='<worldfile>',
-    help='The world file to load from.'
+    help='The world file to load from'
 )
 
 build_story_parser.add_argument(
     'python_filename', metavar='<pythonfile>',
-    help='The python file to write to.'
+    help='The python file to write to'
 )
 
 build_story_parser.add_argument(
     '-s', '--sounds-directory', metavar='<directory>', default=None,
-    help='The directory to copy sounds to.'
+    help='The directory to copy sounds to'
 )
 
 game_parser: ArgumentParser = subcommand(
@@ -165,6 +166,46 @@ game_parser: ArgumentParser = subcommand(
 )
 
 game_parser.add_argument('filename', help='The file to write the new game to')
+
+vault_parser: ArgumentParser = commands.add_parser(
+    'vault', description='Create or compile vault files.'
+)
+
+vault_subcommands: _SubParsersAction = vault_parser.add_subparsers(
+    metavar='<action>', required=True, help='The action to perform'
+)
+
+subcommand(
+    'help', cmd_help(vault_subcommands), subparser=vault_subcommands,
+    description='Show a list of all possible subcommands.',
+    formatter_class=ArgumentDefaultsHelpFormatter, aliases=['commands']
+)
+
+new_vault_parser: ArgumentParser = subcommand(
+    'new', new_vault, subparser=vault_subcommands,
+    formatter_class=ArgumentDefaultsHelpFormatter,
+    description='Create a new vault file.'
+)
+
+new_vault_parser.add_argument(
+    'filename', help='The name for the new vault file'
+)
+
+compile_vault_parser: ArgumentParser = subcommand(
+    'compile', compile_vault, subparser=vault_subcommands,
+    formatter_class=ArgumentDefaultsHelpFormatter,
+    description='Compile an existing vault file.'
+)
+
+compile_vault_parser.add_argument(
+    'filename', metavar='<vault-file>',
+    help='The name of the vault file to compile'
+)
+
+compile_vault_parser.add_argument(
+    'data_file', metavar='<data-file>',
+    help='The name of the data file to create.', nargs='?', default=None
+)
 
 
 def cmd_main() -> None:
