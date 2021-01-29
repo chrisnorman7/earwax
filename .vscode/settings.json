@@ -61,6 +61,7 @@
         "isclass",
         "isgenerator",
         "isidentifier",
+        "iskeyword",
         "isupper",
         "ivar",
         "kw",

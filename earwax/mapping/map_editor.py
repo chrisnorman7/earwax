@@ -1,6 +1,7 @@
 """Provides the MapEditor class."""
 
 from enum import Enum
+from keyword import iskeyword
 from pathlib import Path
 from typing import Dict, Generator, List, Optional
 
@@ -192,6 +193,9 @@ class MapEditor(BoxLevel):
         self.action(
             'Rename current box', symbol=key.R
         )(self.rename_box)
+        self.action(
+            'Label current box', symbol=key.L
+        )(self.label_box)
         return super().__attrs_post_init__()
 
     def on_move_fail(
@@ -224,5 +228,35 @@ class MapEditor(BoxLevel):
                 self.game.cancel()
 
         self.game.output(f'Enter a new name for the current box: {t.name}')
+        yield
+        self.game.push_level(e)
+
+    def label_box(self) -> NoneGenerator:
+        """Rename the current box."""
+        b: Optional[Box[str]] = self.get_current_box()
+        if b is None:
+            return self.game.output('First move to a box.')
+        assert b.data is not None
+        t: BoxTemplate = self.context.template_ids[b.data]
+        e: Editor = Editor(self.game, text=t.label)
+
+        @e.event
+        def on_submit(text: str) -> None:
+            """Set the new name."""
+            if not text or not text.isidentifier() or iskeyword(text):
+                msg: str
+                if not text.isidentifier():
+                    msg = f'Invalid identifier: {text}.'
+                elif iskeyword(text):
+                    msg = f'Reserved keyword: {text}.'
+                else:
+                    msg = 'Cancelled.'
+                self.game.cancel(message=msg)
+            else:
+                t.label = text
+                self.game.output('Label set.')
+                self.game.pop_level()
+
+        self.game.output(f'Enter a new label for the current box: {t.label}')
         yield
         self.game.push_level(e)

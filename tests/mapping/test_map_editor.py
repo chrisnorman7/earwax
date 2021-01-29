@@ -109,3 +109,54 @@ def test_rename_box(
         schedule_once(lambda dt: game.stop(), 0.1)
 
     game.run(window, initial_level=map_editor)
+
+
+def test_label_box(
+    game: Game, map_editor: MapEditor, map_editor_context: MapEditorContext,
+    window: Window
+) -> None:
+    """Make sure we can rename the current box."""
+    box: Optional[Box[str]] = map_editor.get_current_box()
+    assert isinstance(box, Box)
+    assert box.data is not None
+    assert map_editor_context.box_ids[box.data] is box
+    template: BoxTemplate = map_editor_context.template_ids[box.data]
+    old_label: str = template.label
+
+    @map_editor.event
+    def on_push() -> None:
+        assert isinstance(template, BoxTemplate)
+        map_editor.set_coordinates(Point(5, 5, 5))
+        game.press_key(key.L, 0)
+        assert game.level is map_editor
+        map_editor.set_coordinates(Point(0, 0, 0))
+        game.press_key(key.L, 0)
+        assert isinstance(game.level, Editor)
+        game.level.text = ''
+        game.level.submit()
+        assert template.label == old_label
+        game.press_key(key.L, 0)
+        assert isinstance(game.level, Editor)
+        game.level.dismiss()
+        assert template.label == old_label
+        game.press_key(key.L, 0)
+        assert isinstance(game.level, Editor)
+        game.level.text = 'try'
+        game.level.submit()
+        assert game.level is map_editor
+        assert template.label == old_label
+        game.press_key(key.L, 0)
+        assert isinstance(game.level, Editor)
+        game.level.text = 'invalid label'
+        game.level.submit()
+        assert game.level is map_editor
+        assert template.label == old_label
+        game.press_key(key.L, 0)
+        assert isinstance(game.level, Editor)
+        game.level.text = 'valid_label'
+        game.level.submit()
+        assert game.level is map_editor
+        assert template.label == 'valid_label'
+        schedule_once(lambda dt: game.stop(), 0.1)
+
+    game.run(window, initial_level=map_editor)
