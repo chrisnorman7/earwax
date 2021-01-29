@@ -6,6 +6,7 @@ from socket import AF_INET, SOCK_STREAM
 from typing import Generator
 
 from _pytest.fixtures import FixtureRequest
+from cryptography.fernet import Fernet
 from pyglet.window import Window
 from pytest import fixture
 from synthizer import (Context, GlobalFdnReverb, LoggingBackend, LogLevel,
@@ -206,3 +207,15 @@ def get_map_editor(game: Game) -> MapEditor:
 def get_map_editor_context(map_editor: MapEditor) -> MapEditorContext:
     """Return an attached context."""
     return map_editor.context
+
+
+@fixture(name='valid_key')
+def get_valid_key() -> bytes:
+    """Return the correct key for decrypting stuff."""
+    return Fernet.generate_key()
+
+
+@fixture(name='invalid_key')
+def get_invalid_key() -> bytes:
+    """Get the wrong key for decrypting stuff."""
+    return Fernet.generate_key()

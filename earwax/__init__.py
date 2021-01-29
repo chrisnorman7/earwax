@@ -79,6 +79,7 @@ from .sound import (AlreadyDestroyed, BufferCache, BufferDirectory,
 from .speech import tts
 from .task import IntervalFunction, Task, TaskFunction
 from .track import Track, TrackTypes
+from .vault_file import IncorrectVaultKey, VaultFile
 from .walking_directions import walking_directions
 
 # This next import is intentionally separated from the rest, to prevent
@@ -145,6 +146,8 @@ __all__: List[str] = [
     'IntervalFunction', 'Task', 'TaskFunction',
     # track.py:
     'Track', 'TrackTypes',
+    # vault_file.py:
+    'IncorrectVaultKey', 'VaultFile',
     # walking_directions.py:
     'walking_directions',
 ]

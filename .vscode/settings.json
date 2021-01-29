@@ -67,6 +67,7 @@
         "maxdepth",
         "modindex",
         "msg",
+        "msgpack",
         "nargs",
         "noqa",
         "obj",
@@ -90,6 +91,7 @@
         "toprettyxml",
         "tts",
         "undumped",
+        "wb",
         "worl",
         "wx",
         "wxpython"
