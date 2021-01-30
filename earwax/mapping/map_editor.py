@@ -11,6 +11,7 @@ from shortuuid import uuid
 from ..editor import Editor
 from ..game import Game
 from ..hat_directions import DOWN, LEFT, RIGHT, UP
+from ..menus import Menu
 from ..mixins import DumpLoadMixin
 from ..point import Point
 from ..pyglet import key
@@ -18,6 +19,43 @@ from .box import Box, BoxBounds, BoxTypes
 from .box_level import BoxLevel
 
 NoneGenerator = Generator[None, None, None]
+
+
+class InvalidLabel(Exception):
+    """An invalid ID or label was given."""
+
+
+def valid_label(text: str) -> None:
+    """Ensure the given label or ID is valid.
+
+    If it could not be used as a Python identifier for any reason,
+    :class:`earwax.mapping.map_editor.InvalidLabel` will be raised.
+
+    :param text: The text to check.
+    """
+    if not text or not text.isidentifier() or iskeyword(text):
+        msg: str
+        if not text:
+            msg = 'Cancelled.'
+        elif not text.isidentifier():
+            msg = f'Invalid identifier: {text}.'
+        elif iskeyword(text):
+            msg = f'Reserved keyword: {text}.'
+        else:
+            msg = 'Unknown error.'
+        raise InvalidLabel(msg)
+
+
+@attrs(auto_attribs=True)
+class MapEditorBox(Box):
+    """A box with an ID."""
+
+    id: str = attrib()
+
+    @id.default
+    def get_default_id(instance: 'MapEditorBox') -> str:
+        """Raise an error if the id is not provided."""
+        raise RuntimeError('You must provide an ID.')
 
 
 class AnchorPoints(Enum):
@@ -109,22 +147,24 @@ class MapEditorContext:
             p += adjustment
         return p
 
-    def to_box(self, game: Game, template: BoxTemplate) -> Box[str]:
+    def to_box(self, game: Game, template: BoxTemplate) -> MapEditorBox:
         """Return a box from a template.
 
         :param template: The template to convert.
         """
-        return Box(
+        return MapEditorBox(
             game,
             self.to_point(template.start), self.to_point(template.end),
             surface_sound=Path(template.surface_sound)
             if template.surface_sound is not None else None,
             wall_sound=Path(template.wall_sound)
             if template.wall_sound is not None else None,
-            name=template.name, data=template.id
+            name=template.name, id=template.id
         )
 
-    def add_template(self, template: BoxTemplate) -> None:
+    def add_template(
+        self, template: BoxTemplate, box: Optional[MapEditorBox] = None
+    ) -> None:
         """Add a template to this context.
 
         This method will add the given template to its
@@ -136,7 +176,8 @@ class MapEditorContext:
         self.level_map.box_templates.append(template)
         self.template_ids[template.id] = template
         self.template_labels[template.label] = template
-        box: Box[str] = self.to_box(self.level.game, template)
+        if box is None:
+            box = self.to_box(self.level.game, template)
         self.level.add_box(box)
         self.box_ids[template.id] = box
 
@@ -193,9 +234,7 @@ class MapEditor(BoxLevel):
         self.action(
             'Rename current box', symbol=key.R
         )(self.rename_box)
-        self.action(
-            'Label current box', symbol=key.L
-        )(self.label_box)
+        self.action('Box menu', symbol=key.B)(self.box_menu)
         return super().__attrs_post_init__()
 
     def on_move_fail(
@@ -206,13 +245,23 @@ class MapEditor(BoxLevel):
         self.game.output('There is no box in that direction.')
         return super().on_move_fail(distance, vertical, bearing, coordinates)
 
-    def rename_box(self) -> NoneGenerator:
-        """Rename the current box."""
-        b: Optional[Box[str]] = self.get_current_box()
+    def box_menu(self) -> None:
+        """Push a menu to configure the current box."""
+        b: Optional[MapEditorBox] = self.get_current_box()
         if b is None:
             return self.game.output('First move to a box.')
-        assert b.data is not None
-        t: BoxTemplate = self.context.template_ids[b.data]
+        m: Menu = Menu(self.game, f'Configure {b.name} (#{b.id})')
+        m.add_item(self.rename_box, title='Rename')
+        m.add_item(self.label_box, title='Label')
+        m.add_item(self.id_box, title='Identify')
+        self.game.push_level(m)
+
+    def rename_box(self) -> NoneGenerator:
+        """Rename the current box."""
+        b: Optional[MapEditorBox] = self.get_current_box()
+        if b is None:
+            return self.game.output('First move to a box.')
+        t: BoxTemplate = self.context.template_ids[b.id]
         e: Editor = Editor(self.game, text=t.name)
 
         @e.event
@@ -233,30 +282,56 @@ class MapEditor(BoxLevel):
 
     def label_box(self) -> NoneGenerator:
         """Rename the current box."""
-        b: Optional[Box[str]] = self.get_current_box()
+        b: Optional[MapEditorBox] = self.get_current_box()
         if b is None:
             return self.game.output('First move to a box.')
-        assert b.data is not None
-        t: BoxTemplate = self.context.template_ids[b.data]
+        t: BoxTemplate = self.context.template_ids[b.id]
         e: Editor = Editor(self.game, text=t.label)
 
         @e.event
         def on_submit(text: str) -> None:
             """Set the new name."""
-            if not text or not text.isidentifier() or iskeyword(text):
-                msg: str
-                if not text.isidentifier():
-                    msg = f'Invalid identifier: {text}.'
-                elif iskeyword(text):
-                    msg = f'Reserved keyword: {text}.'
-                else:
-                    msg = 'Cancelled.'
-                self.game.cancel(message=msg)
+            try:
+                valid_label(text)
+            except InvalidLabel as e:
+                self.game.cancel(message=str(e))
             else:
                 t.label = text
                 self.game.output('Label set.')
                 self.game.pop_level()
 
         self.game.output(f'Enter a new label for the current box: {t.label}')
+        yield
+        self.game.push_level(e)
+
+    def id_box(self) -> NoneGenerator:
+        """Change the ID for the current box."""
+        b: Optional[MapEditorBox] = self.get_current_box()
+        if b is None:
+            return self.game.output('First move to a box.')
+        t: BoxTemplate = self.context.template_ids[b.id]
+        e: Editor = Editor(self.game, text=t.id)
+
+        @e.event
+        def on_submit(text: str) -> None:
+            """Set the new name."""
+            try:
+                valid_label(text)
+            except InvalidLabel as e:
+                self.game.cancel(message=str(e))
+            else:
+                assert b is not None
+                t.id = text
+                template: BoxTemplate
+                for template in self.context.level_map.box_templates:
+                    if template.start.box_id == b.id:
+                        template.start.box_id = text
+                    if template.end.box_id == b.id:
+                        template.end.box_id = text
+                b.id = text
+                self.game.output('Label set.')
+                self.game.pop_level()
+
+        self.game.output(f'Enter a new ID for the current box: {t.id}')
         yield
         self.game.push_level(e)
