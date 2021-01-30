@@ -1,7 +1,8 @@
 """Provides the BoxLevel class."""
 
 from math import cos, floor, sin
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, cast
+from typing import (
+    Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, cast)
 
 from attr import Factory, attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
@@ -102,7 +103,7 @@ class BoxLevel(Level):
     """
 
     boxes: List[Box[Any]] = Factory(list)
-    boxes_by_type: Dict[Any, List[Box]] = attrib(
+    boxes_by_type: Dict[Type, List[Box]] = attrib(
         default=Factory(dict), init=False, repr=False
     )
 
