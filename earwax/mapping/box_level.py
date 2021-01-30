@@ -151,6 +151,7 @@ class BoxLevel(Level):
         """
         box.box_level = None
         self.boxes.remove(box)
+        self.current_box = None
         data_type = type(box.data)
         if data_type in self.boxes_by_type:
             self.boxes_by_type[data_type].remove(box)

@@ -394,6 +394,7 @@ def test_remove_box(box_level: BoxLevel, box: Box) -> None:
     """Test the remove_box method."""
     box_level.add_box(box)
     box_level.remove_box(box)
+    assert box_level.current_box is None
     assert box.box_level is None
     assert box_level.boxes == []
     box_level.add_box(box)

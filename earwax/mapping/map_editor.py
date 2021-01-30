@@ -3,7 +3,7 @@
 from enum import Enum
 from keyword import iskeyword
 from pathlib import Path
-from typing import Dict, Generator, List, Optional
+from typing import Callable, Dict, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
 from shortuuid import uuid
@@ -56,6 +56,10 @@ class MapEditorBox(Box):
     def get_default_id(instance: 'MapEditorBox') -> str:
         """Raise an error if the id is not provided."""
         raise RuntimeError('You must provide an ID.')
+
+    def __str__(self) -> str:
+        """Return a string representation of this object."""
+        return f'{self.name} (#{self.id})'
 
 
 class AnchorPoints(Enum):
@@ -131,7 +135,6 @@ class MapEditorContext:
 
     level_map: LevelMap = Factory(LevelMap)
     template_ids: Dict[str, BoxTemplate] = Factory(dict)
-    template_labels: Dict[str, BoxTemplate] = Factory(dict)
     box_ids: Dict[str, Box[str]] = Factory(dict)
 
     def to_point(self, data: BoxPoint) -> Point:
@@ -175,11 +178,27 @@ class MapEditorContext:
         """
         self.level_map.box_templates.append(template)
         self.template_ids[template.id] = template
-        self.template_labels[template.label] = template
         if box is None:
             box = self.to_box(self.level.game, template)
         self.level.add_box(box)
         self.box_ids[template.id] = box
+
+    def reload_template(self, template: BoxTemplate) -> None:
+        """Reload the given template.
+
+        This method recreates the box associated with the given template.
+
+        :param template: The template to reload.
+        """
+        box: MapEditorBox = self.box_ids[template.id]
+        self.level.remove_box(box)
+        self.add_template(template)
+        if self.level.get_current_box() is None:
+            # Better move the player.
+            box = self.box_ids[template.id]
+            self.level.set_coordinates(box.start)
+        else:
+            print(self.level.get_current_box())
 
 
 @attrs(auto_attribs=True)
@@ -235,6 +254,7 @@ class MapEditor(BoxLevel):
             'Rename current box', symbol=key.R
         )(self.rename_box)
         self.action('Box menu', symbol=key.B)(self.box_menu)
+        self.action('Move box', symbol=key.P)(self.points_menu)
         return super().__attrs_post_init__()
 
     def on_move_fail(
@@ -250,8 +270,9 @@ class MapEditor(BoxLevel):
         b: Optional[MapEditorBox] = self.get_current_box()
         if b is None:
             return self.game.output('First move to a box.')
-        m: Menu = Menu(self.game, f'Configure {b.name} (#{b.id})')
+        m: Menu = Menu(self.game, f'Configure {b}')
         m.add_item(self.rename_box, title='Rename')
+        m.add_item(self.points_menu, title='Move')
         m.add_item(self.label_box, title='Label')
         m.add_item(self.id_box, title='Identify')
         self.game.push_level(m)
@@ -335,3 +356,96 @@ class MapEditor(BoxLevel):
         self.game.output(f'Enter a new ID for the current box: {t.id}')
         yield
         self.game.push_level(e)
+
+    def point_menu(
+        self, template: BoxTemplate, point: BoxPoint
+    ) -> Callable[[], None]:
+        """Push a menu for configuring individual points."""
+
+        def set_coordinates() -> NoneGenerator:
+            e: Editor = Editor(
+                self.game, text=f'{point.x}, {point.y}, {point.z}'
+            )
+
+            @e.event
+            def on_submit(text: str) -> None:
+                """Parse coordinates from the given text."""
+                if not text:
+                    return self.game.cancel()
+                x: int
+                y: int
+                z: int
+                try:
+                    x, y, z = (int(i) for i in text.split(','))
+                except ValueError:
+                    return self.game.cancel(
+                        message=f'Invalid coordinates: {text}.'
+                    )
+                else:
+                    point.x, point.y, point.z = x, y, z
+                    self.context.reload_template(template)
+                    self.game.cancel(message='Coordinates changed.')
+
+            self.game.output('Enter new coordinates:')
+            yield
+            self.game.push_level(e)
+
+        def set_anchor() -> None:
+            m: Menu = Menu(self.game, 'Anchor')
+            current_box: Optional[MapEditorBox] = self.get_current_box()
+
+            def _set_anchor(id: Optional[str] = None) -> Callable[[], None]:
+
+                def inner() -> None:
+                    point.box_id = id
+                    self.context.reload_template(template)
+                    self.game.cancel(
+                        message=f'Anchor {"cleared" if id is None else "set"}.'
+                    )
+
+                return inner
+
+            if point.box_id is not None:
+                m.add_item(_set_anchor(None), title='Clear Anchor')
+            box: MapEditorBox
+            for box in reversed(self.boxes):
+                if box is current_box or box.id == point.box_id:
+                    continue
+                m.add_item(_set_anchor(box.id), title=str(box))
+            if m.items:
+                self.game.push_level(m)
+            else:
+                self.game.output('There is nothing to anchor to.')
+
+        def inner() -> None:
+            m: Menu = Menu(self.game, 'Configure Point')
+            m.add_item(
+                set_coordinates,
+                title=f'Set coordinates ({point.x}, {point.y}, {point.z})'
+            )
+            anchor: str = 'Not Anchored'
+            if point.box_id is not None and point.corner is not None:
+                anchor_box: MapEditorBox = self.context.box_ids[point.box_id]
+                anchor = f'{anchor_box} '
+                anchor += f'[{point.corner.name.replace("_", " ")}]'
+            m.add_item(set_anchor, title=f'Anchor ({anchor})')
+            self.game.push_level(m)
+
+        return inner
+
+    def points_menu(self) -> None:
+        """Push a menu for moving the current box."""
+        box: Optional[MapEditorBox] = self.get_current_box()
+        if box is None:
+            return self.game.output('First move to a box.')
+        t: BoxTemplate = self.context.template_ids[box.id]
+        m: Menu = Menu(self.game, f'Move {box}')
+        m.add_item(
+            self.point_menu(t, t.start),
+            title=f'Start coordinates {box.start.coordinates}'
+        )
+        m.add_item(
+            self.point_menu(t, t.end),
+            title=f'End coordinates {box.end.coordinates}'
+        )
+        self.game.push_level(m)
