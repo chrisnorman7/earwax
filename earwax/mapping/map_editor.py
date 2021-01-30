@@ -197,8 +197,6 @@ class MapEditorContext:
             # Better move the player.
             box = self.box_ids[template.id]
             self.level.set_coordinates(box.start)
-        else:
-            print(self.level.get_current_box())
 
 
 @attrs(auto_attribs=True)
@@ -257,6 +255,10 @@ class MapEditor(BoxLevel):
         self.action('Move box', symbol=key.P)(self.points_menu)
         return super().__attrs_post_init__()
 
+    def complain_box(self) -> None:
+        """Complain about there being no box."""
+        return self.game.output('First move to a box.')
+
     def on_move_fail(
         self, distance: float, vertical: Optional[float], bearing: int,
         coordinates: Point
@@ -269,10 +271,11 @@ class MapEditor(BoxLevel):
         """Push a menu to configure the current box."""
         b: Optional[MapEditorBox] = self.get_current_box()
         if b is None:
-            return self.game.output('First move to a box.')
+            return self.complain_box()
         m: Menu = Menu(self.game, f'Configure {b}')
         m.add_item(self.rename_box, title='Rename')
         m.add_item(self.points_menu, title='Move')
+        m.add_item(self.box_sounds, title='Sounds')
         m.add_item(self.label_box, title='Label')
         m.add_item(self.id_box, title='Identify')
         self.game.push_level(m)
@@ -281,7 +284,7 @@ class MapEditor(BoxLevel):
         """Rename the current box."""
         b: Optional[MapEditorBox] = self.get_current_box()
         if b is None:
-            return self.game.output('First move to a box.')
+            return self.complain_box()
         t: BoxTemplate = self.context.template_ids[b.id]
         e: Editor = Editor(self.game, text=t.name)
 
@@ -305,7 +308,7 @@ class MapEditor(BoxLevel):
         """Rename the current box."""
         b: Optional[MapEditorBox] = self.get_current_box()
         if b is None:
-            return self.game.output('First move to a box.')
+            return self.complain_box()
         t: BoxTemplate = self.context.template_ids[b.id]
         e: Editor = Editor(self.game, text=t.label)
 
@@ -329,7 +332,7 @@ class MapEditor(BoxLevel):
         """Change the ID for the current box."""
         b: Optional[MapEditorBox] = self.get_current_box()
         if b is None:
-            return self.game.output('First move to a box.')
+            return self.complain_box()
         t: BoxTemplate = self.context.template_ids[b.id]
         e: Editor = Editor(self.game, text=t.id)
 
@@ -437,7 +440,7 @@ class MapEditor(BoxLevel):
         """Push a menu for moving the current box."""
         box: Optional[MapEditorBox] = self.get_current_box()
         if box is None:
-            return self.game.output('First move to a box.')
+            return self.complain_box()
         t: BoxTemplate = self.context.template_ids[box.id]
         m: Menu = Menu(self.game, f'Move {box}')
         m.add_item(
@@ -447,5 +450,57 @@ class MapEditor(BoxLevel):
         m.add_item(
             self.point_menu(t, t.end),
             title=f'End coordinates {box.end.coordinates}'
+        )
+        self.game.push_level(m)
+
+    def box_sound(
+        self, template: BoxTemplate, name: str
+    ) -> Callable[[], NoneGenerator]:
+        """Push an editor for setting the given sound.
+
+        :param template: The template to modify.
+
+        :param name: The name of the sound to modify.
+        """
+
+        def inner() -> NoneGenerator:
+            e: Editor = Editor(self.game, text=getattr(template, name))
+
+            @e.event
+            def on_submit(text: str) -> None:
+                box: MapEditorBox = self.context.box_ids[template.id]
+                if not text:
+                    setattr(box, name, None)
+                    setattr(template, name, None)
+                    return self.game.cancel(message='Sound cleared.')
+                p: Path = Path(text)
+                if not p.exists():
+                    return self.game.cancel(
+                        message=f'Path does not exist: {p}.'
+                    )
+                setattr(template, name, text)
+                setattr(box, name, p)
+                self.game.cancel(message='Sound set.')
+
+            self.game.output(f'Enter the path to a new sound: {e.text}')
+            yield
+            self.game.push_level(e)
+
+        return inner
+
+    def box_sounds(self) -> None:
+        """Push a menu for configuring sounds."""
+        box: Optional[MapEditorBox] = self.get_current_box()
+        if box is None:
+            return self.complain_box()
+        t: BoxTemplate = self.context.template_ids[box.id]
+        m: Menu = Menu(self.game, 'Box Sounds')
+        m.add_item(
+            self.box_sound(t, 'surface_sound'),
+            title=f'Footstep sound ({t.surface_sound})'
+        )
+        m.add_item(
+            self.box_sound(t, 'wall_sound'),
+            title=f'Wall sound ({t.wall_sound})'
         )
         self.game.push_level(m)
