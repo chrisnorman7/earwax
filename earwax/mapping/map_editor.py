@@ -9,7 +9,6 @@ from attr import Factory, attrib, attrs
 from shortuuid import uuid
 
 from ..editor import Editor
-from ..hat_directions import DOWN, LEFT, RIGHT, UP
 from ..menus import Menu
 from ..mixins import DumpLoadMixin
 from ..point import Point
@@ -213,7 +212,7 @@ class MapEditor(BoxLevel):
     :class:`earwax.mapping.map_editor.LevelMap` instance.
     """
 
-    filename: Path = Path('map.yaml')
+    filename: Optional[Path] = None
 
     context: MapEditorContext = attrib(repr=False)
 
@@ -221,7 +220,7 @@ class MapEditor(BoxLevel):
     def get_default_context(instance: 'MapEditor') -> MapEditorContext:
         """Return a suitable context."""
         level_map: LevelMap
-        if instance.filename.is_file():
+        if instance.filename is not None:
             level_map = LevelMap.from_filename(instance.filename)
         else:
             level_map = LevelMap()
@@ -241,30 +240,10 @@ class MapEditor(BoxLevel):
                     name='First Box', id='first_box'
                 )
             )
+        self.add_default_actions()
         self.action(
-            'Move forwards', symbol=key.W, hat_direction=UP
-        )(self.move())
-        self.action(
-            'Turn around', symbol=key.S, hat_direction=DOWN
-        )(self.turn(180))
-        self.action(
-            'Turn left', symbol=key.A, hat_direction=LEFT
-        )(self.turn(-45))
-        self.action(
-            'Turn right', symbol=key.D, hat_direction=RIGHT
-        )(self.turn(45))
-        self.action(
-            'Show coordinates', symbol=key.C, joystick_button=0
-        )(self.show_coordinates())
-        self.action(
-            'Show facing direction', symbol=key.F, joystick_button=3
-        )(self.show_facing())
-        self.action(
-            'Describe current box', symbol=key.X, joystick_button=2
-        )(self.describe_current_box)
-        self.action(
-            'Show nearest door', symbol=key.Z, joystick_button=1
-        )
+            'New box', symbol=key.N
+        )(self.create_box)
         self.action(
             'Rename current box', symbol=key.R
         )(self.rename_box)
@@ -292,6 +271,7 @@ class MapEditor(BoxLevel):
 
     def save(self) -> None:
         """Save the map level."""
+        assert self.filename is not None
         try:
             self.context.level_map.save(self.filename)
         except Exception as e:
@@ -569,3 +549,16 @@ class MapEditor(BoxLevel):
             title=lambda: f'Wall sound ({t.wall_sound})'
         )
         self.game.push_level(m)
+
+    def create_box(self) -> None:
+        """Create a box, then call :meth:`~earwax.MapEditor.box_menu`."""
+        x: int
+        y: int
+        z: int
+        x, y, z = self.coordinates.floor().coordinates
+        t: BoxTemplate = BoxTemplate(
+            BoxPoint(x=x, y=y, z=z),
+            BoxPoint(x=x, y=y, z=z)
+        )
+        self.context.add_template(t)
+        self.box_menu(self.context.box_ids[t.id])

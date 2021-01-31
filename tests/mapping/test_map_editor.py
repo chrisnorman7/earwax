@@ -105,7 +105,7 @@ def test_rename_box(
     def on_push() -> None:
         assert isinstance(box, MapEditorBox)
         assert isinstance(template, BoxTemplate)
-        map_editor.set_coordinates(Point(5, 5, 5))
+        map_editor.set_coordinates(Point(25, 25, 25))
         game.press_key(key.R, 0)
         assert game.level is map_editor
         map_editor.set_coordinates(Point(0, 0, 0))
@@ -188,7 +188,7 @@ def test_to_box(game: Game, map_editor_context: MapEditorContext) -> None:
         start=BoxPoint(x=1, y=2, z=3),
         end=BoxPoint(x=4, y=5, z=6)
     )
-    b1: MapEditorBox = map_editor_context.to_box(game, t1)
+    b1: MapEditorBox = map_editor_context.to_box(t1)
     assert isinstance(b1, MapEditorBox)
     assert b1.id == t1.id
     assert b1.name == t1.name
@@ -205,7 +205,7 @@ def test_to_box(game: Game, map_editor_context: MapEditorContext) -> None:
             x=4, y=3, z=2
         )
     )
-    b2: MapEditorBox = map_editor_context.to_box(game, t2)
+    b2: MapEditorBox = map_editor_context.to_box(t2)
     assert isinstance(b2, MapEditorBox)
     assert b2.start == Point(4, 4, 4)
     assert b2.end == Point(8, 8, 8)
@@ -218,7 +218,7 @@ def test_to_box(game: Game, map_editor_context: MapEditorContext) -> None:
             box_id=t2.id, corner=AnchorPoints.top_front_right, x=10
         )
     )
-    b3: MapEditorBox = map_editor_context.to_box(game, t3)
+    b3: MapEditorBox = map_editor_context.to_box(t3)
     assert isinstance(b3, MapEditorBox)
     assert b3.start == Point(9, 4, 4)
     assert b3.end == Point(18, 8, 8)
