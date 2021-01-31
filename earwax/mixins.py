@@ -5,8 +5,8 @@ from enum import Enum
 from inspect import isclass
 from pathlib import Path
 from typing import (
-    TYPE_CHECKING, Any, Callable, Dict, List, Optional, TextIO, Tuple, Type,
-    Union, get_args, get_origin)
+    TYPE_CHECKING, Any, Callable, Dict, List, Optional, TextIO, Type, Union,
+    get_args, get_origin)
 
 from attr import attrs
 from typing_inspect import is_union_type
@@ -68,20 +68,6 @@ class TitleMixin:
         if callable(self.title):
             return self.title()
         return self.title
-
-
-@attrs(auto_attribs=True)
-class CoordinatesMixin:
-    """Add 3d coordinates to any object."""
-
-    x: float
-    y: float
-    z: float
-
-    @property
-    def coordinates(self) -> Tuple[float, float, float]:
-        """Return ``self.x``, ``self.y``, and ``self.z`` as a tuple."""
-        return self.x, self.y, self.z
 
 
 class RegisterEventMixin(EventDispatcher):

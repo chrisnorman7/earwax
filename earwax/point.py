@@ -2,12 +2,12 @@
 
 from enum import Enum
 from math import dist, floor
-from typing import Any, Union
+from typing import Any, Generic, Tuple, Type, TypeVar, Union, cast
 
 from attr import attrs
 from movement_2d import angle_between, coordinates_in_direction
 
-from .mixins import CoordinatesMixin
+T = TypeVar('T', float, int)
 
 
 class PointDirections(Enum):
@@ -32,13 +32,22 @@ class PointDirections(Enum):
 
 
 @attrs(auto_attribs=True, order=False, hash=True)
-class Point(CoordinatesMixin):
+class Point(Generic[T]):
     """A point in 3d space."""
 
+    x: T
+    y: T
+    z: T
+
     @classmethod
-    def origin(cls) -> 'Point':
+    def origin(cls) -> 'Point[int]':
         """Return ``Point(0, 0, 0)``."""
-        return cls(0, 0, 0)
+        return cast(Type[Point[int]], cls)(0, 0, 0)
+
+    @property
+    def coordinates(self) -> Tuple[T, T, T]:
+        """Return ``self.x``, ``self.y``, and ``self.z`` as a tuple."""
+        return self.x, self.y, self.z
 
     def directions_to(self, other: 'Point') -> PointDirections:
         """Return the direction between this point and ``other``.
@@ -88,7 +97,9 @@ class Point(CoordinatesMixin):
         x2, y2, z2 = other.coordinates
         return angle_between(x1, y1, x2, y2)
 
-    def in_direction(self, angle: float, distance: float = 1.0) -> 'Point':
+    def in_direction(
+        self, angle: float, distance: float = 1.0
+    ) -> 'Point[float]':
         """Return the coordinates in the given direction.
 
         :param angle: The direction of travel.
@@ -100,9 +111,9 @@ class Point(CoordinatesMixin):
         x, y = coordinates_in_direction(
             self.x, self.y, angle, distance=distance
         )
-        return Point(x, y, self.z)
+        return Point(x, y, float(self.z))
 
-    def copy(self) -> 'Point':
+    def copy(self) -> 'Point[T]':
         """Copy this instance.
 
         Returns a ``Point`` instance with duplicate ``x`` and ``y``
@@ -110,9 +121,11 @@ class Point(CoordinatesMixin):
         """
         return type(self)(self.x, self.y, self.z)
 
-    def floor(self) -> 'Point':
+    def floor(self) -> 'Point[int]':
         """Return a version of this object with both coordinates floored."""
-        return type(self)(floor(self.x), floor(self.y), floor(self.z))
+        return cast(Type[Point[int]], type(self))(
+            floor(self.x), floor(self.y), floor(self.z)
+        )
 
     def __add__(self, offset: Union[int, 'Point']) -> 'Point':
         """Add two points together."""
