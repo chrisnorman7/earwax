@@ -51,6 +51,11 @@ class ActionMap:
             def walk_forwards():
                 # ...
 
+        It is possible to use a generator function to have code executed before
+        and after a trigger fires. If you need this behaviour, see the
+        documentation for the :attr:`~earwax.Action.func` attribute of
+        :class:`earwax.Action`.
+
         :param title: The :attr:`~earwax.Action.title` of the new action.
 
             This value is currently only used by :class:`earwax.ActionMenu`.

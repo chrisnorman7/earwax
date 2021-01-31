@@ -12,14 +12,27 @@ from .types import ActionFunctionType, HatDirection, OptionalGenerator
 class Action:
     """An action that can be called from within a game.
 
-    Actions are added to :class:`~earwax.Level` instances.
+    Actions can be added to :class:`~earwax.Level`, and
+    :class:`~earwax.ActionMap` instances.
 
     Usually, this class is not used directly, but returned by the
-    :meth:`earwax.Level.action` method.
+    :meth:`~earwax.ActionMap.action` method of whatever :class:`~earwax.Level`
+    or :class:`~earwax.ActionMap` instance it is bound to.
 
     :ivar ~earwax.Action.title: The title of this action.
 
     :ivar ~earwax.Action.func: The function to run.
+
+        If this value is a normal function, it will be called when the action
+        is triggered.
+
+        If this function is a generator, any code before the first ``yield``
+        statement will be run when the triggering key, hat, joystick button, or
+        mouse button is pressed down. Anything after that will be run when the
+        same trigger is released.
+
+        It is worth noting that the behaviour of having a generator that yields
+        more than once is undefined.
 
     :ivar ~earwax.Action.symbol: The keyboard symbol to be used (should be one
         of the symbols from `pyglet.window.key
