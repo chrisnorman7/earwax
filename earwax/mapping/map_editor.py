@@ -272,12 +272,13 @@ class MapEditor(BoxLevel):
         b: Optional[MapEditorBox] = self.get_current_box()
         if b is None:
             return self.complain_box()
-        m: Menu = Menu(self.game, f'Configure {b}')
-        m.add_item(self.rename_box, title='Rename')
+        t: BoxTemplate = self.context.template_ids[b.id]
+        m: Menu = Menu(self.game, lambda: f'Configure {b}')
+        m.add_item(self.rename_box, title=lambda: f'Rename ({b.name})')
         m.add_item(self.points_menu, title='Move')
         m.add_item(self.box_sounds, title='Sounds')
-        m.add_item(self.label_box, title='Label')
-        m.add_item(self.id_box, title='Identify')
+        m.add_item(self.label_box, title=lambda: f'Label ({t.label})')
+        m.add_item(self.id_box, title=lambda: f'ID ({t.id})')
         self.game.push_level(m)
 
     def rename_box(self) -> NoneGenerator:
@@ -424,14 +425,22 @@ class MapEditor(BoxLevel):
             m: Menu = Menu(self.game, 'Configure Point')
             m.add_item(
                 set_coordinates,
-                title=f'Set coordinates ({point.x}, {point.y}, {point.z})'
+                title=lambda: (
+                    f'Set coordinates ({point.x}, {point.y}, {point.z})'
+                )
             )
-            anchor: str = 'Not Anchored'
-            if point.box_id is not None and point.corner is not None:
-                anchor_box: MapEditorBox = self.context.box_ids[point.box_id]
-                anchor = f'{anchor_box} '
-                anchor += f'[{point.corner.name.replace("_", " ")}]'
-            m.add_item(set_anchor, title=f'Anchor ({anchor})')
+
+            def anchor_title() -> str:
+                anchor: str = 'Not Anchored'
+                if point.box_id is not None and point.corner is not None:
+                    anchor_box: MapEditorBox = self.context.box_ids[
+                        point.box_id
+                    ]
+                    anchor = f'{anchor_box} '
+                    anchor += f'[{point.corner.name.replace("_", " ")}]'
+                return f'Anchor ({anchor})'
+
+            m.add_item(set_anchor, title=anchor_title)
             self.game.push_level(m)
 
         return inner
@@ -497,10 +506,10 @@ class MapEditor(BoxLevel):
         m: Menu = Menu(self.game, 'Box Sounds')
         m.add_item(
             self.box_sound(t, 'surface_sound'),
-            title=f'Footstep sound ({t.surface_sound})'
+            title=lambda: f'Footstep sound ({t.surface_sound})'
         )
         m.add_item(
             self.box_sound(t, 'wall_sound'),
-            title=f'Wall sound ({t.wall_sound})'
+            title=lambda: f'Wall sound ({t.wall_sound})'
         )
         self.game.push_level(m)
