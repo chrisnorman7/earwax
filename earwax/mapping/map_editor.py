@@ -132,10 +132,16 @@ class MapEditorContext:
     """
 
     level: 'MapEditor'
+    level_map: LevelMap
 
-    level_map: LevelMap = Factory(LevelMap)
     template_ids: Dict[str, BoxTemplate] = Factory(dict)
     box_ids: Dict[str, Box[str]] = Factory(dict)
+
+    def __attrs_post_init__(self) -> None:
+        """Add templates to ``self.template_ids``."""
+        t: BoxTemplate
+        for t in self.level_map.box_templates:
+            self.template_ids[t.id] = t
 
     def to_point(self, data: BoxPoint) -> Point:
         """Return a point from the given data.
@@ -207,17 +213,27 @@ class MapEditor(BoxLevel):
     :class:`earwax.mapping.map_editor.LevelMap` instance.
     """
 
-    filename: str = 'map.yaml'
+    filename: Path = Path('map.yaml')
 
     context: MapEditorContext = attrib(repr=False)
 
     @context.default
     def get_default_context(instance: 'MapEditor') -> MapEditorContext:
         """Return a suitable context."""
-        return MapEditorContext(instance)
+        level_map: LevelMap
+        if instance.filename.is_file():
+            level_map = LevelMap.from_filename(instance.filename)
+        else:
+            level_map = LevelMap()
+        return MapEditorContext(instance, level_map)
 
     def __attrs_post_init__(self) -> None:
         """Add the initial box if there is none, and add extra actions."""
+        t: BoxTemplate
+        for t in self.context.level_map.box_templates:
+            b: MapEditorBox = self.context.to_box(self.game, t)
+            self.context.box_ids[t.id] = b
+            self.add_box(b)
         if not self.boxes:
             self.context.add_template(
                 BoxTemplate(
@@ -253,6 +269,12 @@ class MapEditor(BoxLevel):
         )(self.rename_box)
         self.action('Box menu', symbol=key.B)(self.box_menu)
         self.action('Move box', symbol=key.P)(self.points_menu)
+        self.action(
+            'Save map', symbol=key.S, modifiers=key.MOD_CTRL
+        )(self.save)
+        self.action(
+            'Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT
+        )(self.game.push_action_menu)
         return super().__attrs_post_init__()
 
     def complain_box(self) -> None:
@@ -266,6 +288,16 @@ class MapEditor(BoxLevel):
         """Tell the user their move failed."""
         self.game.output('There is no box in that direction.')
         return super().on_move_fail(distance, vertical, bearing, coordinates)
+
+    def save(self) -> None:
+        """Save the map level."""
+        try:
+            self.context.level_map.save(self.filename)
+        except Exception as e:
+            self.game.output(f'Failed to save the map: {e}.')
+            raise
+        else:
+            self.game.output('Map saved.')
 
     def box_menu(self) -> None:
         """Push a menu to configure the current box."""
