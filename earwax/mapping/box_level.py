@@ -7,6 +7,7 @@ from typing import (
 from attr import Factory, attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
 
+from ..hat_directions import DOWN, LEFT, RIGHT, UP
 from ..types import EventType
 from .box import BoxBounds
 
@@ -17,6 +18,7 @@ except ModuleNotFoundError:
 
 from ..level import Level
 from ..point import Point, PointDirections
+from ..pyglet import key
 from ..walking_directions import walking_directions
 from .box import Box
 from .door import Door
@@ -120,6 +122,52 @@ class BoxLevel(Level):
         box: Box
         for box in self.boxes:
             self.register_box(box)
+
+    def add_default_actions(self) -> None:
+        """Add some default actions.
+
+        This method adds the following actions:
+
+        * Move forward: W
+
+        * Turn 180 degrees: S
+
+        * Turn 45 degrees left: A
+
+        * Turn 45 degrees right: D
+
+        * Show coordinates: C
+
+        * Show the facing direction: F
+
+        * Describe current box: X
+
+        * Speak nearest door: Z
+        """
+        self.action(
+            'Move forwards', symbol=key.W, hat_direction=UP
+        )(self.move())
+        self.action(
+            'Turn around', symbol=key.S, hat_direction=DOWN
+        )(self.turn(180))
+        self.action(
+            'Turn left', symbol=key.A, hat_direction=LEFT
+        )(self.turn(-45))
+        self.action(
+            'Turn right', symbol=key.D, hat_direction=RIGHT
+        )(self.turn(45))
+        self.action(
+            'Show coordinates', symbol=key.C, joystick_button=0
+        )(self.show_coordinates())
+        self.action(
+            'Show facing direction', symbol=key.F, joystick_button=3
+        )(self.show_facing())
+        self.action(
+            'Describe current box', symbol=key.X, joystick_button=2
+        )(self.describe_current_box)
+        self.action(
+            'Show nearest door', symbol=key.Z, joystick_button=1
+        )
 
     def add_box(self, box: Box[Any]) -> None:
         """Add a box to :attr:`self.boxes <earwax.BoxLevel.boxes>`.
