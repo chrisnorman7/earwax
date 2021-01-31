@@ -4,8 +4,9 @@ from datetime import datetime
 from enum import Enum
 from inspect import isclass
 from pathlib import Path
-from typing import (TYPE_CHECKING, Any, Dict, List, Optional, TextIO, Tuple,
-                    Type, get_args, get_origin)
+from typing import (
+    TYPE_CHECKING, Any, Callable, Dict, List, Optional, TextIO, Tuple, Type,
+    Union, get_args, get_origin)
 
 from attr import attrs
 from typing_inspect import is_union_type
@@ -51,9 +52,22 @@ class TitleMixin:
     """Add a title to any :class:`Level` subclass.
 
     :ivar ~earwax.level.TitleMixin.title: The title of this instance.
+
+        If this value is a callable, it should return a string which will be
+        used as the title.
     """
 
-    title: str
+    title: Union[str, Callable[[], str]]
+
+    def get_title(self) -> str:
+        """Return the proper title of this object.
+
+        If :attr:`self.title <earwax.mixins.TitleMixin.title>` is a callable,
+        its return value will be returned.
+        """
+        if callable(self.title):
+            return self.title()
+        return self.title
 
 
 @attrs(auto_attribs=True)

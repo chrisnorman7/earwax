@@ -263,10 +263,11 @@ class Menu(Level, TitleMixin, DismissibleMixin):
             self.select_sound.destroy()
             self.select_sound = None
         if item is None:
-            self.game.output(self.title)
+            self.game.output(self.get_title())
         else:
-            if item.title is not None:
-                self.game.output(item.title)
+            title: Optional[str] = item.get_title()
+            if title is not None:
+                self.game.output(title)
             item.dispatch_event('on_selected')
             sound_path: Optional[Path] = (
                 item.select_sound_path
@@ -350,8 +351,10 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         self.search_time = now
         index: int
         item: MenuItem
+        title: Optional[str]
         for index, item in enumerate(self.items):
-            if item.title is not None and item.title.lower().startswith(
+            title = item.get_title()
+            if title is not None and title.lower().startswith(
                 self.search_string
             ):
                 self.position = index
