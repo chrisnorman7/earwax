@@ -9,7 +9,6 @@ from attr import Factory, attrib, attrs
 from shortuuid import uuid
 
 from ..editor import Editor
-from ..game import Game
 from ..hat_directions import DOWN, LEFT, RIGHT, UP
 from ..menus import Menu
 from ..mixins import DumpLoadMixin
@@ -156,13 +155,13 @@ class MapEditorContext:
             p += adjustment
         return p
 
-    def to_box(self, game: Game, template: BoxTemplate) -> MapEditorBox:
+    def to_box(self, template: BoxTemplate) -> MapEditorBox:
         """Return a box from a template.
 
         :param template: The template to convert.
         """
         return MapEditorBox(
-            game,
+            self.level.game,
             self.to_point(template.start), self.to_point(template.end),
             surface_sound=Path(template.surface_sound)
             if template.surface_sound is not None else None,
@@ -185,7 +184,7 @@ class MapEditorContext:
         self.level_map.box_templates.append(template)
         self.template_ids[template.id] = template
         if box is None:
-            box = self.to_box(self.level.game, template)
+            box = self.to_box(template)
         self.level.add_box(box)
         self.box_ids[template.id] = box
 
@@ -196,7 +195,8 @@ class MapEditorContext:
 
         :param template: The template to reload.
         """
-        box: MapEditorBox = self.box_ids[template.id]
+        self.level_map.box_templates.remove(template)
+        box: MapEditorBox = self.box_ids.pop(template.id)
         self.level.remove_box(box)
         self.add_template(template)
         if self.level.get_current_box() is None:
@@ -231,13 +231,14 @@ class MapEditor(BoxLevel):
         """Add the initial box if there is none, and add extra actions."""
         t: BoxTemplate
         for t in self.context.level_map.box_templates:
-            b: MapEditorBox = self.context.to_box(self.game, t)
+            b: MapEditorBox = self.context.to_box(t)
             self.context.box_ids[t.id] = b
             self.add_box(b)
         if not self.boxes:
             self.context.add_template(
                 BoxTemplate(
-                    BoxPoint(), BoxPoint(), name='First Box', id='first_box'
+                    BoxPoint(), BoxPoint(x=10, y=10, z=10),
+                    name='First Box', id='first_box'
                 )
             )
         self.action(
@@ -267,7 +268,7 @@ class MapEditor(BoxLevel):
         self.action(
             'Rename current box', symbol=key.R
         )(self.rename_box)
-        self.action('Box menu', symbol=key.B)(self.box_menu)
+        self.action('Box menu', symbol=key.B)(self.boxes_menu)
         self.action('Move box', symbol=key.P)(self.points_menu)
         self.action(
             'Save map', symbol=key.S, modifiers=key.MOD_CTRL
@@ -299,14 +300,37 @@ class MapEditor(BoxLevel):
         else:
             self.game.output('Map saved.')
 
-    def box_menu(self) -> None:
-        """Push a menu to configure the current box."""
-        b: Optional[MapEditorBox] = self.get_current_box()
-        if b is None:
+    def boxes_menu(self) -> None:
+        """Push a menu to select a box to configure.
+
+        If there is only 1 box, it will not be shown.
+        """
+
+        def inner(box: MapEditorBox) -> None:
+            if isinstance(self.game.level, Menu):
+                self.game.pop_level()
+            return self.box_menu(box)
+
+        boxes: List[MapEditorBox] = []
+        b: MapEditorBox
+        for b in self.boxes:
+            if b.contains_point(self.coordinates):
+                boxes.append(b)
+        if not boxes:
             return self.complain_box()
-        t: BoxTemplate = self.context.template_ids[b.id]
-        m: Menu = Menu(self.game, lambda: f'Configure {b}')
-        m.add_item(self.rename_box, title=lambda: f'Rename ({b.name})')
+        elif len(boxes) == 1:
+            return inner(boxes[0])
+        else:
+            m: Menu = Menu(self.game, 'Select Box')
+            for b in boxes:
+                m.add_item(lambda: inner(b), title=str(b))
+            self.game.push_level(m)
+
+    def box_menu(self, box: MapEditorBox) -> None:
+        """Push a menu to configure the provided box."""
+        t: BoxTemplate = self.context.template_ids[box.id]
+        m: Menu = Menu(self.game, lambda: f'Configure {box}')
+        m.add_item(self.rename_box, title=lambda: f'Rename ({box.name})')
         m.add_item(self.points_menu, title='Move')
         m.add_item(self.box_sounds, title='Sounds')
         m.add_item(self.label_box, title=lambda: f'Label ({t.label})')

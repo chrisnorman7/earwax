@@ -5,7 +5,7 @@ from pathlib import Path
 
 from earwax import Game, MapEditor
 
-from ...mapping.map_editor import BoxTemplate
+from ...mapping.map_editor import LevelMap
 from ...pyglet import Window
 
 
@@ -17,8 +17,8 @@ def new_map(args: Namespace) -> None:
         print()
         print(f'Path already exists: {args.filename}.')
         raise SystemExit
-    t: BoxTemplate = BoxTemplate()
-    t.save(p)
+    level_map: LevelMap = LevelMap()
+    level_map.save(p)
     print(f'Map created at {args.filename}.')
 
 
