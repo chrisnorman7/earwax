@@ -63,8 +63,7 @@ from .mapping import (Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door,
                       Portal)
 from .menus import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
                     ReverbEditor, TypeHandler, UnknownTypeError)
-from .mixins import (CoordinatesMixin, DismissibleMixin, DumpLoadMixin,
-                     TitleMixin)
+from .mixins import DismissibleMixin, DumpLoadMixin, TitleMixin
 from .networking import (
     AlreadyConnected, AlreadyConnecting, ConnectionStates, NetworkConnection,
     NetworkingConnectionError, NotConnectedYet)
@@ -123,7 +122,7 @@ __all__: List[str] = [
     'ActionMenu', 'ConfigMenu', 'FileMenu', 'Menu', 'MenuItem', 'ReverbEditor',
     'TypeHandler', 'UnknownTypeError',
     # mixins.py:
-    'CoordinatesMixin', 'DismissibleMixin', 'DumpLoadMixin', 'TitleMixin',
+    'DismissibleMixin', 'DumpLoadMixin', 'TitleMixin',
     # networking.py:
     'AlreadyConnected', 'AlreadyConnecting', 'ConnectionStates',
     'NetworkConnection', 'NetworkingConnectionError', 'NotConnectedYet',
