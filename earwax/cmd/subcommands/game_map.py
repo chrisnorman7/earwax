@@ -3,10 +3,10 @@
 from argparse import Namespace
 from pathlib import Path
 
-from pyglet.window import Window
-
 from earwax import Game, MapEditor
-from earwax.mapping.map_editor import BoxTemplate
+
+from ...mapping.map_editor import BoxTemplate
+from ...pyglet import Window
 
 
 def new_map(args: Namespace) -> None:
