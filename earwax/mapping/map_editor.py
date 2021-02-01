@@ -271,7 +271,8 @@ class MapEditor(BoxLevel):
 
     def save(self) -> None:
         """Save the map level."""
-        assert self.filename is not None
+        if self.filename is None:
+            return self.game.output('There is no filename to save to.')
         try:
             self.context.level_map.save(self.filename)
         except Exception as e:
