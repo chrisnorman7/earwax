@@ -547,9 +547,6 @@ class SoundManager:
 
         :param path: The path to play.
 
-        :param schedule_destruction: Whether or not to schedule the newly
-            created sound for destruction when it has finished playing.
-
         :param kwargs: Extra keyword arguments to pass to the constructor of
             :class:`earwax.Sound`.
 
