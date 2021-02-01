@@ -117,7 +117,7 @@ class BoxLevel(Level):
     def __attrs_post_init__(self) -> None:
         """Register default events."""
         super().__attrs_post_init__()
-        for func in (self.on_move, self.on_move_fail, self.on_turn):
+        for func in (self.on_move_success, self.on_move_fail, self.on_turn):
             self.register_event(cast(EventType, func))
         box: Box
         for box in self.boxes:
@@ -237,8 +237,8 @@ class BoxLevel(Level):
         """
         pass
 
-    def on_move(self) -> None:
-        """Handle movement.
+    def on_move_success(self) -> None:
+        """Handle a successful move.
 
         An event that will be dispatched when the
         :meth:`~earwax.BoxLevel.move` action is used.
@@ -403,7 +403,7 @@ class BoxLevel(Level):
                     self.set_coordinates(p)
                     box.dispatch_event('on_footstep', _bearing, p)
                     self.handle_box(box)
-                    self.dispatch_event('on_move')
+                    self.dispatch_event('on_move_success')
             else:
                 self.dispatch_event(
                     'on_move_fail', distance, vertical, _bearing, p

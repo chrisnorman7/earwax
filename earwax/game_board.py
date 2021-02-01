@@ -58,7 +58,7 @@ class GameBoard(Level, Generic[T]):
         super().__attrs_post_init__()
         self.populate()
         func: Callable[..., Any]
-        for func in (self.on_move, self.on_move_fail):
+        for func in (self.on_move_success, self.on_move_fail):
             self.register_event(func)
 
     def populate(self) -> None:
@@ -106,8 +106,8 @@ class GameBoard(Level, Generic[T]):
         except NoSuchTile:
             return None
 
-    def on_move(self, direction: PointDirections) -> None:
-        """Run code when the player moves.
+    def on_move_success(self, direction: PointDirections) -> None:
+        """Handle a successful move.
 
         An event that is dispatched by :meth:`~earwax.GameBoard.move`.
 
@@ -164,7 +164,7 @@ class GameBoard(Level, Generic[T]):
                         setattr(p, name, 0)
                 self.get_tile(p)
                 self.coordinates = p
-                self.dispatch_event('on_move', direction)
+                self.dispatch_event('on_move_success', direction)
             except NoSuchTile:
                 self.dispatch_event('on_move_fail', direction)
 

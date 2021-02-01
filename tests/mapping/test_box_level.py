@@ -94,7 +94,7 @@ def test_move(game: Game, box_level: BoxLevel) -> None:
     assert box_level.coordinates == Point(3.0, 2.0, 2.0)
 
     @box_level.event
-    def on_move() -> None:
+    def on_move_success() -> None:
         assert box_level.coordinates == Point(3, 1, 2)
         raise MoveWorks()
 

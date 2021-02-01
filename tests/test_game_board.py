@@ -60,7 +60,7 @@ def get_board(game: Game) -> GameBoard[Tuple[float, float, float]]:
     )
 
     @b.event
-    def on_move(p: Point) -> None:
+    def on_move_success(p: Point) -> None:
         raise OnMoveWorks(p)
 
     @b.event
