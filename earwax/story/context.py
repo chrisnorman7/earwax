@@ -4,15 +4,19 @@ import os.path
 import webbrowser
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List, Optional, Type
+from typing import Any, Callable, Dict, Generator, List, Type
 
 from attr import Factory, attrib, attrs
+
+try:
+    from synthizer import PannerStrategy
+except ModuleNotFoundError:
+    PannerStrategy = object
 
 from ..credit import Credit
 from ..editor import Editor
 from ..game import Game
 from ..menus import ConfigMenu, Menu
-from ..sound import PannerStrategies, SoundManager
 from ..track import Track, TrackTypes
 from ..yaml import CLoader, load
 from .edit_level import EditLevel, push_rooms_menu
@@ -107,15 +111,10 @@ class StoryContext:
 
     def before_run(self) -> None:
         """Set the default panning strategy."""
-        manager: Optional[SoundManager]
-        for manager in (
-            self.game.interface_sound_manager,
-            self.game.ambiance_sound_manager, self.game.music_sound_manager
-        ):
-            if manager is not None:
-                manager.default_panner_strategy = PannerStrategies[
-                    self.world.panner_strategy
-                ]
+        if self.game.audio_context is not None:
+            self.game.audio_context.panner_strategy = PannerStrategy[
+                self.world.panner_strategy
+            ]
 
     def get_window_caption(self) -> str:
         """Return a suitable window title."""
@@ -458,21 +457,15 @@ class StoryContext:
     def set_panner_strategy(self) -> None:
         """Allow the changing of the panner strategy."""
 
-        def set_strategy(strategy: PannerStrategies) -> Callable[[], None]:
+        def set_strategy(strategy: PannerStrategy) -> Callable[[], None]:
 
             def inner() -> None:
                 self.world.panner_strategy = strategy.name
                 self.game.output(
                     f'Panner strategy changed to {self.world.panner_strategy}.'
                 )
-                manager: Optional[SoundManager]
-                for manager in (
-                    self.game.ambiance_sound_manager,
-                    self.game.interface_sound_manager,
-                    self.game.music_sound_manager
-                ):
-                    if manager is not None:
-                        manager.default_panner_strategy = strategy
+                if self.game.audio_context is not None:
+                    self.game.audio_context.panner_strategy = strategy
                 self.game.pop_level()
 
             return inner
@@ -480,7 +473,7 @@ class StoryContext:
         m: Menu = Menu(
             self.game, f'Panner Strategy ({self.world.panner_strategy})'
         )
-        strategy: PannerStrategies
-        for strategy in PannerStrategies.__members__.values():
+        strategy: PannerStrategy
+        for strategy in PannerStrategy.__members__.values():
             m.add_item(set_strategy(strategy), title=strategy.name)
         self.game.push_level(m)

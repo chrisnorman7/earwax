@@ -1,9 +1,11 @@
 """Map demo."""
 
+import sys
+
 if True:
-    import sys
     sys.path.insert(0, '../..')
 
+from logging import basicConfig
 from pathlib import Path
 from typing import List
 
@@ -112,24 +114,6 @@ def before_run() -> None:
     level: BoxLevel = BoxLevel(game, boxes=boxes)
     level.tracks.append(music)
     level.ambiances.extend(ambiances)
-    level.action('Show coordinates', symbol=key.C)(level.show_coordinates())
-    level.action('Show facing direction', symbol=key.F)(level.show_facing())
-    level.action('Walk forwards', symbol=key.W, interval=0.5)(level.move())
-    level.action(
-        'Walk backwards', symbol=key.S, interval=1.0
-    )(level.move(distance=-0.5))
-    level.action('Turn right', symbol=key.D)(level.turn(45))
-    level.action('Turn left', symbol=key.A)(level.turn(-45))
-    level.action(
-        'Activate nearby objects', symbol=key.RETURN
-    )(level.activate())
-
-    level.action(
-        'Announce nearest door', symbol=key.Z
-    )(level.show_nearest_door())
-    level.action(
-        'Describe current box', symbol=key.X
-    )(level.describe_current_box)
 
     @level.action('Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT)
     def help_menu() -> None:
@@ -154,9 +138,11 @@ def before_run() -> None:
         )
         m.add_submenu(credits_menu, False, title='Credits')
 
+    level.add_default_actions()
     game.push_level(level)
 
 
 if __name__ == '__main__':
+    basicConfig(level='INFO')
     window: Window = Window(caption='Map Demo')
     game.run(window)

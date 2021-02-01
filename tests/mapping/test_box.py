@@ -5,7 +5,7 @@ from typing import List, Optional
 from pytest import raises
 
 from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, Game, NotADoor,
-                    PannerStrategies, Point, Portal, SoundManager)
+                    Point, Portal, SoundManager)
 
 
 def test_init(box_level: BoxLevel, game: Game, box: Box) -> None:
@@ -305,7 +305,6 @@ def test_sound_manager(game: Game) -> None:
     assert b.reverb is None
     assert m.default_gain == game.config.sound.sound_volume.value
     assert m.default_looping is False
-    assert m.default_panner_strategy is PannerStrategies.default
     assert m.default_reverb is None
 
 

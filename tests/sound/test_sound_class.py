@@ -3,15 +3,12 @@
 from pathlib import Path
 from time import sleep
 
-from pyglet.window import Window
 from pytest import raises
 from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
                        Generator, GlobalFdnReverb, PannedSource,
                        PannerStrategy, Source3D, StreamingGenerator)
 
-from earwax import (AlreadyDestroyed, BufferCache, Game, Point, Sound,
-                    SoundManager)
-from earwax.sound import PannerStrategies
+from earwax import AlreadyDestroyed, BufferCache, Point, Sound, SoundManager
 
 
 def test_init(
@@ -25,10 +22,10 @@ def test_init(
     assert sound.context is context
     assert sound.generator is generator
     assert sound.buffer is buffer
-    assert sound.panner_strategy is PannerStrategies.default
     assert sound.position is None
     assert isinstance(sound.source, DirectSource)
     assert not sound._destroyed
+    assert not sound.keep_around
     assert sound.gain == 1.0
     assert sound.source.gain == 1.0
     assert sound.looping is False
@@ -38,11 +35,10 @@ def test_init(
     generator = StreamingGenerator(context, 'file', 'sound.wav')
     sound = Sound(
         context, generator, None, looping=True, gain=0.5,
-        position=Point(1, 2, 3), panner_strategy=PannerStrategies.stereo
+        position=Point(1, 2, 3)
     )
     sleep(0.1)
     assert sound.buffer is None
-    assert sound.panner_strategy is PannerStrategies.stereo
     assert sound.generator is generator
     assert sound.looping is True
     assert generator.looping is True
@@ -56,13 +52,10 @@ def test_init(
     generator = StreamingGenerator(context, 'file', 'sound.wav')
     sound = Sound(
         context, generator, buffer, position=0.5,
-        panner_strategy=PannerStrategies.best
     )
     sleep(0.1)
     assert isinstance(sound.source, PannedSource)
     assert sound.source.panning_scalar == 0.5
-    assert sound.panner_strategy is PannerStrategies.best
-    assert sound.source.panner_strategy is PannerStrategy.HRTF
     sound.destroy()
 
 
@@ -129,30 +122,6 @@ def test_destroy_from_stream(context: Context) -> None:
     with raises(AlreadyDestroyed) as exc:
         sound.destroy()
     assert exc.value.args == (sound,)
-
-
-def test_schedule_destruction(
-    buffer_cache: BufferCache, game: Game, window: Window, context: Context
-) -> None:
-    """Ensure sounds get destroyed properly."""
-    sound: Sound = Sound.from_stream(context, 'file', 'sound.wav')
-    with raises(RuntimeError):
-        sound.schedule_destruction()
-    assert sound._destroyed is False
-    sound.destroy()
-    sound = Sound.from_path(
-        context, buffer_cache, Path('sound.wav'),
-        on_destroy=lambda sound: window.close()
-    )
-    sound.schedule_destruction()
-    game.run(window)
-    assert sound._destroyed is True
-    assert sound.context is context
-    assert sound.source is None
-    assert isinstance(sound.buffer, Buffer)
-    assert isinstance(sound.generator, BufferGenerator)
-    with raises(KeyError):
-        sound.generator.destroy()
 
 
 def test_connect_reverb() -> None:
@@ -281,7 +250,10 @@ def test_set_position(sound: Sound) -> None:
 
 def test_set_loopng(sound_manager: SoundManager) -> None:
     """Test the set_looping method."""
-    sound: Sound = sound_manager.play_path(Path('sound.wav'), False)
+    sound: Sound = sound_manager.play_path(
+        Path('sound.wav'), keep_around=False
+    )
+    assert sound.keep_around is False
     assert sound.looping is False
     assert sound.generator.looping is False
     sound.set_looping(False)

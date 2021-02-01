@@ -2,10 +2,11 @@
 
 from concurrent.futures import Executor, ThreadPoolExecutor
 from inspect import isgenerator
+from logging import Logger, getLogger
 from multiprocessing import cpu_count
 from pathlib import Path
 from typing import (Any, Callable, Dict, Generator, Iterator, List, Optional,
-                    Tuple, Type, cast)
+                    Tuple, Type, Union, cast)
 from warnings import warn
 
 from attr import Factory, attrib, attrs
@@ -15,7 +16,7 @@ from .menus import ActionMenu, Menu
 from .pyglet import (EVENT_HANDLED, EVENT_UNHANDLED, Joystick, Window, app,
                      get_joysticks, get_settings_path, schedule_interval,
                      unschedule)
-from .sound import BufferCache
+from .sound import AlreadyDestroyed, BufferCache, Sound
 from .task import IntervalFunction, Task, TaskFunction
 from .types import EventType
 
@@ -25,9 +26,11 @@ except ModuleNotFoundError:
     detect_screen_reader, load, unload = (None, None, None)
 
 try:
-    from synthizer import Context, initialized
+    from synthizer import Context, FinishedEvent, LoopedEvent, initialized
 except ModuleNotFoundError:
-    Context, initialized = (object, None)
+    Context, FinishedEvent, LoopedEvent, initialized = (
+        object, object, object, None
+    )
 
 from .action import Action, HatDirection, OptionalGenerator
 from .configuration import EarwaxConfig
@@ -193,6 +196,12 @@ class Game(RegisterEventMixin):
     )
 
     credits: List[Credit] = attrib(default=Factory(list), repr=False)
+    logger: Logger = attrib(repr=False)
+
+    @logger.default
+    def get_default_logger(instance: 'Game') -> Logger:
+        """Return a logger."""
+        return getLogger(f'<game {instance.name}>')
 
     def __attrs_post_init__(self) -> None:
         """Register default events."""
@@ -655,7 +664,8 @@ class Game(RegisterEventMixin):
             warn('No screen reader detected.')
         if self.audio_context is None:
             with initialized():
-                self.audio_context = Context()
+                self.audio_context = Context(enable_events=True)
+                schedule_interval(self.poll_synthizer_events, 1.0)
                 self.setup_run(initial_level)
                 self.finalise_run()
         else:
@@ -974,3 +984,33 @@ class Game(RegisterEventMixin):
             self.pop_level()
         else:
             self.reveal_level(level)
+
+    def poll_synthizer_events(self, dt: float) -> None:
+        """Poll the audio context for new synthizer events.
+
+        :param dt: The delta provided by Pyglet.
+        """
+        if self.audio_context is not None:
+            event: Union[FinishedEvent, LoopedEvent]
+            for event in self.audio_context.get_events():
+                sound: Optional[Sound] = event.source.get_userdata()
+                if sound is None:
+                    self.logger.info('Ignoring sourceless event %r.', event)
+                    continue
+                if isinstance(event, FinishedEvent):
+                    if sound.on_finished is not None:
+                        sound.on_finished(sound)
+                    if not sound.keep_around:
+                        try:
+                            sound.destroy()
+                            self.logger.debug('Destroying sound %s.', sound)
+                        except AlreadyDestroyed:
+                            self.logger.debug(
+                                'Sound already destroyed %s.', sound
+                            )
+                    else:
+                        self.logger.debug('Not destroying sound %s.', sound)
+                if isinstance(event, LoopedEvent):
+                    self.logger.debug('Looped sound %s.', sound)
+                    if sound.on_looped is not None:
+                        sound.on_looped(sound)

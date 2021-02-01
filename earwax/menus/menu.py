@@ -246,7 +246,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
             the menu item itself, or the main earwax configuration.
         """
         return self.game.interface_sound_manager.play_path(
-            path, False, looping=item.loop_select_sound
+            path, looping=item.loop_select_sound
         )
 
     def show_selection(self) -> None:
@@ -312,7 +312,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
                 sound_path is not None and
                 self.game.interface_sound_manager is not None
             ):
-                self.game.interface_sound_manager.play_path(sound_path, True)
+                self.game.interface_sound_manager.play_path(sound_path)
             res: OptionalGenerator = item.func()
             if res is not None and isgenerator(res):
                 yield from res

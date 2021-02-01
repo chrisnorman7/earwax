@@ -534,7 +534,7 @@ class Box(Generic[T], RegisterEventMixin):
                 if self.sound_manager is None:
                     self.make_sound_manager()
                 assert self.sound_manager is not None
-                self.sound_manager.play_path(d.open_sound, True)
+                self.sound_manager.play_path(d.open_sound)
             when: float
             if isinstance(d.close_after, tuple):
                 a: float
@@ -567,7 +567,7 @@ class Box(Generic[T], RegisterEventMixin):
                 if self.sound_manager is None:
                     self.make_sound_manager()
                 assert self.sound_manager is not None
-                self.sound_manager.play_path(d.close_sound, True)
+                self.sound_manager.play_path(d.close_sound)
 
     def scheduled_close(self, dt: float) -> None:
         """Call :meth:`~earwax.Box.close`.
@@ -597,7 +597,7 @@ class Box(Generic[T], RegisterEventMixin):
                 and p.exit_sound is not None
             ):
                 self.game.interface_sound_manager.play_path(
-                    p.exit_sound, True, reverb=reverb
+                    p.exit_sound, reverb=reverb
                 )
             bearing: int = self.box_level.bearing
             if p.bearing is not None:

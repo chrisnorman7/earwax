@@ -143,9 +143,11 @@ class BoxLevel(Level):
         * Describe current box: X
 
         * Speak nearest door: Z
+
+        * Activate nearby objects: Return
         """
         self.action(
-            'Move forwards', symbol=key.W, hat_direction=UP
+            'Move forwards', symbol=key.W, hat_direction=UP, interval=0.5
         )(self.move())
         self.action(
             'Turn around', symbol=key.S, hat_direction=DOWN
@@ -167,7 +169,10 @@ class BoxLevel(Level):
         )(self.describe_current_box)
         self.action(
             'Show nearest door', symbol=key.Z, joystick_button=1
-        )
+        )(self.show_nearest_door())
+        self.action(
+            'Activate nearby objects', symbol=key.RETURN
+        )(self.activate())
 
     def add_box(self, box: Box[Any]) -> None:
         """Add a box to :attr:`self.boxes <earwax.BoxLevel.boxes>`.
@@ -245,7 +250,7 @@ class BoxLevel(Level):
             box is not None and box.sound_manager is not None
             and box.surface_sound is not None
         ):
-            box.sound_manager.play_path(box.surface_sound, True, position=None)
+            box.sound_manager.play_path(box.surface_sound, position=None)
 
     def on_move_fail(
         self, distance: float, vertical: Optional[float], bearing: int,
@@ -348,11 +353,11 @@ class BoxLevel(Level):
                 # Play a closed door sound, instead of a wall sound.
                 if data.closed_sound is not None:
                     box.sound_manager.play_path(
-                        data.closed_sound, True, position=coordinates
+                        data.closed_sound, position=coordinates
                     )
             elif box.wall_sound is not None and box.sound_manager is not None:
                 box.sound_manager.play_path(
-                    box.wall_sound, True, position=coordinates
+                    box.wall_sound, position=coordinates
                 )
         box.dispatch_event('on_collide', coordinates)
 

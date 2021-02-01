@@ -273,8 +273,7 @@ class IntroLevel(Level):
                 'Cannot start playing without a valid sound manager.'
             )
         self.sound = self.sound_manager.play_path(
-            self.sound_path, not self.looping, looping=self.looping,
-            **self.play_kwargs
+            self.sound_path, looping=self.looping, **self.play_kwargs
         )
         if self.skip_after is not None:
             schedule_once(

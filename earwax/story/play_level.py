@@ -315,7 +315,7 @@ class PlayLevel(Level):
         if a.message is not None:
             self.game.output(a.message)
         if a.sound is not None:
-            self.game.interface_sound_manager.play_path(Path(a.sound), True)
+            self.game.interface_sound_manager.play_path(Path(a.sound))
         self.set_room(x.destination)
 
     def get_gain(self, type: TrackTypes, multiplier: float) -> float:
@@ -462,7 +462,7 @@ class PlayLevel(Level):
         if self.world.cursor_sound is None:
             return
         self.cursor_sound = self.game.interface_sound_manager.play_path(
-            Path(self.world.cursor_sound), False, position=position
+            Path(self.world.cursor_sound), position=position
         )
 
     def play_action_sound(
@@ -477,7 +477,7 @@ class PlayLevel(Level):
             If this value is ``None``, the sound will not be panned.
         """
         s: Sound = self.game.interface_sound_manager.play_path(
-            Path(sound), True, position=position, reverb=self.reverb
+            Path(sound), position=position, reverb=self.reverb
         )
         self.action_sounds.append(s)
 

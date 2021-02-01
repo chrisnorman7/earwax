@@ -121,7 +121,7 @@ def menu() -> OptionalGenerator:
         """Call player.play in a try block."""
         if g.interface_sound_manager is not None and path is not None:
             try:
-                g.interface_sound_manager.play_path(path, True)
+                g.interface_sound_manager.play_path(path)
             except SynthizerError:
                 pass  # Not a sound file.
 
