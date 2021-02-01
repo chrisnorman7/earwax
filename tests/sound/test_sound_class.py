@@ -269,3 +269,10 @@ def test_set_loopng(sound_manager: SoundManager) -> None:
     assert sound.looping is False
     assert sound.generator.looping is False
     sound.destroy()
+
+
+def test_destroyed_property(sound: Sound) -> None:
+    """Test the destroyed property."""
+    assert sound.destroyed is False
+    sound.destroy()
+    assert sound.destroyed is True

@@ -285,6 +285,11 @@ class Sound:
         return self.buffer is None
 
     @property
+    def destroyed(self) -> bool:
+        """Return whether or not this sound has been destroyed."""
+        return self._destroyed
+
+    @property
     def paused(self) -> bool:
         """Return whether or not this sound is paused."""
         return self._paused
