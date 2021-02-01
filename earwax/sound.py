@@ -190,7 +190,7 @@ class Sound:
         destroyed.
 
     :ivar ~earwax.Sound.on_finished: A function to be called when this sound
-    has finished playing, and :attr:`~earwax.Sound.looping` evaluates to
+        has finished playing, and :attr:`~earwax.Sound.looping` evaluates to
         ``False``.
 
         The timing of this event should not be relied upon.
