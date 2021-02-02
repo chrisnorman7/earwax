@@ -106,7 +106,9 @@ def get_box_level(game: Game) -> BoxLevel:
 @fixture(name='board')
 def get_gameboard(game: Game) -> GameBoard[int]:
     """Get a new ``GameBoard`` instance."""
-    return GameBoard(game, Point(2, 2, 2), lambda p: 0)
+    board: GameBoard[int] = GameBoard(game, Point(2, 2, 2), lambda p: 0)
+    board.populate()
+    return board
 
 
 @fixture(name='window')

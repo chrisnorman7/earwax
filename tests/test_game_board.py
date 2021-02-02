@@ -22,6 +22,9 @@ def test_init(game: Game) -> None:
 
     b: GameBoard[Point] = GameBoard(game, Point(1, 1, 1), tile_builder)
     assert b.coordinates == Point(0, 0, 0)
+    with raises(NoSuchTile):
+        b.get_tile(b.coordinates)
+    game.push_level(b)
     assert b.get_tile(Point(0, 0, 0)) == Point(0, 0, 0)
     assert b.get_tile(Point(1, 0, 0)) == Point(1, 0, 0)
     assert b.get_tile(Point(0, 1, 0)) == Point(0, 1, 0)
@@ -30,14 +33,14 @@ def test_init(game: Game) -> None:
     assert b.get_tile(Point(1, 0, 1)) == Point(1, 0, 1)
     assert b.get_tile(Point(0, 1, 1)) == Point(0, 1, 1)
     assert b.get_tile(Point(1, 1, 1)) == Point(1, 1, 1)
+    game.pop_level()
 
 
-def test_get_tile(game: Game) -> None:
+def test_get_tile(board: GameBoard[int]) -> None:
     """Test GameBoard.get_tile."""
-    b: GameBoard = GameBoard(game, Point(2, 2, 2), lambda p: 0)
-    assert b.get_tile(Point(0, 0, 0)) == 0
+    assert board.get_tile(Point(0, 0, 0)) == 0
     with raises(NoSuchTile):
-        b.get_tile(Point(5, 5, 5))
+        board.get_tile(Point(5, 5, 5))
 
 
 def test_move(board: GameBoard[int]) -> None:
@@ -73,6 +76,7 @@ def get_board(game: Game) -> GameBoard[Tuple[float, float, float]]:
 def test_on_move(game: Game) -> None:
     """Test the on_move event."""
     b: GameBoard[Tuple[float, float, float]] = get_board(game)
+    b.populate()
     with raises(OnMoveWorks) as exc:
         b.move(PointDirections.northeast)()
     assert exc.value.args == (PointDirections.northeast,)
@@ -90,6 +94,7 @@ def test_on_move_fail(game: Game) -> None:
 def test_move_wrap(game: Game) -> None:
     """Test movement with wrap around."""
     b: GameBoard[Tuple[float, float, float]] = get_board(game)
+    b.populate()
     b.coordinates = Point(0, 0, 0)
     with raises(OnMoveWorks):
         b.move(PointDirections.south, wrap=True)()
@@ -103,6 +108,7 @@ def test_move_wrap(game: Game) -> None:
 def test_current_tile(game: Game) -> None:
     """Test getting the current tile."""
     b: GameBoard[Tuple[float, float, float]] = get_board(game)
+    b.populate()
     assert b.current_tile == (0, 0, 0)
     b.coordinates = Point(1, 2, 3)
     assert b.current_tile == (1, 2, 3)
@@ -113,6 +119,7 @@ def test_current_tile(game: Game) -> None:
 def test_populated_points(game: Game) -> None:
     """Test the populated_points list."""
     b: GameBoard[None] = GameBoard(game, Point(2, 2, 0), lambda P: None)
+    b.populate()
     assert len(b.populated_points) == 9
     assert Point(0, 0, 0) in b.populated_points
     assert Point(2, 0, 0) in b.populated_points

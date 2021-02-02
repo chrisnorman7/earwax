@@ -23,6 +23,10 @@ class NoSuchTile(Exception):
 class GameBoard(Level, Generic[T]):
     """A useful starting point for making board games.
 
+    Tiles can be populated with the :meth:`~earwax.GameBoard.populate` method.
+    This method will be called as part of the default
+    :meth:`~earwax.GameBoard.on_push` event.
+
     :ivar ~earwax.GameBoard.size: The size of this board.
 
         This value will be the maximum possible coordinates on the board, with
@@ -54,9 +58,8 @@ class GameBoard(Level, Generic[T]):
     populated_points: List[Point] = attrib(default=Factory(list), init=False)
 
     def __attrs_post_init__(self) -> None:
-        """Populate the board."""
+        """Register events."""
         super().__attrs_post_init__()
-        self.populate()
         func: Callable[..., Any]
         for func in (self.on_move_success, self.on_move_fail):
             self.register_event(func)
@@ -105,6 +108,11 @@ class GameBoard(Level, Generic[T]):
             return self.get_tile(self.coordinates)
         except NoSuchTile:
             return None
+
+    def on_push(self) -> None:
+        """Populate the board."""
+        self.populate()
+        return super().on_push()
 
     def on_move_success(self, direction: PointDirections) -> None:
         """Handle a successful move.
