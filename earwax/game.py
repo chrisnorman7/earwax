@@ -993,9 +993,14 @@ class Game(RegisterEventMixin):
         if self.audio_context is not None:
             event: Union[FinishedEvent, LoopedEvent]
             for event in self.audio_context.get_events():
-                sound: Optional[Sound] = event.source.get_userdata()
+                sound: Optional[Sound] = None
+                if event.source is not None:
+                    sound = event.source.get_userdata()
                 if sound is None:
-                    self.logger.info('Ignoring sourceless event %r.', event)
+                    self.logger.info(
+                        'Ignoring event %r (context=%r, source=%r).',
+                        event, event.context, event.source
+                    )
                     continue
                 if isinstance(event, FinishedEvent):
                     if sound.on_finished is not None:
