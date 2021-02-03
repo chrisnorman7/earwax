@@ -235,7 +235,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
     def make_sound(self, item: MenuItem, path: Path) -> Sound:
         """Return a sound object.
 
-        :param item: The menu item to make the sound form.
+        :param item: The menu item to make the sound for.
 
             This value is probably :attr:`~earwax.Menu.current_item`.
 
@@ -246,7 +246,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
             the menu item itself, or the main earwax configuration.
         """
         return self.game.interface_sound_manager.play_path(
-            path, looping=item.loop_select_sound
+            path, looping=item.loop_select_sound, keep_around=True
         )
 
     def show_selection(self) -> None:
