@@ -997,25 +997,37 @@ class Game(RegisterEventMixin):
                 if event.source is not None:
                     sound = event.source.get_userdata()
                 if sound is None:
-                    self.logger.info(
+                    self.logger.debug(
                         'Ignoring event %r (context=%r, source=%r).',
                         event, event.context, event.source
                     )
                     continue
                 if isinstance(event, FinishedEvent):
                     if sound.on_finished is not None:
-                        sound.on_finished(sound)
+                        try:
+                            sound.on_finished(sound)
+                        except Exception:
+                            self.logger.exception(
+                                'There was an error while running the '
+                                'on_finished event for sound %s.', sound
+                            )
                     if not sound.keep_around:
                         try:
                             sound.destroy()
-                            self.logger.debug('Destroying sound %s.', sound)
+                            self.logger.debug('Destroyed sound %s.', sound)
                         except AlreadyDestroyed:
-                            self.logger.debug(
-                                'Sound already destroyed %s.', sound
+                            self.logger.info(
+                                'Sound %s has already been destroyed.', sound
                             )
                     else:
                         self.logger.debug('Not destroying sound %s.', sound)
                 if isinstance(event, LoopedEvent):
                     self.logger.debug('Looped sound %s.', sound)
                     if sound.on_looped is not None:
-                        sound.on_looped(sound)
+                        try:
+                            sound.on_looped(sound)
+                        except Exception:
+                            self.logger.exception(
+                                'There was an error running the on_looped '
+                                'event for sound %s.', sound
+                            )
