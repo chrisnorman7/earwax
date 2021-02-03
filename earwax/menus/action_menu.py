@@ -114,7 +114,7 @@ class ActionMenu(Menu):
     def action_menu(self, action: Action) -> ActionFunctionType:
         """Show a submenu of triggers.
 
-        Override this method to change how the submenu for actions are
+        Override this method to change how the submenu for actions is
         displayed.
 
         :param action: The action to generate the menu for.
