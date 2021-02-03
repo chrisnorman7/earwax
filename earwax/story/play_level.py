@@ -462,7 +462,7 @@ class PlayLevel(Level):
         if self.world.cursor_sound is None:
             return
         self.cursor_sound = self.game.interface_sound_manager.play_path(
-            Path(self.world.cursor_sound), position=position
+            Path(self.world.cursor_sound), position=position, keep_around=True
         )
 
     def play_action_sound(
