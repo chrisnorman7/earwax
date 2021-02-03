@@ -11,7 +11,7 @@ from ..action import Action
 from ..editor import Editor
 from ..game import Game
 from ..level import Level
-from ..menus import Menu, ReverbEditor
+from ..menus import ActionMenu, Menu, ReverbEditor
 from ..pyglet import key
 from ..types import ActionFunctionType, NoneGenerator, OptionalGenerator
 from ..utils import english_list
@@ -166,7 +166,7 @@ class ObjectPositionLevel(Level):
 def push_rooms_menu(
     game: Game, rooms: List[WorldRoom],
     activate: Callable[[WorldRoom], OptionalGenerator]
-) -> None:
+) -> NoneGenerator:
     """Push a menu with all the provided rooms.
 
     :param game: The game to pop this level from when a room is selected.
@@ -191,13 +191,14 @@ def push_rooms_menu(
 
         m.add_item(inner, title=f'{room.get_name()}: {room.get_description()}')
 
+    yield
     game.push_level(m)
 
 
 def push_actions_menu(
     game: Game, actions: List[WorldAction],
     activate: Callable[[WorldAction], OptionalGenerator]
-) -> None:
+) -> NoneGenerator:
     """Push a menu that lets the player select an action.
 
     :param game: The game to use when constructing the menu.
@@ -220,6 +221,7 @@ def push_actions_menu(
                 return res
 
         m.add_item(inner, title=a.name)
+    yield
     game.push_level(m)
 
 
@@ -362,16 +364,17 @@ class EditLevel(PlayLevel):
             self.game, self.get_rooms(include_current=False), inner
         )
 
-    def goto_room(self) -> None:
+    def goto_room(self) -> NoneGenerator:
         """Let the player choose a room to go to."""
-        push_rooms_menu(self.game, self.get_rooms(), self.set_room)
+        yield from push_rooms_menu(self.game, self.get_rooms(), self.set_room)
 
-    def create_menu(self) -> None:
+    def create_menu(self) -> NoneGenerator:
         """Show the creation menu."""
         m: Menu = Menu(self.game, title='Create')
         m.add_item(self.create_exit, title='Exit')
         m.add_item(self.create_object, title='Object')
         m.add_item(self.create_room, title='Room')
+        yield
         self.game.push_level(m)
 
     def create_exit(self) -> None:
@@ -579,8 +582,9 @@ class EditLevel(PlayLevel):
         if isinstance(obj, RoomExit):
             yield from self.set_action_sound(obj.action)
         elif isinstance(obj, RoomObject):
-            yield
-            push_actions_menu(self.game, obj.actions, self.set_action_sound)
+            yield from push_actions_menu(
+                self.game, obj.actions, self.set_action_sound
+            )
             assert isinstance(self.game.level, Menu)
             m: Menu = self.game.level
 
@@ -627,9 +631,9 @@ class EditLevel(PlayLevel):
 
     def ambiance_menu(
         self, ambiances: List[WorldAmbiance], ambiance: WorldAmbiance
-    ) -> Callable[[], None]:
+    ) -> Callable[[], NoneGenerator]:
         """Push the edit ambiance menu."""
-        def inner() -> None:
+        def inner() -> NoneGenerator:
             m: Menu = Menu(self.game, 'Ambiance Menu')
             m.add_item(self.edit_ambiance(ambiance), title='Edit')
             m.add_item(
@@ -639,6 +643,7 @@ class EditLevel(PlayLevel):
             m.add_item(
                 self.delete_ambiance(ambiances, ambiance), title='Delete'
             )
+            yield
             self.game.push_level(m)
 
         return inner
@@ -1262,9 +1267,12 @@ class EditLevel(PlayLevel):
             )
         self.game.push_level(m)
 
-    def builder_menu(self) -> None:
+    def builder_menu(self) -> NoneGenerator:
         """Push the builder menu."""
         m: Menu = Menu(self.game, 'Building Menu')
+        action_menu: ActionMenu = ActionMenu(
+            self.game, 'Used for getting action symbol descriptions'
+        )
 
         def handle_action(a: Action) -> ActionFunctionType:
 
@@ -1277,5 +1285,9 @@ class EditLevel(PlayLevel):
 
         action: Action
         for action in self.builder_menu_actions:
-            m.add_item(handle_action(action), title=action.title)
+            title: str = action.title
+            if action.symbol is not None:
+                title = f'{title} ({action_menu.symbol_to_string(action)})'
+            m.add_item(handle_action(action), title=title)
+        yield
         self.game.push_level(m)

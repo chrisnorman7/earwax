@@ -212,8 +212,9 @@ class PlayLevel(Level):
         self.stop_action_sounds()
         return super().on_pop()
 
-    def main_menu(self) -> None:
+    def main_menu(self) -> NoneGenerator:
         """Return to the main menu."""
+        yield
         self.game.replace_level(self.world_context.get_main_menu())
 
     def next_category(self) -> NoneGenerator:
