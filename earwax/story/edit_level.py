@@ -3,17 +3,17 @@
 import os.path
 from inspect import isgenerator
 from pathlib import Path
-from typing import (Callable, Dict, Generator, List, Optional, Tuple, Type,
-                    Union, cast)
+from typing import Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
-from attr import Attribute, attrib, attrs
+from attr import Attribute, Factory, attrib, attrs
 
+from ..action import Action
 from ..editor import Editor
 from ..game import Game
 from ..level import Level
 from ..menus import Menu, ReverbEditor
 from ..pyglet import key
-from ..types import OptionalGenerator
+from ..types import ActionFunctionType, NoneGenerator, OptionalGenerator
 from ..utils import english_list
 from .play_level import PlayLevel
 from .world import (DumpablePoint, DumpableReverb, ObjectTypes, RoomExit,
@@ -228,43 +228,60 @@ class EditLevel(PlayLevel):
     """A level for editing stories."""
 
     filename: Optional[Path] = None
+    builder_menu_actions: List[Action] = Factory(list)
 
     def __attrs_post_init__(self) -> None:
         """Add some more actions."""
         self.action('Save world', symbol=key.S, modifiers=key.MOD_CTRL)(
             self.save_world
         )
-        self.action('Go to another room', symbol=key.G)(self.goto_room)
-        self.action('Creation menu', symbol=key.C)(self.create_menu)
-        self.action('Rename the currently focused object', symbol=key.R)(
-            self.rename
+        self.builder_menu_actions.extend(
+            [
+                self.action(
+                    'Go to another room', symbol=key.G
+                )(self.goto_room),
+                self.action('Creation menu', symbol=key.C)(self.create_menu),
+                self.action(
+                    'Rename the currently focused object', symbol=key.R
+                )(self.rename),
+                self.action(
+                    'Shadow room name', symbol=key.R, modifiers=key.MOD_SHIFT
+                )(self.shadow_name),
+                self.action(
+                    'Describe this room', symbol=key.E
+                )(self.describe_room),
+                self.action(
+                    'Shadow room description', symbol=key.E,
+                    modifiers=key.MOD_SHIFT
+                )(self.shadow_description),
+                self.action('Sounds menu', symbol=key.S)(self.sounds_menu),
+                self.action(
+                    'Change object type', symbol=key.T
+                )(self.set_object_type),
+                self.action(
+                    'Ambiances menu', symbol=key.A
+                )(self.ambiances_menu),
+                self.action(
+                    'Actions menu', symbol=key.A, modifiers=key.MOD_SHIFT
+                )(self.object_actions),
+                self.action(
+                    'Change the classes assigned to an object', symbol=key.O,
+                )(self.edit_object_class_names),
+                self.action(
+                    'Add or remove object classes', symbol=key.O,
+                    modifiers=key.MOD_SHIFT
+                )(self.edit_object_classes),
+                self.action(
+                    'Reposition object', symbol=key.X
+                )(self.reposition_object),
+                self.action(
+                    'Configure room reverb', symbol=key.V
+                )(self.configure_reverb),
+                self.action('Delete', symbol=key.DELETE)(self.delete),
+                self.action('Change messages', symbol=key.M)(self.remessage),
+            ]
         )
-        self.action(
-            'Shadow room name', symbol=key.R, modifiers=key.MOD_SHIFT
-        )(self.shadow_name)
-        self.action('Describe this room', symbol=key.E)(self.describe_room)
-        self.action(
-            'Shadow room description', symbol=key.E, modifiers=key.MOD_SHIFT
-        )(self.shadow_description)
-        self.action('Change messages', symbol=key.M)(self.remessage)
-        self.action('Sounds menu', symbol=key.S)(self.sounds_menu)
-        self.action('Change object type', symbol=key.T)(self.set_object_type)
-        self.action('Ambiances menu', symbol=key.A)(self.ambiances_menu)
-        self.action(
-            'Actions menu', symbol=key.A, modifiers=key.MOD_SHIFT
-        )(self.object_actions)
-        self.action(
-            'Change the classes assigned to an object', symbol=key.O,
-        )(self.edit_object_class_names)
-        self.action(
-            'Add or remove object classes', symbol=key.O,
-            modifiers=key.MOD_SHIFT
-        )(self.edit_object_classes)
-        self.action('Reposition object', symbol=key.X)(self.reposition_object)
-        self.action(
-            'Configure room reverb', symbol=key.V
-        )(self.configure_reverb)
-        self.action('Delete', symbol=key.DELETE)(self.delete)
+        self.action('Builder menu', symbol=key.B)(self.builder_menu)
         return super().__attrs_post_init__()
 
     @property
@@ -293,7 +310,7 @@ class EditLevel(PlayLevel):
             self.game.output(str(e))
             raise
 
-    def describe_room(self) -> Generator[None, None, None]:
+    def describe_room(self) -> NoneGenerator:
         """Set the description for the current room."""
         r: WorldRoom = self.room
         e: Editor = Editor(self.game, text=r.description)
@@ -309,7 +326,7 @@ class EditLevel(PlayLevel):
         yield
         self.game.push_level(e)
 
-    def rename(self) -> Generator[None, None, None]:
+    def rename(self) -> NoneGenerator:
         """Rename the currently focused object."""
         obj: Optional[ObjectTypes] = self.object
         if obj is None:
@@ -388,7 +405,7 @@ class EditLevel(PlayLevel):
 
     def set_name(
         self, obj: Union[WorldAction, RoomObject, WorldRoom]
-    ) -> Generator[None, None, None]:
+    ) -> NoneGenerator:
         """Push an editor that can be used to change the name of ``obj``.
 
         :param obj: The object to rename.
@@ -406,7 +423,7 @@ class EditLevel(PlayLevel):
         yield
         self.game.push_level(e)
 
-    def set_message(self, action: WorldAction) -> Generator[None, None, None]:
+    def set_message(self, action: WorldAction) -> NoneGenerator:
         """Push an editor to set the message on the provided action.
 
         :param action: The action whose message attribute will be modified.
@@ -442,7 +459,7 @@ class EditLevel(PlayLevel):
             level: Optional[Level] = self.game.level
             assert isinstance(level, Menu)
 
-            def inner() -> Generator[None, None, None]:
+            def inner() -> NoneGenerator:
                 """Set ``obj.actions_action.message``."""
                 assert isinstance(obj, RoomObject)
                 if obj.actions_action is None:
@@ -452,7 +469,7 @@ class EditLevel(PlayLevel):
 
             level.add_item(inner, title='Object Actions Message')
 
-    def set_world_messages(self) -> Generator[None, None, None]:
+    def set_world_messages(self) -> NoneGenerator:
         """Push a menu that allows the editing of world messages."""
         yield
         messages: WorldMessages = self.world.messages
@@ -468,7 +485,7 @@ class EditLevel(PlayLevel):
             def inner(
                 name: str = a.name, value: str = value,
                 default: str = cast(str, a.default)
-            ) -> Generator[None, None, None]:
+            ) -> NoneGenerator:
                 """Edit the message."""
                 e: Editor = Editor(self.game, text=value)
 
@@ -493,7 +510,7 @@ class EditLevel(PlayLevel):
 
     def set_action_sound(
         self, action: WorldAction
-    ) -> Generator[None, None, None]:
+    ) -> NoneGenerator:
         """Set the sound on the given action.
 
         :param action: The action whose sound will be changed.
@@ -525,13 +542,13 @@ class EditLevel(PlayLevel):
 
     def set_world_sound(
         self, name: str
-    ) -> Callable[[], Generator[None, None, None]]:
+    ) -> Callable[[], NoneGenerator]:
         """Set the given sound.
 
         :param name: The name of the sound to edit.
         """
 
-        def inner() -> Generator[None, None, None]:
+        def inner() -> NoneGenerator:
             sound: str = getattr(self.world, name) or ''
             e: Editor = Editor(self.game, text=sound)
 
@@ -567,7 +584,7 @@ class EditLevel(PlayLevel):
             assert isinstance(self.game.level, Menu)
             m: Menu = self.game.level
 
-            def inner() -> Generator[None, None, None]:
+            def inner() -> NoneGenerator:
                 """Edit the main object action."""
                 assert isinstance(obj, RoomObject)
                 self.game.pop_level()
@@ -583,10 +600,10 @@ class EditLevel(PlayLevel):
 
     def add_ambiance(
         self, ambiances: List[WorldAmbiance]
-    ) -> Callable[[], Generator[None, None, None]]:
+    ) -> Callable[[], NoneGenerator]:
         """Add a new ambiance to the given list."""
 
-        def inner() -> Generator[None, None, None]:
+        def inner() -> NoneGenerator:
             e: Editor = Editor(self.game)
 
             @e.event
@@ -628,10 +645,10 @@ class EditLevel(PlayLevel):
 
     def edit_ambiance(
         self, ambiance: WorldAmbiance
-    ) -> Callable[[], Generator[None, None, None]]:
+    ) -> Callable[[], NoneGenerator]:
         """Edit the ambiance."""
 
-        def inner() -> Generator[None, None, None]:
+        def inner() -> NoneGenerator:
             e: Editor = Editor(self.game, text=ambiance.path)
 
             @e.event
@@ -656,15 +673,15 @@ class EditLevel(PlayLevel):
 
         return inner
 
-    def edit_volume_multiplier(self, ambiance: WorldAmbiance) -> Callable[
-        [], Generator[None, None, None]
-    ]:
+    def edit_volume_multiplier(
+        self, ambiance: WorldAmbiance
+    ) -> Callable[[], NoneGenerator]:
         """Return a callable that can be used to set an ambiance volume multiplier.
 
         :param ambiance: The ambiance whose volume multiplier will be changed.
         """
 
-        def inner() -> Generator[None, None, None]:
+        def inner() -> NoneGenerator:
             e: Editor = Editor(self.game, text=str(ambiance.volume_multiplier))
 
             @e.event
@@ -713,7 +730,7 @@ class EditLevel(PlayLevel):
 
         return inner
 
-    def ambiances_menu(self) -> Generator[None, None, None]:
+    def ambiances_menu(self) -> NoneGenerator:
         """Push a menu that can edit ambiances."""
         obj: Optional[ObjectTypes] = self.object
         if obj is None:
@@ -886,16 +903,16 @@ class EditLevel(PlayLevel):
 
         def inner() -> None:
 
-            def set_name() -> Generator[None, None, None]:
+            def set_name() -> NoneGenerator:
                 yield from self.set_name(action)
 
-            def set_message() -> Generator[None, None, None]:
+            def set_message() -> NoneGenerator:
                 yield from self.set_message(action)
 
-            def set_sound() -> Generator[None, None, None]:
+            def set_sound() -> NoneGenerator:
                 yield from self.set_action_sound(action)
 
-            def set_rumble_value() -> Generator[None, None, None]:
+            def set_rumble_value() -> NoneGenerator:
                 e: Editor = Editor(self.game, text=str(action.rumble_value))
 
                 @e.event
@@ -920,7 +937,7 @@ class EditLevel(PlayLevel):
                 yield
                 self.game.push_level(e)
 
-            def set_rumble_duration() -> Generator[None, None, None]:
+            def set_rumble_duration() -> NoneGenerator:
                 e: Editor = Editor(self.game, text=str(action.rumble_duration))
 
                 @e.event
@@ -999,7 +1016,7 @@ class EditLevel(PlayLevel):
 
         return inner
 
-    def object_actions(self) -> Generator[None, None, None]:
+    def object_actions(self) -> NoneGenerator:
         """Push a menu that lets you configure object actions."""
         obj: Optional[
             Union[RoomObject, RoomExit, WorldRoom, StoryWorld]
@@ -1101,7 +1118,7 @@ class EditLevel(PlayLevel):
         m.add_item(delete_reverb, title='Delete')
         self.game.push_level(m)
 
-    def world_sounds(self) -> Generator[None, None, None]:
+    def world_sounds(self) -> NoneGenerator:
         """Push a menu that can be used to configure world sounds."""
         yield
         m: Menu = Menu(self.game, 'World Sounds')
@@ -1163,7 +1180,7 @@ class EditLevel(PlayLevel):
         :param class_: The object class to edit.
         """
 
-        def rename() -> Generator[None, None, None]:
+        def rename() -> NoneGenerator:
             e: Editor = Editor(self.game, text=class_.name)
 
             @e.event
@@ -1213,7 +1230,7 @@ class EditLevel(PlayLevel):
     def edit_object_classes(self) -> None:
         """Push a menu for editing object classes."""
 
-        def add() -> Generator[None, None, None]:
+        def add() -> NoneGenerator:
             e: Editor = Editor(self.game)
 
             @e.event
@@ -1243,4 +1260,22 @@ class EditLevel(PlayLevel):
                 self.edit_object_class(object_class),
                 title=f'{object_class.name}: {objects}'
             )
+        self.game.push_level(m)
+
+    def builder_menu(self) -> None:
+        """Push the builder menu."""
+        m: Menu = Menu(self.game, 'Building Menu')
+
+        def handle_action(a: Action) -> ActionFunctionType:
+
+            def inner() -> OptionalGenerator:
+                """Run the action."""
+                self.game.pop_level()
+                return a.run(None)
+
+            return inner
+
+        action: Action
+        for action in self.builder_menu_actions:
+            m.add_item(handle_action(action), title=action.title)
         self.game.push_level(m)

@@ -1,8 +1,7 @@
 """Provides the StoryLevel class."""
 
 from pathlib import Path
-from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List,
-                    Optional, Union)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from attr import Factory, attrib, attrs
 
@@ -14,6 +13,7 @@ from ..point import Point
 from ..pyglet import Joystick, key
 from ..sound import AlreadyDestroyed, Sound
 from ..track import Track, TrackTypes
+from ..types import NoneGenerator
 from ..yaml import CDumper, dump
 from .world import (DumpablePoint, ObjectTypes, RoomExit, RoomObject,
                     StoryWorld, WorldAction, WorldAmbiance, WorldRoom,
@@ -216,15 +216,15 @@ class PlayLevel(Level):
         """Return to the main menu."""
         self.game.replace_level(self.world_context.get_main_menu())
 
-    def next_category(self) -> Generator[None, None, None]:
+    def next_category(self) -> NoneGenerator:
         """Next information category."""
         yield from self.cycle_category(1)
 
-    def previous_category(self) -> Generator[None, None, None]:
+    def previous_category(self) -> NoneGenerator:
         """Previous information category."""
         yield from self.cycle_category(-1)
 
-    def cycle_category(self, direction: int) -> Generator[None, None, None]:
+    def cycle_category(self, direction: int) -> NoneGenerator:
         """Cycle through information categories."""
         self.state.category_index = (
             self.state.category_index + direction

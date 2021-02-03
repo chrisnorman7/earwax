@@ -1,7 +1,6 @@
 """Provides the ActionMenu class."""
 
-from inspect import isgenerator
-from typing import Iterator, Tuple, cast
+from typing import Tuple
 
 from ..action import Action
 from ..hat_directions import DEFAULT, DOWN, LEFT, RIGHT, UP
@@ -154,14 +153,6 @@ class ActionMenu(Menu):
             """Pop the menu, and run the action."""
             self.game.pop_level()
             self.game.pop_level()
-            yield
-            res = action.run(None)
-            if isgenerator(res):
-                next(cast(Iterator[None], res))
-                try:
-                    next(cast(Iterator[None], res))
-                except StopIteration:
-                    pass  # It's done.
-            return res
+            return action.run(None)
 
         return inner

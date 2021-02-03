@@ -4,7 +4,7 @@ import os.path
 import webbrowser
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List, Type
+from typing import Any, Callable, Dict, List, Type
 
 from attr import Factory, attrib, attrs
 
@@ -18,6 +18,7 @@ from ..editor import Editor
 from ..game import Game
 from ..menus import ConfigMenu, Menu
 from ..track import Track, TrackTypes
+from ..types import NoneGenerator
 from ..yaml import CLoader, load
 from .edit_level import EditLevel, push_rooms_menu
 from .play_level import PlayLevel
@@ -234,7 +235,7 @@ class StoryContext:
     def credit_menu(self, credit: Credit) -> Callable[[], None]:
         """Push a menu that can deal with credits."""
 
-        def edit_name() -> Generator[None, None, None]:
+        def edit_name() -> NoneGenerator:
             """Edit the credit name."""
             e: Editor = Editor(self.game, text=credit.name)
 
@@ -255,7 +256,7 @@ class StoryContext:
             yield
             self.game.push_level(e)
 
-        def edit_url() -> Generator[None, None, None]:
+        def edit_url() -> NoneGenerator:
             """Set the URL."""
             e: Editor = Editor(self.game, text=credit.url)
 
@@ -276,7 +277,7 @@ class StoryContext:
             yield
             self.game.push_level(e)
 
-        def edit_sound() -> Generator[None, None, None]:
+        def edit_sound() -> NoneGenerator:
             """Set the sound."""
             sound: str = ''
             if credit.sound is not None:
@@ -320,7 +321,7 @@ class StoryContext:
             m: Menu = Menu.yes_no(self.game, yes, self.game.cancel)
             self.game.push_level(m)
 
-        def close_menu() -> Generator[None, None, None]:
+        def close_menu() -> NoneGenerator:
             self.game.output('Done.')
             yield
             self.game.clear_levels()
@@ -373,7 +374,7 @@ class StoryContext:
     def configure_music(self) -> None:
         """Allow adding and removing main menu music."""
 
-        def add() -> Generator[None, None, None]:
+        def add() -> NoneGenerator:
             """Add some music."""
             e: Editor = Editor(self.game)
 
@@ -422,8 +423,8 @@ class StoryContext:
     def world_options(self) -> None:
         """Configure the world."""
 
-        def set_value(name: str) -> Callable[[], Generator[None, None, None]]:
-            def inner() -> Generator[None, None, None]:
+        def set_value(name: str) -> Callable[[], NoneGenerator]:
+            def inner() -> NoneGenerator:
                 e: Editor = Editor(self.game, text=getattr(self.world, name))
 
                 @e.event

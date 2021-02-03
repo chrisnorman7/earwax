@@ -10,14 +10,13 @@ from .promises.threaded_promise import ThreadedPromiseFunctionType
 if TYPE_CHECKING:
     from .action import Action
 
-OptionalGenerator = Optional[Generator[None, None, None]]
+NoneGenerator = Generator[None, None, None]
+OptionalGenerator = Optional[NoneGenerator]
 ActionFunctionType = Callable[[], OptionalGenerator]
 HatDirection = Tuple[int, int]
 ActionListType = List['Action']
-ReleaseGeneratorDictType = Dict[int, Generator[None, None, None]]
-JoyButtonReleaseGeneratorDictType = Dict[
-    Tuple[str, int], Generator[None, None, None]
-]
+ReleaseGeneratorDictType = Dict[int, NoneGenerator]
+JoyButtonReleaseGeneratorDictType = Dict[Tuple[str, int], NoneGenerator]
 MotionFunctionType = Callable[[], None]
 MotionsType = Dict[int, MotionFunctionType]
 StaggeredPromiseFunctionType = StaggeredPromiseFunctionType

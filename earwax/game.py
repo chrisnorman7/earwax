@@ -18,7 +18,7 @@ from .pyglet import (EVENT_HANDLED, EVENT_UNHANDLED, Joystick, Window, app,
                      unschedule)
 from .sound import AlreadyDestroyed, BufferCache, Sound
 from .task import IntervalFunction, Task, TaskFunction
-from .types import EventType
+from .types import EventType, NoneGenerator
 
 try:
     from cytolk.tolk import detect_screen_reader, load, unload
@@ -148,7 +148,7 @@ class Game(RegisterEventMixin):
         default=Factory(dict), init=False, repr=False
     )
 
-    joyhat_release_generators: List[Generator[None, None, None]] = attrib(
+    joyhat_release_generators: List[NoneGenerator] = attrib(
         default=Factory(list), init=False, repr=False
     )
 
@@ -272,7 +272,7 @@ class Game(RegisterEventMixin):
                         try:
                             next(cast(Iterator[None], res))
                             self.key_release_generators[symbol] = cast(
-                                Generator[None, None, None], res
+                                NoneGenerator, res
                             )
                         except StopIteration:
                             pass
@@ -371,7 +371,7 @@ class Game(RegisterEventMixin):
                     if isgenerator(res):
                         next(cast(Iterator[None], res))
                         self.mouse_release_generators[button] = cast(
-                            Generator[None, None, None], res
+                            NoneGenerator, res
                         )
             return True
         return False
@@ -450,7 +450,7 @@ class Game(RegisterEventMixin):
                         self.joybutton_release_generators[
                             (joystick.device.name, button)
                         ] = cast(
-                            Generator[None, None, None], res
+                            NoneGenerator, res
                         )
             return True
         return False
@@ -500,7 +500,7 @@ class Game(RegisterEventMixin):
             for a in self.triggered_actions:
                 if a.hat_direction is not None:
                     self.stop_action(a)
-            generator: Generator[None, None, None]
+            generator: NoneGenerator
             for generator in self.joyhat_release_generators:
                 try:
                     next(generator)
@@ -515,7 +515,7 @@ class Game(RegisterEventMixin):
                         try:
                             next(cast(Iterator[None], res))
                             self.joyhat_release_generators.append(
-                                cast(Generator[None, None, None], res)
+                                cast(NoneGenerator, res)
                             )
                         except StopIteration:
                             pass

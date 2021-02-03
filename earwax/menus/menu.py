@@ -4,7 +4,7 @@ import webbrowser
 from inspect import isgenerator
 from pathlib import Path
 from time import time
-from typing import TYPE_CHECKING, Callable, Generator, List, Optional
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 from attr import Factory, attrib, attrs
 
@@ -15,6 +15,7 @@ from ..level import Level
 from ..mixins import DismissibleMixin, TitleMixin
 from ..pyglet import key
 from ..sound import Sound
+from ..types import NoneGenerator
 from .menu_item import MenuItem
 
 if TYPE_CHECKING:
@@ -392,7 +393,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
             :meth:`~earwax.Menu.add_item`.
         """
 
-        def inner() -> Generator[None, None, None]:
+        def inner() -> NoneGenerator:
             """Push the menu."""
             yield
             if replace:

@@ -3,20 +3,22 @@
 from concurrent.futures import Executor
 from pathlib import Path
 from random import choice
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import (Any, Callable, Dict, Generator, Iterator, List, Optional,
+                    Union)
 
 from attr import Factory, attrib, attrs
 
 from .utils import random_file as _random_file
 
 try:
-    from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
-                           Generator, GlobalFdnReverb, PannedSource,
-                           PannerStrategy, Source, Source3D,
-                           StreamingGenerator, SynthizerError)
+    from synthizer import Buffer, BufferGenerator, Context, DirectSource
+    from synthizer import Generator as SynthizerGenerator
+    from synthizer import (GlobalFdnReverb, PannedSource, PannerStrategy,
+                           Source, Source3D, StreamingGenerator,
+                           SynthizerError)
 except ModuleNotFoundError:
     (
-        Buffer, BufferGenerator, Context, DirectSource, Generator,
+        Buffer, BufferGenerator, Context, DirectSource, SynthizerGenerator,
         GlobalFdnReverb, PannedSource, PannerStrategy, Source, Source3D,
         StreamingGenerator
     ) = (
@@ -211,7 +213,7 @@ class Sound:
     """
 
     context: Context
-    generator: Generator
+    generator: SynthizerGenerator
     buffer: Optional[Buffer] = None
     gain: float = 1.0
     looping: bool = False
@@ -646,7 +648,7 @@ class BufferDirectory:
         Populates the :attr:`~earwax.BufferDirectory.buffers` and
         :attr:`~earwax.BufferDirectory.paths` dictionaries.
         """
-        g: Generator[Path]
+        g: Generator[Path, None, None]
         if instance.glob is None:
             g = instance.path.iterdir()
         else:
@@ -659,7 +661,7 @@ class BufferDirectory:
             instance.paths[p.name] = p
             d[p.name] = instance.buffer_cache.get_buffer('file', str(p))
 
-        map_generator: Generator[None, None, None]
+        map_generator: Iterator[None]
         if instance.thread_pool is None:
             map_generator = map(inner, g)
         else:
