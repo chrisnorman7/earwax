@@ -13,7 +13,8 @@ from ..game import Game
 from ..level import Level
 from ..menus import ActionMenu, Menu, ReverbEditor
 from ..pyglet import key
-from ..types import ActionFunctionType, NoneGenerator, OptionalGenerator
+from ..types import (ActionFunctionType, NoneGenerator, OptionalGenerator,
+                     TitleFunction)
 from ..utils import english_list
 from .play_level import PlayLevel
 from .world import (DumpablePoint, DumpableReverb, ObjectTypes, RoomExit,
@@ -189,7 +190,9 @@ def push_rooms_menu(
             else:
                 return res
 
-        m.add_item(inner, title=f'{room.get_name()}: {room.get_description()}')
+        m.add_item(
+            inner, title=lambda: f'{room.get_name()}: {room.get_description()}'
+        )
 
     yield
     game.push_level(m)
@@ -207,7 +210,7 @@ def push_actions_menu(
 
     :param activate: A function to call with the chosen action.
     """
-    m: Menu = Menu(game, 'Actions')
+    m: Menu = Menu(game, lambda: f'Actions ({len(actions)})')
     a: WorldAction
     for a in actions:
 
@@ -220,7 +223,7 @@ def push_actions_menu(
             else:
                 return res
 
-        m.add_item(inner, title=a.name)
+        m.add_item(inner, title=lambda: a.name)
     yield
     game.push_level(m)
 
@@ -419,8 +422,8 @@ class EditLevel(PlayLevel):
         def on_submit(text: str) -> None:
             """Rename ``obj``."""
             obj.name = text
-            self.game.pop_level()
             self.game.output('Done.')
+            self.game.pop_level()
 
         self.game.output('Enter a new name for %s:' % obj.name)
         yield
@@ -439,8 +442,8 @@ class EditLevel(PlayLevel):
             action.message = text
             if text == '':
                 action.message = None
-            self.game.pop_level()
             self.game.output('Message set.')
+            self.game.pop_level()
 
         self.game.output(
             f'Enter a new message for {action.name}: {action.message}'
@@ -458,7 +461,9 @@ class EditLevel(PlayLevel):
         elif isinstance(obj, RoomExit):
             yield from self.set_message(obj.action)
         else:
-            push_actions_menu(self.game, obj.actions, self.set_message)
+            yield from push_actions_menu(
+                self.game, obj.actions, self.set_message
+            )
             level: Optional[Level] = self.game.level
             assert isinstance(level, Menu)
 
@@ -474,41 +479,47 @@ class EditLevel(PlayLevel):
 
     def set_world_messages(self) -> NoneGenerator:
         """Push a menu that allows the editing of world messages."""
-        yield
         messages: WorldMessages = self.world.messages
         m: Menu = Menu(self.game, 'World Messages')
-        value: str
         a: Attribute
+        name: str
+        value: str
         for a in messages.__attrs_attrs__:  # type: ignore[attr-defined]
             if a.type is not str:
                 continue
-            value = getattr(self.world.messages, a.name)
-            assert isinstance(value, str)
+            name = a.name
 
             def inner(
-                name: str = a.name, value: str = value,
-                default: str = cast(str, a.default)
+                name: str = name, default: str = cast(str, a.default)
             ) -> NoneGenerator:
                 """Edit the message."""
+                value: str = getattr(self.world.messages, name)
                 e: Editor = Editor(self.game, text=value)
 
                 @e.event
                 def on_submit(text: str) -> None:
                     """Set the value."""
-                    self.game.pop_level()
                     if not text:
                         text = default
                     setattr(self.world.messages, name, text)
                     self.game.output('Message set.')
+                    self.game.pop_level()
 
-                self.game.pop_level()
                 self.game.output('Enter the message: %s' % value)
                 yield
                 self.game.push_level(e)
 
-            title: str = message_descriptions.get(a.name, a.name)
-            title = f'{title}: {value!r}'
-            m.add_item(inner, title=title)
+            def get_title(name: str) -> TitleFunction:
+
+                def get_title_inner() -> str:
+                    value: str = getattr(self.world.messages, name)
+                    title: str = message_descriptions.get(name, name)
+                    return f'{title}: {value!r}'
+
+                return get_title_inner
+
+            m.add_item(inner, title=get_title(name))
+        yield
         self.game.push_level(m)
 
     def set_action_sound(
@@ -635,10 +646,14 @@ class EditLevel(PlayLevel):
         """Push the edit ambiance menu."""
         def inner() -> NoneGenerator:
             m: Menu = Menu(self.game, 'Ambiance Menu')
-            m.add_item(self.edit_ambiance(ambiance), title='Edit')
+            m.add_item(
+                self.edit_ambiance(ambiance),
+                title=lambda: f'Edit ({ambiance.path})'
+            )
             m.add_item(
                 self.edit_volume_multiplier(ambiance),
-                title=f'Change volume offset ({ambiance.volume_multiplier})'
+                title=lambda: 'Change volume offset '
+                f'({ambiance.volume_multiplier})'
             )
             m.add_item(
                 self.delete_ambiance(ambiances, ambiance), title='Delete'
@@ -752,7 +767,7 @@ class EditLevel(PlayLevel):
             a: WorldAmbiance
             for a in obj.ambiances:
                 m.add_item(
-                    self.ambiance_menu(obj.ambiances, a), title=a.path
+                    self.ambiance_menu(obj.ambiances, a), title=lambda: a.path
                 )
             yield
             self.game.push_level(m)
@@ -853,7 +868,7 @@ class EditLevel(PlayLevel):
         if not isinstance(obj, RoomObject):
             return self.game.output('First select an object.')
         description: str = types[obj.type]
-        m: Menu = Menu(self.game, f'Object Type ({description})')
+        m: Menu = Menu(self.game, lambda: f'Object Type ({description})')
         type_: RoomObjectTypes
         for type_, description in types.items():
 
@@ -1002,19 +1017,20 @@ class EditLevel(PlayLevel):
                 self.game.push_level(m)
 
             m: Menu = Menu(self.game, 'Edit Action')
-            m.add_item(set_name, title=f'Rename ({action.name})')
+            m.add_item(set_name, title=lambda: f'Rename ({action.name})')
             m.add_item(
-                set_message, title=f'Message ({action.message})'
+                set_message, title=lambda: f'Message ({action.message})'
             )
             m.add_item(
-                set_sound, title=f'Sound ({action.sound})'
+                set_sound, title=lambda: f'Sound ({action.sound})'
             )
             m.add_item(
-                set_rumble_value, title=f'Rumble value ({action.rumble_value})'
+                set_rumble_value,
+                title=lambda: f'Rumble value ({action.rumble_value})'
             )
             m.add_item(
                 set_rumble_duration,
-                title=f'Rumble duration ({action.rumble_duration})'
+                title=lambda: f'Rumble duration ({action.rumble_duration})'
             )
             m.add_item(delete, title='Delete')
             self.game.push_level(m)
@@ -1129,15 +1145,17 @@ class EditLevel(PlayLevel):
         m: Menu = Menu(self.game, 'World Sounds')
         m.add_item(
             self.set_world_sound('cursor_sound'),
-            title=f'Cursor sound ({self.world.cursor_sound})'
+            title=lambda: f'Cursor sound ({self.world.cursor_sound})'
         )
         m.add_item(
             self.set_world_sound('empty_category_sound'),
-            title=f'Empty category sound ({self.world.empty_category_sound})'
+            title=lambda: 'Empty category sound '
+            f'({self.world.empty_category_sound})'
         )
         m.add_item(
             self.set_world_sound('end_of_category_sound'),
-            title=f'End of category sound ({self.world.end_of_category_sound})'
+            title=lambda: 'End of category sound '
+            f'({self.world.end_of_category_sound})'
         )
         self.game.push_level(m)
 
@@ -1148,35 +1166,27 @@ class EditLevel(PlayLevel):
             return self.game.output('You must first select an object.')
         if not isinstance(obj, RoomObject):
             return self.game.output('Only objects can have classes.')
+        class_names: List[str] = obj.class_names
 
-        def add(name: str) -> Callable[[], None]:
+        def toggle_class(name: str) -> Callable[[], None]:
             def inner() -> None:
-                assert isinstance(obj, RoomObject)
-                obj.class_names.append(name)
-                self.game.reveal_level(self)
-                self.edit_object_class_names()
+                if name in class_names:
+                    class_names.remove(name)
+                else:
+                    class_names.append(name)
+                self.game.pop_level()
 
             return inner
 
-        def remove(name: str) -> Callable[[], None]:
-            def inner() -> None:
-                assert isinstance(obj, RoomObject)
-                obj.class_names.remove(name)
-                self.game.reveal_level(self)
-                self.edit_object_class_names()
-
-            return inner
-
-        m: Menu = Menu(self.game, 'Classes')
-        name: str
-        for name in obj.class_names:
-            m.add_item(remove(name), title=f'Remove {name}')
+        m: Menu = Menu(self.game, lambda: f'Classes ({len(class_names)})')
         object_class: RoomObjectClass
         for object_class in self.world.object_classes:
-            if object_class.name not in obj.class_names:
-                m.add_item(
-                    add(object_class.name), title=f'Add {object_class.name}'
-                )
+            n: str = object_class.name
+            m.add_item(
+                toggle_class(n),
+                title=lambda: f'{"Remove" if n in obj.class_names else "Add"} '
+                f'{n}'
+            )
         self.game.push_level(m)
 
     def edit_object_class(self, class_: RoomObjectClass) -> Callable[[], None]:
