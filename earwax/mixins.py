@@ -3,9 +3,10 @@
 from datetime import datetime
 from enum import Enum
 from inspect import isclass
+from .types import TitleFunction
 from pathlib import Path
 from typing import (
-    TYPE_CHECKING, Any, Callable, Dict, List, Optional, TextIO, Type, Union,
+    TYPE_CHECKING, Any, Dict, List, Optional, TextIO, Type, Union,
     get_args, get_origin)
 
 from attr import attrs
@@ -57,7 +58,7 @@ class TitleMixin:
         used as the title.
     """
 
-    title: Union[str, Callable[[], str]]
+    title: Union[str, TitleFunction]
 
     def get_title(self) -> str:
         """Return the proper title of this object.

@@ -1,12 +1,13 @@
 """Provides the MenuItem class."""
 
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Optional, Union
 
 from attr import attrs
 
 from ..action import ActionFunctionType
 from ..mixins import RegisterEventMixin
+from ..types import TitleFunction
 
 
 @attrs(auto_attribs=True)
@@ -47,7 +48,7 @@ class MenuItem(RegisterEventMixin):
     """
 
     func: ActionFunctionType
-    title: Optional[Union[str, Callable[[], str]]] = None
+    title: Optional[Union[str, TitleFunction]] = None
     select_sound_path: Optional[Path] = None
     loop_select_sound: bool = False
     activate_sound_path: Optional[Path] = None

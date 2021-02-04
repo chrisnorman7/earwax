@@ -23,3 +23,4 @@ StaggeredPromiseFunctionType = StaggeredPromiseFunctionType
 StaggeredPromiseGeneratorType = StaggeredPromiseGeneratorType
 ThreadedPromiseFunctionType = ThreadedPromiseFunctionType
 EventType = Callable[..., Any]
+TitleFunction = Callable[[], str]
