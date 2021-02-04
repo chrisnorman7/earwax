@@ -3,11 +3,9 @@
 from datetime import datetime
 from enum import Enum
 from inspect import isclass
-from .types import TitleFunction
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING, Any, Dict, List, Optional, TextIO, Type, Union,
-    get_args, get_origin)
+from typing import (TYPE_CHECKING, Any, Dict, List, Optional, TextIO, Type,
+                    Union, get_args, get_origin)
 
 from attr import attrs
 from typing_inspect import is_union_type
@@ -17,7 +15,7 @@ from .yaml import CDumper, CLoader, dump, load
 
 if TYPE_CHECKING:
     from .game import Game
-    from .types import EventType
+    from .types import EventType, TitleFunction
 
 
 @attrs(auto_attribs=True)
@@ -58,7 +56,7 @@ class TitleMixin:
         used as the title.
     """
 
-    title: Union[str, TitleFunction]
+    title: Union[str, 'TitleFunction']
 
     def get_title(self) -> str:
         """Return the proper title of this object.

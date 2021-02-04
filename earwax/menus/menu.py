@@ -381,6 +381,11 @@ class Menu(Level, TitleMixin, DismissibleMixin):
             self.select_sound.destroy()
         return super().on_pop()
 
+    def on_reveal(self) -> None:
+        """Show selection again."""
+        self.show_selection()
+        return super().on_reveal()
+
     def add_submenu(self, menu: 'Menu', replace: bool, **kwargs) -> MenuItem:
         """Add a submenu to this menu.
 
