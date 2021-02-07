@@ -1,5 +1,5 @@
 pyglet >= 1.5.14
-synthizer >= 0.8.7
+synthizer >= 0.8.9
 cytolk >= 0.1.6
 attrs >= 20.3.0
 pyyaml >= 5.4.1
@@ -9,5 +9,5 @@ movement_2d >= 1.1.1
 pysdl2 >= 0.9.7
 pysdl2-dll >= 2.0.14
 jinja2 >= 2.11.3
-cryptography >= 3.3.1
+cryptography >= 3.4
 msgpack >= 1.0.2
