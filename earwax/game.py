@@ -5,8 +5,8 @@ from inspect import isgenerator
 from logging import Logger, getLogger
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import (Any, Callable, Dict, Generator, Iterator, List, Optional,
-                    Tuple, Type, Union, cast)
+from typing import (Any, Callable, Dict, Generator, Iterable, Iterator, List,
+                    Optional, Tuple, Type, Union, cast)
 from warnings import warn
 
 from attr import Factory, attrib, attrs
@@ -300,10 +300,7 @@ class Game(RegisterEventMixin):
             generator: Generator[
                 None, None, None
             ] = self.key_release_generators.pop(symbol)
-            try:
-                next(generator)
-            except StopIteration:
-                pass
+            list(generator)
         return True
 
     def press_key(
@@ -407,10 +404,7 @@ class Game(RegisterEventMixin):
             generator: Generator[
                 None, None, None
             ] = self.mouse_release_generators.pop(button)
-            try:
-                next(generator)
-            except StopIteration:
-                pass
+            list(generator)
         return True
 
     def click_mouse(self, button: int, modifiers: int) -> None:
@@ -446,7 +440,7 @@ class Game(RegisterEventMixin):
                 if a.joystick_button == button:
                     res: OptionalGenerator = self.start_action(a)
                     if isgenerator(res):
-                        next(cast(Iterator[None], res))
+                        list(cast(Iterable[None], res))
                         self.joybutton_release_generators[
                             (joystick.device.name, button)
                         ] = cast(
@@ -474,10 +468,7 @@ class Game(RegisterEventMixin):
             generator: Generator[
                 None, None, None
             ] = self.joybutton_release_generators.pop(t)
-            try:
-                next(generator)
-            except StopIteration:
-                pass
+            list(generator)
         return True
 
     def on_joyhat_motion(self, joystick: Joystick, x: int, y: int) -> bool:
@@ -502,10 +493,7 @@ class Game(RegisterEventMixin):
                     self.stop_action(a)
             generator: NoneGenerator
             for generator in self.joyhat_release_generators:
-                try:
-                    next(generator)
-                except StopIteration:
-                    pass
+                list(generator)
             self.joyhat_release_generators.clear()
         if self.level is not None:
             for a in self.level.actions:
