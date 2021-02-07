@@ -6,7 +6,7 @@ from logging import Logger, getLogger
 from multiprocessing import cpu_count
 from pathlib import Path
 from typing import (Any, Callable, Dict, Generator, Iterable, Iterator, List,
-                    Optional, Tuple, Type, Union, cast)
+                    Optional, Tuple, Type, cast)
 from warnings import warn
 
 from attr import Factory, attrib, attrs
@@ -26,10 +26,11 @@ except ModuleNotFoundError:
     detect_screen_reader, load, unload = (None, None, None)
 
 try:
-    from synthizer import Context, FinishedEvent, LoopedEvent, initialized
+    from synthizer import (Context, Event, FinishedEvent, LoopedEvent,
+                           initialized)
 except ModuleNotFoundError:
-    Context, FinishedEvent, LoopedEvent, initialized = (
-        object, object, object, None
+    Context, Event, FinishedEvent, LoopedEvent, initialized = (
+        object, object, object, object, None
     )
 
 from .action import Action, HatDirection, OptionalGenerator
@@ -979,7 +980,7 @@ class Game(RegisterEventMixin):
         :param dt: The delta provided by Pyglet.
         """
         if self.audio_context is not None:
-            event: Union[FinishedEvent, LoopedEvent]
+            event: Event
             for event in self.audio_context.get_events():
                 sound: Optional[Sound] = None
                 if event.source is not None:
