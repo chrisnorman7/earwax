@@ -46,6 +46,14 @@ class ActionMenu(Menu):
     If you want to override how triggers appear in the menu, then you can
     override :meth:`~ActionMenu.symbol_to_string` and
     :meth:`~ActionMenu.mouse_to_string`.
+
+    :ivar ~earwax.ActionMenu.input_mode: The input mode this menu will show
+        actions for.
+
+    :ivar ~earwax.ActionMenu.all_triggers_label: The label for the "All
+        triggers" entry.
+
+        If this value is ``None`` no such entry will be shown.
     """
 
     input_mode: Optional[InputModes] = attrib(repr=False)
@@ -54,6 +62,8 @@ class ActionMenu(Menu):
     def get_default_input_mode(instance: 'ActionMenu') -> InputModes:
         """Get the default input mode."""
         return instance.game.input_mode
+
+    all_triggers_label: Optional[str] = '<< Show all triggers >>'
 
     def __attrs_post_init__(self) -> None:
         """Add every action as an item."""
@@ -87,8 +97,8 @@ class ActionMenu(Menu):
                         f'Invalid input mode: {self.input_mode!r}.'
                     )
                 self.add_item(func, title=self.action_title(a, triggers))
-        if self.input_mode is not None:
-            self.add_item(self.show_all, title='<< Show all triggers >>')
+        if self.input_mode is not None and self.all_triggers_label is not None:
+            self.add_item(self.show_all, title=self.all_triggers_label)
 
     def symbol_to_string(self, action: Action) -> str:
         """Describe how to trigger the given action with the keyboard.
