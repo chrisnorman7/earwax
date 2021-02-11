@@ -57,6 +57,7 @@ from .editor import Editor
 from .event_matcher import EventMatcher
 from .game import Game, GameNotRunning
 from .game_board import GameBoard, NoSuchTile
+from .input_modes import InputModes
 from .level import IntroLevel, Level
 from .mapping import (Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door,
                       MapEditor, MapEditorContext, NearestBox, NotADoor,
@@ -112,6 +113,8 @@ __all__: List[str] = [
     'Game', 'GameNotRunning',
     # game_board.py:
     'GameBoard', 'NoSuchTile',
+    # input_modes.py:
+    'InputModes',
     # level.py:
     'IntroLevel', 'Level',
     # mapping/__init__.py:

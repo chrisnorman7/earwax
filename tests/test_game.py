@@ -10,8 +10,20 @@ from pyglet.window import Window, key
 from pytest import raises
 from synthizer import Context
 
-from earwax import (ActionMenu, Credit, Game, GameNotRunning, Level, Menu,
-                    SoundManager)
+from earwax import (ActionMenu, Credit, Game, GameNotRunning, InputModes,
+                    Level, Menu, SoundManager)
+
+
+class PretendDevice:
+    """A pretend device."""
+
+    name: str = 'Pretend Device'
+
+
+class PretendJoystick:
+    """A pretend joystick object."""
+
+    device: PretendDevice = PretendDevice()
 
 
 class WorksWithoutYield(Exception):
@@ -304,3 +316,22 @@ def test_cancel(game: Game, level: Level) -> None:
     game.cancel(level=level_2)
     assert game.level is level_2
     assert game.levels == [level, level_2]
+
+
+def test_input_modes(game: Game) -> None:
+    """Test input modes."""
+    assert game.input_mode is InputModes.keyboard
+    game.on_joybutton_press(PretendJoystick(), 0)
+    assert game.input_mode is InputModes.controller
+    game.on_key_press(1234, 0)
+    assert game.input_mode is InputModes.keyboard
+    game.on_joybutton_release(PretendJoystick(), 1)
+    assert game.input_mode is InputModes.controller
+    game.on_key_release(1234, 0)
+    assert game.input_mode is InputModes.keyboard
+    game.input_mode = InputModes.controller
+    game.on_mouse_press(0, 0, 0, 0)
+    assert game.input_mode is InputModes.keyboard
+    game.input_mode = InputModes.controller
+    game.on_mouse_release(0, 0, 0, 0)
+    assert game.input_mode is InputModes.keyboard

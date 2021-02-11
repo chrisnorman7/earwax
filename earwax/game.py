@@ -12,6 +12,7 @@ from warnings import warn
 from attr import Factory, attrib, attrs
 
 from .credit import Credit
+from .input_modes import InputModes
 from .menus import ActionMenu, Menu
 from .pyglet import (EVENT_HANDLED, EVENT_UNHANDLED, Joystick, Window, app,
                      get_joysticks, get_settings_path, schedule_interval,
@@ -204,6 +205,10 @@ class Game(RegisterEventMixin):
         """Return a logger."""
         return getLogger(f'<game {instance.name}>')
 
+    input_mode: InputModes = attrib(
+        default=Factory(lambda: InputModes.keyboard), init=False, repr=False
+    )
+
     def __attrs_post_init__(self) -> None:
         """Register default events."""
         for func in (
@@ -264,6 +269,7 @@ class Game(RegisterEventMixin):
             <https://pythonhosted.org/pyglet/api/pyglet.window.key-
             module.html>`__.
         """
+        self.input_mode = InputModes.keyboard
         if self.level is not None:
             a: Action
             for a in self.level.actions:
@@ -293,6 +299,7 @@ class Game(RegisterEventMixin):
             <https://pythonhosted.org/pyglet/api/pyglet.window.key-
             module.html>`__.
         """
+        self.input_mode = InputModes.keyboard
         a: Action
         for a in self.triggered_actions:
             if a.symbol == symbol:
@@ -361,6 +368,7 @@ class Game(RegisterEventMixin):
             <https://pythonhosted.org/pyglet/api/pyglet.window.key-
             module.html>`__.
         """
+        self.input_mode = InputModes.keyboard
         if self.level is not None:
             a: Action
             for a in self.level.actions:
@@ -397,6 +405,7 @@ class Game(RegisterEventMixin):
             <https://pythonhosted.org/pyglet/api/pyglet.window.key-
             module.html>`__.
         """
+        self.input_mode = InputModes.keyboard
         a: Action
         for a in self.triggered_actions:
             if a.mouse_button == button:
@@ -435,6 +444,7 @@ class Game(RegisterEventMixin):
 
         : param button: The button that was pressed.
         """
+        self.input_mode = InputModes.controller
         if self.level is not None:
             a: Action
             for a in self.level.actions:
@@ -460,6 +470,7 @@ class Game(RegisterEventMixin):
 
         : param button: The button that was pressed.
         """
+        self.input_mode = InputModes.controller
         t: Tuple[str, int] = (joystick.device.name, button)
         a: Action
         for a in self.triggered_actions:
@@ -486,6 +497,7 @@ class Game(RegisterEventMixin):
 
         : param y: The up / down position of the hat.
         """
+        self.input_mode = InputModes.controller
         direction: HatDirection = (x, y)
         a: Action
         if direction == DEFAULT:
