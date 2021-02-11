@@ -866,7 +866,9 @@ class Game(RegisterEventMixin):
         :param kwargs: The extra keyword arguments to pass to the ActionMenu
             constructor.
         """
-        menu: ActionMenu = ActionMenu(self, title=title, **kwargs)
+        menu: ActionMenu = ActionMenu(
+            self, title, **kwargs  # type: ignore[arg-type]
+        )
         self.push_level(menu)
         return menu
 
