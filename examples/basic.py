@@ -163,5 +163,6 @@ def actions_menu() -> NoneGenerator:
     yield
     g.push_action_menu()
 
+
 if __name__ == '__main__':
     g.run(Window(caption='Example Game'), initial_level=level)
