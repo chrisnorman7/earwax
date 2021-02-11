@@ -68,7 +68,7 @@ def test_yield_replaces_menu(
 def test_action_menu(game: Game, level: Level, menu: Menu) -> None:
     """Test the ActionMenu class."""
     game.push_level(level)
-    a: ActionMenu = ActionMenu(game, 'Actions')
+    a: ActionMenu = ActionMenu(game, 'Actions', input_mode=None)
     assert a.items == []
     assert a.position == -1
 
@@ -80,7 +80,7 @@ def test_action_menu(game: Game, level: Level, menu: Menu) -> None:
     @level.action('Actions', symbol=key.A)
     def actions():
         yield  # So that the a key doesn't change focus in the actions menu.
-        game.push_level(ActionMenu(game, 'Actions'))
+        game.push_level(ActionMenu(game, 'Actions', input_mode=None))
 
     game.press_key(key.A, 0, string='a')
     assert isinstance(game.level, ActionMenu)

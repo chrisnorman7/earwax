@@ -239,7 +239,7 @@ def test_push_action_menu(game: Game, level: Level) -> None:
         pass
 
     game.push_level(level)
-    menu: ActionMenu = game.push_action_menu()
+    menu: ActionMenu = game.push_action_menu(input_mode=None)
     assert game.level is menu
     assert menu.game is game
     assert len(menu.items) == 1

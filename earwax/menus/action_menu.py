@@ -1,14 +1,19 @@
 """Provides the ActionMenu class."""
 
-from typing import Tuple
+from typing import List, Optional, Tuple
+
+from attr import attrib, attrs
 
 from ..action import Action
 from ..hat_directions import DEFAULT, DOWN, LEFT, RIGHT, UP
+from ..input_modes import InputModes
 from ..pyglet import key, mouse
 from ..types import ActionFunctionType, OptionalGenerator
+from ..utils import english_list
 from .menu import Menu
 
 
+@attrs(auto_attribs=True)
 class ActionMenu(Menu):
     """A menu to show a list of actions and their associated triggers.
 
@@ -43,13 +48,47 @@ class ActionMenu(Menu):
     :meth:`~ActionMenu.mouse_to_string`.
     """
 
+    input_mode: Optional[InputModes] = attrib(repr=False)
+
+    @input_mode.default
+    def get_default_input_mode(instance: 'ActionMenu') -> InputModes:
+        """Get the default input mode."""
+        return instance.game.input_mode
+
     def __attrs_post_init__(self) -> None:
         """Add every action as an item."""
         super().__attrs_post_init__()
-        if self.game.level is not None:
-            a: Action
-            for a in self.game.level.actions:
+        if self.game.level is None:
+            return  # Nothing to do.
+        a: Action
+        for a in self.game.level.actions:
+            if self.input_mode is None:
                 self.add_item(self.action_menu(a), title=a.title)
+            else:
+                func: ActionFunctionType = self.handle_action(a)
+                triggers: List[str] = []
+                if self.input_mode is InputModes.keyboard:
+                    if a.symbol is not None:
+                        triggers.append(self.symbol_to_string(a))
+                    if a.mouse_button is not None:
+                        triggers.append(
+                            f'{self.mouse_to_string(a)} mouse button'
+                        )
+                elif self.input_mode is InputModes.controller:
+                    if a.joystick_button is not None:
+                        triggers.append(f'Button {a.joystick_button}')
+                    if a.hat_direction is not None:
+                        triggers.append(
+                            f'{self.hat_direction_to_string(a.hat_direction)} '
+                            'hat'
+                        )
+                else:
+                    raise RuntimeError(
+                        f'Invalid input mode: {self.input_mode!r}.'
+                    )
+                self.add_item(func, title=self.action_title(a, triggers))
+        if self.input_mode is not None:
+            self.add_item(self.show_all, title='<< Show all triggers >>')
 
     def symbol_to_string(self, action: Action) -> str:
         """Describe how to trigger the given action with the keyboard.
@@ -57,7 +96,7 @@ class ActionMenu(Menu):
         Returns a string representing the symbol and modifiers needed to
         trigger the provided action.
 
-        You can be certain that ``action.symbol is not None``.
+        You must be certain that ``action.symbol is not None``.
 
         Override this method to change how symbol triggers appear.
 
@@ -79,7 +118,7 @@ class ActionMenu(Menu):
         Returns a string representing the mouse button and modifiers needed
         to trigger the provided action.
 
-        You can be certain that ``action.mouse_button is not None``.
+        You must be certain that ``action.mouse_button is not None``.
 
         Override this method to change how mouse triggers appear.
 
@@ -151,8 +190,36 @@ class ActionMenu(Menu):
 
         def inner() -> OptionalGenerator:
             """Pop the menu, and run the action."""
-            self.game.pop_level()
+            # First reveal this menu, as this method may be called from a sub
+            # menu.
+            self.game.reveal_level(self)
+            # Now pop this menu off the stack.
             self.game.pop_level()
             return action.run(None)
 
         return inner
+
+    def action_title(self, action: Action, triggers: List[str]) -> str:
+        """Return a suitable title for the given action.
+
+        This method is used when building the menu when
+        :attr:`~earwax.ActionMenu.input_mode` is not ``None``.
+
+        :param action: The action whose name will be used.
+
+        :param triggers: A list of triggers gleaned from the given action.
+        """
+        triggers_str: str = english_list(
+            triggers, empty='No triggers', and_='or '
+        )
+        return f'{action.title}: {triggers_str}'
+
+    def show_all(self) -> None:
+        """Show all triggers."""
+        # First pop the level, so the right actions are processed.
+        self.game.pop_level()
+        m: ActionMenu = ActionMenu(
+            self.game, self.title,  # type: ignore[arg-type]
+            input_mode=None
+        )
+        self.game.push_level(m)
