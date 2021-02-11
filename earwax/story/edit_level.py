@@ -1281,7 +1281,8 @@ class EditLevel(PlayLevel):
         """Push the builder menu."""
         m: Menu = Menu(self.game, 'Building Menu')
         action_menu: ActionMenu = ActionMenu(
-            self.game, 'Used for getting action symbol descriptions'
+            self.game,
+            'Get action symbol descriptions'  # type: ignore[arg-type]
         )
 
         def handle_action(a: Action) -> ActionFunctionType:

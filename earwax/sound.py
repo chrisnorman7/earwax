@@ -642,7 +642,7 @@ class BufferDirectory:
     buffers: Dict[str, Buffer] = attrib(init=False)
 
     @buffers.default
-    def buffers_default(instance: 'BufferDirectory') -> Dict[str, Path]:
+    def buffers_default(instance: 'BufferDirectory') -> Dict[str, Buffer]:
         """Return the default value.
 
         Populates the :attr:`~earwax.BufferDirectory.buffers` and

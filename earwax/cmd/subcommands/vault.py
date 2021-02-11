@@ -106,14 +106,15 @@ def compile_vault(args: Namespace) -> None:
         if df is None:
             df = os.path.splitext(fn)[0] + '.data'
         data_file = Path(df)
-        key: str = data['key']
+        key_str: str = data['key']
+        key: bytes = key_str.encode()
         vault.save(data_file, key)
         print('Data file compiled.')
         print()
         print('To use this file in your code, you can do:')
         print(
             'vault_file: VaultFile = '
-            f"VaultFile.from_path(Path('{data_file}'), '{key}')"
+            f"VaultFile.from_path(Path('{data_file}'), '{key_str}')"
         )
     else:
         print('Error:')

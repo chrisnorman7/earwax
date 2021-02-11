@@ -1,7 +1,7 @@
 """Provides the VaultFile class."""
 
 from pathlib import Path
-from typing import AnyStr, Dict, Generator, List, Optional, Union
+from typing import Dict, Generator, List, Optional, Union
 
 from attr import Factory, attrib, attrs
 from cryptography.fernet import Fernet, InvalidToken
@@ -38,7 +38,7 @@ class VaultFile:
     entries: EntriesType = attrib(default=Factory(dict), repr=False)
 
     @classmethod
-    def from_path(cls, filename: Path, key: AnyStr) -> 'VaultFile':
+    def from_path(cls, filename: Path, key: bytes) -> 'VaultFile':
         """Load a series of files and return a ``VaultFile`` instance.
 
         Given a path to a data file, and the *correct* key, load a series of
@@ -64,7 +64,7 @@ class VaultFile:
         entries: EntriesType = loads(data)
         return VaultFile(entries=entries)
 
-    def save(self, filename: Path, key: AnyStr) -> None:
+    def save(self, filename: Path, key: bytes) -> None:
         """Save this instance's entries to a file.
 
         :path filename: The data file to save to.

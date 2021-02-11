@@ -68,7 +68,10 @@ def test_yield_replaces_menu(
 def test_action_menu(game: Game, level: Level, menu: Menu) -> None:
     """Test the ActionMenu class."""
     game.push_level(level)
-    a: ActionMenu = ActionMenu(game, 'Actions', input_mode=None)
+    a: ActionMenu = ActionMenu(
+        game, 'Actions',  # type: ignore[arg-type]
+        input_mode=None
+    )
     assert a.items == []
     assert a.position == -1
 
