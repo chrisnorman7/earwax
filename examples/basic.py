@@ -13,7 +13,7 @@ from synthizer import SynthizerError
 
 from earwax import (Config, ConfigMenu, ConfigValue, Editor, FileMenu, Game,
                     Level)
-from earwax.types import OptionalGenerator
+from earwax.types import NoneGenerator, OptionalGenerator
 
 
 class ConnectionConfig(Config):
@@ -154,10 +154,14 @@ def configure_earwax() -> Generator[None, None, None]:
     g.push_level(m)
 
 
-level.action(
+@level.action(
     'Show actions', symbol=key.SLASH, modifiers=key.MOD_SHIFT,
     joystick_button=4
-)(g.push_action_menu)
+)
+def actions_menu() -> NoneGenerator:
+    """Push an actions menu."""
+    yield
+    g.push_action_menu()
 
 if __name__ == '__main__':
     g.run(Window(caption='Example Game'), initial_level=level)
