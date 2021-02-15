@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List
 
 from pyglet.window import Window, key
+from synthizer import PannerStrategy
 
 from earwax import (ActionMenu, Ambiance, Box, BoxLevel, BoxTypes, Credit,
                     Door, Game, Level, Menu, Point, Reverb, Track, TrackTypes)
@@ -43,6 +44,7 @@ game: Game = Game(
 @game.event
 def before_run() -> None:
     """Create rooms and level."""
+    game.audio_context.panner_strategy = PannerStrategy.HRTF
     boxes: List[Box] = []
     ambiances: List[Ambiance] = []
 
