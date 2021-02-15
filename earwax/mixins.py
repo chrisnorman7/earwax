@@ -5,10 +5,10 @@ from enum import Enum
 from inspect import isclass
 from pathlib import Path
 from typing import (TYPE_CHECKING, Any, Dict, List, Optional, TextIO, Type,
-                    Union, get_args, get_origin)
+                    Union, get_origin)
 
 from attr import attrs
-from typing_inspect import is_union_type
+from typing_inspect import get_args, is_union_type
 
 from .pyglet import EventDispatcher
 from .yaml import CDumper, CLoader, dump, load
