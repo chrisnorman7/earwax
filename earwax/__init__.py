@@ -36,8 +36,6 @@ There are ready made :class:`~earwax.Level` classes for creating :class:`menus
 <earwax.Menu>`, and :class:`editors <earwax.Editor>`.
 """
 
-from typing import List
-
 try:
     import pyglet
     pyglet.options['shadow_window'] = False
@@ -85,69 +83,3 @@ from .walking_directions import walking_directions
 # circular imports.
 if True:
     from . import cmd
-
-__all__: List[str] = [
-    # General modules:
-    'cmd', 'hat_directions', 'story', 'types', 'utils',
-    # action.py:
-    'Action',
-    # action_map.py:
-    'ActionMap',
-    # ambiance.py:
-    'Ambiance',
-    # config.py:
-    'Config', 'ConfigValue',
-    # configuration.py:
-    'EarwaxConfig',
-    # credit.py:
-    'Credit',
-    # dialogue_tree.py:
-    'DialogueLine', 'DialogueTree',
-    # die.py:
-    'Die',
-    # editor.py:
-    'Editor',
-    # event_matcher.py:
-    'EventMatcher',
-    # game.py:
-    'Game', 'GameNotRunning',
-    # game_board.py:
-    'GameBoard', 'NoSuchTile',
-    # input_modes.py:
-    'InputModes',
-    # level.py:
-    'IntroLevel', 'Level',
-    # mapping/__init__.py:
-    'Box', 'BoxBounds', 'BoxLevel', 'BoxTypes', 'CurrentBox', 'Door',
-    'MapEditor', 'MapEditorContext', 'NearestBox', 'NotADoor', 'Portal',
-    # menus/__init__.py:
-    'ActionMenu', 'ConfigMenu', 'FileMenu', 'Menu', 'MenuItem', 'ReverbEditor',
-    'TypeHandler', 'UnknownTypeError',
-    # mixins.py:
-    'DismissibleMixin', 'DumpLoadMixin', 'TitleMixin',
-    # networking.py:
-    'AlreadyConnected', 'AlreadyConnecting', 'ConnectionStates',
-    'NetworkConnection', 'NetworkingConnectionError', 'NotConnectedYet',
-    # point.py:
-    'Point', 'PointDirections',
-    # promises/__init__.py:
-    'Promise', 'PromiseStates', 'StaggeredPromise', 'ThreadedPromise',
-    'staggered_promise',
-    # reverb.py:
-    'Reverb',
-    # rumble_effects.py:
-    'RumbleEffect', 'RumbleSequence', 'RumbleSequenceLine',
-    # sound.py:
-    'AlreadyDestroyed', 'BufferCache', 'BufferDirectory',
-    'NoCache', 'Sound', 'SoundError', 'SoundManager',
-    # speech.py:
-    'tts',
-    # task.py:
-    'IntervalFunction', 'Task', 'TaskFunction',
-    # track.py:
-    'Track', 'TrackTypes',
-    # vault_file.py:
-    'IncorrectVaultKey', 'VaultFile',
-    # walking_directions.py:
-    'walking_directions',
-]
