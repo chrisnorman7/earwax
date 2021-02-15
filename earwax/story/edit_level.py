@@ -191,7 +191,7 @@ def push_rooms_menu(
                 return res
 
         m.add_item(
-            inner, title=lambda: f'{room.get_name()}: {room.get_description()}'
+            inner, title=lambda r=room: f'{r.get_name()}: {r.get_description()}'
         )
 
     yield
@@ -380,7 +380,7 @@ class EditLevel(PlayLevel):
         yield
         self.game.push_level(m)
 
-    def create_exit(self) -> None:
+    def create_exit(self) -> NoneGenerator:
         """Link this room to another."""
         self.game.pop_level()
         room: WorldRoom = self.room
@@ -390,7 +390,7 @@ class EditLevel(PlayLevel):
             room.create_exit(destination)
             self.game.output('Exit created.')
 
-        push_rooms_menu(
+        yield from push_rooms_menu(
             self.game, self.get_rooms(include_current=False), inner
         )
 
