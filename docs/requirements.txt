@@ -7,4 +7,3 @@ typing_inspect
 shortuuid
 cryptography
 msgpack
-synthizer
