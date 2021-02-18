@@ -9,5 +9,5 @@ movement_2d >= 1.1.1
 pysdl2 >= 0.9.7
 pysdl2-dll >= 2.0.14
 jinja2 >= 2.11.3
-cryptography >= 3.4.4
+cryptography >= 3.4.6
 msgpack >= 1.0.2
