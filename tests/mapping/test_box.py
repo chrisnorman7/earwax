@@ -2,8 +2,6 @@
 
 from typing import List, Optional
 
-from pytest import raises
-
 from earwax import (
     Box,
     BoxBounds,
@@ -16,6 +14,7 @@ from earwax import (
     Portal,
     SoundManager,
 )
+from pytest import raises
 
 
 def test_init(box_level: BoxLevel, game: Game, box: Box) -> None:
@@ -397,3 +396,12 @@ def test_get_nearest_point(game: Game) -> None:
     assert b.get_nearest_point(Point(6, 0, 6)) == b.bounds.top_back_right
     assert b.get_nearest_point(b.start) == b.start
     assert b.get_nearest_point(b.centre) == b.centre
+
+
+def test_hash(game: Game) -> None:
+    """Test that boxes can be hashed."""
+    b: Box = Box(game, Point(1, 2, 3), Point(4, 5, 6))
+    assert hash(b) == id(b)
+    b2: Box = Box(game, Point(7, 8, 9), Point(10, 11, 12))
+    assert hash(b2) == id(b2)
+    assert hash(b2) != hash(b)
