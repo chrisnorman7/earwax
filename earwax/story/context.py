@@ -139,8 +139,8 @@ class StoryContext:
         """Push a menu that can be used to configure Earwax."""
         m: ConfigMenu = ConfigMenu(  # type: ignore[misc]
             self.game,
-            "Configure Earwax",
-            dismissible=False,  # type: ignore[arg-type]
+            "Configure Earwax",  # type: ignore[arg-type]
+            dismissible=False,
         )
 
         @m.item(title="Return to main menu")
