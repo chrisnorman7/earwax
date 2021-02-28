@@ -177,7 +177,7 @@ class BoxBounds:
         return self.width * self.depth * self.height
 
 
-@attrs(auto_attribs=True)
+@attrs(auto_attribs=True, hash=False)
 class Box(Generic[T], RegisterEventMixin):
     """A box on a map.
 
@@ -267,6 +267,10 @@ class Box(Generic[T], RegisterEventMixin):
             self.on_close,
         ):
             self.register_event(cast(EventType, func))
+
+    def __hash__(self) -> int:
+        """Return a hash."""
+        return id(self)
 
     @classmethod
     def create_fitted(
