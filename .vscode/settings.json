@@ -105,6 +105,10 @@
             "!Module"
         ],
         "editor.wordBasedSuggestions": false,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
     },
     "cmake.configureOnOpen": false,
+    "python.sortImports.path": "${workspaceFolder}/env/scripts/isort",
 }
