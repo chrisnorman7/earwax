@@ -2,18 +2,24 @@
 
 if True:
     import sys
-    sys.path.insert(0, '..')
+
+    sys.path.insert(0, "..")
 
 from warnings import warn
 
 from pyglet.input import Joystick
 from pyglet.window import Window, key
 
-from earwax import (Game, Level, RumbleEffect, RumbleSequence,
-                    RumbleSequenceLine)
+from earwax import (
+    Game,
+    Level,
+    RumbleEffect,
+    RumbleSequence,
+    RumbleSequenceLine,
+)
 from earwax.sdl import SdlError
 
-game: Game = Game(name='Rumble Example')
+game: Game = Game(name="Rumble Example")
 rumble_wave: RumbleEffect = RumbleEffect(
     0.2,  # start_value
     0.3,  # increase_interval
@@ -39,7 +45,7 @@ level: Level = Level(game)
 @level.register_and_bind
 def on_joyaxis_motion(joystick: Joystick, axis: str, value: float):
     """Handle joystick motion."""
-    if axis not in ('y', 'ry'):
+    if axis not in ("y", "ry"):
         return None
     if value <= 0:
         try:
@@ -76,19 +82,19 @@ def on_joybutton_release(joystick: Joystick, button: int) -> None:
     game.stop_rumble(joystick)
 
 
-@level.action('Show help', symbol=key.SLASH, modifiers=key.MOD_SHIFT)
+@level.action("Show help", symbol=key.SLASH, modifiers=key.MOD_SHIFT)
 def show_help() -> None:
     """Tell 'em what to do."""
-    game.output('Move the joysticks and press buttons for rumbles.')
+    game.output("Move the joysticks and press buttons for rumbles.")
 
 
 @game.event
 def before_run() -> None:
     """Warn if there are no joysticks detected."""
     if len(game.joysticks) < 1:
-        warn('No joysticks detected.')
+        warn("No joysticks detected.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     window: Window = Window(caption=game.name)
     game.run(window, initial_level=level)

@@ -50,7 +50,7 @@ class MenuItem(RegisterEventMixin):
     """
 
     func: ActionFunctionType
-    title: Optional[Union[str, 'TitleFunction']] = None
+    title: Optional[Union[str, "TitleFunction"]] = None
     select_sound_path: Optional[Path] = None
     loop_select_sound: bool = False
     activate_sound_path: Optional[Path] = None

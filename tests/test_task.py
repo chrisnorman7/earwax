@@ -12,13 +12,14 @@ class Works(Exception):
 
 def test_init() -> None:
     """Test initialisation."""
+
     def interval() -> float:
         """Return an interval."""
         return 5.0
 
     def func(dt: float) -> None:
         """Do something."""
-        print('Worked.')
+        print("Worked.")
 
     t: Task = Task(interval, func)
     assert isinstance(t, Task)
@@ -50,6 +51,7 @@ def test_start(level: Level, game: Game, window: Window) -> None:
 
 def test_start_immediately() -> None:
     """Test start a task straight away."""
+
     def func(dt: float) -> None:
         """Raise to exit."""
         raise Works

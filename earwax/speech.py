@@ -21,4 +21,4 @@ try:
 except ModuleNotFoundError:
     tts = None
 
-__all__ = ['tts']
+__all__ = ["tts"]

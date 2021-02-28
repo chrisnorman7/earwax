@@ -73,7 +73,7 @@ class FileMenu(Menu):
     directory_label: Optional[str] = None
     show_directories: bool = True
     show_files: bool = True
-    up_label: str = '..'
+    up_label: str = ".."
 
     def __attrs_post_init__(self) -> None:
         """Add the menu items."""
@@ -118,9 +118,9 @@ class FileMenu(Menu):
 
         return inner
 
-    def select_item(self, path: Optional[Path]) -> Callable[
-        [], OptionalGenerator
-    ]:
+    def select_item(
+        self, path: Optional[Path]
+    ) -> Callable[[], OptionalGenerator]:
         """Select an item.
 
         Used as the menu handler in place of a lambda.

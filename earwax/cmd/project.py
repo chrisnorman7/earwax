@@ -40,12 +40,10 @@ class Project(DumpLoadMixin):
     """
 
     name: str
-    author: str = Factory(lambda: f'{getuser()} <{getuser()}@localhost')
+    author: str = Factory(lambda: f"{getuser()} <{getuser()}@localhost")
     description: str = Factory(str)
-    version: str = Factory(lambda: '0.0.0')
-    requirements: str = Factory(
-        lambda: 'earwax\npyglet\nsynthizer\n'
-    )
+    version: str = Factory(lambda: "0.0.0")
+    requirements: str = Factory(lambda: "earwax\npyglet\nsynthizer\n")
 
     credits: List[ProjectCredit] = Factory(list)
     variables: List[Variable] = Factory(list)

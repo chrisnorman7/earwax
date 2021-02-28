@@ -56,11 +56,11 @@ class Level(RegisterEventMixin, ActionMap):
         while this level is top of the stack.
     """
 
-    game: 'Game'
+    game: "Game"
 
-    motions: 'MotionsType' = attrib(Factory(dict), init=False, repr=False)
+    motions: "MotionsType" = attrib(Factory(dict), init=False, repr=False)
 
-    ambiances: List['Ambiance'] = attrib(
+    ambiances: List["Ambiance"] = attrib(
         default=Factory(list), init=False, repr=False
     )
     tracks: List[Track] = attrib(default=Factory(list), init=False, repr=False)
@@ -68,8 +68,11 @@ class Level(RegisterEventMixin, ActionMap):
     def __attrs_post_init__(self) -> None:
         """Register default events."""
         for func in (
-            self.on_pop, self.on_push, self.on_reveal, self.on_text_motion,
-            self.on_cover
+            self.on_pop,
+            self.on_push,
+            self.on_reveal,
+            self.on_text_motion,
+            self.on_cover,
         ):
             self.register_event(cast(EventType, func))
 
@@ -77,7 +80,7 @@ class Level(RegisterEventMixin, ActionMap):
         """Start all the ambiances on this instance."""
         if self.game.ambiance_sound_manager is None:
             raise RuntimeError(
-                'Unable to start ambiances with no ambiance sound manager.'
+                "Unable to start ambiances with no ambiance sound manager."
             )
         ambiance: Ambiance
         for ambiance in self.ambiances:
@@ -100,11 +103,11 @@ class Level(RegisterEventMixin, ActionMap):
                 manager = self.game.music_sound_manager
             else:
                 raise RuntimeError(
-                    'Unknown track type: %r.' % track.track_type
+                    "Unknown track type: %r." % track.track_type
                 )
             if manager is None:
                 raise RuntimeError(
-                    f'Unable to play {track!r} with no sound manager.'
+                    f"Unable to play {track!r} with no sound manager."
                 )
             track.play(manager)
 
@@ -129,9 +132,9 @@ class Level(RegisterEventMixin, ActionMap):
         if motion in self.motions:
             self.motions[motion]()
 
-    def motion(self, motion: int) -> Callable[
-        ['MotionFunctionType'], 'MotionFunctionType'
-    ]:
+    def motion(
+        self, motion: int
+    ) -> Callable[["MotionFunctionType"], "MotionFunctionType"]:
         """Add a handler to :attr:`~earwax.Level.motions`.
 
         For example::
@@ -148,7 +151,7 @@ class Level(RegisterEventMixin, ActionMap):
             module.html>`__.
         """
 
-        def inner(func: 'MotionFunctionType') -> 'MotionFunctionType':
+        def inner(func: "MotionFunctionType") -> "MotionFunctionType":
             self.motions[motion] = func
             return func
 
@@ -172,7 +175,7 @@ class Level(RegisterEventMixin, ActionMap):
         self.stop_ambiances()
         self.stop_tracks()
 
-    def on_cover(self, level: 'Level') -> None:
+    def on_cover(self, level: "Level") -> None:
         """Code to run when this level has been covered by a new one."""
         pass
 
@@ -245,7 +248,7 @@ class IntroLevel(Level):
 
     @sound_manager.default
     def get_default_sound_manager(
-        instance: 'IntroLevel'
+        instance: "IntroLevel",
     ) -> Optional[SoundManager]:
         """Return a suitable sound manager."""
         return instance.game.interface_sound_manager
@@ -270,7 +273,7 @@ class IntroLevel(Level):
         super().on_push()
         if self.sound_manager is None:
             raise RuntimeError(
-                'Cannot start playing without a valid sound manager.'
+                "Cannot start playing without a valid sound manager."
             )
         self.sound = self.sound_manager.play_path(
             self.sound_path, looping=self.looping, **self.play_kwargs
@@ -278,8 +281,9 @@ class IntroLevel(Level):
         if self.skip_after is not None:
             schedule_once(
                 lambda dt: self.game.replace_level(self.level)
-                if self.game.level is self else None,
-                self.skip_after
+                if self.game.level is self
+                else None,
+                self.skip_after,
             )
 
     def on_pop(self) -> None:

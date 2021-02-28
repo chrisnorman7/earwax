@@ -26,7 +26,7 @@ def test_add() -> None:
     assert p.y == 8
     assert p.z == 6
     with raises(TypeError):
-        p += 'Failure.'  # type: ignore[operator]
+        p += "Failure."  # type: ignore[operator]
 
 
 def test_subtract() -> None:
@@ -41,7 +41,7 @@ def test_subtract() -> None:
     assert p.y == 5
     assert p.z == 9
     with raises(TypeError):
-        p -= 'Failure.'  # type: ignore[operator]
+        p -= "Failure."  # type: ignore[operator]
 
 
 def test_multiply() -> None:
@@ -56,7 +56,7 @@ def test_multiply() -> None:
     assert p.y == 270
     assert p.z == 400
     with raises(TypeError):
-        p *= 'Failure.'  # type: ignore[operator]
+        p *= "Failure."  # type: ignore[operator]
 
 
 def test_lessthan() -> None:

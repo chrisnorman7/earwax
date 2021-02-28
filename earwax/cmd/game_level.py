@@ -35,9 +35,9 @@ class GameLevelScript(DumpLoadMixin):
 
         If you want the path, use the :attr:`~script_path` attribute.
         """
-        name: str = f'script_{self.id}'
-        assert name.isidentifier(), f'{name} is not a valid identifier.'
-        return name + '.py'
+        name: str = f"script_{self.id}"
+        assert name.isidentifier(), f"{name} is not a valid identifier."
+        return name + ".py"
 
     @property
     def script_path(self) -> Path:
@@ -55,14 +55,14 @@ class GameLevelScript(DumpLoadMixin):
         returned.
         """
         if not self.script_path.is_file():
-            return ''
-        with self.script_path.open('r') as f:
+            return ""
+        with self.script_path.open("r") as f:
             return f.read()
 
     @code.setter
     def code(self, code: str) -> None:
         """Set the code."""
-        with self.script_path.open('w') as f:
+        with self.script_path.open("w") as f:
             f.write(code)
 
 

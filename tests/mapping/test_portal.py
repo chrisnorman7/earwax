@@ -32,7 +32,7 @@ def test_on_enter(box_level: BoxLevel) -> None:
         raise EnterWorks
 
     with raises(EnterWorks):
-        p.dispatch_event('on_enter')
+        p.dispatch_event("on_enter")
 
 
 def test_on_exit(box_level: BoxLevel) -> None:
@@ -44,4 +44,4 @@ def test_on_exit(box_level: BoxLevel) -> None:
         raise ExitWorks()
 
     with raises(ExitWorks):
-        p.dispatch_event('on_exit')
+        p.dispatch_event("on_exit")

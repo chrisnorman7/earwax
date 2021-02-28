@@ -96,7 +96,7 @@ class RumbleEffect:
     decrease_value: float
     end_value: float
 
-    def start(self, game: 'Game', joystick: Joystick) -> StaggeredPromise:
+    def start(self, game: "Game", joystick: Joystick) -> StaggeredPromise:
         """Start this effect.
 
         :param game: The game which will provide the
@@ -164,7 +164,7 @@ class RumbleSequence:
 
     lines: List[RumbleSequenceLine]
 
-    def start(self, game: 'Game', joystick: Joystick) -> StaggeredPromise:
+    def start(self, game: "Game", joystick: Joystick) -> StaggeredPromise:
         """Start this effect.
 
         :param game: The game which will provide the

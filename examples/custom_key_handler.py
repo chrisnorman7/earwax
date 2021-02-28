@@ -23,12 +23,20 @@ from pyglet.window import Window, key
 from earwax import ActionMenu, Game, Level
 
 keys = (
-    key._1, key._2, key._3, key._4, key._5, key._6, key._7, key._8, key._9,
-    key._0
+    key._1,
+    key._2,
+    key._3,
+    key._4,
+    key._5,
+    key._6,
+    key._7,
+    key._8,
+    key._9,
+    key._0,
 )
 
 game = Game()
-window = Window(caption='Testing')
+window = Window(caption="Testing")
 
 level = Level(game)
 
@@ -37,24 +45,24 @@ level = Level(game)
 def on_key_press(symbol, modifiers) -> Optional[bool]:
     """Handle a pressed key."""
     if symbol in keys and not modifiers:
-        game.output(f'Position {keys.index(symbol)}.')
+        game.output(f"Position {keys.index(symbol)}.")
         return EVENT_HANDLED
     elif symbol == key.ESCAPE and not modifiers and game.level is level:
-        window.dispatch_event('on_close')
+        window.dispatch_event("on_close")
     return EVENT_UNHANDLED
 
 
-@level.action('Cause problems', symbol=key._0)
+@level.action("Cause problems", symbol=key._0)
 def problem():
     """Raise an error."""
-    raise RuntimeError('This should never happen.')
+    raise RuntimeError("This should never happen.")
 
 
-@level.action('Show help', symbol=key.SLASH, modifiers=key.MOD_SHIFT)
+@level.action("Show help", symbol=key.SLASH, modifiers=key.MOD_SHIFT)
 def get_help():
     """Show an action menu."""
-    game.push_level(ActionMenu(game, 'Actions'))
+    game.push_level(ActionMenu(game, "Actions"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     game.run(window, initial_level=level)

@@ -34,13 +34,13 @@ def valid_label(text: str) -> None:
     if not text or not text.isidentifier() or iskeyword(text):
         msg: str
         if not text:
-            msg = 'Cancelled.'
+            msg = "Cancelled."
         elif not text.isidentifier():
-            msg = f'Invalid identifier: {text}.'
+            msg = f"Invalid identifier: {text}."
         elif iskeyword(text):
-            msg = f'Reserved keyword: {text}.'
+            msg = f"Reserved keyword: {text}."
         else:
-            msg = 'Unknown error.'
+            msg = "Unknown error."
         raise InvalidLabel(msg)
 
 
@@ -51,13 +51,13 @@ class MapEditorBox(Box):
     id: str = attrib()
 
     @id.default
-    def get_default_id(instance: 'MapEditorBox') -> str:
+    def get_default_id(instance: "MapEditorBox") -> str:
         """Raise an error if the id is not provided."""
-        raise RuntimeError('You must provide an ID.')
+        raise RuntimeError("You must provide an ID.")
 
     def __str__(self) -> str:
         """Return a string representation of this object."""
-        return f'{self.name} (#{self.id})'
+        return f"{self.name} (#{self.id})"
 
 
 class AnchorPoints(Enum):
@@ -93,7 +93,7 @@ class BoxTemplate(DumpLoadMixin):
 
     start: BoxPoint = Factory(BoxPoint)
     end: BoxPoint = Factory(BoxPoint)
-    name: str = 'Untitled Box'
+    name: str = "Untitled Box"
     surface_sound: Optional[str] = None
     wall_sound: Optional[str] = None
 
@@ -104,9 +104,9 @@ class BoxTemplate(DumpLoadMixin):
     label: str = attrib()
 
     @label.default
-    def get_default_label(instance: 'BoxTemplate') -> str:
+    def get_default_label(instance: "BoxTemplate") -> str:
         """Get a unique ID."""
-        return f'box_{instance.id}'
+        return f"box_{instance.id}"
 
 
 @attrs(auto_attribs=True)
@@ -116,7 +116,7 @@ class LevelMap(DumpLoadMixin):
     box_templates: List[BoxTemplate] = Factory(list)
     coordinates: BoxPoint = Factory(lambda: BoxPoint())
     bearing: int = 0
-    name: str = 'Untitled Map'
+    name: str = "Untitled Map"
     notes: str = Factory(str)
 
 
@@ -129,7 +129,7 @@ class MapEditorContext:
     :class:`~earwax.MapEditor` instance.
     """
 
-    level: 'MapEditor'
+    level: "MapEditor"
     level_map: LevelMap
 
     template_ids: Dict[str, BoxTemplate] = Factory(dict)
@@ -161,12 +161,16 @@ class MapEditorContext:
         """
         return MapEditorBox(
             self.level.game,
-            self.to_point(template.start), self.to_point(template.end),
+            self.to_point(template.start),
+            self.to_point(template.end),
             surface_sound=Path(template.surface_sound)
-            if template.surface_sound is not None else None,
+            if template.surface_sound is not None
+            else None,
             wall_sound=Path(template.wall_sound)
-            if template.wall_sound is not None else None,
-            name=template.name, id=template.id
+            if template.wall_sound is not None
+            else None,
+            name=template.name,
+            id=template.id,
         )
 
     def add_template(
@@ -217,7 +221,7 @@ class MapEditor(BoxLevel):
     context: MapEditorContext = attrib(repr=False)
 
     @context.default
-    def get_default_context(instance: 'MapEditor') -> MapEditorContext:
+    def get_default_context(instance: "MapEditor") -> MapEditorContext:
         """Return a suitable context."""
         level_map: LevelMap
         if instance.filename is not None:
@@ -236,50 +240,51 @@ class MapEditor(BoxLevel):
         if not self.boxes:
             self.context.add_template(
                 BoxTemplate(
-                    BoxPoint(), BoxPoint(x=10, y=10, z=10),
-                    name='First Box', id='first_box'
+                    BoxPoint(),
+                    BoxPoint(x=10, y=10, z=10),
+                    name="First Box",
+                    id="first_box",
                 )
             )
         self.add_default_actions()
-        self.action(
-            'New box', symbol=key.N
-        )(self.create_box)
-        self.action(
-            'Rename current box', symbol=key.R
-        )(self.rename_box)
-        self.action('Box menu', symbol=key.B)(self.boxes_menu)
-        self.action('Move box', symbol=key.P)(self.points_menu)
-        self.action(
-            'Save map', symbol=key.S, modifiers=key.MOD_CTRL
-        )(self.save)
-        self.action(
-            'Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT
-        )(self.game.push_action_menu)
+        self.action("New box", symbol=key.N)(self.create_box)
+        self.action("Rename current box", symbol=key.R)(self.rename_box)
+        self.action("Box menu", symbol=key.B)(self.boxes_menu)
+        self.action("Move box", symbol=key.P)(self.points_menu)
+        self.action("Save map", symbol=key.S, modifiers=key.MOD_CTRL)(
+            self.save
+        )
+        self.action("Help menu", symbol=key.SLASH, modifiers=key.MOD_SHIFT)(
+            self.game.push_action_menu
+        )
         return super().__attrs_post_init__()
 
     def complain_box(self) -> None:
         """Complain about there being no box."""
-        return self.game.output('First move to a box.')
+        return self.game.output("First move to a box.")
 
     def on_move_fail(
-        self, distance: float, vertical: Optional[float], bearing: int,
-        coordinates: Point
+        self,
+        distance: float,
+        vertical: Optional[float],
+        bearing: int,
+        coordinates: Point,
     ) -> None:
         """Tell the user their move failed."""
-        self.game.output('There is no box in that direction.')
+        self.game.output("There is no box in that direction.")
         return super().on_move_fail(distance, vertical, bearing, coordinates)
 
     def save(self) -> None:
         """Save the map level."""
         if self.filename is None:
-            return self.game.output('There is no filename to save to.')
+            return self.game.output("There is no filename to save to.")
         try:
             self.context.level_map.save(self.filename)
         except Exception as e:
-            self.game.output(f'Failed to save the map: {e}.')
+            self.game.output(f"Failed to save the map: {e}.")
             raise
         else:
-            self.game.output('Map saved.')
+            self.game.output("Map saved.")
 
     def boxes_menu(self) -> None:
         """Push a menu to select a box to configure.
@@ -302,7 +307,7 @@ class MapEditor(BoxLevel):
         elif len(boxes) == 1:
             return inner(boxes[0])
         else:
-            m: Menu = Menu(self.game, 'Select Box')
+            m: Menu = Menu(self.game, "Select Box")
             for b in boxes:
                 m.add_item(lambda: inner(b), title=str(b))
             self.game.push_level(m)
@@ -310,12 +315,12 @@ class MapEditor(BoxLevel):
     def box_menu(self, box: MapEditorBox) -> None:
         """Push a menu to configure the provided box."""
         t: BoxTemplate = self.context.template_ids[box.id]
-        m: Menu = Menu(self.game, lambda: f'Configure {box}')
-        m.add_item(self.rename_box, title=lambda: f'Rename ({box.name})')
-        m.add_item(self.points_menu, title='Move')
-        m.add_item(self.box_sounds, title='Sounds')
-        m.add_item(self.label_box, title=lambda: f'Label ({t.label})')
-        m.add_item(self.id_box, title=lambda: f'ID ({t.id})')
+        m: Menu = Menu(self.game, lambda: f"Configure {box}")
+        m.add_item(self.rename_box, title=lambda: f"Rename ({box.name})")
+        m.add_item(self.points_menu, title="Move")
+        m.add_item(self.box_sounds, title="Sounds")
+        m.add_item(self.label_box, title=lambda: f"Label ({t.label})")
+        m.add_item(self.id_box, title=lambda: f"ID ({t.id})")
         self.game.push_level(m)
 
     def rename_box(self) -> NoneGenerator:
@@ -333,12 +338,12 @@ class MapEditor(BoxLevel):
                 assert b is not None
                 b.name = text
                 t.name = text
-                self.game.output('Box renamed.')
+                self.game.output("Box renamed.")
                 self.game.pop_level()
             else:
                 self.game.cancel()
 
-        self.game.output(f'Enter a new name for the current box: {t.name}')
+        self.game.output(f"Enter a new name for the current box: {t.name}")
         yield
         self.game.push_level(e)
 
@@ -359,10 +364,10 @@ class MapEditor(BoxLevel):
                 self.game.cancel(message=str(e))
             else:
                 t.label = text
-                self.game.output('Label set.')
+                self.game.output("Label set.")
                 self.game.pop_level()
 
-        self.game.output(f'Enter a new label for the current box: {t.label}')
+        self.game.output(f"Enter a new label for the current box: {t.label}")
         yield
         self.game.push_level(e)
 
@@ -391,10 +396,10 @@ class MapEditor(BoxLevel):
                     if template.end.box_id == b.id:
                         template.end.box_id = text
                 b.id = text
-                self.game.output('Label set.')
+                self.game.output("Label set.")
                 self.game.pop_level()
 
-        self.game.output(f'Enter a new ID for the current box: {t.id}')
+        self.game.output(f"Enter a new ID for the current box: {t.id}")
         yield
         self.game.push_level(e)
 
@@ -405,7 +410,7 @@ class MapEditor(BoxLevel):
 
         def set_coordinates() -> NoneGenerator:
             e: Editor = Editor(
-                self.game, text=f'{point.x}, {point.y}, {point.z}'
+                self.game, text=f"{point.x}, {point.y}, {point.z}"
             )
 
             @e.event
@@ -417,26 +422,25 @@ class MapEditor(BoxLevel):
                 y: int
                 z: int
                 try:
-                    x, y, z = (int(i) for i in text.split(','))
+                    x, y, z = (int(i) for i in text.split(","))
                 except ValueError:
                     return self.game.cancel(
-                        message=f'Invalid coordinates: {text}.'
+                        message=f"Invalid coordinates: {text}."
                     )
                 else:
                     point.x, point.y, point.z = x, y, z
                     self.context.reload_template(template)
-                    self.game.cancel(message='Coordinates changed.')
+                    self.game.cancel(message="Coordinates changed.")
 
-            self.game.output('Enter new coordinates:')
+            self.game.output("Enter new coordinates:")
             yield
             self.game.push_level(e)
 
         def set_anchor() -> None:
-            m: Menu = Menu(self.game, 'Anchor')
+            m: Menu = Menu(self.game, "Anchor")
             current_box: Optional[MapEditorBox] = self.get_current_box()
 
             def _set_anchor(id: Optional[str] = None) -> Callable[[], None]:
-
                 def inner() -> None:
                     point.box_id = id
                     self.context.reload_template(template)
@@ -447,7 +451,7 @@ class MapEditor(BoxLevel):
                 return inner
 
             if point.box_id is not None:
-                m.add_item(_set_anchor(None), title='Clear Anchor')
+                m.add_item(_set_anchor(None), title="Clear Anchor")
             box: MapEditorBox
             for box in reversed(self.boxes):
                 if box is current_box or box.id == point.box_id:
@@ -456,26 +460,26 @@ class MapEditor(BoxLevel):
             if m.items:
                 self.game.push_level(m)
             else:
-                self.game.output('There is nothing to anchor to.')
+                self.game.output("There is nothing to anchor to.")
 
         def inner() -> None:
-            m: Menu = Menu(self.game, 'Configure Point')
+            m: Menu = Menu(self.game, "Configure Point")
             m.add_item(
                 set_coordinates,
                 title=lambda: (
-                    f'Set coordinates ({point.x}, {point.y}, {point.z})'
-                )
+                    f"Set coordinates ({point.x}, {point.y}, {point.z})"
+                ),
             )
 
             def anchor_title() -> str:
-                anchor: str = 'Not Anchored'
+                anchor: str = "Not Anchored"
                 if point.box_id is not None and point.corner is not None:
                     anchor_box: MapEditorBox = self.context.box_ids[
                         point.box_id
                     ]
-                    anchor = f'{anchor_box} '
+                    anchor = f"{anchor_box} "
                     anchor += f'[{point.corner.name.replace("_", " ")}]'
-                return f'Anchor ({anchor})'
+                return f"Anchor ({anchor})"
 
             m.add_item(set_anchor, title=anchor_title)
             self.game.push_level(m)
@@ -488,14 +492,14 @@ class MapEditor(BoxLevel):
         if box is None:
             return self.complain_box()
         t: BoxTemplate = self.context.template_ids[box.id]
-        m: Menu = Menu(self.game, f'Move {box}')
+        m: Menu = Menu(self.game, f"Move {box}")
         m.add_item(
             self.point_menu(t, t.start),
-            title=f'Start coordinates {box.start.coordinates}'
+            title=f"Start coordinates {box.start.coordinates}",
         )
         m.add_item(
             self.point_menu(t, t.end),
-            title=f'End coordinates {box.end.coordinates}'
+            title=f"End coordinates {box.end.coordinates}",
         )
         self.game.push_level(m)
 
@@ -518,17 +522,17 @@ class MapEditor(BoxLevel):
                 if not text:
                     setattr(box, name, None)
                     setattr(template, name, None)
-                    return self.game.cancel(message='Sound cleared.')
+                    return self.game.cancel(message="Sound cleared.")
                 p: Path = Path(text)
                 if not p.exists():
                     return self.game.cancel(
-                        message=f'Path does not exist: {p}.'
+                        message=f"Path does not exist: {p}."
                     )
                 setattr(template, name, text)
                 setattr(box, name, p)
-                self.game.cancel(message='Sound set.')
+                self.game.cancel(message="Sound set.")
 
-            self.game.output(f'Enter the path to a new sound: {e.text}')
+            self.game.output(f"Enter the path to a new sound: {e.text}")
             yield
             self.game.push_level(e)
 
@@ -540,14 +544,14 @@ class MapEditor(BoxLevel):
         if box is None:
             return self.complain_box()
         t: BoxTemplate = self.context.template_ids[box.id]
-        m: Menu = Menu(self.game, 'Box Sounds')
+        m: Menu = Menu(self.game, "Box Sounds")
         m.add_item(
-            self.box_sound(t, 'surface_sound'),
-            title=lambda: f'Footstep sound ({t.surface_sound})'
+            self.box_sound(t, "surface_sound"),
+            title=lambda: f"Footstep sound ({t.surface_sound})",
         )
         m.add_item(
-            self.box_sound(t, 'wall_sound'),
-            title=lambda: f'Wall sound ({t.wall_sound})'
+            self.box_sound(t, "wall_sound"),
+            title=lambda: f"Wall sound ({t.wall_sound})",
         )
         self.game.push_level(m)
 
@@ -558,8 +562,7 @@ class MapEditor(BoxLevel):
         z: int
         x, y, z = self.coordinates.floor().coordinates
         t: BoxTemplate = BoxTemplate(
-            BoxPoint(x=x, y=y, z=z),
-            BoxPoint(x=x, y=y, z=z)
+            BoxPoint(x=x, y=y, z=z), BoxPoint(x=x, y=y, z=z)
         )
         self.context.add_template(t)
         self.box_menu(self.context.box_ids[t.id])

@@ -38,56 +38,84 @@ class ReverbSetting:
 
 reverb_settings: List[ReverbSetting] = [
     ReverbSetting(
-        'mean_free_path', 'The mean free path of the simulated environment',
-        min=0.0, max=0.5, default=0.02,
+        "mean_free_path",
+        "The mean free path of the simulated environment",
+        min=0.0,
+        max=0.5,
+        default=0.02,
     ),
     ReverbSetting(
-        't60', 'The T60 of the reverb',
-        min=0.0, max=100.0, default=1.0, increment=5.0
+        "t60",
+        "The T60 of the reverb",
+        min=0.0,
+        max=100.0,
+        default=1.0,
+        increment=5.0,
     ),
     ReverbSetting(
-        'late_reflections_lf_rolloff', 'A multiplicative factor on T60 for '
-        'the low frequency band',
-        min=0.0, max=2.0, default=1.0
+        "late_reflections_lf_rolloff",
+        "A multiplicative factor on T60 for " "the low frequency band",
+        min=0.0,
+        max=2.0,
+        default=1.0,
     ),
     ReverbSetting(
-        'late_reflections_lf_reference', 'Where the low band of the feedback '
-        'equalizer ends',
-        min=0.0, max=22050.0, default=200.0, increment=500.0
+        "late_reflections_lf_reference",
+        "Where the low band of the feedback " "equalizer ends",
+        min=0.0,
+        max=22050.0,
+        default=200.0,
+        increment=500.0,
     ),
     ReverbSetting(
-        'late_reflections_hf_rolloff', 'A multiplicative factor on T60 for '
-        'the high frequency band',
-        min=0.0, max=2.0, default=0.5
+        "late_reflections_hf_rolloff",
+        "A multiplicative factor on T60 for " "the high frequency band",
+        min=0.0,
+        max=2.0,
+        default=0.5,
     ),
     ReverbSetting(
-        'late_reflections_hf_reference', 'Where the high band of the '
-        'equalizer starts',
-        min=0.0, max=22050.0, default=500.0, increment=500.0
+        "late_reflections_hf_reference",
+        "Where the high band of the " "equalizer starts",
+        min=0.0,
+        max=22050.0,
+        default=500.0,
+        increment=500.0,
     ),
     ReverbSetting(
-        'late_reflections_diffusion', 'Controls the diffusion of the late '
-        'reflections as a percent',
-        min=0.0, max=1.0, default=1.0
+        "late_reflections_diffusion",
+        "Controls the diffusion of the late " "reflections as a percent",
+        min=0.0,
+        max=1.0,
+        default=1.0,
     ),
     ReverbSetting(
-        'late_reflections_modulation_depth', 'The depth of the modulation of '
-        'the delay lines on the feedback path in seconds',
-        min=0.0, max=0.3, default=0.01
+        "late_reflections_modulation_depth",
+        "The depth of the modulation of "
+        "the delay lines on the feedback path in seconds",
+        min=0.0,
+        max=0.3,
+        default=0.01,
     ),
     ReverbSetting(
-        'late_reflections_modulation_frequency', 'The frequency of the '
-        'modulation of the delay lines in the feedback paths',
-        min=0.01, max=100.0, default=0.5, increment=5.0
+        "late_reflections_modulation_frequency",
+        "The frequency of the "
+        "modulation of the delay lines in the feedback paths",
+        min=0.01,
+        max=100.0,
+        default=0.5,
+        increment=5.0,
     ),
     ReverbSetting(
-        'late_reflections_delay', 'The delay of the late reflections relative '
-        'to the input in seconds',
-        min=0.0, max=0.5, default=0.01
+        "late_reflections_delay",
+        "The delay of the late reflections relative "
+        "to the input in seconds",
+        min=0.0,
+        max=0.5,
+        default=0.01,
     ),
     ReverbSetting(
-        'gain', 'The volume of the reverb',
-        min=0.0, max=1.0, default=1.0
+        "gain", "The volume of the reverb", min=0.0, max=1.0, default=1.0
     ),
 ]
 
@@ -99,16 +127,16 @@ class ReverbEditor(Menu):
     reverb: GlobalFdnReverb = attrib()
 
     @reverb.default
-    def get_default_reverb(instance: 'ReverbEditor') -> GlobalFdnReverb:
+    def get_default_reverb(instance: "ReverbEditor") -> GlobalFdnReverb:
         """Raise an error."""
-        raise RuntimeError('You must supply a reverb.')
+        raise RuntimeError("You must supply a reverb.")
 
     settings: Reverb = attrib()
 
     @settings.default
-    def get_default_settings(instance: 'ReverbEditor') -> Reverb:
+    def get_default_settings(instance: "ReverbEditor") -> Reverb:
         """Raise an error."""
-        raise RuntimeError('You must provide a settings object.')
+        raise RuntimeError("You must provide a settings object.")
 
     setting_items: List[MenuItem] = Factory(list)
 
@@ -119,18 +147,19 @@ class ReverbEditor(Menu):
             value: float = getattr(self.settings, setting.name)
             item: MenuItem = self.add_item(
                 self.edit_value(setting, value),
-                title=f'{setting.description} ({value})'
+                title=f"{setting.description} ({value})",
             )
             self.setting_items.append(item)
         self.action(
-            'Restore setting to default', symbol=key.BACKSPACE,
-            joystick_button=3
+            "Restore setting to default",
+            symbol=key.BACKSPACE,
+            joystick_button=3,
         )(self.adjust_value(ValueAdjustments.default))
         self.action(
-            'Increment setting value', symbol=key.RIGHT, joystick_button=1
+            "Increment setting value", symbol=key.RIGHT, joystick_button=1
         )(self.adjust_value(ValueAdjustments.increment))
         self.action(
-            'Decrement setting value', symbol=key.LEFT, joystick_button=2
+            "Decrement setting value", symbol=key.LEFT, joystick_button=2
         )(self.adjust_value(ValueAdjustments.decrement))
         return super().__attrs_post_init__()
 
@@ -138,9 +167,12 @@ class ReverbEditor(Menu):
         """Reload this menu."""
         self.game.pop_level()
         m: ReverbEditor = ReverbEditor(  # type: ignore[misc]
-            self.game, self.title,  # type: ignore[arg-type]
-            reverb=self.reverb, settings=self.settings,
-            dismissible=self.dismissible, position=self.position
+            self.game,
+            self.title,  # type: ignore[arg-type]
+            reverb=self.reverb,
+            settings=self.settings,
+            dismissible=self.dismissible,
+            position=self.position,
         )
         item: MenuItem
         for item in self.items:
@@ -173,14 +205,14 @@ class ReverbEditor(Menu):
                     value = float(text)
                 except ValueError:
                     self.game.pop_level()
-                    return self.game.output(f'Invalid value: {text}.')
+                    return self.game.output(f"Invalid value: {text}.")
                 else:
                     self.game.pop_level()
                     self.set_value(setting, value)
 
             self.game.output(
-                f'Enter a value between {setting.min} and {setting.max}: '
-                f'{value}'
+                f"Enter a value between {setting.min} and {setting.max}: "
+                f"{value}"
             )
             yield
             self.game.push_level(e)
@@ -203,6 +235,6 @@ class ReverbEditor(Menu):
                 elif amount is ValueAdjustments.decrement:
                     self.set_value(setting, value - setting.increment)
                 else:
-                    raise RuntimeError(f'Invalid adjustment: {amount!r}.')
+                    raise RuntimeError(f"Invalid adjustment: {amount!r}.")
 
         return inner

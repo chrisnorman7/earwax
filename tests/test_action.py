@@ -22,12 +22,12 @@ class RightMouseButton(Exception):
 
 def test_init() -> None:
     """Test that instances actions properly."""
-    a = Action('Print', print)
-    assert a.title == 'Print'
+    a = Action("Print", print)
+    assert a.title == "Print"
     assert a.func is print
     assert a.symbol is None
     assert a.modifiers == 0
-    a = Action('Print', print, symbol=key.P, modifiers=key.MOD_SHIFT)
+    a = Action("Print", print, symbol=key.P, modifiers=key.MOD_SHIFT)
     assert a.symbol == key.P
     assert a.modifiers == key.MOD_SHIFT
 
@@ -35,11 +35,11 @@ def test_init() -> None:
 def test_mouse(game: Game, level: Level) -> None:
     """Test actions with mouse buttons."""
 
-    @level.action('Left mouse button', mouse_button=mouse.LEFT)
+    @level.action("Left mouse button", mouse_button=mouse.LEFT)
     def left_mouse():
         raise LeftMouseButton()
 
-    @level.action('Right mouse button', mouse_button=mouse.RIGHT)
+    @level.action("Right mouse button", mouse_button=mouse.RIGHT)
     def right_mouse():
         raise RightMouseButton()
 
@@ -55,7 +55,7 @@ def test_mouse_generator(game: Game, level: Level) -> None:
     """Test actions with mouse button triggers that yield."""
     game.push_level(level)
 
-    @level.action('Mouse button', mouse_button=mouse.LEFT)
+    @level.action("Mouse button", mouse_button=mouse.LEFT)
     def mouse_button():
         yield
         raise Works()

@@ -33,20 +33,20 @@ class DialogueLine:
     :param ~earwax.DialogueLine.responses: A list of responses to this line.
     """
 
-    parent: 'DialogueTree'
+    parent: "DialogueTree"
 
     text: Optional[str] = None
     sound: Optional[Path] = None
     can_show: Optional[Callable[[], bool]] = None
     on_activate: Optional[Callable[[], bool]] = None
 
-    responses: List['DialogueLine'] = attrib(default=Factory(list), repr=False)
+    responses: List["DialogueLine"] = attrib(default=Factory(list), repr=False)
 
     def __attrs_post_init__(self) -> None:
         """Check that we have text or a sound."""
         if self.text is None and self.sound is None:
             raise RuntimeError(
-                'A dialogue line must have either text or a sound.'
+                "A dialogue line must have either text or a sound."
             )
         self.parent.children.append(self)
 
@@ -76,6 +76,7 @@ class DialogueTree:
         """
         child: DialogueLine
         return [
-            child for child in self.children if child.can_show is None or
-            child.can_show() is True
+            child
+            for child in self.children
+            if child.can_show is None or child.can_show() is True
         ]

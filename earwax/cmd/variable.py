@@ -8,7 +8,7 @@ from shortuuid import uuid
 
 from earwax.mixins import DumpLoadMixin
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class VariableTypes(Enum):
@@ -31,10 +31,10 @@ class VariableTypes(Enum):
 
 
 type_strings: Dict[VariableTypes, str] = {
-    VariableTypes.type_bool: 'Boolean',
-    VariableTypes.type_string: 'String',
-    VariableTypes.type_int: 'Integer',
-    VariableTypes.type_float: 'Float'
+    VariableTypes.type_bool: "Boolean",
+    VariableTypes.type_string: "String",
+    VariableTypes.type_int: "Integer",
+    VariableTypes.type_float: "Float",
 }
 
 
@@ -72,10 +72,10 @@ class Variable(Generic[T], DumpLoadMixin):
         elif cls is bool:
             return VariableTypes.type_bool
         else:
-            raise TypeError('Unknown type for %r.' % self)
+            raise TypeError("Unknown type for %r." % self)
 
     @classmethod
-    def load(cls, data: Dict[str, Any], *args) -> 'Variable':
+    def load(cls, data: Dict[str, Any], *args) -> "Variable":
         """Load a variable, and check its type.
 
         :param value: The value to load.
@@ -83,8 +83,7 @@ class Variable(Generic[T], DumpLoadMixin):
         v: Variable = super().load(data, *args)
         if v.type is not v.get_type():
             raise TypeError(
-                'Loaded type %r but expected %r from data %r.' % (
-                    v.get_type(), v.type, data
-                )
+                "Loaded type %r but expected %r from data %r."
+                % (v.get_type(), v.type, data)
             )
         return v

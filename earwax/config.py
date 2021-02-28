@@ -9,7 +9,7 @@ try:
 except ImportError:
     CDumper, CLoader, dump, load = (None, None, None, None)  # type: ignore
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 DumpDict = Dict[str, Any]
 
@@ -76,7 +76,7 @@ class ConfigValue(Generic[T]):
     name: Optional[str] = None
     type_: Optional[object] = None
     value_converters: Optional[
-        Dict[object, Callable[['ConfigValue'], str]]
+        Dict[object, Callable[["ConfigValue"], str]]
     ] = None
     default: Optional[T] = attrib(default=Factory(type(None)), init=False)
     dump_func: Optional[DumpFunc] = None
@@ -161,7 +161,7 @@ class Config:
 
     __section_name__: Optional[str] = None
     __config_values__: Dict[str, ConfigValue]
-    __config_subsections__: Dict[str, 'Config']
+    __config_subsections__: Dict[str, "Config"]
 
     def __init__(self) -> None:
         """Create the configuration object.

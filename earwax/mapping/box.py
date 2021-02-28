@@ -3,8 +3,18 @@
 from enum import Enum
 from pathlib import Path
 from random import uniform
-from typing import (TYPE_CHECKING, Any, Callable, Dict, Generic, List,
-                    Optional, Tuple, TypeVar, cast)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    cast,
+)
 
 from attr import Factory, attrib, attrs
 
@@ -27,7 +37,7 @@ if TYPE_CHECKING:
     from .box_level import BoxLevel
 
 IntCoordinates = Tuple[int, int, int]
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class BoxError(Exception):
@@ -127,16 +137,18 @@ class BoxBounds:
         end_y: int
         end_z: int
         start_x, start_y, start_z = cast(
-            Tuple[int, int, int],
-            self.bottom_back_left.floor().coordinates
+            Tuple[int, int, int], self.bottom_back_left.floor().coordinates
         )
         end_x, end_y, end_z = cast(
             IntCoordinates, self.top_front_right.floor().coordinates
         )
         return (
-            x == start_x or x == end_x or
-            y == start_y or y == end_y or
-            z == start_z or z == end_z
+            x == start_x
+            or x == end_x
+            or y == start_y
+            or y == end_y
+            or z == start_z
+            or z == end_z
         )
 
     @property
@@ -215,7 +227,7 @@ class Box(Generic[T], RegisterEventMixin):
     :ivar ~earwax.Box.reverb: The reverb that is assigned to this box.
     """
 
-    game: 'Game'
+    game: "Game"
     start: Point
     end: Point
 
@@ -232,7 +244,7 @@ class Box(Generic[T], RegisterEventMixin):
     reverb: Optional[GlobalFdnReverb] = attrib(
         default=Factory(lambda: None), repr=False
     )
-    box_level: Optional['BoxLevel'] = None
+    box_level: Optional["BoxLevel"] = None
     _sound_manager: Optional[SoundManager] = attrib(
         default=Factory(lambda: None), init=False, repr=False
     )
@@ -243,23 +255,28 @@ class Box(Generic[T], RegisterEventMixin):
         self.centre = self.start + Point(
             self.bounds.width / 2,
             self.bounds.depth / 2,
-            self.bounds.height / 2
+            self.bounds.height / 2,
         )
         if self.box_level is not None:
             self.box_level.add_box(self)
         for func in (
-            self.on_footstep, self.on_collide, self.on_activate, self.on_open,
-            self.on_close
+            self.on_footstep,
+            self.on_collide,
+            self.on_activate,
+            self.on_open,
+            self.on_close,
         ):
             self.register_event(cast(EventType, func))
 
     @classmethod
     def create_fitted(
-        cls, game: 'Game', children: List['Box'],
+        cls,
+        game: "Game",
+        children: List["Box"],
         pad_start: Optional[Point] = None,
         pad_end: Optional[Point] = None,
         **kwargs
-    ) -> 'Box':
+    ) -> "Box":
         """Return a box that fits all of ``children`` inside itself.
 
         Pass a list of :class:`~earwax.Box` instances, and you'll get a box
@@ -299,9 +316,12 @@ class Box(Generic[T], RegisterEventMixin):
             if end_z is None or child.end.z > end_z:
                 end_z = child.end.z
         if (
-            start_x is not None and start_y is not None and
-            start_z is not None and end_x is not None and
-            end_y is not None and end_z is not None
+            start_x is not None
+            and start_y is not None
+            and start_z is not None
+            and end_x is not None
+            and end_y is not None
+            and end_z is not None
         ):
             start: Point = Point(start_x, start_y, start_z)
             if pad_start is not None:
@@ -311,15 +331,20 @@ class Box(Generic[T], RegisterEventMixin):
                 end += pad_end
             return cls(game, start, end, **kwargs)
         else:
-            raise ValueError('Invalid children: %r.' % children)
+            raise ValueError("Invalid children: %r." % children)
 
     @classmethod
     def create_row(
-        cls, game: 'Game', start: Point, size: Point, count: int,
-        offset: Point, get_name: Optional[Callable[[int], str]] = None,
-        on_create: Optional[Callable[['Box'], None]] = None,
+        cls,
+        game: "Game",
+        start: Point,
+        size: Point,
+        count: int,
+        offset: Point,
+        get_name: Optional[Callable[[int], str]] = None,
+        on_create: Optional[Callable[["Box"], None]] = None,
         **kwargs
-    ) -> List['Box']:
+    ) -> List["Box"]:
         """Generate a list of boxes.
 
         This method is useful for creating rows of buildings, or rooms on a
@@ -389,7 +414,7 @@ class Box(Generic[T], RegisterEventMixin):
         while n < count:
             kw: Dict[str, Any] = kwargs.copy()
             if get_name is not None:
-                kw['name'] = get_name(n)
+                kw["name"] = get_name(n)
             box: Box = cls(game, start.copy(), start + size, **kw)
             if on_create is not None:
                 on_create(box)
@@ -423,7 +448,7 @@ class Box(Generic[T], RegisterEventMixin):
                     buffer_cache=self.game.buffer_cache,
                     default_position=self.centre,
                     default_gain=self.game.config.sound.sound_volume.value,
-                    default_reverb=self.reverb
+                    default_reverb=self.reverb,
                 )
                 if self.name is not None:
                     self._sound_manager.name = self.name
@@ -483,11 +508,11 @@ class Box(Generic[T], RegisterEventMixin):
                 coordinates.z >= self.start.z,
                 coordinates.x <= self.end.x,
                 coordinates.y <= self.end.y,
-                coordinates.z <= self.end.z
+                coordinates.z <= self.end.z,
             )
         )
 
-    def could_fit(self, box: 'Box') -> bool:
+    def could_fit(self, box: "Box") -> bool:
         """Return whether or not the given box could be contained by this one.
 
         Returns ``True`` if the given box could be contained by this box,
@@ -529,7 +554,7 @@ class Box(Generic[T], RegisterEventMixin):
         d: Door = self.data
         if d.can_open is None or d.can_open() is True:
             d.open = True
-            self.dispatch_event('on_open')
+            self.dispatch_event("on_open")
             if d.open_sound is not None:
                 if self.sound_manager is None:
                     self.make_sound_manager()
@@ -562,7 +587,7 @@ class Box(Generic[T], RegisterEventMixin):
         if d.can_close is None or d.can_close() is True:
             unschedule(self.scheduled_close)
             d.open = False
-            self.dispatch_event('on_close')
+            self.dispatch_event("on_close")
             if d.close_sound is not None:
                 if self.sound_manager is None:
                     self.make_sound_manager()

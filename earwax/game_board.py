@@ -8,7 +8,7 @@ from .level import Level
 from .point import Point, PointDirections
 from .walking_directions import walking_directions
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class NoSuchTile(Exception):
@@ -159,7 +159,7 @@ class GameBoard(Level, Generic[T]):
                 name: str
                 value: int
                 size_value: int
-                for name in ('x', 'y', 'z'):
+                for name in ("x", "y", "z"):
                     value = getattr(p, name)
                     size_value = getattr(self.size, name)
                     if value < 0:
@@ -172,8 +172,8 @@ class GameBoard(Level, Generic[T]):
                         setattr(p, name, 0)
                 self.get_tile(p)
                 self.coordinates = p
-                self.dispatch_event('on_move_success', direction)
+                self.dispatch_event("on_move_success", direction)
             except NoSuchTile:
-                self.dispatch_event('on_move_fail', direction)
+                self.dispatch_event("on_move_fail", direction)
 
         return inner

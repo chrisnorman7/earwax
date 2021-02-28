@@ -44,7 +44,7 @@ class Editor(Level, DismissibleMixin):
         hat.
     """
 
-    text: str = ''
+    text: str = ""
     cursor_position: Optional[int] = None
     vertical_position: Optional[int] = None
 
@@ -53,21 +53,21 @@ class Editor(Level, DismissibleMixin):
         self.motion(key.MOTION_BACKSPACE)(self.motion_backspace)
         self.motion(key.MOTION_DELETE)(self.motion_delete)
         self.motion(key.MOTION_LEFT)(self.motion_left)
-        self.action('Left arrow', hat_direction=LEFT)(self.motion_left)
+        self.action("Left arrow", hat_direction=LEFT)(self.motion_left)
         self.motion(key.MOTION_RIGHT)(self.motion_right)
-        self.action('Right arrow', hat_direction=RIGHT)(self.motion_right)
+        self.action("Right arrow", hat_direction=RIGHT)(self.motion_right)
         self.motion(key.MOTION_BEGINNING_OF_LINE)(self.beginning_of_line)
         self.motion(key.MOTION_END_OF_LINE)(self.end_of_line)
         self.motion(key.MOTION_UP)(self.motion_up)
-        self.action('Choose previous letter', hat_direction=UP)(self.hat_up)
+        self.action("Choose previous letter", hat_direction=UP)(self.hat_up)
         self.motion(key.MOTION_DOWN)(self.motion_down)
-        self.action('Choose next letter', hat_direction=DOWN)(self.hat_down)
-        self.action('Submit text', symbol=key.RETURN)(self.submit)
-        self.action('Dismiss', symbol=key.ESCAPE)(self.dismiss)
-        self.action('Clear', symbol=key.U, modifiers=key.MOD_CTRL)(self.clear)
-        self.action('Cut', symbol=key.X, modifiers=key.MOD_CTRL)(self.cut)
-        self.action('Copy', symbol=key.C, modifiers=key.MOD_CTRL)(self.copy)
-        self.action('Paste', symbol=key.V, modifiers=key.MOD_CTRL)(self.paste)
+        self.action("Choose next letter", hat_direction=DOWN)(self.hat_down)
+        self.action("Submit text", symbol=key.RETURN)(self.submit)
+        self.action("Dismiss", symbol=key.ESCAPE)(self.dismiss)
+        self.action("Clear", symbol=key.U, modifiers=key.MOD_CTRL)(self.clear)
+        self.action("Cut", symbol=key.X, modifiers=key.MOD_CTRL)(self.cut)
+        self.action("Copy", symbol=key.C, modifiers=key.MOD_CTRL)(self.copy)
+        self.action("Paste", symbol=key.V, modifiers=key.MOD_CTRL)(self.paste)
         for func in (self.on_text, self.on_submit):
             self.register_event_type(func.__name__)
         return super().__attrs_post_init__()
@@ -76,22 +76,22 @@ class Editor(Level, DismissibleMixin):
         """Cut the contents of this editor to the clipboard."""
         self.copy()
         if copy is not None:
-            self.text = ''
+            self.text = ""
             self.beginning_of_line()
 
     def copy(self) -> None:
         """Copy the contents of this editor to the clipboard."""
         if copy is None:
-            self.game.output('Pyperclip is not installed.')
+            self.game.output("Pyperclip is not installed.")
         else:
             copy(self.text)
 
     def paste(self) -> None:
         """Paste the contents of the clipboard into this editor."""
         if paste is None:
-            self.game.output('Cannot paste without Pyperclip installed.')
+            self.game.output("Cannot paste without Pyperclip installed.")
         else:
-            self.dispatch_event('on_text', paste())
+            self.dispatch_event("on_text", paste())
 
     def submit(self) -> None:
         """Submit :attr:`self.text <earwax.Editor.text>`.
@@ -101,13 +101,15 @@ class Editor(Level, DismissibleMixin):
 
         By default, this method is called when the enter key is pressed.
         """
-        self.dispatch_event('on_submit', self.text)
+        self.dispatch_event("on_submit", self.text)
 
     def insert_text(self, text: str) -> None:
         """Insert ``text`` at the current cursor position."""
-        self.text = self.text[:self.cursor_position] + text + self.text[
-            self.cursor_position:
-        ]
+        self.text = (
+            self.text[: self.cursor_position]
+            + text
+            + self.text[self.cursor_position :]
+        )
 
     def on_text(self, text: str) -> None:
         """Text has been entered.
@@ -138,8 +140,8 @@ class Editor(Level, DismissibleMixin):
 
         :param text: The text to speak, using ``tts.speak``.
         """
-        if text == ' ':
-            text = 'space'
+        if text == " ":
+            text = "space"
         self.game.output(text)
 
     def echo_current_character(self) -> None:
@@ -148,7 +150,7 @@ class Editor(Level, DismissibleMixin):
         Used when moving through the text.
         """
         if self.cursor_position is None:
-            return self.echo('')
+            return self.echo("")
         self.echo(self.text[self.cursor_position])
 
     def set_cursor_position(self, pos: Optional[int]) -> None:
@@ -175,7 +177,7 @@ class Editor(Level, DismissibleMixin):
             index = None
         self.vertical_position = index
         if pos is None:
-            return self.echo('')
+            return self.echo("")
         self.echo_current_character()
 
     def clear(self) -> None:
@@ -183,7 +185,7 @@ class Editor(Level, DismissibleMixin):
 
         By default, this method is called when control + u is pressed.
         """
-        self.text = ''
+        self.text = ""
         self.set_cursor_position(None)
 
     def motion_backspace(self) -> None:
@@ -193,18 +195,19 @@ class Editor(Level, DismissibleMixin):
         there is no text to delete.
         """
         if self.cursor_position is None:
-            if self.text == '':
-                self.echo('No text to delete.')
+            if self.text == "":
+                self.echo("No text to delete.")
             else:
                 self.echo(self.text[-1])
                 self.text = self.text[:-1]
         elif self.cursor_position == 0:
-            self.echo('')
+            self.echo("")
         else:
             self.set_cursor_position(self.cursor_position - 1)
-            self.text = self.text[:self.cursor_position] + self.text[
-                self.cursor_position + 1:
-            ]
+            self.text = (
+                self.text[: self.cursor_position]
+                + self.text[self.cursor_position + 1 :]
+            )
 
     def do_delete(self) -> None:
         """Perform a forward delete.
@@ -213,9 +216,10 @@ class Editor(Level, DismissibleMixin):
         hat movement methods.
         """
         if self.cursor_position is not None:
-            self.text = self.text[:self.cursor_position] + self.text[
-                self.cursor_position + 1:
-            ]
+            self.text = (
+                self.text[: self.cursor_position]
+                + self.text[self.cursor_position + 1 :]
+            )
 
     def motion_delete(self) -> None:
         """Delete the character under the cursor.
@@ -224,7 +228,7 @@ class Editor(Level, DismissibleMixin):
         text, which will amount to the same thing).
         """
         if self.cursor_position is None:
-            return self.echo('')
+            return self.echo("")
         self.do_delete()
         self.set_cursor_position(self.cursor_position)
 
@@ -235,8 +239,8 @@ class Editor(Level, DismissibleMixin):
         pressed.
         """
         if self.cursor_position is None:
-            if self.text == '':
-                return self.echo('')
+            if self.text == "":
+                return self.echo("")
             self.set_cursor_position(len(self.text) - 1)
         else:
             self.set_cursor_position(max(0, self.cursor_position - 1))
@@ -248,7 +252,7 @@ class Editor(Level, DismissibleMixin):
         pressed.
         """
         if self.cursor_position is None:
-            return self.echo('')
+            return self.echo("")
         self.set_cursor_position(self.cursor_position + 1)
 
     def beginning_of_line(self) -> None:
@@ -309,9 +313,9 @@ class Editor(Level, DismissibleMixin):
             self.vertical_position -= 1
             if self.vertical_position == -1:
                 if self.cursor_position is None:
-                    self.echo('Submit')
+                    self.echo("Submit")
                 else:
-                    self.echo('Delete')
+                    self.echo("Delete")
             else:
                 self.do_delete()
                 self.on_text(
@@ -334,6 +338,6 @@ class Editor(Level, DismissibleMixin):
         self.do_delete()
         self.on_text(letter)
         if self.cursor_position is None:
-            self.cursor_position = (len(self.text) - 1)
+            self.cursor_position = len(self.text) - 1
         else:
             self.cursor_position -= 1

@@ -15,7 +15,7 @@ from ..reverb import Reverb
 if TYPE_CHECKING:
     from ..game import Game
 
-ObjectTypes = Union['WorldRoom', 'RoomObject', 'RoomExit']
+ObjectTypes = Union["WorldRoom", "RoomObject", "RoomExit"]
 
 
 class StringMixin:
@@ -24,7 +24,7 @@ class StringMixin:
     def __str__(self) -> str:
         """Return this object as a string."""
         assert isinstance(self, (WorldRoom, RoomObject))
-        return f'{self.name} (#{self.id})'
+        return f"{self.name} (#{self.id})"
 
 
 class DumpablePoint(Point, DumpLoadMixin):
@@ -53,7 +53,7 @@ class WorldAmbiance(DumpLoadMixin):
 
     def __str__(self) -> str:
         """Return a string."""
-        return f'Ambiance {self.path}'
+        return f"Ambiance {self.path}"
 
 
 @attrs(auto_attribs=True)
@@ -92,7 +92,7 @@ class WorldAction(DumpLoadMixin):
         If this value is ``0``, no rumble will occur.
     """
 
-    name: str = 'Unnamed Action'
+    name: str = "Unnamed Action"
     message: Optional[str] = None
     sound: Optional[str] = None
     rumble_value: float = 0.0
@@ -209,7 +209,7 @@ class RoomObject(StringMixin, DumpLoadMixin):
     """
 
     id: str = Factory(uuid)
-    name: str = 'Unnamed Object'
+    name: str = "Unnamed Object"
     actions_action: Optional[WorldAction] = None
     ambiances: List[WorldAmbiance] = Factory(list)
     actions: List[WorldAction] = Factory(list)
@@ -219,9 +219,9 @@ class RoomObject(StringMixin, DumpLoadMixin):
     use_action: Optional[WorldAction] = None
     type: RoomObjectTypes = Factory(lambda: RoomObjectTypes.stuck)
     class_names: List[str] = Factory(list)
-    location: 'WorldRoom' = attrib(init=False, repr=False)
+    location: "WorldRoom" = attrib(init=False, repr=False)
 
-    __excluded_attribute_names__ = ['location']
+    __excluded_attribute_names__ = ["location"]
 
     @property
     def is_stuck(self) -> bool:
@@ -287,12 +287,12 @@ class RoomExit(DumpLoadMixin):
     destination_id: str
     action: WorldAction = attrib(Factory(WorldAction), repr=False)
     position: Optional[DumpablePoint] = None
-    location: 'WorldRoom' = attrib(init=False)
+    location: "WorldRoom" = attrib(init=False)
 
-    __excluded_attribute_names__ = ['location']
+    __excluded_attribute_names__ = ["location"]
 
     @property
-    def destination(self) -> 'WorldRoom':
+    def destination(self) -> "WorldRoom":
         """Return the room this exit leads from.
 
         This value is inferred from :attr:`destination_id`.
@@ -302,8 +302,8 @@ class RoomExit(DumpLoadMixin):
     def __str__(self) -> str:
         """Return a string."""
         return (
-            f'{self.action.name} ({self.location.get_name()} -> '
-            f'{self.destination.get_name()})'
+            f"{self.action.name} ({self.location.get_name()} -> "
+            f"{self.destination.get_name()})"
         )
 
 
@@ -356,37 +356,37 @@ class WorldRoom(DumpLoadMixin, StringMixin):
     """
 
     id: str = Factory(uuid)
-    name: str = 'Unnamed Room'
-    description: str = 'Not described.'
+    name: str = "Unnamed Room"
+    description: str = "Not described."
     ambiances: List[WorldAmbiance] = Factory(list)
     objects: Dict[str, RoomObject] = Factory(dict)
     exits: List[RoomExit] = Factory(list)
     reverb: Optional[DumpableReverb] = None
-    world: 'StoryWorld' = attrib(init=False, repr=False)
+    world: "StoryWorld" = attrib(init=False, repr=False)
 
-    __excluded_attribute_names__ = ['world']
+    __excluded_attribute_names__ = ["world"]
 
     def get_name(self) -> str:
         """Return the actual name of this room."""
         name: str = self.name
-        if name.startswith('#'):
+        if name.startswith("#"):
             name = name[1:]
             if name in self.world.rooms:
                 return self.world.rooms[name].name
-            return f'!! ERROR: Invalid room ID {name} !!'
+            return f"!! ERROR: Invalid room ID {name} !!"
         return name
 
     def get_description(self) -> str:
         """Return the actual description of this room."""
         description: str = self.description
-        if description.startswith('#'):
+        if description.startswith("#"):
             description = description[1:]
             if description in self.world.rooms:
                 return self.world.rooms[description].description
-            return f'!! ERROR: Invalid room ID {description} !!'
+            return f"!! ERROR: Invalid room ID {description} !!"
         return description
 
-    def create_exit(self, destination: 'WorldRoom', **kwargs) -> RoomExit:
+    def create_exit(self, destination: "WorldRoom", **kwargs) -> RoomExit:
         """Create and return an exit that links this room to another.
 
         This method will add the new exits to this room's
@@ -500,35 +500,35 @@ class WorldMessages(DumpLoadMixin):
     """
 
     # Empty category and failure messages:
-    no_objects: str = 'This room is empty.'
-    no_actions: str = 'There is nothing you can do with this object.'
-    no_exits: str = 'There is no way out of this room.'
-    no_use: str = 'You cannot use {}.'
-    nothing_to_use: str = 'You have nothing that can be used.'
-    nothing_to_drop: str = 'You have nothing that can be dropped.'
+    no_objects: str = "This room is empty."
+    no_actions: str = "There is nothing you can do with this object."
+    no_exits: str = "There is no way out of this room."
+    no_use: str = "You cannot use {}."
+    nothing_to_use: str = "You have nothing that can be used."
+    nothing_to_drop: str = "You have nothing that can be dropped."
     empty_inventory: str = "You aren't carrying anything."
-    room_activate: str = 'You cannot do that.'
+    room_activate: str = "You cannot do that."
 
     # Category names:
-    room_category: str = 'Location'
-    objects_category: str = 'Objects'
-    exits_category: str = 'Exits'
+    room_category: str = "Location"
+    objects_category: str = "Objects"
+    exits_category: str = "Exits"
 
     # Menu messages:
-    actions_menu: str = 'You step up to {}.'
-    inventory_menu: str = 'Inventory'
-    main_menu: str = 'Main Menu'
-    play_game: str = 'Start new game'
-    load_game: str = 'Load game'
-    show_credits: str = 'Show Credits'
-    credits_menu: str = 'Credits'
-    welcome: str = 'Welcome to this game.'
-    no_saved_game: str = 'You have no game saved.'
-    exit: str = 'Exit'
+    actions_menu: str = "You step up to {}."
+    inventory_menu: str = "Inventory"
+    main_menu: str = "Main Menu"
+    play_game: str = "Start new game"
+    load_game: str = "Load game"
+    show_credits: str = "Show Credits"
+    credits_menu: str = "Credits"
+    welcome: str = "Welcome to this game."
+    no_saved_game: str = "You have no game saved."
+    exit: str = "Exit"
 
     def __str__(self) -> str:
         """Return a string."""
-        return 'World messages'
+        return "World messages"
 
 
 @attrs(auto_attribs=True)
@@ -589,9 +589,9 @@ class StoryWorld(DumpLoadMixin):
         :attr:`~earwax.story.RoomObject.classes` lists.
     """
 
-    game: 'Game'
-    name: str = 'Untitled World'
-    author: str = 'Unknown'
+    game: "Game"
+    name: str = "Untitled World"
+    author: str = "Unknown"
 
     main_menu_musics: List[str] = Factory(list)
     cursor_sound: Optional[str] = None
@@ -601,15 +601,15 @@ class StoryWorld(DumpLoadMixin):
     initial_room_id: Optional[str] = None
     messages: WorldMessages = Factory(WorldMessages)
     take_action: WorldAction = Factory(
-        lambda: WorldAction(name='Take', message='You take {}.')
+        lambda: WorldAction(name="Take", message="You take {}.")
     )
     drop_action: WorldAction = Factory(
-        lambda: WorldAction(name='Drop', message='You drop {}.')
+        lambda: WorldAction(name="Drop", message="You drop {}.")
     )
-    panner_strategy: str = Factory(lambda: 'HRTF')
+    panner_strategy: str = Factory(lambda: "HRTF")
     object_classes: List[RoomObjectClass] = Factory(list)
 
-    __excluded_attribute_names__ = ['game']
+    __excluded_attribute_names__ = ["game"]
 
     def __attrs_post_init__(self) -> None:
         """Set all the location attributes."""
@@ -627,19 +627,21 @@ class StoryWorld(DumpLoadMixin):
     def load(cls, data: Dict[str, Any], *args) -> Any:
         """Load credits before anything else."""
         world: StoryWorld = super().load(data, *args)
-        config_data: Dict[str, Any] = data.get('config', None)
+        config_data: Dict[str, Any] = data.get("config", None)
         if config_data is not None:
             world.game.config.populate_from_dict(config_data)
         credit_data: Dict[str, Any]
-        for credit_data in data.get('credits', []):
+        for credit_data in data.get("credits", []):
             path: Optional[Path] = None
-            p: Optional[str] = credit_data.get('sound', None)
+            p: Optional[str] = credit_data.get("sound", None)
             if p is not None:
                 path = Path(p)
             world.game.credits.append(
                 Credit(
-                    credit_data['name'], credit_data['url'], sound=path,
-                    loop=credit_data.get('loo', True)
+                    credit_data["name"],
+                    credit_data["url"],
+                    sound=path,
+                    loop=credit_data.get("loo", True),
                 )
             )
         return world
@@ -679,25 +681,26 @@ class StoryWorld(DumpLoadMixin):
 
     def __str__(self) -> str:
         """Return a string."""
-        return f'World({self.name!r})'
+        return f"World({self.name!r})"
 
     def dump(self) -> Dict[str, Any]:
         """Dump this world."""
         data: Dict[str, Any] = super().dump()
-        data['config'] = self.game.config.dump()
+        data["config"] = self.game.config.dump()
         credits_list: List[Dict[str, Any]] = []
         credit: Credit
         for credit in self.game.credits:
             credits_list.append(
                 {
-                    'name': credit.name,
-                    'url': credit.url,
-                    'sound': None
-                    if credit.sound is None else str(credit.sound),
-                    'loop': credit.loop
+                    "name": credit.name,
+                    "url": credit.url,
+                    "sound": None
+                    if credit.sound is None
+                    else str(credit.sound),
+                    "loop": credit.loop,
                 }
             )
-        data['credits'] = credits_list
+        data["credits"] = credits_list
         return data
 
 
@@ -746,7 +749,7 @@ class WorldState(DumpLoadMixin):
     room_id: str = attrib()
 
     @room_id.default
-    def get_default_room_id(instance: 'WorldState') -> str:
+    def get_default_room_id(instance: "WorldState") -> str:
         """Get the first room ID from the attached world.
 
         :param instance: The instance to work on.
@@ -758,7 +761,7 @@ class WorldState(DumpLoadMixin):
     category_index: int = Factory(int)
     object_index: Optional[int] = None
 
-    __excluded_attribute_names__ = ['world']
+    __excluded_attribute_names__ = ["world"]
 
     @property
     def room(self) -> WorldRoom:

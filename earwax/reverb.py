@@ -39,13 +39,27 @@ class Reverb:
         r: GlobalFdnReverb = GlobalFdnReverb(context)
         r.gain = self.gain  # noqa: E501
         r.late_reflections_delay = self.late_reflections_delay  # noqa: E501
-        r.late_reflections_diffusion = self.late_reflections_diffusion  # noqa: E501
-        r.late_reflections_hf_reference = self.late_reflections_hf_reference  # noqa: E501
-        r.late_reflections_hf_rolloff = self.late_reflections_hf_rolloff  # noqa: E501
-        r.late_reflections_lf_reference = self.late_reflections_lf_reference  # noqa: E501
-        r.late_reflections_lf_rolloff = self.late_reflections_lf_rolloff  # noqa: E501
-        r.late_reflections_modulation_depth = self.late_reflections_modulation_depth  # noqa: E501
-        r.late_reflections_modulation_frequency = self.late_reflections_modulation_frequency  # noqa: E501
+        r.late_reflections_diffusion = (
+            self.late_reflections_diffusion
+        )  # noqa: E501
+        r.late_reflections_hf_reference = (
+            self.late_reflections_hf_reference
+        )  # noqa: E501
+        r.late_reflections_hf_rolloff = (
+            self.late_reflections_hf_rolloff
+        )  # noqa: E501
+        r.late_reflections_lf_reference = (
+            self.late_reflections_lf_reference
+        )  # noqa: E501
+        r.late_reflections_lf_rolloff = (
+            self.late_reflections_lf_rolloff
+        )  # noqa: E501
+        r.late_reflections_modulation_depth = (
+            self.late_reflections_modulation_depth
+        )  # noqa: E501
+        r.late_reflections_modulation_frequency = (
+            self.late_reflections_modulation_frequency
+        )  # noqa: E501
         r.mean_free_path = self.mean_free_path  # noqa: E501
         r.t60 = self.t60  # noqa: E501
         return r

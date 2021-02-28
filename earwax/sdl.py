@@ -15,7 +15,7 @@ class SdlError(Exception):
 def sdl_raise() -> None:
     """Raise the most recent SDL error."""
     e: bytes = SDL_GetError()
-    e_string: str = e.decode(sys.getdefaultencoding(), errors='replace')
+    e_string: str = e.decode(sys.getdefaultencoding(), errors="replace")
     if e:
         raise SdlError(e_string)
 

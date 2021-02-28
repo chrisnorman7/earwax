@@ -1,8 +1,8 @@
 """Provides the BoxLevel class."""
 
 from math import cos, floor, sin
-from typing import (
-    Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, cast)
+from typing import (Any, Callable, Dict, Iterable, List, Optional, Tuple, Type,
+                    cast)
 
 from attr import Factory, attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
@@ -147,32 +147,32 @@ class BoxLevel(Level):
         * Activate nearby objects: Return
         """
         self.action(
-            'Move forwards', symbol=key.W, hat_direction=UP, interval=0.5
+            "Move forwards", symbol=key.W, hat_direction=UP, interval=0.5
         )(self.move())
-        self.action(
-            'Turn around', symbol=key.S, hat_direction=DOWN
-        )(self.turn(180))
-        self.action(
-            'Turn left', symbol=key.A, hat_direction=LEFT
-        )(self.turn(-45))
-        self.action(
-            'Turn right', symbol=key.D, hat_direction=RIGHT
-        )(self.turn(45))
-        self.action(
-            'Show coordinates', symbol=key.C, joystick_button=0
-        )(self.show_coordinates())
-        self.action(
-            'Show facing direction', symbol=key.F, joystick_button=3
-        )(self.show_facing())
-        self.action(
-            'Describe current box', symbol=key.X, joystick_button=2
-        )(self.describe_current_box)
-        self.action(
-            'Show nearest door', symbol=key.Z, joystick_button=1
-        )(self.show_nearest_door())
-        self.action(
-            'Activate nearby objects', symbol=key.RETURN
-        )(self.activate())
+        self.action("Turn around", symbol=key.S, hat_direction=DOWN)(
+            self.turn(180)
+        )
+        self.action("Turn left", symbol=key.A, hat_direction=LEFT)(
+            self.turn(-45)
+        )
+        self.action("Turn right", symbol=key.D, hat_direction=RIGHT)(
+            self.turn(45)
+        )
+        self.action("Show coordinates", symbol=key.C, joystick_button=0)(
+            self.show_coordinates()
+        )
+        self.action("Show facing direction", symbol=key.F, joystick_button=3)(
+            self.show_facing()
+        )
+        self.action("Describe current box", symbol=key.X, joystick_button=2)(
+            self.describe_current_box
+        )
+        self.action("Show nearest door", symbol=key.Z, joystick_button=1)(
+            self.show_nearest_door()
+        )
+        self.action("Activate nearby objects", symbol=key.RETURN)(
+            self.activate()
+        )
 
     def add_box(self, box: Box[Any]) -> None:
         """Add a box to :attr:`self.boxes <earwax.BoxLevel.boxes>`.
@@ -247,14 +247,18 @@ class BoxLevel(Level):
         """
         box: Optional[Box] = self.get_current_box()
         if (
-            box is not None and box.sound_manager is not None
+            box is not None
+            and box.sound_manager is not None
             and box.surface_sound is not None
         ):
             box.sound_manager.play_path(box.surface_sound, position=None)
 
     def on_move_fail(
-        self, distance: float, vertical: Optional[float], bearing: int,
-        coordinates: Point
+        self,
+        distance: float,
+        vertical: Optional[float],
+        bearing: int,
+        coordinates: Point,
     ) -> None:
         """Handle a move failure.
 
@@ -292,7 +296,12 @@ class BoxLevel(Level):
         if self.game.audio_context is not None:
             rad = angle2rad(angle)
             self.game.audio_context.orientation = (
-                sin(rad), cos(rad), 0, 0, 0, 1
+                sin(rad),
+                cos(rad),
+                0,
+                0,
+                0,
+                1,
             )
 
     def calculate_coordinates(
@@ -333,8 +342,9 @@ class BoxLevel(Level):
         self.current_box = CurrentBox(self.coordinates, box)
         if box is not current_box:
             if (
-                current_box is not None and box.name != current_box.name and
-                box.name is not None
+                current_box is not None
+                and box.name != current_box.name
+                and box.name is not None
             ):
                 self.game.output(box.name)
 
@@ -359,11 +369,13 @@ class BoxLevel(Level):
                 box.sound_manager.play_path(
                     box.wall_sound, position=coordinates
                 )
-        box.dispatch_event('on_collide', coordinates)
+        box.dispatch_event("on_collide", coordinates)
 
     def move(
-        self, distance: float = 1.0, vertical: Optional[float] = None,
-        bearing: Optional[int] = None
+        self,
+        distance: float = 1.0,
+        vertical: Optional[float] = None,
+        bearing: Optional[int] = None,
     ) -> Callable[[], None]:
         """Return a callable that allows the player to move on the map.
 
@@ -401,12 +413,12 @@ class BoxLevel(Level):
                     self.collide(box, p)
                 else:
                     self.set_coordinates(p)
-                    box.dispatch_event('on_footstep', _bearing, p)
+                    box.dispatch_event("on_footstep", _bearing, p)
                     self.handle_box(box)
-                    self.dispatch_event('on_move_success')
+                    self.dispatch_event("on_move_success")
             else:
                 self.dispatch_event(
-                    'on_move_fail', distance, vertical, _bearing, p
+                    "on_move_fail", distance, vertical, _bearing, p
                 )
 
         return inner
@@ -417,9 +429,9 @@ class BoxLevel(Level):
         def inner() -> None:
             """Speak the coordinates."""
             c: Point = self.coordinates.floor()
-            s: str = f'{c.x}, {c.y}'
+            s: str = f"{c.x}, {c.y}"
             if include_z:
-                s += f', {c.z}'
+                s += f", {c.z}"
             self.game.output(s)
 
         return inner
@@ -441,13 +453,15 @@ class BoxLevel(Level):
             directions.remove(PointDirections.here)
             index: int = round(
                 (
-                    self.bearing + 360 if (self.bearing % 360) < 0 else
-                    self.bearing
-                ) / 45
+                    self.bearing + 360
+                    if (self.bearing % 360) < 0
+                    else self.bearing
+                )
+                / 45
             ) % len(directions)
             string: str = directions[index].name
             if include_angle:
-                string = f'{string} ({self.bearing})'
+                string = f"{string} ({self.bearing})"
             self.game.output(string)
 
         return inner
@@ -474,7 +488,7 @@ class BoxLevel(Level):
 
         def inner() -> None:
             self.set_bearing(normalise_angle(self.bearing + amount))
-            self.dispatch_event('on_turn')
+            self.dispatch_event("on_turn")
 
         return inner
 
@@ -504,12 +518,12 @@ class BoxLevel(Level):
                 self.coordinates
             )
             if (
-                nearest_door is not None and
-                nearest_door.distance <= door_distance
+                nearest_door is not None
+                and nearest_door.distance <= door_distance
             ):
                 return nearest_door.box.handle_door()
             if box is not None:
-                box.dispatch_event('on_activate')
+                box.dispatch_event("on_activate")
 
         return inner
 
@@ -531,19 +545,19 @@ class BoxLevel(Level):
             )
             if nearest_door is not None:
                 d: Box[Door] = nearest_door.box
-                name: str = d.name or 'Untitled door'
+                name: str = d.name or "Untitled door"
                 angle: int = floor(
                     self.get_angle_between(nearest_door.coordinates)
                 )
                 distance: float = nearest_door.distance
                 if max_distance is not None and distance > max_distance:
-                    return self.game.output('There are no nearby doors.')
+                    return self.game.output("There are no nearby doors.")
                 directions: str
                 if not round(distance):
-                    directions = 'here'
+                    directions = "here"
                 else:
-                    directions = '%.1f at %d degrees' % (distance, angle)
-                self.game.output(f'{name}: {directions}.')
+                    directions = "%.1f at %d degrees" % (distance, angle)
+                self.game.output(f"{name}: {directions}.")
 
         return inner
 
@@ -551,18 +565,18 @@ class BoxLevel(Level):
         """Describe the current box."""
         box: Optional[Box] = self.get_current_box()
         if box is None:
-            self.game.output('No box.')
+            self.game.output("No box.")
         else:
             b: BoxBounds = box.bounds
             self.game.output(
-                f'{box.name}: {b.width + 1} x {b.depth + 1} x {b.height + 1}.'
+                f"{box.name}: {b.width + 1} x {b.depth + 1} x {b.height + 1}."
             )
 
     def get_current_box(self) -> Optional[Box]:
         """Get the box that lies at the current coordinates."""
         if (
-            self.current_box is not None and
-            self.current_box.coordinates == self.coordinates
+            self.current_box is not None
+            and self.current_box.coordinates == self.coordinates
         ):
             return self.current_box.box
         box: Optional[Box] = self.get_containing_box(self.coordinates)

@@ -8,8 +8,19 @@ from pyglet.window import Window, key
 from pytest import raises
 from synthizer import Context, DirectSource, Source3D, StreamingGenerator
 
-from earwax import (Action, AlreadyDestroyed, Ambiance, Game, IntroLevel,
-                    Level, Point, Sound, SoundManager, Track, TrackTypes)
+from earwax import (
+    Action,
+    AlreadyDestroyed,
+    Ambiance,
+    Game,
+    IntroLevel,
+    Level,
+    Point,
+    Sound,
+    SoundManager,
+    Track,
+    TrackTypes,
+)
 
 
 class OnCoverWorks(Exception):
@@ -43,8 +54,8 @@ def test_on_text_motion(game: Game, level: Level, window: Window) -> None:
             window.close()
 
     def push_motions(dt: float) -> None:
-        window.dispatch_event('on_text_motion', key.MOTION_BACKSPACE)
-        window.dispatch_event('on_text_motion', key.MOTION_BEGINNING_OF_LINE)
+        window.dispatch_event("on_text_motion", key.MOTION_BACKSPACE)
+        window.dispatch_event("on_text_motion", key.MOTION_BEGINNING_OF_LINE)
 
     @game.event
     def before_run() -> None:
@@ -73,6 +84,7 @@ def test_on_pop(level: Level, game: Game) -> None:
     @level.event
     def on_pop() -> None:
         game.push_level(pop_level)
+
     game.push_level(level)
     game.pop_level()
     assert game.levels == [pop_level]
@@ -95,9 +107,9 @@ def test_on_reveal(game: Game, level: Level) -> None:
 def test_action(game: Game, level: Level) -> None:
     """Test the game.action method."""
     game.push_level(level)
-    a = level.action('Print')(print)
+    a = level.action("Print")(print)
     assert isinstance(a, Action)
-    assert a.title == 'Print'
+    assert a.title == "Print"
     assert a.func is print
     assert a.symbol is None
     assert a.modifiers == 0
@@ -131,7 +143,7 @@ def test_start_ambiances(
     context: Context, game: Game, level: Level, window: Window
 ) -> None:
     """Test that ambiances start correctly."""
-    a: Ambiance = Ambiance.from_path(Path('sound.wav'), Point(0, 0, 0))
+    a: Ambiance = Ambiance.from_path(Path("sound.wav"), Point(0, 0, 0))
     level.ambiances.append(a)
 
     @level.event
@@ -159,12 +171,12 @@ def test_start_tracks(
     context: Context, game: Game, level: Level, window: Window
 ) -> None:
     """Test that tracks start properly."""
-    music: Track = Track.from_path(Path('sound.wav'), TrackTypes.music)
-    assert music.protocol == 'file'
-    assert music.path == 'sound.wav'
-    ambiance: Track = Track.from_path(Path('move.wav'), TrackTypes.ambiance)
-    assert ambiance.protocol == 'file'
-    assert ambiance.path == 'move.wav'
+    music: Track = Track.from_path(Path("sound.wav"), TrackTypes.music)
+    assert music.protocol == "file"
+    assert music.path == "sound.wav"
+    ambiance: Track = Track.from_path(Path("move.wav"), TrackTypes.ambiance)
+    assert ambiance.protocol == "file"
+    assert ambiance.path == "move.wav"
     level.tracks.extend([ambiance, music])
 
     @level.event
@@ -199,7 +211,7 @@ def test_register_and_bind(level: Level) -> None:
         raise RegisterAndBindWorks()
 
     with raises(RegisterAndBindWorks):
-        level.dispatch_event('on_test')
+        level.dispatch_event("on_test")
 
 
 def test_intro_level(window: Window, level: Level, game: Game) -> None:
@@ -207,12 +219,12 @@ def test_intro_level(window: Window, level: Level, game: Game) -> None:
     intro: IntroLevel
     with raises(AssertionError):
         intro = IntroLevel(
-            game, level, Path('sound.wav'), skip_after=5.0, looping=True
+            game, level, Path("sound.wav"), skip_after=5.0, looping=True
         )
-    intro = IntroLevel(game, level, Path('sound.wav'))
+    intro = IntroLevel(game, level, Path("sound.wav"))
     assert isinstance(intro.sound_manager, SoundManager)
     assert intro.sound_manager is game.interface_sound_manager
-    assert intro.sound_path == Path('sound.wav')
+    assert intro.sound_path == Path("sound.wav")
     assert intro.sound is None
 
     @intro.event
@@ -239,7 +251,7 @@ def test_intro_level_skip_after(
 ) -> None:
     """Test what happens when skip_after is set."""
     intro: IntroLevel = IntroLevel(
-        game, level, Path('sound.wav'), skip_after=0.5
+        game, level, Path("sound.wav"), skip_after=0.5
     )
 
     @level.event
@@ -258,7 +270,7 @@ def test_intro_level_skip_after(
 def test_intro_level_looping(window: Window, level: Level, game: Game) -> None:
     """Test that intro levels loop properly."""
     intro: IntroLevel = IntroLevel(
-        game, level, Path('sound.wav'), looping=True
+        game, level, Path("sound.wav"), looping=True
     )
 
     @level.event
@@ -277,14 +289,14 @@ def test_intro_level_looping(window: Window, level: Level, game: Game) -> None:
     assert game.level is intro
     assert isinstance(intro.sound_manager, SoundManager)
     assert isinstance(intro.sound, Sound)
-    intro.dispatch_event('on_pop')
+    intro.dispatch_event("on_pop")
 
 
 def test_intro_level_skip(window: Window, level: Level, game: Game) -> None:
     """Test skipping an IntroLevel instance."""
     sounds: List[Sound] = []
     intro: IntroLevel = IntroLevel(
-        game, level, Path('sound.wav'), skip_after=5.0
+        game, level, Path("sound.wav"), skip_after=5.0
     )
 
     @level.event

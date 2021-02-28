@@ -101,14 +101,14 @@ class StaggeredPromise(Promise):
             ``None``.
         """
         if self.generator is None:
-            raise RuntimeError('You must call ``self.run`` first.')
+            raise RuntimeError("You must call ``self.run`` first.")
         try:
             delay: float = next(self.generator)
-            self.dispatch_event('on_next', delay)
+            self.dispatch_event("on_next", delay)
             schedule_once(self.do_next, delay)
         except StopIteration as e:
             if not e.args:
-                e.args = (None, )
+                e.args = (None,)
             self.done(*e.args)
         except Exception as e:
             self.error(e)
@@ -121,14 +121,14 @@ class StaggeredPromise(Promise):
         """
         super().cancel()
         if self.generator is None:
-            raise RuntimeError('This promise has no generator.')
+            raise RuntimeError("This promise has no generator.")
         unschedule(self.do_next)
         self.generator.close()
 
     @classmethod
     def decorate(
         cls, func: StaggeredPromiseFunctionType
-    ) -> 'StaggeredPromise':
+    ) -> "StaggeredPromise":
         """Make an instance from a decorated function.
 
         This function acts as a decorator method for returning

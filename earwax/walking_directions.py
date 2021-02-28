@@ -15,7 +15,7 @@ try:
         PointDirections.southwest: Point(-1, -1, 0),
         PointDirections.west: Point(-1, 0, 0),
         PointDirections.northwest: Point(-1, 1, 0),
-        PointDirections.here: Point(0, 0, 0)
+        PointDirections.here: Point(0, 0, 0),
     }
 except TypeError:
     walking_directions = {}  # Docs are building.

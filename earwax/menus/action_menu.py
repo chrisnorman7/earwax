@@ -59,11 +59,11 @@ class ActionMenu(Menu):
     input_mode: Optional[InputModes] = attrib(repr=False)
 
     @input_mode.default
-    def get_default_input_mode(instance: 'ActionMenu') -> InputModes:
+    def get_default_input_mode(instance: "ActionMenu") -> InputModes:
         """Get the default input mode."""
         return instance.game.input_mode
 
-    all_triggers_label: Optional[str] = '<< Show all triggers >>'
+    all_triggers_label: Optional[str] = "<< Show all triggers >>"
 
     def __attrs_post_init__(self) -> None:
         """Add every action as an item."""
@@ -82,19 +82,19 @@ class ActionMenu(Menu):
                         triggers.append(self.symbol_to_string(a))
                     if a.mouse_button is not None:
                         triggers.append(
-                            f'{self.mouse_to_string(a)} mouse button'
+                            f"{self.mouse_to_string(a)} mouse button"
                         )
                 elif self.input_mode is InputModes.controller:
                     if a.joystick_button is not None:
-                        triggers.append(f'Button {a.joystick_button}')
+                        triggers.append(f"Button {a.joystick_button}")
                     if a.hat_direction is not None:
                         triggers.append(
-                            f'{self.hat_direction_to_string(a.hat_direction)} '
-                            'hat'
+                            f"{self.hat_direction_to_string(a.hat_direction)} "
+                            "hat"
                         )
                 else:
                     raise RuntimeError(
-                        f'Invalid input mode: {self.input_mode!r}.'
+                        f"Invalid input mode: {self.input_mode!r}."
                     )
                 self.add_item(func, title=self.action_title(a, triggers))
         if self.input_mode is not None and self.all_triggers_label is not None:
@@ -114,12 +114,12 @@ class ActionMenu(Menu):
             this method will be working on.
         """
         s: str
-        mods: str = ''
+        mods: str = ""
         if action.modifiers:
             mods = key.modifiers_string(action.modifiers)
         s = key.symbol_string(action.symbol)
         if mods:
-            s = f'{mods} + {s}'
+            s = f"{mods} + {s}"
         return s
 
     def mouse_to_string(self, action: Action) -> str:
@@ -136,26 +136,26 @@ class ActionMenu(Menu):
             attribute this method will be working on.
         """
         s: str
-        mods: str = ''
+        mods: str = ""
         if action.modifiers:
             mods = key.modifiers_string(action.modifiers)
         s = mouse.buttons_string(action.mouse_button)
         if mods:
-            s = f'{mods} + {s}'
+            s = f"{mods} + {s}"
         return s
 
     def hat_direction_to_string(self, direction: Tuple[int, int]) -> str:
         """Return the given hat direction as a string."""
         if direction == DEFAULT:
-            return 'Default'
+            return "Default"
         elif direction == UP:
-            return 'Up'
+            return "Up"
         elif direction == DOWN:
-            return 'Down'
+            return "Down"
         elif direction == LEFT:
-            return 'Left'
+            return "Left"
         elif direction == RIGHT:
-            return 'Right'
+            return "Right"
         else:
             return str(direction)
 
@@ -170,21 +170,21 @@ class ActionMenu(Menu):
 
         def inner() -> None:
             func: ActionFunctionType = self.handle_action(action)
-            m: Menu = Menu(self.game, 'Triggers')
+            m: Menu = Menu(self.game, "Triggers")
             s: str
             if action.symbol is not None:
                 s = self.symbol_to_string(action)
-                m.add_item(func, title='Keyboard: ' + s)
+                m.add_item(func, title="Keyboard: " + s)
             if action.mouse_button is not None:
                 s = self.mouse_to_string(action)
-                m.add_item(func, title='Mouse: ' + s)
+                m.add_item(func, title="Mouse: " + s)
             if action.joystick_button is not None:
                 m.add_item(
-                    func, title=f'Joystick: Button {action.joystick_button}'
+                    func, title=f"Joystick: Button {action.joystick_button}"
                 )
             if action.hat_direction is not None:
                 d: str = self.hat_direction_to_string(action.hat_direction)
-                m.add_item(func, title=f'Joystick: {d} hat')
+                m.add_item(func, title=f"Joystick: {d} hat")
             self.game.push_level(m)
 
         return inner
@@ -220,16 +220,15 @@ class ActionMenu(Menu):
         :param triggers: A list of triggers gleaned from the given action.
         """
         triggers_str: str = english_list(
-            triggers, empty='No triggers', and_='or '
+            triggers, empty="No triggers", and_="or "
         )
-        return f'{action.title}: {triggers_str}'
+        return f"{action.title}: {triggers_str}"
 
     def show_all(self) -> None:
         """Show all triggers."""
         # First pop the level, so the right actions are processed.
         self.game.pop_level()
         m: ActionMenu = ActionMenu(
-            self.game, self.title,  # type: ignore[arg-type]
-            input_mode=None
+            self.game, self.title, input_mode=None  # type: ignore[arg-type]
         )
         self.game.push_level(m)

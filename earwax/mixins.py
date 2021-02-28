@@ -4,8 +4,16 @@ from datetime import datetime
 from enum import Enum
 from inspect import isclass
 from pathlib import Path
-from typing import (TYPE_CHECKING, Any, Dict, List, Optional, TextIO, Type,
-                    Union)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    TextIO,
+    Type,
+    Union,
+)
 
 from attr import attrs
 from typing_inspect import get_args, get_origin, is_union_type
@@ -41,9 +49,9 @@ class DismissibleMixin:
         cancellation.
         """
         if self.dismissible:
-            self.game: 'Game'
+            self.game: "Game"
             self.game.pop_level()
-            self.game.output('Cancel.')
+            self.game.output("Cancel.")
 
 
 @attrs(auto_attribs=True)
@@ -56,7 +64,7 @@ class TitleMixin:
         used as the title.
     """
 
-    title: Union[str, 'TitleFunction']
+    title: Union[str, "TitleFunction"]
 
     def get_title(self) -> str:
         """Return the proper title of this object.
@@ -72,7 +80,7 @@ class TitleMixin:
 class RegisterEventMixin(EventDispatcher):
     """Allow registering and binding events in one function."""
 
-    def register_event(self, func: 'EventType') -> str:
+    def register_event(self, func: "EventType") -> str:
         """Register an event type from a function.
 
         This function uses ``func.__name__`` to register an event type,
@@ -82,7 +90,7 @@ class RegisterEventMixin(EventDispatcher):
         """
         return self.register_event_type(func.__name__)
 
-    def register_and_bind(self, func: 'EventType') -> 'EventType':
+    def register_and_bind(self, func: "EventType") -> "EventType":
         """Register and bind a new event.
 
         This is the same as::
@@ -125,10 +133,15 @@ class DumpLoadMixin:
     """
 
     __allowed_basic_types__: List[Type] = [
-        str, int, float, bool, datetime, type(None)
+        str,
+        int,
+        float,
+        bool,
+        datetime,
+        type(None),
     ]
-    __type_key__: str = '__type__'
-    __value_key__: str = '__value__'
+    __type_key__: str = "__type__"
+    __value_key__: str = "__value__"
     __excluded_attribute_names__: Optional[List[str]] = None
 
     def get_dump_value(self, type_: Type, value: Any) -> Any:
@@ -161,10 +174,10 @@ class DumpLoadMixin:
             value_dump_object: Optional[DumpLoadMixin] = None
             if issubclass(key_type, DumpLoadMixin):
                 raise RuntimeError(
-                    f'You cannot use {key_type!r} as a dictionary key, as '
-                    'dumping would result in a dictionary being used as a '
-                    'dictionary key, which Python does not allow.'
-                    )
+                    f"You cannot use {key_type!r} as a dictionary key, as "
+                    "dumping would result in a dictionary being used as a "
+                    "dictionary key, which Python does not allow."
+                )
             if not issubclass(value_type, DumpLoadMixin):
                 value_dump_object = self
             return_value: Dict[Any, Any] = {}
@@ -180,7 +193,7 @@ class DumpLoadMixin:
             return return_value
         else:
             raise RuntimeError(
-                'Unable to dump value %r of type %r.' % (value, type_)
+                "Unable to dump value %r of type %r." % (value, type_)
             )
 
     def dump(self) -> Dict[str, Any]:
@@ -188,7 +201,7 @@ class DumpLoadMixin:
         cls: Type[DumpLoadMixin] = type(self)
         dump_value: Dict[str, Any] = {}
         for name, type_ in cls.__annotations__.items():
-            if name.startswith('_'):
+            if name.startswith("_"):
                 continue
             if (
                 cls.__excluded_attribute_names__ is not None
@@ -255,7 +268,8 @@ class DumpLoadMixin:
                 return {
                     cls.get_load_value(key_type, k): cls.get_load_value(
                         value_type, v
-                    ) for k, v in value.items()
+                    )
+                    for k, v in value.items()
                 }
             elif is_union_type(expected_type):
                 type_name: Optional[str] = value.get(cls.__type_key__, None)
@@ -265,13 +279,12 @@ class DumpLoadMixin:
                         return t.get_load_value(t, value)
                 else:
                     raise RuntimeError(
-                        'unable to load a union value without a type hint.'
+                        "unable to load a union value without a type hint."
                     )
             else:
                 raise RuntimeError(
-                    'Unable to load %r, with an expected type %r.' % (
-                        value, expected_type
-                    )
+                    "Unable to load %r, with an expected type %r."
+                    % (value, expected_type)
                 )
 
     @classmethod
@@ -290,9 +303,8 @@ class DumpLoadMixin:
         type_name: Optional[str] = data.get(cls.__type_key__, None)
         if type_name is None or type_name != cls.__name__:
             raise RuntimeError(
-                'The provided value does ot appear to be a dump of %r: %r.' % (
-                    cls, data
-                )
+                "The provided value does ot appear to be a dump of %r: %r."
+                % (cls, data)
             )
         data = data.get(cls.__value_key__, {})
         kwargs: Dict[str, Any] = {}
@@ -303,7 +315,7 @@ class DumpLoadMixin:
                     and name in cls.__excluded_attribute_names__
                 ):
                     continue
-                if name.startswith('_'):
+                if name.startswith("_"):
                     continue
                 kwargs[name] = cls.get_load_value(type_, data[name])
         return cls(*args, **kwargs)  # type: ignore[call-arg]
@@ -326,7 +338,7 @@ class DumpLoadMixin:
 
         :param filename: The path to load from.
         """
-        with filename.open('r') as f:
+        with filename.open("r") as f:
             return cls.from_file(f, *args)
 
     def save(self, filename: Path) -> None:
@@ -334,5 +346,5 @@ class DumpLoadMixin:
 
         :param filename: The path to the file to dump to.
         """
-        with filename.open('w') as f:
+        with filename.open("w") as f:
             dump(self.dump(), f, Dumper=CDumper)

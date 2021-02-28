@@ -31,9 +31,9 @@ class PretendSocket(socket):
         If ``self.data`` is ``None``, then raise ``BlockingIOError``.
         """
         if not self.connected:
-            return b''
+            return b""
         if self.data is None:
-            raise BlockingIOError('No data yet.')
+            raise BlockingIOError("No data yet.")
         data: bytes = self.data
         self.data = None
         return data

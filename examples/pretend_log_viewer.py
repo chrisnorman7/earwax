@@ -20,22 +20,31 @@ level = Level(game)
 
 for i, x in enumerate(
     (
-        key._1, key._2, key._3, key._4, key._5, key._6, key._7, key._8, key._9,
-        key._0
+        key._1,
+        key._2,
+        key._3,
+        key._4,
+        key._5,
+        key._6,
+        key._7,
+        key._8,
+        key._9,
+        key._0,
     )
 ):
-    @level.action(f'Read message {i + 1}', symbol=x)
+
+    @level.action(f"Read message {i + 1}", symbol=x)
     def speak(pos=i):
         """Read the message at the given position."""
-        game.output(f'Position {pos}.')
+        game.output(f"Position {pos}.")
 
 
-@level.action('Show help', symbol=key.SLASH, modifiers=key.MOD_SHIFT)
+@level.action("Show help", symbol=key.SLASH, modifiers=key.MOD_SHIFT)
 def get_help():
     """Show an action menu."""
-    game.push_level(ActionMenu(game, 'Actions'))
+    game.push_level(ActionMenu(game, "Actions"))
 
 
-if __name__ == '__main__':
-    window = Window(caption='Testing')
+if __name__ == "__main__":
+    window = Window(caption="Testing")
     game.run(window, initial_level=level)

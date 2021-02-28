@@ -22,7 +22,7 @@ class EventMatcher:
     :ivar ~earwax.EventMatcher.name: The name of the event this matcher uses.
     """
 
-    game: 'Game'
+    game: "Game"
     name: str
 
     def dispatch(self, *args, **kwargs) -> None:
@@ -42,8 +42,8 @@ class EventMatcher:
             found.
         """
         if (
-            self.game.level is not None and
-            self.name in self.game.level.event_types
+            self.game.level is not None
+            and self.name in self.game.level.event_types
         ):
             return self.game.level.dispatch_event(self.name, *args, **kwargs)
         if self.name in self.game.event_types:

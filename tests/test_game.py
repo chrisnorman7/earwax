@@ -10,14 +10,22 @@ from pyglet.window import Window, key
 from pytest import raises
 from synthizer import Context
 
-from earwax import (ActionMenu, Credit, Game, GameNotRunning, InputModes,
-                    Level, Menu, SoundManager)
+from earwax import (
+    ActionMenu,
+    Credit,
+    Game,
+    GameNotRunning,
+    InputModes,
+    Level,
+    Menu,
+    SoundManager,
+)
 
 
 class PretendDevice:
     """A pretend device."""
 
-    name: str = 'Pretend Device'
+    name: str = "Pretend Device"
 
 
 class PretendJoystick:
@@ -64,37 +72,37 @@ def test_on_key_press(game: Game, level: Level) -> None:
     """Test pressing keys."""
     game.push_level(level)
 
-    @level.action('Test without yield', symbol=key.T)
+    @level.action("Test without yield", symbol=key.T)
     def test_without_yield():
         raise WorksWithoutYield()
 
     with raises(WorksWithoutYield):
-        game.press_key(key.T, 0, string='t')
-    game.press_key(key.T, key.MOD_SHIFT, string='T')
-    game.press_key(key.P, 0, string='p')
-    game.press_key(key.P, key.MOD_SHIFT, string='P')
+        game.press_key(key.T, 0, string="t")
+    game.press_key(key.T, key.MOD_SHIFT, string="T")
+    game.press_key(key.P, 0, string="p")
+    game.press_key(key.P, key.MOD_SHIFT, string="P")
 
-    @level.action('First yield', symbol=key._1)
+    @level.action("First yield", symbol=key._1)
     def first_yield():
         raise WorksFirstYield()
         yield
 
     with raises(WorksFirstYield):
-        game.press_key(key._1, 0, string='1')
+        game.press_key(key._1, 0, string="1")
 
 
 def test_on_key_release(game: Game, level: Level) -> None:
     """Test the on_key_press event."""
     game.push_level(level)
 
-    @level.action('Second yield', symbol=key._2)
+    @level.action("Second yield", symbol=key._2)
     def second_yield():
         yield
         raise WorksSecondYield()
 
-    game.dispatch_event('on_key_press', key._2, 0)
+    game.dispatch_event("on_key_press", key._2, 0)
     with raises(WorksSecondYield):
-        game.dispatch_event('on_key_release', key._2, 0)
+        game.dispatch_event("on_key_release", key._2, 0)
 
 
 def test_push_level(game: Game, level: Level) -> None:
@@ -114,7 +122,7 @@ def test_replace_level(game: Game, level: Level, menu: Menu) -> None:
     assert game.levels == [menu]
     game.push_level(level)
     assert game.levels == [menu, level]
-    m2 = Menu(game, 'Second Menu')
+    m2 = Menu(game, "Second Menu")
     game.replace_level(m2)
     assert game.levels == [menu, m2]
 
@@ -198,9 +206,9 @@ def test_run(
 def test_get_settings_path() -> None:
     """Test the get_settings_path method."""
     g: Game = Game()
-    assert g.get_settings_path() == Path(get_settings_path('earwax.game'))
-    g = Game(name='testing')
-    assert g.get_settings_path() == Path(get_settings_path('testing'))
+    assert g.get_settings_path() == Path(get_settings_path("earwax.game"))
+    g = Game(name="testing")
+    assert g.get_settings_path() == Path(get_settings_path("testing"))
 
 
 def test_after_run(game: Game, level: Level, window: Window) -> None:
@@ -234,7 +242,7 @@ def test_stop(game: Game, window: Window) -> None:
 def test_push_action_menu(game: Game, level: Level) -> None:
     """Test the push_action_menu method."""
 
-    @level.action('Test', symbol=key.T)
+    @level.action("Test", symbol=key.T)
     def do_test() -> None:
         pass
 
@@ -248,15 +256,15 @@ def test_push_action_menu(game: Game, level: Level) -> None:
 def test_push_credits_menu(game: Game) -> None:
     """Test the push_credits_menu method."""
     game.credits = [
-        Credit('Test 1', 'example.com'),
-        Credit('Test 2', 'test.org')
+        Credit("Test 1", "example.com"),
+        Credit("Test 2", "test.org"),
     ]
     m: Menu = game.push_credits_menu()
     assert isinstance(m, Menu)
     assert m is game.level
     assert len(m.items) == 2
-    assert m.items[0].title == 'Test 1'
-    assert m.items[1].title == 'Test 2'
+    assert m.items[0].title == "Test 1"
+    assert m.items[1].title == "Test 2"
 
 
 def test_adjust_volume(game: Game) -> None:

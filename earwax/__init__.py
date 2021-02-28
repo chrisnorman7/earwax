@@ -38,7 +38,8 @@ There are ready made :class:`~earwax.Level` classes for creating :class:`menus
 
 try:
     import pyglet
-    pyglet.options['shadow_window'] = False
+
+    pyglet.options["shadow_window"] = False
 except (ImportError, TypeError):
     pyglet = None  # Docs are building.
 
@@ -57,22 +58,57 @@ from .game import Game, GameNotRunning
 from .game_board import GameBoard, NoSuchTile
 from .input_modes import InputModes
 from .level import IntroLevel, Level
-from .mapping import (Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door,
-                      MapEditor, MapEditorContext, NearestBox, NotADoor,
-                      Portal)
-from .menus import (ActionMenu, ConfigMenu, FileMenu, Menu, MenuItem,
-                    ReverbEditor, TypeHandler, UnknownTypeError)
+from .mapping import (
+    Box,
+    BoxBounds,
+    BoxLevel,
+    BoxTypes,
+    CurrentBox,
+    Door,
+    MapEditor,
+    MapEditorContext,
+    NearestBox,
+    NotADoor,
+    Portal,
+)
+from .menus import (
+    ActionMenu,
+    ConfigMenu,
+    FileMenu,
+    Menu,
+    MenuItem,
+    ReverbEditor,
+    TypeHandler,
+    UnknownTypeError,
+)
 from .mixins import DismissibleMixin, DumpLoadMixin, TitleMixin
 from .networking import (
-    AlreadyConnected, AlreadyConnecting, ConnectionStates, NetworkConnection,
-    NetworkingConnectionError, NotConnectedYet)
+    AlreadyConnected,
+    AlreadyConnecting,
+    ConnectionStates,
+    NetworkConnection,
+    NetworkingConnectionError,
+    NotConnectedYet,
+)
 from .point import Point, PointDirections
-from .promises import (Promise, PromiseStates, StaggeredPromise,
-                       ThreadedPromise, staggered_promise)
+from .promises import (
+    Promise,
+    PromiseStates,
+    StaggeredPromise,
+    ThreadedPromise,
+    staggered_promise,
+)
 from .reverb import Reverb
 from .rumble_effects import RumbleEffect, RumbleSequence, RumbleSequenceLine
-from .sound import (AlreadyDestroyed, BufferCache, BufferDirectory, NoCache,
-                    Sound, SoundError, SoundManager)
+from .sound import (
+    AlreadyDestroyed,
+    BufferCache,
+    BufferDirectory,
+    NoCache,
+    Sound,
+    SoundError,
+    SoundManager,
+)
 from .speech import tts
 from .task import IntervalFunction, Task, TaskFunction
 from .track import Track, TrackTypes

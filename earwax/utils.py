@@ -36,8 +36,10 @@ def nearest_square(n: int, allow_higher: bool = False) -> int:
 
 
 def english_list(
-    items: List[str], empty: str = 'Nothing', sep: str = ', ',
-    and_: str = 'and '
+    items: List[str],
+    empty: str = "Nothing",
+    sep: str = ", ",
+    and_: str = "and ",
 ) -> str:
     """Given a list of strings, returns a string representing them as a list.
 
@@ -65,7 +67,7 @@ def english_list(
     if len(items) == 0:
         return empty
     else:
-        items[-1] = f'{and_}{items[-1]}'
+        items[-1] = f"{and_}{items[-1]}"
         return sep.join(items)
 
 
@@ -91,7 +93,7 @@ def pluralise(n: int, single: str, multiple: Optional[str] = None) -> str:
     if n == 1:
         return single
     elif multiple is None:
-        return single + 's'
+        return single + "s"
     else:
         return multiple
 

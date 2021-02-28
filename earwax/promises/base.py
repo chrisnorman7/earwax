@@ -10,7 +10,7 @@ from ..mixins import RegisterEventMixin
 if TYPE_CHECKING:
     from ..types import EventType
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class PromiseStates(Enum):
@@ -68,9 +68,12 @@ class Promise(Generic[T], RegisterEventMixin):
     def __attrs_post_init__(self) -> None:
         """Register default events."""
         for func in (
-            self.on_done, self.on_error, self.on_cancel, self.on_finally
+            self.on_done,
+            self.on_error,
+            self.on_cancel,
+            self.on_finally,
         ):
-            self.register_event(cast('EventType', func))
+            self.register_event(cast("EventType", func))
 
     def on_done(self, result: T) -> None:
         """Handle return value.
@@ -113,7 +116,7 @@ class Promise(Generic[T], RegisterEventMixin):
     def cancel(self) -> None:
         """Override to provide cancel functionality."""
         self.state = PromiseStates.cancelled
-        self.dispatch_event('on_cancel')
+        self.dispatch_event("on_cancel")
 
     def done(self, value: T) -> None:
         """Finish up.
@@ -125,8 +128,8 @@ class Promise(Generic[T], RegisterEventMixin):
         :param value: The value that was returned from whatever function this
             promise had.
         """
-        self.dispatch_event('on_done', value)
-        self.dispatch_event('on_finally')
+        self.dispatch_event("on_done", value)
+        self.dispatch_event("on_finally")
         self.state = PromiseStates.done
 
     def error(self, e: Exception) -> None:
@@ -137,6 +140,6 @@ class Promise(Generic[T], RegisterEventMixin):
 
         :param e: The exception that was raised.
         """
-        self.dispatch_event('on_error', e)
-        self.dispatch_event('on_finally')
+        self.dispatch_event("on_error", e)
+        self.dispatch_event("on_finally")
         self.state = PromiseStates.error

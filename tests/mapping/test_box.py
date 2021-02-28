@@ -4,8 +4,18 @@ from typing import List, Optional
 
 from pytest import raises
 
-from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, Game, NotADoor,
-                    Point, Portal, SoundManager)
+from earwax import (
+    Box,
+    BoxBounds,
+    BoxLevel,
+    BoxTypes,
+    Door,
+    Game,
+    NotADoor,
+    Point,
+    Portal,
+    SoundManager,
+)
 
 
 def test_init(box_level: BoxLevel, game: Game, box: Box) -> None:
@@ -13,7 +23,7 @@ def test_init(box_level: BoxLevel, game: Game, box: Box) -> None:
     assert isinstance(box, Box)
     assert box.reverb is None
     assert isinstance(box.sound_manager, SoundManager)
-    assert box.sound_manager.name == 'Untitled sound manager'
+    assert box.sound_manager.name == "Untitled sound manager"
     assert box.game is game
     assert box.start == Point(1, 2, 3)
     assert box.end == Point(4, 5, 6)
@@ -80,13 +90,12 @@ def test_create_fitted_padded(game: Game) -> None:
     """Ensure the pad_start and pad_end parameters work as expected."""
     a: Box = Box(game, Point(0, 0, 0), Point(3, 3, 3))
     b: Box = Box(
-        game, a.bounds.bottom_back_right + Point(1, 0, 0),
-        a.end + Point(3, 0, 0)
+        game,
+        a.bounds.bottom_back_right + Point(1, 0, 0),
+        a.end + Point(3, 0, 0),
     )
     c: Box = Box.create_fitted(
-        game, [a, b],
-        pad_start=Point(-1, -2, -3),
-        pad_end=Point(1, 2, 3)
+        game, [a, b], pad_start=Point(-1, -2, -3), pad_end=Point(1, 2, 3)
     )
     assert c.start == Point(-1, -2, -3)
     assert c.end == Point(7, 5, 6)
@@ -134,11 +143,15 @@ def test_create_row(game: Game) -> None:
 def test_create_row_named(game: Game) -> None:
     """Test creating a row of named rooms."""
     first, second = Box.create_row(
-        game, Point(0, 0, 0), Point(3, 3, 3), 2, Point(1, 0, 0),
-        get_name=lambda i: f'Room {i + 1}'
+        game,
+        Point(0, 0, 0),
+        Point(3, 3, 3),
+        2,
+        Point(1, 0, 0),
+        get_name=lambda i: f"Room {i + 1}",
     )
-    assert first.name == 'Room 1'
-    assert second.name == 'Room 2'
+    assert first.name == "Room 1"
+    assert second.name == "Room 2"
 
 
 def test_create_row_on_create(game: Game) -> None:
@@ -149,16 +162,20 @@ def test_create_row_on_create(game: Game) -> None:
     def on_create(b: Box) -> None:
         """Set a name."""
         if b.start == Point(0, 0, 0):
-            b.name = 'First Box'
+            b.name = "First Box"
         else:
-            b.name = 'Second Box'
+            b.name = "Second Box"
 
     a, b = Box.create_row(
-        game, Point(0, 0, 0), Point(1, 1, 1), 2, Point(1, 0, 0),
-        on_create=on_create
+        game,
+        Point(0, 0, 0),
+        Point(1, 1, 1),
+        2,
+        Point(1, 0, 0),
+        on_create=on_create,
     )
-    assert a.name == 'First Box'
-    assert b.name == 'Second Box'
+    assert a.name == "First Box"
+    assert b.name == "Second Box"
 
 
 def test_open(game: Game, door: Door) -> None:
@@ -168,7 +185,7 @@ def test_open(game: Game, door: Door) -> None:
 
     @b.event
     def on_close() -> None:
-        raise RuntimeError('This event should not have fired.')
+        raise RuntimeError("This event should not have fired.")
 
     with raises(NotADoor):
         b.open()
@@ -191,7 +208,7 @@ def test_close(game: Game, door: Door) -> None:
 
     @b.event
     def on_open() -> None:
-        raise RuntimeError('This event should not have fired.')
+        raise RuntimeError("This event should not have fired.")
 
     with raises(NotADoor):
         b.close()
@@ -321,8 +338,10 @@ def test_is_portal(game: Game, box: Box, box_level: BoxLevel) -> None:
     assert box.data is None
     assert not box.is_portal
     b: Box[Portal] = Box[Portal](
-        game, Point(0, 0, 0), Point(0, 0, 2),
-        data=Portal(box_level, Point(0, 0, 0))
+        game,
+        Point(0, 0, 0),
+        Point(0, 0, 2),
+        data=Portal(box_level, Point(0, 0, 0)),
     )
     assert b.is_portal
 

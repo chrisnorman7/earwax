@@ -7,28 +7,35 @@ from pyglet.window import Window, key
 from pytest import raises
 
 from earwax import BoxTypes, Editor, Game, MapEditor, Point
-from earwax.mapping.map_editor import (AnchorPoints, BoxPoint, BoxTemplate,
-                                       InvalidLabel, LevelMap, MapEditorBox,
-                                       MapEditorContext, valid_label)
+from earwax.mapping.map_editor import (
+    AnchorPoints,
+    BoxPoint,
+    BoxTemplate,
+    InvalidLabel,
+    LevelMap,
+    MapEditorBox,
+    MapEditorContext,
+    valid_label,
+)
 
 
 def test_valid_label() -> None:
     """Test the valid_label method."""
     with raises(InvalidLabel) as exc:
-        valid_label('Hello world')
-    assert exc.value.args == ('Invalid identifier: Hello world.',)
+        valid_label("Hello world")
+    assert exc.value.args == ("Invalid identifier: Hello world.",)
     with raises(InvalidLabel) as exc:
-        valid_label(':')
-    assert exc.value.args == ('Invalid identifier: :.',)
+        valid_label(":")
+    assert exc.value.args == ("Invalid identifier: :.",)
     with raises(InvalidLabel) as exc:
-        valid_label('try')
-    assert exc.value.args == ('Reserved keyword: try.',)
+        valid_label("try")
+    assert exc.value.args == ("Reserved keyword: try.",)
     with raises(InvalidLabel) as exc:
-        valid_label('except')
-    assert exc.value.args == ('Reserved keyword: except.',)
+        valid_label("except")
+    assert exc.value.args == ("Reserved keyword: except.",)
     with raises(InvalidLabel) as exc:
-        valid_label('')
-    assert exc.value.args == ('Cancelled.',)
+        valid_label("")
+    assert exc.value.args == ("Cancelled.",)
 
 
 def test_point_anchor_init() -> None:
@@ -48,12 +55,12 @@ def test_box_template_init() -> None:
     assert t.start == BoxPoint()
     assert isinstance(t.end, BoxPoint)
     assert t.end == BoxPoint()
-    assert t.name == 'Untitled Box'
+    assert t.name == "Untitled Box"
     assert t.surface_sound is None
     assert t.wall_sound is None
     assert t.type is BoxTypes.empty
     assert isinstance(t.label, str)
-    assert t.label == f'box_{t.id}'
+    assert t.label == f"box_{t.id}"
 
 
 def test_level_map_init() -> None:
@@ -62,7 +69,7 @@ def test_level_map_init() -> None:
     assert level_map.box_templates == []
     assert level_map.coordinates == BoxPoint()
     assert level_map.bearing == 0
-    assert level_map.name == 'Untitled Map'
+    assert level_map.name == "Untitled Map"
 
 
 def test_map_editor_init(game: Game, map_editor: MapEditor) -> None:
@@ -74,7 +81,7 @@ def test_map_editor_init(game: Game, map_editor: MapEditor) -> None:
     assert isinstance(b, MapEditorBox)
     box_id: str = b.id
     assert isinstance(box_id, str)
-    assert box_id != ''
+    assert box_id != ""
     context: MapEditorContext = map_editor.context
     assert isinstance(context, MapEditorContext)
     assert box_id in context.template_ids
@@ -90,11 +97,13 @@ def test_map_editor_init(game: Game, map_editor: MapEditor) -> None:
 
 
 def test_rename_box(
-    game: Game, map_editor: MapEditor, map_editor_context: MapEditorContext,
-    window: Window
+    game: Game,
+    map_editor: MapEditor,
+    map_editor_context: MapEditorContext,
+    window: Window,
 ) -> None:
     """Make sure we can rename the current box."""
-    new_name: str = 'Testing'
+    new_name: str = "Testing"
     box: Optional[MapEditorBox] = map_editor.get_current_box()
     assert isinstance(box, MapEditorBox)
     assert box.id is not None
@@ -111,15 +120,15 @@ def test_rename_box(
         map_editor.set_coordinates(Point(0, 0, 0))
         game.press_key(key.R, 0)
         assert isinstance(game.level, Editor)
-        game.level.text = ''
+        game.level.text = ""
         game.level.submit()
-        assert box.name == 'First Box'
-        assert template.name == 'First Box'
+        assert box.name == "First Box"
+        assert template.name == "First Box"
         game.press_key(key.R, 0)
         assert isinstance(game.level, Editor)
         game.level.dismiss()
-        assert box.name == 'First Box'
-        assert template.name == 'First Box'
+        assert box.name == "First Box"
+        assert template.name == "First Box"
         game.press_key(key.R, 0)
         assert isinstance(game.level, Editor)
         game.level.text = new_name
@@ -133,8 +142,10 @@ def test_rename_box(
 
 
 def test_label_box(
-    game: Game, map_editor: MapEditor, map_editor_context: MapEditorContext,
-    window: Window
+    game: Game,
+    map_editor: MapEditor,
+    map_editor_context: MapEditorContext,
+    window: Window,
 ) -> None:
     """Make sure we can relabel the current box."""
     box: Optional[MapEditorBox] = map_editor.get_current_box()
@@ -152,7 +163,7 @@ def test_label_box(
         map_editor.set_coordinates(Point(0, 0, 0))
         list(map_editor.label_box())
         assert isinstance(game.level, Editor)
-        game.level.text = ''
+        game.level.text = ""
         game.level.submit()
         assert template.label == old_label
         list(map_editor.label_box())
@@ -161,22 +172,22 @@ def test_label_box(
         assert template.label == old_label
         list(map_editor.label_box())
         assert isinstance(game.level, Editor)
-        game.level.text = 'try'
+        game.level.text = "try"
         game.level.submit()
         assert game.level is map_editor
         assert template.label == old_label
         list(map_editor.label_box())
         assert isinstance(game.level, Editor)
-        game.level.text = 'invalid label'
+        game.level.text = "invalid label"
         game.level.submit()
         assert game.level is map_editor
         assert template.label == old_label
         list(map_editor.label_box())
         assert isinstance(game.level, Editor)
-        game.level.text = 'valid_label'
+        game.level.text = "valid_label"
         game.level.submit()
         assert game.level is map_editor
-        assert template.label == 'valid_label'
+        assert template.label == "valid_label"
         schedule_once(lambda dt: game.stop(), 0.1)
 
     game.run(window, initial_level=map_editor)
@@ -185,8 +196,7 @@ def test_label_box(
 def test_to_box(game: Game, map_editor_context: MapEditorContext) -> None:
     """Test the to_box method."""
     t1: BoxTemplate = BoxTemplate(
-        start=BoxPoint(x=1, y=2, z=3),
-        end=BoxPoint(x=4, y=5, z=6)
+        start=BoxPoint(x=1, y=2, z=3), end=BoxPoint(x=4, y=5, z=6)
     )
     b1: MapEditorBox = map_editor_context.to_box(t1)
     assert isinstance(b1, MapEditorBox)
@@ -197,13 +207,11 @@ def test_to_box(game: Game, map_editor_context: MapEditorContext) -> None:
     map_editor_context.add_template(t1, box=b1)
     t2: BoxTemplate = BoxTemplate(
         start=BoxPoint(
-            box_id=t1.id, corner=AnchorPoints.bottom_back_left,
-            x=3, y=2, z=1
+            box_id=t1.id, corner=AnchorPoints.bottom_back_left, x=3, y=2, z=1
         ),
         end=BoxPoint(
-            box_id=t1.id, corner=AnchorPoints.top_front_right,
-            x=4, y=3, z=2
-        )
+            box_id=t1.id, corner=AnchorPoints.top_front_right, x=4, y=3, z=2
+        ),
     )
     b2: MapEditorBox = map_editor_context.to_box(t2)
     assert isinstance(b2, MapEditorBox)
@@ -214,9 +222,7 @@ def test_to_box(game: Game, map_editor_context: MapEditorContext) -> None:
         start=BoxPoint(
             box_id=t2.id, corner=AnchorPoints.bottom_back_right, x=1
         ),
-        end=BoxPoint(
-            box_id=t2.id, corner=AnchorPoints.top_front_right, x=10
-        )
+        end=BoxPoint(box_id=t2.id, corner=AnchorPoints.top_front_right, x=10),
     )
     b3: MapEditorBox = map_editor_context.to_box(t3)
     assert isinstance(b3, MapEditorBox)
@@ -225,8 +231,10 @@ def test_to_box(game: Game, map_editor_context: MapEditorContext) -> None:
 
 
 def test_id_box(
-    game: Game, map_editor: MapEditor, map_editor_context: MapEditorContext,
-    window: Window
+    game: Game,
+    map_editor: MapEditor,
+    map_editor_context: MapEditorContext,
+    window: Window,
 ) -> None:
     """Make sure we can change the ID of the current box.
 
@@ -243,18 +251,19 @@ def test_id_box(
             box_id=template.id, corner=AnchorPoints.bottom_back_left, x=3, y=3
         ),
         end=BoxPoint(
-            box_id=template.id, corner=AnchorPoints.top_front_right,
-            x=5, y=5, z=5
-        )
+            box_id=template.id,
+            corner=AnchorPoints.top_front_right,
+            x=5,
+            y=5,
+            z=5,
+        ),
     )
     map_editor_context.add_template(t1)
     t2: BoxTemplate = BoxTemplate(
         start=BoxPoint(
             box_id=template.id, corner=AnchorPoints.bottom_back_right
         ),
-        end=BoxPoint(
-            box_id=t1.id, corner=AnchorPoints.top_front_right, x=5
-        )
+        end=BoxPoint(box_id=t1.id, corner=AnchorPoints.top_front_right, x=5),
     )
     map_editor_context.add_template(t2)
     assert len(map_editor.boxes) == 3
@@ -268,7 +277,7 @@ def test_id_box(
         map_editor.set_coordinates(Point(0, 0, 0))
         list(map_editor.id_box())
         assert isinstance(game.level, Editor)
-        game.level.text = ''
+        game.level.text = ""
         game.level.submit()
         assert template.id == old_id
         list(map_editor.id_box())
@@ -277,22 +286,22 @@ def test_id_box(
         assert template.id == old_id
         list(map_editor.id_box())
         assert isinstance(game.level, Editor)
-        game.level.text = 'try'
+        game.level.text = "try"
         game.level.submit()
         assert game.level is map_editor
         assert template.id == old_id
         list(map_editor.id_box())
         assert isinstance(game.level, Editor)
-        game.level.text = 'invalid ID'
+        game.level.text = "invalid ID"
         game.level.submit()
         assert game.level is map_editor
         assert template.id == old_id
         list(map_editor.id_box())
         assert isinstance(game.level, Editor)
-        game.level.text = 'valid_id'
+        game.level.text = "valid_id"
         game.level.submit()
         assert game.level is map_editor
-        assert template.id == 'valid_id'
+        assert template.id == "valid_id"
         assert t1.start.box_id == template.id
         assert t2.start.box_id == template.id
         schedule_once(lambda dt: game.stop(), 0.1)

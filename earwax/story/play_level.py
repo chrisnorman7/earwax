@@ -15,9 +15,18 @@ from ..sound import AlreadyDestroyed, Sound
 from ..track import Track, TrackTypes
 from ..types import NoneGenerator
 from ..yaml import CDumper, dump
-from .world import (DumpablePoint, ObjectTypes, RoomExit, RoomObject,
-                    StoryWorld, WorldAction, WorldAmbiance, WorldRoom,
-                    WorldState, WorldStateCategories)
+from .world import (
+    DumpablePoint,
+    ObjectTypes,
+    RoomExit,
+    RoomObject,
+    StoryWorld,
+    WorldAction,
+    WorldAmbiance,
+    WorldRoom,
+    WorldState,
+    WorldStateCategories,
+)
 
 if TYPE_CHECKING:
     from synthizer import GlobalFdnReverb
@@ -52,14 +61,14 @@ class PlayLevel(Level):
         excluding those objects that are in the player's :attr:`inventory`.
     """
 
-    world_context: 'StoryContext'
+    world_context: "StoryContext"
 
     action_sounds: List[Sound] = attrib(
         default=Factory(list), init=False, repr=False
     )
     cursor_sound: Optional[Sound] = None
     inventory: List[RoomObject] = Factory(list)
-    reverb: Optional['GlobalFdnReverb'] = None
+    reverb: Optional["GlobalFdnReverb"] = None
     object_ambiances: Dict[str, List[Ambiance]] = Factory(dict)
     object_tracks: Dict[str, List[Track]] = Factory(dict)
 
@@ -67,54 +76,53 @@ class PlayLevel(Level):
         """Load inventory and bind actions."""
         self.build_inventory()
         self.action(
-            'Next category', symbol=key.DOWN, hat_direction=hat_directions.DOWN
+            "Next category", symbol=key.DOWN, hat_direction=hat_directions.DOWN
         )(self.next_category)
         self.action(
-            'Previous category', symbol=key.UP, hat_direction=hat_directions.UP
+            "Previous category", symbol=key.UP, hat_direction=hat_directions.UP
         )(self.previous_category)
         self.action(
-            'Next object', symbol=key.RIGHT, hat_direction=hat_directions.RIGHT
+            "Next object", symbol=key.RIGHT, hat_direction=hat_directions.RIGHT
         )(self.next_object)
         self.action(
-            'Previous object', symbol=key.LEFT,
-            hat_direction=hat_directions.LEFT
+            "Previous object",
+            symbol=key.LEFT,
+            hat_direction=hat_directions.LEFT,
         )(self.previous_object)
+        self.action("Activate object", symbol=key.RETURN, joystick_button=0)(
+            self.activate
+        )
+        self.action("Inventory", symbol=key.I, joystick_button=3)(
+            self.inventory_menu
+        )
+        self.action("Use object", symbol=key.U, joystick_button=2)(
+            self.use_object_menu
+        )
+        self.action("Drop object", symbol=key.D, joystick_button=1)(
+            self.drop_object_menu
+        )
+        self.action("Return to main menu", symbol=key.Q, joystick_button=9)(
+            self.main_menu
+        )
+        self.action("Play or pause sounds", symbol=key.P)(self.pause)
         self.action(
-            'Activate object', symbol=key.RETURN, joystick_button=0
-        )(self.activate)
-        self.action(
-            'Inventory', symbol=key.I, joystick_button=3
-        )(self.inventory_menu)
-        self.action(
-            'Use object', symbol=key.U, joystick_button=2
-        )(self.use_object_menu)
-        self.action(
-            'Drop object', symbol=key.D, joystick_button=1
-        )(self.drop_object_menu)
-        self.action(
-            'Return to main menu', symbol=key.Q, joystick_button=9
-        )(self.main_menu)
-        self.action('Play or pause sounds', symbol=key.P)(self.pause)
-        self.action(
-            'Help menu', symbol=key.SLASH, modifiers=key.MOD_SHIFT,
-            joystick_button=6
+            "Help menu",
+            symbol=key.SLASH,
+            modifiers=key.MOD_SHIFT,
+            joystick_button=6,
         )(self.game.push_action_menu)
         self.action(
-            'Volume down', symbol=key.PAGEDOWN, interval=0.1, joystick_button=4
-        )(
-            self.game.change_volume(-0.05)
+            "Volume down", symbol=key.PAGEDOWN, interval=0.1, joystick_button=4
+        )(self.game.change_volume(-0.05))
+        self.action(
+            "Volume Up", symbol=key.PAGEUP, interval=0.1, joystick_button=5
+        )(self.game.change_volume(0.05))
+        self.action("Save game", symbol=key.F3, joystick_button=7)(
+            self.save_state
         )
-        self.action(
-            'Volume Up', symbol=key.PAGEUP, interval=0.1, joystick_button=5
-        )(
-            self.game.change_volume(0.05)
+        self.action("Load game", symbol=key.F4, joystick_button=8)(
+            self.world_context.load
         )
-        self.action(
-            'Save game', symbol=key.F3, joystick_button=7
-        )(self.save_state)
-        self.action(
-            'Load game', symbol=key.F4, joystick_button=8
-        )(self.world_context.load)
         return super().__attrs_post_init__()
 
     def build_inventory(self) -> None:
@@ -143,7 +151,8 @@ class PlayLevel(Level):
         The resulting list will be sorted with Python's ``sorted`` builtin.
         """
         return sorted(
-            obj for obj in self.state.room.objects.values()
+            obj
+            for obj in self.state.room.objects.values()
             if obj not in self.inventory
         )
 
@@ -266,7 +275,7 @@ class PlayLevel(Level):
         else:
             data = [x.action.name for x in room.exits]
         if not data:
-            message: str = 'If you are seeing this, you have found a bug.'
+            message: str = "If you are seeing this, you have found a bug."
             if category is WorldStateCategories.objects:
                 message = self.world.messages.no_objects
             elif category is WorldStateCategories.exits:
@@ -361,18 +370,17 @@ class PlayLevel(Level):
                 track.sound.set_gain(
                     self.get_gain(
                         track.track_type,
-                        ambiances[track.path].volume_multiplier
+                        ambiances[track.path].volume_multiplier,
                     )
                 )
                 loaded_paths.append(track.path)
         a: WorldAmbiance
         for a in room.ambiances:
             if a.path not in loaded_paths:
-                track = Track('file', a.path, TrackTypes.ambiance)
+                track = Track("file", a.path, TrackTypes.ambiance)
                 track.play(
-                    self.game.ambiance_sound_manager, gain=self.get_gain(
-                        track.track_type, a.volume_multiplier
-                    )
+                    self.game.ambiance_sound_manager,
+                    gain=self.get_gain(track.track_type, a.volume_multiplier),
                 )
                 self.tracks.append(track)
         obj: RoomObject
@@ -390,19 +398,21 @@ class PlayLevel(Level):
         for a in obj.ambiances:
             gain = self.get_gain(TrackTypes.ambiance, a.volume_multiplier)
             if obj.position is None:
-                track = Track('file', a.path, TrackTypes.ambiance)
+                track = Track("file", a.path, TrackTypes.ambiance)
                 self.tracks.append(track)
                 track.play(
-                    self.game.ambiance_sound_manager, gain=gain,
-                    reverb=self.reverb
+                    self.game.ambiance_sound_manager,
+                    gain=gain,
+                    reverb=self.reverb,
                 )
                 self.object_tracks[obj.id].append(track)
             else:
-                ambiance: Ambiance = Ambiance('file', a.path, obj.position)
+                ambiance: Ambiance = Ambiance("file", a.path, obj.position)
                 self.ambiances.append(ambiance)
                 ambiance.play(
-                    self.game.ambiance_sound_manager, gain=gain,
-                    reverb=self.reverb
+                    self.game.ambiance_sound_manager,
+                    gain=gain,
+                    reverb=self.reverb,
                 )
                 self.object_ambiances[obj.id].append(ambiance)
 
@@ -423,8 +433,10 @@ class PlayLevel(Level):
             ambiance.stop()
 
     def do_action(
-        self, action: WorldAction, obj: Union[RoomObject, RoomExit],
-        pan: bool = True
+        self,
+        action: WorldAction,
+        obj: Union[RoomObject, RoomExit],
+        pan: bool = True,
     ) -> None:
         """Actually perform an action.
 
@@ -482,9 +494,9 @@ class PlayLevel(Level):
         )
         self.action_sounds.append(s)
 
-    def perform_action(self, obj: RoomObject, action: WorldAction) -> Callable[
-        [], None
-    ]:
+    def perform_action(
+        self, obj: RoomObject, action: WorldAction
+    ) -> Callable[[], None]:
         """Return a function that will perform an object action.
 
         This method is used by :meth:`actions_menu` to allow the player to
@@ -565,7 +577,7 @@ class PlayLevel(Level):
         for action in actions:
             m.add_item(
                 self.perform_action(obj, action),
-                title=action.name.format(obj.name)
+                title=action.name.format(obj.name),
             )
         self.game.push_level(m)
 
@@ -591,31 +603,31 @@ class PlayLevel(Level):
 
     def save_state(self) -> None:
         """Save the current state."""
-        print('Trying to save world state.')
+        print("Trying to save world state.")
         directory: Path = self.game.get_settings_path()
         if not directory.is_dir():
             try:
                 directory.mkdir()
                 self.world_context.logger.info(
-                    'Created game settings directory %s.',
-                    self.game.get_settings_path()
+                    "Created game settings directory %s.",
+                    self.game.get_settings_path(),
                 )
             except Exception as e:
                 self.game.output(
-                    'Unable to create game settings directory: %s' % e
+                    "Unable to create game settings directory: %s" % e
                 )
                 return self.world_context.logger.exception(
-                    'Failed to create game settings directory.'
+                    "Failed to create game settings directory."
                 )
         data: Dict[str, Any] = self.state.dump()
         try:
-            self.world_context.logger.info('Saving game state: %r.', data)
-            with self.world_context.config_file.open('w') as f:
+            self.world_context.logger.info("Saving game state: %r.", data)
+            with self.world_context.config_file.open("w") as f:
                 f.write(dump(data, Dumper=CDumper))
-            self.game.output('Game saved.')
+            self.game.output("Game saved.")
         except Exception as e:
-            self.game.output('Unable to create save file: %s' % e)
-            self.world_context.logger.exception('Failed to create save file.')
+            self.game.output("Unable to create save file: %s" % e)
+            self.world_context.logger.exception("Failed to create save file.")
 
     def object_menu(self, obj: RoomObject) -> Callable[[], None]:
         """Return a callable which shows the inventory menu for an object."""
@@ -625,7 +637,7 @@ class PlayLevel(Level):
             if obj.use_action is not None:
                 m.add_item(
                     self.use_object(obj),
-                    title=obj.use_action.name.format(obj.name)
+                    title=obj.use_action.name.format(obj.name),
                 )
             if obj.is_droppable:
                 action: WorldAction
@@ -695,9 +707,10 @@ class PlayLevel(Level):
         return inner
 
     def objects_menu(
-        self, objects: List[RoomObject],
+        self,
+        objects: List[RoomObject],
         func: Callable[[RoomObject], Callable[[], None]],
-        title: str
+        title: str,
     ) -> None:
         """Push a menu of objects."""
         m: Menu = Menu(self.game, title)
@@ -712,7 +725,7 @@ class PlayLevel(Level):
             x for x in self.inventory if x.is_droppable
         ]
         if objects:
-            self.objects_menu(objects, self.drop_object, 'Drop Object')
+            self.objects_menu(objects, self.drop_object, "Drop Object")
         else:
             self.game.output(self.world.messages.nothing_to_drop)
 
@@ -720,6 +733,6 @@ class PlayLevel(Level):
         """Push a menu that allows using an object."""
         objects: List[RoomObject] = [x for x in self.inventory if x.is_usable]
         if objects:
-            self.objects_menu(objects, self.use_object, 'Use Object')
+            self.objects_menu(objects, self.use_object, "Use Object")
         else:
             self.game.output(self.world.messages.nothing_to_use)

@@ -38,7 +38,7 @@ class VaultFile:
     entries: EntriesType = attrib(default=Factory(dict), repr=False)
 
     @classmethod
-    def from_path(cls, filename: Path, key: bytes) -> 'VaultFile':
+    def from_path(cls, filename: Path, key: bytes) -> "VaultFile":
         """Load a series of files and return a ``VaultFile`` instance.
 
         Given a path to a data file, and the *correct* key, load a series of
@@ -54,7 +54,7 @@ class VaultFile:
 
         :param key: The decryption key for the given file.
         """
-        with filename.open('rb') as f:
+        with filename.open("rb") as f:
             data: bytes = f.read()
         fernet: Fernet = Fernet(key)
         try:
@@ -81,12 +81,13 @@ class VaultFile:
         data: bytes = dumps(self.entries)
         fernet: Fernet = Fernet(key)
         data = fernet.encrypt(data)
-        with filename.open('wb') as f:
+        with filename.open("wb") as f:
             f.write(data)
 
     def add_path(
-        self, p: Union[Path, Generator[Path, None, None]],
-        label: Optional[str] = None
+        self,
+        p: Union[Path, Generator[Path, None, None]],
+        label: Optional[str] = None,
     ) -> str:
         """Add a file or files to this vault.
 
@@ -120,18 +121,18 @@ class VaultFile:
                 label = str(p)
             else:
                 raise RuntimeError(
-                    f'Cannot infer label from {p}: Object is not a path.'
+                    f"Cannot infer label from {p}: Object is not a path."
                 )
         if isinstance(p, Path):
             if p.is_file():
-                with p.open('rb') as f:
+                with p.open("rb") as f:
                     self.entries[label] = f.read()
             elif p.is_dir():
                 p = p.iterdir()
                 return self.add_path(p, label=label)
             else:
                 raise RuntimeError(
-                    f'Cannot handle {p!r}: Not a file or directory.'
+                    f"Cannot handle {p!r}: Not a file or directory."
                 )
         else:
             files: List[bytes] = []
@@ -139,7 +140,7 @@ class VaultFile:
             for child in p:
                 if child.is_dir():
                     continue
-                with child.open('rb') as f:
+                with child.open("rb") as f:
                     files.append(f.read())
             self.entries[label] = files
         return label

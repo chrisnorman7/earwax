@@ -53,7 +53,7 @@ class Portal(RegisterEventMixin):
         any messages which should be sent to the player.
     """
 
-    level: 'BoxLevel'
+    level: "BoxLevel"
     coordinates: Point
     bearing: Optional[int] = None
 

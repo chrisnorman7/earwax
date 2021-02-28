@@ -45,7 +45,7 @@ def test_on_connect(
 
     @game.event
     def before_run() -> None:
-        con.connect('google.com', 80)
+        con.connect("google.com", 80)
 
     schedule_once(too_slow, 2.0)
     game.run(window)
@@ -73,7 +73,7 @@ def test_on_error(
         return EVENT_HANDLED
 
     def do_connect(dt: float) -> None:
-        con.connect('test.nothing', 1234)
+        con.connect("test.nothing", 1234)
 
     @game.event
     def before_run() -> None:
@@ -87,10 +87,10 @@ def test_on_error(
 def test_on_send(con: NetworkConnection, socket: PretendSocket) -> None:
     """Ensure that data is sent properly."""
     socket.patch(con)
-    con.send(b'test')
-    assert socket.data == b'test'
-    con.send(b'hello world')
-    assert socket.data == b'hello world'
+    con.send(b"test")
+    assert socket.data == b"test"
+    con.send(b"hello world")
+    assert socket.data == b"hello world"
 
 
 def test_on_disconnect(
@@ -124,19 +124,19 @@ def test_on_data(
     @con.event
     def on_data(data: bytes) -> None:
         if game.level is None:
-            assert data == b'Hello world'
-            con.send(b'test')
+            assert data == b"Hello world"
+            con.send(b"test")
             game.push_level(second_level)
         elif game.level is second_level:
-            assert data == b'test'
+            assert data == b"test"
             game.push_level(works_level)
             con.shutdown()
             window.close()
         else:
-            raise RuntimeError('Something went wrong.')
+            raise RuntimeError("Something went wrong.")
 
     def setup(dt: float) -> None:
-        con.send(b'Hello world')
+        con.send(b"Hello world")
         schedule(con.poll)
 
     schedule_once(setup, 0.5)

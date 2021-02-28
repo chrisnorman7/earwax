@@ -10,4 +10,4 @@ except ImportError:
     from yaml import Dumper as CDumper  # type: ignore[misc]
     from yaml import FullLoader as CLoader  # type: ignore[misc]
 
-__all__: List[str] = ['dump', 'load', 'CDumper', 'CLoader']
+__all__: List[str] = ["dump", "load", "CDumper", "CLoader"]

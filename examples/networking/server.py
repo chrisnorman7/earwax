@@ -13,6 +13,6 @@ def on_data(ctx, data):
     ctx.send_raw(data)
 
 
-if __name__ == '__main__':
-    logging.basicConfig(level='INFO')
+if __name__ == "__main__":
+    logging.basicConfig(level="INFO")
     s.run(1234)

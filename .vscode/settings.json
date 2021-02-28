@@ -100,13 +100,19 @@
         "wxpython"
     ],
     "cSpell.enabled": true,
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "-l",
+        "79"
+    ],
     "[python]": {
         "gitlens.codeLens.symbolScopes": [
             "!Module"
         ],
         "editor.wordBasedSuggestions": false,
+        "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
-            "source.organizeImports": true
+            "source.organizeImports": true,
         }
     },
     "cmake.configureOnOpen": false,

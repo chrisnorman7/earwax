@@ -3,8 +3,16 @@
 from concurrent.futures import Executor
 from pathlib import Path
 from random import choice
-from typing import (Any, Callable, Dict, Generator, Iterator, List, Optional,
-                    Union)
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Iterator,
+    List,
+    Optional,
+    Union,
+)
 
 from attr import Factory, attrib, attrs
 
@@ -13,23 +21,46 @@ from .utils import random_file as _random_file
 try:
     from synthizer import Buffer, BufferGenerator, Context, DirectSource
     from synthizer import Generator as SynthizerGenerator
-    from synthizer import (GlobalFdnReverb, PannedSource, PannerStrategy,
-                           Source, Source3D, StreamingGenerator,
-                           SynthizerError)
+    from synthizer import (
+        GlobalFdnReverb,
+        PannedSource,
+        PannerStrategy,
+        Source,
+        Source3D,
+        StreamingGenerator,
+        SynthizerError,
+    )
 except ModuleNotFoundError:
     (
-        Buffer, BufferGenerator, Context, DirectSource, SynthizerGenerator,
-        GlobalFdnReverb, PannedSource, PannerStrategy, Source, Source3D,
-        StreamingGenerator
+        Buffer,
+        BufferGenerator,
+        Context,
+        DirectSource,
+        SynthizerGenerator,
+        GlobalFdnReverb,
+        PannedSource,
+        PannerStrategy,
+        Source,
+        Source3D,
+        StreamingGenerator,
     ) = (
-        object, object, object, object, object, object, object, object, object,
-        object, object
+        object,
+        object,
+        object,
+        object,
+        object,
+        object,
+        object,
+        object,
+        object,
+        object,
+        object,
     )
     SynthizerError = Exception
 
 from .point import Point
 
-SoundEventType = Callable[['Sound'], None]
+SoundEventType = Callable[["Sound"], None]
 PositionType = Optional[Union[float, Point]]
 
 
@@ -76,7 +107,7 @@ class BufferCache:
 
         :param path: The path to use.
         """
-        return f'{protocol}://{path}'
+        return f"{protocol}://{path}"
 
     def get_buffer(self, protocol: str, path: str) -> Buffer:
         """Load and return a Buffer instance.
@@ -238,7 +269,7 @@ class Sound:
     @classmethod
     def from_stream(
         cls, context: Context, protocol: str, path: str, **kwargs
-    ) -> 'Sound':
+    ) -> "Sound":
         """Create a sound that streams from the given arguments.
 
         :param context: The synthizer context to use.
@@ -256,7 +287,7 @@ class Sound:
     @classmethod
     def from_path(
         cls, context: Context, buffer_cache: BufferCache, path: Path, **kwargs
-    ) -> 'Sound':
+    ) -> "Sound":
         """Create a sound that plays the given path.
 
         :param context: The synthizer context to use.
@@ -272,7 +303,7 @@ class Sound:
             :attr:`~earwax.Sound` constructor.
         """
         path = _random_file(path)
-        buffer: Buffer = buffer_cache.get_buffer('file', str(path))
+        buffer: Buffer = buffer_cache.get_buffer("file", str(path))
         generator: BufferGenerator = BufferGenerator(context)
         generator.buffer = buffer
         return cls(context, generator, buffer, **kwargs)
@@ -334,7 +365,7 @@ class Sound:
                 source = PannedSource(self.context)
                 source.panning_scalar = self.position
             else:
-                raise RuntimeError(f'Invalid position: {self.position}')
+                raise RuntimeError(f"Invalid position: {self.position}")
         source.add_generator(self.generator)
         source.gain = self.gain
         self.source = source
@@ -498,7 +529,7 @@ class SoundManager:
         default=Factory(type(None)), repr=False
     )
 
-    name: str = 'Untitled sound manager'
+    name: str = "Untitled sound manager"
     default_gain: float = 1.0
     default_looping: bool = False
     default_position: PositionType = None
@@ -540,11 +571,11 @@ class SoundManager:
             The ``setdefault`` method will be used with each of the default
             values from this object..
         """
-        kwargs.setdefault('gain', self.default_gain)
-        kwargs.setdefault('looping', self.default_looping)
-        kwargs.setdefault('position', self.default_position)
-        kwargs.setdefault('reverb', self.default_reverb)
-        kwargs.setdefault('on_destroy', self.remove_sound)
+        kwargs.setdefault("gain", self.default_gain)
+        kwargs.setdefault("looping", self.default_looping)
+        kwargs.setdefault("position", self.default_position)
+        kwargs.setdefault("reverb", self.default_reverb)
+        kwargs.setdefault("on_destroy", self.remove_sound)
 
     def play_path(self, path: Path, /, **kwargs) -> Sound:
         """Play a sound from a path.
@@ -642,7 +673,7 @@ class BufferDirectory:
     buffers: Dict[str, Buffer] = attrib(init=False)
 
     @buffers.default
-    def buffers_default(instance: 'BufferDirectory') -> Dict[str, Buffer]:
+    def buffers_default(instance: "BufferDirectory") -> Dict[str, Buffer]:
         """Return the default value.
 
         Populates the :attr:`~earwax.BufferDirectory.buffers` and
@@ -659,7 +690,7 @@ class BufferDirectory:
         def inner(p: Path) -> None:
             p = p.resolve()
             instance.paths[p.name] = p
-            d[p.name] = instance.buffer_cache.get_buffer('file', str(p))
+            d[p.name] = instance.buffer_cache.get_buffer("file", str(p))
 
         map_generator: Iterator[None]
         if instance.thread_pool is None:

@@ -55,7 +55,7 @@ def test_on_done_no_args(game: Game, window: Window, level: Level) -> None:
 
     @p.register_func
     def return_5() -> int:
-        sleep(.1)
+        sleep(0.1)
         return 5
 
     @p.event
@@ -82,13 +82,13 @@ def test_on_done_with_args(game: Game, window: Window, level: Level) -> None:
 
     @p.event
     def on_done(t: Tuple[str, int]) -> None:
-        assert t == ('test', 10)
+        assert t == ("test", 10)
         game.push_level(level)
         window.close()
 
     @game.event
     def before_run() -> None:
-        p.run('test', number=10)
+        p.run("test", number=10)
 
     game.run(window)
     assert game.levels == [level]

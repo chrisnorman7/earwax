@@ -29,16 +29,19 @@ class ActionMap:
     :ivar ~earwax.ActionMap.actions: The actions to be stored on this map.
     """
 
-    actions: 'ActionListType' = attrib(
+    actions: "ActionListType" = attrib(
         default=Factory(list), init=False, repr=False
     )
 
     def action(
-        self, title: str, symbol: Optional[int] = None,
-        mouse_button: Optional[int] = None, modifiers: int = 0,
+        self,
+        title: str,
+        symbol: Optional[int] = None,
+        mouse_button: Optional[int] = None,
+        modifiers: int = 0,
         joystick_button: Optional[int] = None,
         hat_direction: Optional[HatDirection] = None,
-        interval: Optional[float] = None
+        interval: Optional[float] = None,
     ) -> Callable[[ActionFunctionType], Action]:
         """Add an action to this object.
 
@@ -82,16 +85,21 @@ class ActionMap:
         def inner(func: ActionFunctionType) -> Action:
             """Actually add the action."""
             a: Action = Action(
-                title, func, symbol=symbol, mouse_button=mouse_button,
-                modifiers=modifiers, joystick_button=joystick_button,
-                hat_direction=hat_direction, interval=interval
+                title,
+                func,
+                symbol=symbol,
+                mouse_button=mouse_button,
+                modifiers=modifiers,
+                joystick_button=joystick_button,
+                hat_direction=hat_direction,
+                interval=interval,
             )
             self.actions.append(a)
             return a
 
         return inner
 
-    def add_actions(self, action_map: 'ActionMap') -> None:
+    def add_actions(self, action_map: "ActionMap") -> None:
         """Add the actions from the provided map to this map.
 
         :param action_map: The map whose actions should be appended to this

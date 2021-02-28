@@ -60,7 +60,7 @@ class ConfigMenu(Menu):
     config: Config = attrib()
 
     @config.default
-    def earwax_config(instance: 'ConfigMenu') -> Config:
+    def earwax_config(instance: "ConfigMenu") -> Config:
         """Return the main earwax configuration."""
         return instance.game.config
 
@@ -82,7 +82,7 @@ class ConfigMenu(Menu):
                 subsection = self.config.__config_subsections__[name]
                 name = self.get_subsection_name(subsection, name)
                 self.add_item(
-                    self.subsection_menu(subsection, name), title=f'{name}...'
+                    self.subsection_menu(subsection, name), title=f"{name}..."
                 )
             elif name in self.config.__config_values__:
                 value = self.config.__config_values__[name]
@@ -90,21 +90,21 @@ class ConfigMenu(Menu):
                 self.add_item(self.option_menu(value, name), title=name)
         # Now, let's add us some type handlers.
         self.type_handler(
-            bool, lambda o, n: 'Disable' if o.value else 'Enable'
+            bool, lambda o, n: "Disable" if o.value else "Enable"
         )(self.handle_bool)
-        self.type_handler(type(None), lambda option, name: 'Clear Value')(
+        self.type_handler(type(None), lambda option, name: "Clear Value")(
             self.clear_value
         )
-        self.type_handler(str, lambda option, name: 'Enter String')(
+        self.type_handler(str, lambda option, name: "Enter String")(
             self.handle_string
         )
-        self.type_handler(int, lambda option, name: 'Enter Integer')(
+        self.type_handler(int, lambda option, name: "Enter Integer")(
             self.handle_int
         )
-        self.type_handler(float, lambda option, name: 'Enter Float')(
+        self.type_handler(float, lambda option, name: "Enter Float")(
             self.handle_float
         )
-        self.type_handler(Path, lambda option, name: 'Select a path')(
+        self.type_handler(Path, lambda option, name: "Select a path")(
             self.handle_path
         )
 
@@ -117,7 +117,7 @@ class ConfigMenu(Menu):
         :param option: The :class:`~earwax.ConfigValue` instance to work on.
         """
         option.value = not option.value
-        self.game.output('Enabled' if option.value else 'Disabled')
+        self.game.output("Enabled" if option.value else "Disabled")
         self.game.pop_level()
 
     def clear_value(self, option: ConfigValue) -> None:
@@ -132,12 +132,12 @@ class ConfigMenu(Menu):
             should be set to ``None``.
         """
         option.value = None
-        self.game.output('Cleared.')
+        self.game.output("Cleared.")
         self.game.pop_level()
 
-    def handle_string(self, option: ConfigValue) -> Generator[
-        None, None, None
-    ]:
+    def handle_string(
+        self, option: ConfigValue
+    ) -> Generator[None, None, None]:
         """Allow editing strings.
 
         Used by the default :class:`~earwax.TypeHandler` that
@@ -145,9 +145,9 @@ class ConfigMenu(Menu):
 
         :param option: The :class:`~earwax.ConfigValue` instance to work on.
         """
-        self.game.output(f'Enter value: {option.value}')
+        self.game.output(f"Enter value: {option.value}")
         yield
-        e: Editor = Editor(self.game, text=option.value or '')
+        e: Editor = Editor(self.game, text=option.value or "")
 
         @e.event
         def on_submit(value: str):
@@ -157,9 +157,7 @@ class ConfigMenu(Menu):
 
         self.game.push_level(e)
 
-    def handle_int(self, option: ConfigValue) -> Generator[
-        None, None, None
-    ]:
+    def handle_int(self, option: ConfigValue) -> Generator[None, None, None]:
         """Allow editing integers.
 
         Used by the default :class:`~earwax.TypeHandler` that
@@ -167,27 +165,25 @@ class ConfigMenu(Menu):
 
         :param option: The :class:`~earwax.ConfigValue` instance to work on.
         """
-        self.game.output(f'Enter value: {option.value}')
+        self.game.output(f"Enter value: {option.value}")
         yield
-        e: Editor = Editor(self.game, text=str(option.value) or '')
+        e: Editor = Editor(self.game, text=str(option.value) or "")
 
         @e.event
         def on_submit(value: str):
             """Set the option value."""
             if not value:
-                value = '0'
+                value = "0"
             try:
                 self.set_value(option, int(value))()
             except ValueError:
-                self.game.output('You must enter a number.')
+                self.game.output("You must enter a number.")
             finally:
                 self.game.pop_level()
 
         self.game.push_level(e)
 
-    def handle_float(self, option: ConfigValue) -> Generator[
-        None, None, None
-    ]:
+    def handle_float(self, option: ConfigValue) -> Generator[None, None, None]:
         """Allow editing floats.
 
         Used by the default :class:`~earwax.TypeHandler` that
@@ -195,19 +191,19 @@ class ConfigMenu(Menu):
 
         :param option: The :class:`~earwax.ConfigValue` instance to work on.
         """
-        self.game.output(f'Enter value: {option.value}')
+        self.game.output(f"Enter value: {option.value}")
         yield
-        e: Editor = Editor(self.game, text=str(option.value) or '')
+        e: Editor = Editor(self.game, text=str(option.value) or "")
 
         @e.event
         def on_submit(value: str):
             """Set the option value."""
             if not value:
-                value = '0.0'
+                value = "0.0"
             try:
                 self.set_value(option, float(value))()
             except ValueError:
-                self.game.output('You must enter a number.')
+                self.game.output("You must enter a number.")
             finally:
                 self.game.pop_level()
 
@@ -231,18 +227,21 @@ class ConfigMenu(Menu):
         t: object = option.type_
         empty_label: Optional[str] = None
         if is_union_type(t) and type(None) in get_args(t):
-            empty_label = 'Clear'
+            empty_label = "Clear"
         fm: FileMenu = FileMenu(
-            self.game, 'Select Path',  # type: ignore[arg-type]
-            path=option.value.parent if isinstance(option.value, Path) else
-            Path.cwd(), func=inner,
-            empty_label=empty_label
+            self.game,
+            "Select Path",  # type: ignore[arg-type]
+            path=option.value.parent
+            if isinstance(option.value, Path)
+            else Path.cwd(),
+            func=inner,
+            empty_label=empty_label,
         )
         self.game.push_level(fm)
 
-    def type_handler(self, type_: object, title: TitleFunc) -> Callable[
-        [TypeHandlerFunc], TypeHandlerFunc
-    ]:
+    def type_handler(
+        self, type_: object, title: TitleFunc
+    ) -> Callable[[TypeHandlerFunc], TypeHandlerFunc]:
         """Add a type handler.
 
         Decorate a function to be used as a type handler::
@@ -309,9 +308,9 @@ class ConfigMenu(Menu):
             return option.name
         return name
 
-    def subsection_menu(self, subsection: Config, name: str) -> Callable[
-        [], Generator[None, None, None]
-    ]:
+    def subsection_menu(
+        self, subsection: Config, name: str
+    ) -> Callable[[], Generator[None, None, None]]:
         """Add a menu for the given subsection.
 
         By default, creates a new :class:`earwax.ConfigMenu` instance, and
@@ -334,9 +333,9 @@ class ConfigMenu(Menu):
 
         return inner
 
-    def option_menu(self, option: ConfigValue, name: str) -> Callable[
-        [], Generator[None, None, None]
-    ]:
+    def option_menu(
+        self, option: ConfigValue, name: str
+    ) -> Callable[[], Generator[None, None, None]]:
         """Add a menu for the given option.
 
         If the type of the provided option is a ``Union`` type (like
@@ -362,10 +361,12 @@ class ConfigMenu(Menu):
             yield
             printable_value: str = option.value_to_string()
             t: object = type(option.value)
-            if option.value_converters is not None and \
-               t in option.value_converters:
+            if (
+                option.value_converters is not None
+                and t in option.value_converters
+            ):
                 printable_value = option.value_converters[t](option)
-            m: Menu = Menu(self.game, f'{name}: {printable_value}')
+            m: Menu = Menu(self.game, f"{name}: {printable_value}")
             types: Tuple[object]
             if is_union_type(option.type_):
                 types = get_args(option.type_)
@@ -379,7 +380,7 @@ class ConfigMenu(Menu):
                         m.add_item(
                             self.set_value(option, value),
                             title=f'{"* " if option.value == value else ""}'
-                            f'{repr(value)}'
+                            f"{repr(value)}",
                         )
                 elif type_ in self.type_handlers:
                     handler: TypeHandler = self.type_handlers[type_]
@@ -391,14 +392,14 @@ class ConfigMenu(Menu):
                     raise UnknownTypeError(type_)
             m.add_item(
                 self.set_value(option, option.default),
-                title=f'Restore Default ({repr(option.default)})'
+                title=f"Restore Default ({repr(option.default)})",
             )
             self.game.push_level(m)
 
         return inner
 
     def set_value(
-        self, option: ConfigValue, value: Any, message: str = 'Done.'
+        self, option: ConfigValue, value: Any, message: str = "Done."
     ) -> Callable[[], None]:
         """Set a value.
 

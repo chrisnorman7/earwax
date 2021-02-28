@@ -7,8 +7,17 @@ from pytest import raises
 from synthizer import GlobalFdnReverb
 
 from earwax import (
-    Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door, Game, NearestBox,
-    Point, Portal)
+    Box,
+    BoxBounds,
+    BoxLevel,
+    BoxTypes,
+    CurrentBox,
+    Door,
+    Game,
+    NearestBox,
+    Point,
+    Portal,
+)
 
 
 class CollideWorks(Exception):
@@ -107,8 +116,10 @@ def test_move(game: Game, box_level: BoxLevel) -> None:
 
     @box_level.event
     def on_move_fail(
-        distance: float, vertical: Optional[float], bearing: int,
-        coordinates: Point
+        distance: float,
+        vertical: Optional[float],
+        bearing: int,
+        coordinates: Point,
     ) -> None:
         assert distance == 1.0
         assert vertical is None
@@ -164,9 +175,7 @@ def test_activate(
     assert door.open is True
     b: Box = Box(game, box.start, box.start, data=door)
     box_level.add_box(b)
-    assert dist(
-        box_level.coordinates.coordinates, b.start.coordinates
-    ) < 2.0
+    assert dist(box_level.coordinates.coordinates, b.start.coordinates) < 2.0
     assert box_level.get_containing_box(box_level.coordinates) is b
     assert b.is_door
     a()
@@ -198,8 +207,10 @@ def test_move_fail(game: Game, box_level: BoxLevel) -> None:
 
     @box_level.event
     def on_move_fail(
-        distance: float, vertical: Optional[float], bearing: int,
-        coordinates: Point
+        distance: float,
+        vertical: Optional[float],
+        bearing: int,
+        coordinates: Point,
     ) -> None:
         raise MoveFailWorks(distance, vertical, bearing, coordinates)
 
@@ -252,8 +263,10 @@ def test_get_current_box(game: Game, door: Door) -> None:
     assert cb.box is second
     assert cb.coordinates == second.start
     doorstep: Box[Door] = Box(
-        game, third.bounds.bottom_front_right.copy(), third.end.copy(),
-        data=door
+        game,
+        third.bounds.bottom_front_right.copy(),
+        third.end.copy(),
+        data=door,
     )
     box_level.add_box(doorstep)
     box_level.set_coordinates(doorstep.start)
@@ -261,7 +274,9 @@ def test_get_current_box(game: Game, door: Door) -> None:
     parent: Box = Box(game, Point(0, 0, 0), Point(100, 100, 5))
     # Make a base for tracks to sit on.
     tracks: Box = Box(
-        game, parent.start, parent.bounds.bottom_back_right + Point(0, 2, 0),
+        game,
+        parent.start,
+        parent.bounds.bottom_back_right + Point(0, 2, 0),
     )
     box_level = BoxLevel(game, boxes=[parent, tracks])
     assert box_level.get_containing_box(Point(0, 0, 0)) is tracks
@@ -365,8 +380,11 @@ def test_nearest_portal(game: Game) -> None:
     assert isinstance(nearest_portal, NearestBox)
     assert nearest_portal.box is doorstep
     second_doorstep: Box[Portal] = Box(
-        game, room.start.copy(), room.bounds.top_back_left.copy(), data=p,
-        box_level=box_level
+        game,
+        room.start.copy(),
+        room.bounds.top_back_left.copy(),
+        data=p,
+        box_level=box_level,
     )
     nearest_portal = box_level.nearest_portal(room.start)
     assert isinstance(nearest_portal, NearestBox)
@@ -383,8 +401,10 @@ def test_add_box(game: Game, box_level: BoxLevel, box: Box) -> None:
     assert box_level.current_box is None
     box_level.current_box = cb
     box_2: Box = Box(
-        game, box.bounds.bottom_front_right + Point(0, 1, 0),
-        box.end + Point(0, 5, 0), box_level=box_level
+        game,
+        box.bounds.bottom_front_right + Point(0, 1, 0),
+        box.end + Point(0, 5, 0),
+        box_level=box_level,
     )
     assert box_level.boxes == [box, box_2]
     assert box_level.current_box is cb

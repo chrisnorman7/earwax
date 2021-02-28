@@ -23,32 +23,32 @@ def test_buffer_cache(buffer_cache: BufferCache, game: Game) -> None:
 
 def test_get_buffer(buffer_cache: BufferCache):
     """Test the get_buffer method."""
-    b = buffer_cache.get_buffer('file', 'sound.wav')
+    b = buffer_cache.get_buffer("file", "sound.wav")
     assert isinstance(b, Buffer)
     assert len(buffer_cache.buffer_uris) == 1
-    uri: str = buffer_cache.get_uri('file', 'sound.wav')
+    uri: str = buffer_cache.get_uri("file", "sound.wav")
     assert uri == buffer_cache.buffer_uris[0]
     assert buffer_cache.buffers[uri] is b
     assert buffer_cache.current_size == buffer_cache.get_size(b)
     # Try to get a non existant file.
     with raises(SynthizerError):
-        buffer_cache.get_buffer('file', 'invalid.wav')
+        buffer_cache.get_buffer("file", "invalid.wav")
     # Try to open a non sound file.
     with raises(SynthizerError):
-        buffer_cache.get_buffer('file', __file__)
+        buffer_cache.get_buffer("file", __file__)
     # Try to open a directory.
     with raises(SynthizerError):
-        buffer_cache.get_buffer('file', 'earwax')
+        buffer_cache.get_buffer("file", "earwax")
     # Check that the buffers are cached:
-    assert buffer_cache.get_buffer('file', 'sound.wav') is b
+    assert buffer_cache.get_buffer("file", "sound.wav") is b
     # Check the size is still as it was.
     assert buffer_cache.current_size == buffer_cache.get_size(b)
 
 
 def test_current_size(buffer_cache: BufferCache) -> None:
     """Test the current_size attribute."""
-    b1: Buffer = buffer_cache.get_buffer('file', 'sound.wav')
-    b2: Buffer = buffer_cache.get_buffer('file', 'move.wav')
+    b1: Buffer = buffer_cache.get_buffer("file", "sound.wav")
+    b2: Buffer = buffer_cache.get_buffer("file", "move.wav")
     assert buffer_cache.current_size == (
         buffer_cache.get_size(b1) + buffer_cache.get_size(b2)
     )
@@ -56,9 +56,9 @@ def test_current_size(buffer_cache: BufferCache) -> None:
 
 def test_pop_buffer(buffer_cache: BufferCache) -> None:
     """Test the pop_buffer method."""
-    buffer_cache.get_buffer('file', 'sound.wav')
+    buffer_cache.get_buffer("file", "sound.wav")
     uri: str = buffer_cache.buffer_uris[0]
-    buffer_cache.get_buffer('file', 'move.wav')
+    buffer_cache.get_buffer("file", "move.wav")
     assert len(buffer_cache.buffer_uris) == 2
     assert uri == buffer_cache.buffer_uris[-1]
     buffer_cache.pop_buffer()
@@ -72,11 +72,11 @@ def test_pop_buffer(buffer_cache: BufferCache) -> None:
 
 def test_max_size(buffer_cache: BufferCache) -> None:
     """Test that maximum size is respected."""
-    b1: Buffer = buffer_cache.get_buffer('file', 'sound.wav')
+    b1: Buffer = buffer_cache.get_buffer("file", "sound.wav")
     uri: str = buffer_cache.buffer_uris[0]
     s1: int = buffer_cache.get_size(b1)
     buffer_cache.max_size = s1
-    b2: Buffer = buffer_cache.get_buffer('file', 'move.wav')
+    b2: Buffer = buffer_cache.get_buffer("file", "move.wav")
     assert uri not in buffer_cache.buffer_uris
     s2: int = buffer_cache.get_size(b2)
     assert len(buffer_cache.buffer_uris) == 1
@@ -90,20 +90,20 @@ def test_buffer_directory(buffer_cache: BufferCache):
         # This test will throw an error because of non sound files.
         BufferDirectory(buffer_cache, Path())
     b: BufferDirectory = BufferDirectory(
-        buffer_cache, Path.cwd(), glob='*.wav'
+        buffer_cache, Path.cwd(), glob="*.wav"
     )
     assert isinstance(b.buffer_cache, BufferCache)
     assert len(b.buffers) == 2
-    assert isinstance(b.buffers['move.wav'], Buffer)
-    assert isinstance(b.buffers['sound.wav'], Buffer)
+    assert isinstance(b.buffers["move.wav"], Buffer)
+    assert isinstance(b.buffers["sound.wav"], Buffer)
     with raises(KeyError):
-        b.buffers['nothing.wav']
-    assert b.buffers['move.wav'] != b.buffers['sound.wav']
-    assert isinstance(b.paths['sound.wav'], Path)
-    assert isinstance(b.paths['move.wav'], Path)
-    assert b.paths['sound.wav'] != b.paths['move.wav']
+        b.buffers["nothing.wav"]
+    assert b.buffers["move.wav"] != b.buffers["sound.wav"]
+    assert isinstance(b.paths["sound.wav"], Path)
+    assert isinstance(b.paths["move.wav"], Path)
+    assert b.paths["sound.wav"] != b.paths["move.wav"]
     with raises(KeyError):
-        b.paths['nothing.wav']
+        b.paths["nothing.wav"]
     assert isinstance(b.random_path(), Path)
     p: Path = b.random_path()
     assert b.paths[p.name] is p

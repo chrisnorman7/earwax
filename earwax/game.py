@@ -5,8 +5,19 @@ from inspect import isgenerator
 from logging import Logger, getLogger
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import (Any, Callable, Dict, Generator, Iterable, Iterator, List,
-                    Optional, Tuple, Type, cast)
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    cast,
+)
 from warnings import warn
 
 from attr import Factory, attrib, attrs
@@ -14,9 +25,17 @@ from attr import Factory, attrib, attrs
 from .credit import Credit
 from .input_modes import InputModes
 from .menus import ActionMenu, Menu
-from .pyglet import (EVENT_HANDLED, EVENT_UNHANDLED, Joystick, Window, app,
-                     get_joysticks, get_settings_path, schedule_interval,
-                     unschedule)
+from .pyglet import (
+    EVENT_HANDLED,
+    EVENT_UNHANDLED,
+    Joystick,
+    Window,
+    app,
+    get_joysticks,
+    get_settings_path,
+    schedule_interval,
+    unschedule,
+)
 from .sound import AlreadyDestroyed, BufferCache, Sound
 from .task import IntervalFunction, Task, TaskFunction
 from .types import EventType, NoneGenerator
@@ -27,11 +46,20 @@ except ModuleNotFoundError:
     detect_screen_reader, load, unload = (None, None, None)
 
 try:
-    from synthizer import (Context, Event, FinishedEvent, LoopedEvent,
-                           initialized)
+    from synthizer import (
+        Context,
+        Event,
+        FinishedEvent,
+        LoopedEvent,
+        initialized,
+    )
 except ModuleNotFoundError:
     Context, Event, FinishedEvent, LoopedEvent, initialized = (
-        object, object, object, object, None
+        object,
+        object,
+        object,
+        object,
+        None,
     )
 
 from .action import Action, HatDirection, OptionalGenerator
@@ -42,8 +70,11 @@ from .level import Level
 from .mixins import RegisterEventMixin
 from .sound import SoundManager
 from .speech import tts
-from .types import (ActionListType, JoyButtonReleaseGeneratorDictType,
-                    ReleaseGeneratorDictType)
+from .types import (
+    ActionListType,
+    JoyButtonReleaseGeneratorDictType,
+    ReleaseGeneratorDictType,
+)
 
 NoneType: Type[None] = type(None)
 
@@ -134,7 +165,7 @@ class Game(RegisterEventMixin):
 
     levels: List[Level] = attrib(default=Factory(list), init=False, repr=False)
 
-    triggered_actions: 'ActionListType' = attrib(
+    triggered_actions: "ActionListType" = attrib(
         default=Factory(list), init=False, repr=False
     )
 
@@ -174,7 +205,7 @@ class Game(RegisterEventMixin):
     buffer_cache: BufferCache = attrib(repr=False)
 
     @buffer_cache.default
-    def get_default_buffer_cache(instance: 'Game') -> BufferCache:
+    def get_default_buffer_cache(instance: "Game") -> BufferCache:
         """Return the default buffer cache.
 
         :param instance: The game to return the buffer cache for.
@@ -194,16 +225,17 @@ class Game(RegisterEventMixin):
     thread_pool: Executor = attrib(
         default=Factory(
             lambda: ThreadPoolExecutor(max(1, int(cpu_count() / 4)))
-        ), repr=False
+        ),
+        repr=False,
     )
 
     credits: List[Credit] = attrib(default=Factory(list), repr=False)
     logger: Logger = attrib(repr=False)
 
     @logger.default
-    def get_default_logger(instance: 'Game') -> Logger:
+    def get_default_logger(instance: "Game") -> Logger:
         """Return a logger."""
-        return getLogger(f'<game {instance.name}>')
+        return getLogger(f"<game {instance.name}>")
 
     input_mode: InputModes = attrib(
         default=Factory(lambda: InputModes.keyboard), init=False, repr=False
@@ -212,10 +244,17 @@ class Game(RegisterEventMixin):
     def __attrs_post_init__(self) -> None:
         """Register default events."""
         for func in (
-            self.before_run, self.after_run, self.on_close,
-            self.on_joyhat_motion, self.on_joybutton_press,
-            self.on_joybutton_release, self.on_key_press, self.on_key_release,
-            self.on_mouse_press, self.on_mouse_release, self.setup
+            self.before_run,
+            self.after_run,
+            self.on_close,
+            self.on_joyhat_motion,
+            self.on_joybutton_press,
+            self.on_joybutton_release,
+            self.on_key_press,
+            self.on_key_release,
+            self.on_mouse_press,
+            self.on_mouse_release,
+            self.setup,
         ):
             self.register_event(cast(EventType, func))
 
@@ -312,8 +351,11 @@ class Game(RegisterEventMixin):
         return True
 
     def press_key(
-        self, symbol: int, modifiers: int, string: Optional[str] = None,
-        motion: Optional[int] = None
+        self,
+        symbol: int,
+        modifiers: int,
+        string: Optional[str] = None,
+        motion: Optional[int] = None,
     ) -> None:
         """Simulate a key press.
 
@@ -340,9 +382,9 @@ class Game(RegisterEventMixin):
         """
         self.on_key_press(symbol, modifiers)
         if string is not None:
-            getattr(self, 'on_text', lambda s: None)(string)
+            getattr(self, "on_text", lambda s: None)(string)
         if motion is not None:
-            getattr(self, 'on_text_motion', lambda m: None)(motion)
+            getattr(self, "on_text_motion", lambda m: None)(motion)
         self.on_key_release(symbol, modifiers)
 
     def on_mouse_press(
@@ -454,9 +496,7 @@ class Game(RegisterEventMixin):
                         list(cast(Iterable[None], res))
                         self.joybutton_release_generators[
                             (joystick.device.name, button)
-                        ] = cast(
-                            NoneGenerator, res
-                        )
+                        ] = cast(NoneGenerator, res)
             return True
         return False
 
@@ -561,6 +601,7 @@ class Game(RegisterEventMixin):
     def init_sdl(self) -> None:
         """Initialise SDL."""
         import sdl2
+
         sdl2.SDL_Init(sdl2.SDL_INIT_EVERYTHING)
 
     def setup_run(self, initial_level: Optional[Level]) -> None:
@@ -573,28 +614,31 @@ class Game(RegisterEventMixin):
 
         :param initial_level: The initial level to be pushed.
         """
-        self.dispatch_event('setup')
+        self.dispatch_event("setup")
         if self.audio_context is not None:
             self.audio_context.gain = self.config.sound.master_volume.value
             if self.interface_sound_manager is None:
                 self.interface_sound_manager = SoundManager(
-                    self.audio_context, buffer_cache=self.buffer_cache,
-                    name='Interface sound manager',
-                    default_gain=self.config.sound.sound_volume.value
+                    self.audio_context,
+                    buffer_cache=self.buffer_cache,
+                    name="Interface sound manager",
+                    default_gain=self.config.sound.sound_volume.value,
                 )
             if self.music_sound_manager is None:
                 self.music_sound_manager = SoundManager(
-                    self.audio_context, buffer_cache=self.buffer_cache,
-                    name='Music sound manager',
+                    self.audio_context,
+                    buffer_cache=self.buffer_cache,
+                    name="Music sound manager",
                     default_gain=self.config.sound.music_volume.value,
-                    default_looping=True
+                    default_looping=True,
                 )
             if self.ambiance_sound_manager is None:
                 self.ambiance_sound_manager = SoundManager(
-                    self.audio_context, buffer_cache=self.buffer_cache,
-                    name='Ambiance sound manager',
+                    self.audio_context,
+                    buffer_cache=self.buffer_cache,
+                    name="Ambiance sound manager",
                     default_gain=self.config.sound.ambiance_volume.value,
-                    default_looping=True
+                    default_looping=True,
                 )
         if initial_level is not None:
             self.push_level(initial_level)
@@ -610,14 +654,16 @@ class Game(RegisterEventMixin):
 
         * Dispatch the :meth:`~earwax.Game.after_run` event.
         """
-        self.dispatch_event('before_run')
+        self.dispatch_event("before_run")
         app.run()
         unload()
-        self.dispatch_event('after_run')
+        self.dispatch_event("after_run")
 
     def run(
-        self, window: Window, mouse_exclusive: bool = True,
-        initial_level: Optional[Level] = None
+        self,
+        window: Window,
+        mouse_exclusive: bool = True,
+        initial_level: Optional[Level] = None,
     ) -> None:
         """Run the game.
 
@@ -662,7 +708,7 @@ class Game(RegisterEventMixin):
         self.window = window
         self.open_joysticks()
         if detect_screen_reader() is None:
-            warn('No screen reader detected.')
+            warn("No screen reader detected.")
         if self.audio_context is None:
             with initialized():
                 self.audio_context = Context(enable_events=True)
@@ -676,6 +722,7 @@ class Game(RegisterEventMixin):
     def open_joysticks(self) -> None:
         """Open and attach events to all attached joysticks."""
         import sdl2
+
         i: int
         j: Joystick
         for i, j in enumerate(get_joysticks()):
@@ -707,9 +754,9 @@ class Game(RegisterEventMixin):
             stack.
         """
         if self.level is not None:
-            self.level.dispatch_event('on_cover', level)
+            self.level.dispatch_event("on_cover", level)
         self.levels.append(level)
-        level.dispatch_event('on_push')
+        level.dispatch_event("on_push")
 
     def replace_level(self, level: Level) -> None:
         """Pop the current level, then push the new one.
@@ -735,9 +782,9 @@ class Game(RegisterEventMixin):
         :meth:`~earwax.Level.on_reveal` on the one below it.
         """
         level: Level = self.levels.pop()
-        level.dispatch_event('on_pop')
+        level.dispatch_event("on_pop")
         if self.level is not None:
-            self.level.dispatch_event('on_reveal')
+            self.level.dispatch_event("on_reveal")
 
     def pop_levels(self, n: int) -> None:
         """Pop the given number of levels.
@@ -811,7 +858,7 @@ class Game(RegisterEventMixin):
         """
         if self.window is None:
             raise GameNotRunning()
-        self.window.dispatch_event('on_close')
+        self.window.dispatch_event("on_close")
 
     def register_task(
         self, interval: IntervalFunction
@@ -850,7 +897,7 @@ class Game(RegisterEventMixin):
         task.stop()
         self.tasks.remove(task)
 
-    def push_action_menu(self, title: str = 'Actions', **kwargs) -> ActionMenu:
+    def push_action_menu(self, title: str = "Actions", **kwargs) -> ActionMenu:
         """Push and return an action menu.
 
         This method reduces the amount of code required to create a help menu::
@@ -872,7 +919,7 @@ class Game(RegisterEventMixin):
         self.push_level(menu)
         return menu
 
-    def push_credits_menu(self, title='Game Credits') -> Menu:
+    def push_credits_menu(self, title="Game Credits") -> Menu:
         """Push a credits menu onto the stack.
 
         This method reduces the amount of code needed to push a credits menu::
@@ -902,6 +949,7 @@ class Game(RegisterEventMixin):
         import sdl2
 
         from .sdl import maybe_raise
+
         index: int = self.joysticks.index(joystick)
         haptic: Any = sdl2.SDL_HapticOpen(index)
         maybe_raise(sdl2.SDL_HapticRumbleInit(haptic))
@@ -915,6 +963,7 @@ class Game(RegisterEventMixin):
         import sdl2
 
         from .sdl import maybe_raise
+
         index: int = self.joysticks.index(joystick)
         haptic: Any = sdl2.SDL_HapticOpen(index)
         maybe_raise(sdl2.SDL_HapticRumbleStop(haptic))
@@ -926,7 +975,7 @@ class Game(RegisterEventMixin):
         """
         v: float = min(
             self.config.sound.max_volume.value,
-            self.config.sound.master_volume.value + amount
+            self.config.sound.master_volume.value + amount,
         )
         if v < 0:
             v = 0
@@ -968,7 +1017,7 @@ class Game(RegisterEventMixin):
         return i
 
     def cancel(
-        self, message: str = 'Cancelled', level: Optional[Level] = None
+        self, message: str = "Cancelled", level: Optional[Level] = None
     ) -> None:
         """Cancel with an optional message.
 
@@ -1001,8 +1050,10 @@ class Game(RegisterEventMixin):
                     sound = event.source.get_userdata()
                 if sound is None:
                     self.logger.debug(
-                        'Ignoring event %r (context=%r, source=%r).',
-                        event, event.context, event.source
+                        "Ignoring event %r (context=%r, source=%r).",
+                        event,
+                        event.context,
+                        event.source,
                     )
                     continue
                 if isinstance(event, FinishedEvent):
@@ -1011,26 +1062,28 @@ class Game(RegisterEventMixin):
                             sound.on_finished(sound)
                         except Exception:
                             self.logger.exception(
-                                'There was an error while running the '
-                                'on_finished event for sound %s.', sound
+                                "There was an error while running the "
+                                "on_finished event for sound %s.",
+                                sound,
                             )
                     if not sound.keep_around:
                         try:
                             sound.destroy()
-                            self.logger.debug('Destroyed sound %s.', sound)
+                            self.logger.debug("Destroyed sound %s.", sound)
                         except AlreadyDestroyed:
                             self.logger.info(
-                                'Sound %s has already been destroyed.', sound
+                                "Sound %s has already been destroyed.", sound
                             )
                     else:
-                        self.logger.debug('Not destroying sound %s.', sound)
+                        self.logger.debug("Not destroying sound %s.", sound)
                 if isinstance(event, LoopedEvent):
-                    self.logger.debug('Looped sound %s.', sound)
+                    self.logger.debug("Looped sound %s.", sound)
                     if sound.on_looped is not None:
                         try:
                             sound.on_looped(sound)
                         except Exception:
                             self.logger.exception(
-                                'There was an error running the on_looped '
-                                'event for sound %s.', sound
+                                "There was an error running the on_looped "
+                                "event for sound %s.",
+                                sound,
                             )

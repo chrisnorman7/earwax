@@ -88,7 +88,10 @@ class NetworkConnection(RegisterEventMixin):
     def __attrs_post_init__(self) -> None:
         """Register default events."""
         for func in (
-            self.on_connect, self.on_disconnect, self.on_data, self.on_error
+            self.on_connect,
+            self.on_disconnect,
+            self.on_data,
+            self.on_error,
         ):
             self.register_event(func)  # type: ignore[arg-type]
 
@@ -153,7 +156,7 @@ class NetworkConnection(RegisterEventMixin):
             schedule(self.poll)
         except error as e:
             self.state = ConnectionStates.error
-            self.dispatch_event('on_error', e)
+            self.dispatch_event("on_error", e)
             self.socket = None
 
     def close(self) -> None:
@@ -165,7 +168,7 @@ class NetworkConnection(RegisterEventMixin):
         if self.socket is None:
             raise NotConnectedYet(self)
         self.socket.close()
-        self.dispatch_event('on_disconnect')
+        self.dispatch_event("on_disconnect")
         self.shutdown()
 
     def poll(self, dt: float) -> None:
@@ -189,18 +192,18 @@ class NetworkConnection(RegisterEventMixin):
             try:
                 data: bytes = self.socket.recv(1024)
                 if not data:
-                    self.dispatch_event('on_disconnect')
+                    self.dispatch_event("on_disconnect")
                     return self.shutdown()
                 chunks.append(data)
             except BlockingIOError:
                 if self.state is ConnectionStates.connecting:
                     self.state = ConnectionStates.connected
-                    self.dispatch_event('on_connect')
+                    self.dispatch_event("on_connect")
                 break  # There is no data to read.
             except error:
                 return  # Still connecting.
         if chunks:
-            self.dispatch_event('on_data', b''.join(chunks))
+            self.dispatch_event("on_data", b"".join(chunks))
 
     def shutdown(self) -> None:
         """Shutdown this server.

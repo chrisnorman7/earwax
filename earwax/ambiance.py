@@ -40,7 +40,7 @@ class Ambiance:
     )
 
     @classmethod
-    def from_path(cls, path: Path, coordinates: Point) -> 'Ambiance':
+    def from_path(cls, path: Path, coordinates: Point) -> "Ambiance":
         """Return a new instance from a path.
 
         :param path: The path to build the ambiance from.
@@ -50,7 +50,7 @@ class Ambiance:
         :param coordinates: The coordinates of this ambiance.
         """
         path = random_file(path)
-        return cls('file', str(path), coordinates=coordinates)
+        return cls("file", str(path), coordinates=coordinates)
 
     def play(self, sound_manager: SoundManager, **kwargs) -> None:
         """Load and position the sound.
@@ -61,8 +61,8 @@ class Ambiance:
         :param kwargs: The additional keyword arguments to pass to
             :meth:`~earwax.SoundManager.play_path`.
         """
-        kwargs.setdefault('position', self.coordinates)
-        kwargs.setdefault('looping', True)
+        kwargs.setdefault("position", self.coordinates)
+        kwargs.setdefault("looping", True)
         self.sound = sound_manager.play_stream(
             self.protocol, self.path, **kwargs
         )

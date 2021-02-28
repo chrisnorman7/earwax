@@ -3,7 +3,7 @@
 import sys
 
 if True:
-    sys.path.insert(0, '..')
+    sys.path.insert(0, "..")
 
 from pathlib import Path
 from typing import Generator, Optional
@@ -11,35 +11,45 @@ from typing import Generator, Optional
 from pyglet.window import Window, key, mouse
 from synthizer import SynthizerError
 
-from earwax import (Config, ConfigMenu, ConfigValue, Editor, FileMenu, Game,
-                    Level)
+from earwax import (
+    Config,
+    ConfigMenu,
+    ConfigValue,
+    Editor,
+    FileMenu,
+    Game,
+    Level,
+)
 from earwax.types import NoneGenerator, OptionalGenerator
 
 
 class ConnectionConfig(Config):
     """Pretend connection configuration."""
 
-    __section_name__ = 'Connection Options'
+    __section_name__ = "Connection Options"
     connection_speed = ConfigValue(
-        'normal', type_=('slow', 'normal', 'fast'), name='Connection speed'
+        "normal", type_=("slow", "normal", "fast"), name="Connection speed"
     )
     tls = ConfigValue(
-        True, type_=Optional[bool], name='Use TLS', value_converters={
-            type(None): lambda o: 'Automatic',
-            bool: lambda o: 'Enabled' if o.value else 'Disabled'
-        }
+        True,
+        type_=Optional[bool],
+        name="Use TLS",
+        value_converters={
+            type(None): lambda o: "Automatic",
+            bool: lambda o: "Enabled" if o.value else "Disabled",
+        },
     )
     timeout = ConfigValue(
-        30.0, name='Connection timeout', value_converters={
-            float: lambda o: f'{o.value} seconds'
-        }
+        30.0,
+        name="Connection timeout",
+        value_converters={float: lambda o: f"{o.value} seconds"},
     )
 
 
 class ServerConfig(Config):
     """Configure an imaginary server."""
 
-    hostname = ConfigValue('localhost')
+    hostname = ConfigValue("localhost")
     port = ConfigValue(1234)
     connection = ConnectionConfig()
 
@@ -47,12 +57,12 @@ class ServerConfig(Config):
 class ExampleConfig(Config):
     """Accessed with the o key."""
 
-    __section_name__ = 'Options'
-    username = ConfigValue('')
-    remember = ConfigValue(True, name='Remember username')
+    __section_name__ = "Options"
+    username = ConfigValue("")
+    remember = ConfigValue(True, name="Remember username")
     server = ServerConfig()
-    start_script = ConfigValue(None, type_=Optional[Path], name='Start script')
-    can_beep = ConfigValue(True, name='Allow beeping')
+    start_script = ConfigValue(None, type_=Optional[Path], name="Start script")
+    can_beep = ConfigValue(True, name="Allow beeping")
 
 
 g: Game = Game()
@@ -60,11 +70,11 @@ level: Level = Level(g)
 config: ExampleConfig = ExampleConfig()
 
 
-@level.action('Change window title', symbol=key.T, joystick_button=2)
+@level.action("Change window title", symbol=key.T, joystick_button=2)
 def set_title() -> OptionalGenerator:
     """Set the window title to the given text."""
     if g.window is not None:
-        g.output(f'Window title: {g.window.caption}')
+        g.output(f"Window title: {g.window.caption}")
         yield
         e: Editor = Editor(g, text=g.window.caption)
         g.push_level(e)
@@ -73,47 +83,44 @@ def set_title() -> OptionalGenerator:
         def on_submit(text: str) -> None:
             if g.window is not None:
                 g.window.set_caption(text)
-            g.output('Title set.')
+            g.output("Title set.")
             g.pop_level()
 
 
-@level.action('Quit', symbol=key.ESCAPE, joystick_button=3)
+@level.action("Quit", symbol=key.ESCAPE, joystick_button=3)
 def do_quit() -> None:
     """Quit the game."""
     if g.window is not None:
-        g.window.dispatch_event('on_close')
+        g.window.dispatch_event("on_close")
 
 
-@level.action('Beep', symbol=key.B, interval=0.75, joystick_button=0)
+@level.action("Beep", symbol=key.B, interval=0.75, joystick_button=0)
 def do_beep() -> None:
     """Speak something."""
     if config.can_beep.value:
-        sys.stdout.write('\a')
+        sys.stdout.write("\a")
         sys.stdout.flush()
 
 
-@level.action('Mouse thing', mouse_button=mouse.LEFT)
+@level.action("Mouse thing", mouse_button=mouse.LEFT)
 def mouse_thing():
     """Alert the player they pressed their left mouse button."""
-    g.output('Mouse down.')
+    g.output("Mouse down.")
     yield
-    g.output('Mouse up.')
+    g.output("Mouse up.")
 
 
 @level.action(
-    'Toggle beeping', symbol=key.P, mouse_button=mouse.RIGHT,
-    joystick_button=1
+    "Toggle beeping", symbol=key.P, mouse_button=mouse.RIGHT, joystick_button=1
 )
 def toggle_beep() -> Generator[None, None, None]:
     """Toggle beeping."""
     config.can_beep.value = not config.can_beep.value
     yield
-    g.output(
-        f'Beeping {"enabled" if config.can_beep.value else "disabled"}.'
-    )
+    g.output(f'Beeping {"enabled" if config.can_beep.value else "disabled"}.')
 
 
-@level.action('Menu', symbol=key.M)
+@level.action("Menu", symbol=key.M)
 def menu() -> OptionalGenerator:
     """Select a file."""
 
@@ -127,36 +134,39 @@ def menu() -> OptionalGenerator:
 
     yield
     menu: FileMenu = FileMenu(
-        g, 'Select A File',  # type: ignore[arg-type]
-        func=play_sound, path=Path.cwd(),
+        g,
+        "Select A File",  # type: ignore[arg-type]
+        func=play_sound,
+        path=Path.cwd(),
     )
     g.push_level(menu)
 
 
-@level.action('Options', symbol=key.O)
+@level.action("Options", symbol=key.O)
 def options() -> Generator[None, None, None]:
     """Show the options menu."""
     yield
     m: ConfigMenu = ConfigMenu(
-        g, 'Options',  # type: ignore[arg-type]
-        config=config
+        g, "Options", config=config  # type: ignore[arg-type]
     )
     g.push_level(m)
 
 
-@level.action('Configure Earwax', symbol=key.C)
+@level.action("Configure Earwax", symbol=key.C)
 def configure_earwax() -> Generator[None, None, None]:
     """Configure the earwax library."""
     yield
     m: ConfigMenu = ConfigMenu(
-        g, 'Earwax Configuration'  # type: ignore[arg-type]
+        g, "Earwax Configuration"  # type: ignore[arg-type]
     )
     g.push_level(m)
 
 
 @level.action(
-    'Show actions', symbol=key.SLASH, modifiers=key.MOD_SHIFT,
-    joystick_button=4
+    "Show actions",
+    symbol=key.SLASH,
+    modifiers=key.MOD_SHIFT,
+    joystick_button=4,
 )
 def actions_menu() -> NoneGenerator:
     """Push an actions menu."""
@@ -164,5 +174,5 @@ def actions_menu() -> NoneGenerator:
     g.push_action_menu()
 
 
-if __name__ == '__main__':
-    g.run(Window(caption='Example Game'), initial_level=level)
+if __name__ == "__main__":
+    g.run(Window(caption="Example Game"), initial_level=level)

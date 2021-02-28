@@ -42,55 +42,55 @@ key: {}
 def new_vault(args: Namespace) -> None:
     """Create a new vault file."""
     if os.path.isfile(args.filename):
-        print('Error:')
+        print("Error:")
         print()
-        print(f'File already exists: {args.filename}')
+        print(f"File already exists: {args.filename}")
         raise SystemExit
     yaml: str = data.format(Fernet.generate_key().decode())
-    with open(args.filename, 'w') as f:
+    with open(args.filename, "w") as f:
         f.write(yaml)
-    print(f'Created a new vault file at {args.filename}.')
-    print('You should edit this file, then compile it with')
+    print(f"Created a new vault file at {args.filename}.")
+    print("You should edit this file, then compile it with")
     filename: str = os.path.splitext(args.filename)[0]
-    print(f'`earwax vault compile {filename}.yaml {filename}.data`')
+    print(f"`earwax vault compile {filename}.yaml {filename}.data`")
 
 
 def compile_vault(args: Namespace) -> None:
     """Compile the given vault file."""
     fn: str = args.filename
     if not os.path.isfile(fn):
-        print('Error')
+        print("Error")
         print()
-        print(f'File does not exist: {fn}')
+        print(f"File does not exist: {fn}")
         raise SystemExit
-    with open(fn, 'r') as f:
+    with open(fn, "r") as f:
         data = load(f, Loader=CLoader)
     if (
-        isinstance(data, dict) and
-        isinstance(data.get('key', None), str) and
-        isinstance(data.get('files', None), dict)
+        isinstance(data, dict)
+        and isinstance(data.get("key", None), str)
+        and isinstance(data.get("files", None), dict)
     ):
-        files: dict[str, str] = data.get('files', {})
+        files: dict[str, str] = data.get("files", {})
         if not files:
-            print('Error:')
+            print("Error:")
             print()
-            print(f'The vault file {fn} has an empty files section.')
+            print(f"The vault file {fn} has an empty files section.")
             raise SystemExit
         vault: VaultFile = VaultFile()
         name: str
         value: str
         for name, value in files.items():
             if not isinstance(name, str):
-                print('Error:')
+                print("Error:")
                 print()
-                print(f'Invalid label: {name}')
+                print(f"Invalid label: {name}")
                 raise SystemExit
             if not isinstance(value, str):
-                print('Error:')
+                print("Error:")
                 print()
-                print(f'Invalid path spec: {value}.')
+                print(f"Invalid path spec: {value}.")
                 raise SystemExit
-            print(f'{name}: ', end='')
+            print(f"{name}: ", end="")
             g: List[str] = glob(value)
             if len(g) == 1:
                 p: Path = Path(g[0])
@@ -104,26 +104,26 @@ def compile_vault(args: Namespace) -> None:
         data_file: Path
         df: Optional[str] = args.data_file
         if df is None:
-            df = os.path.splitext(fn)[0] + '.data'
+            df = os.path.splitext(fn)[0] + ".data"
         data_file = Path(df)
-        key_str: str = data['key']
+        key_str: str = data["key"]
         key: bytes = key_str.encode()
         vault.save(data_file, key)
-        print('Data file compiled.')
+        print("Data file compiled.")
         print()
-        print('To use this file in your code, you can do:')
+        print("To use this file in your code, you can do:")
         print(
-            'vault_file: VaultFile = '
+            "vault_file: VaultFile = "
             f"VaultFile.from_path(Path('{data_file}'), '{key_str}')"
         )
     else:
-        print('Error:')
+        print("Error:")
         print()
-        print(f'Does not appear to be a vault file: {fn}')
+        print(f"Does not appear to be a vault file: {fn}")
         if isinstance(data, dict):
-            if 'key' not in data:
-                print('No encryption key found.')
-            elif not isinstance(data.get('files', None), dict):
-                print('No files section found.')
+            if "key" not in data:
+                print("No encryption key found.")
+            elif not isinstance(data.get("files", None), dict):
+                print("No files section found.")
             else:
-                print('Unknown error.')
+                print("Unknown error.")

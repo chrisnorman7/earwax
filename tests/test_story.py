@@ -4,15 +4,23 @@ from inspect import isgenerator
 from typing import Any, Dict, Iterator, List
 
 from earwax import Game
-from earwax.story import (DumpablePoint, RoomExit, RoomObject, StoryWorld,
-                          WorldAction, WorldAmbiance, WorldMessages, WorldRoom)
+from earwax.story import (
+    DumpablePoint,
+    RoomExit,
+    RoomObject,
+    StoryWorld,
+    WorldAction,
+    WorldAmbiance,
+    WorldMessages,
+    WorldRoom,
+)
 
 
 def test_init(game: Game) -> None:
     """Test initialisation."""
     w: StoryWorld = StoryWorld(game)
-    assert w.name == 'Untitled World'
-    assert w.author == 'Unknown'
+    assert w.name == "Untitled World"
+    assert w.author == "Unknown"
     assert w.main_menu_musics == []
     assert w.rooms == {}
     assert w.initial_room_id is None
@@ -21,11 +29,11 @@ def test_init(game: Game) -> None:
 
 def test_dump(game: Game) -> None:
     """Test the dump method."""
-    w: StoryWorld = StoryWorld(game, name='Test World', author='Earwax')
-    room_1: WorldRoom = WorldRoom('first_room')
+    w: StoryWorld = StoryWorld(game, name="Test World", author="Earwax")
+    room_1: WorldRoom = WorldRoom("first_room")
     w.add_room(room_1)
     assert w.initial_room is room_1
-    room_2: WorldRoom = WorldRoom('world_2')
+    room_2: WorldRoom = WorldRoom("world_2")
     w.add_room(room_2)
     assert w.initial_room is room_1
     exit_1: RoomExit = room_1.create_exit(room_2)
@@ -38,24 +46,27 @@ def test_dump(game: Game) -> None:
     assert exit_2.destination is room_1
     assert exit_2 in room_2.exits
     object_1: RoomObject = room_1.create_object(
-        id='object_1', position=DumpablePoint(1, 2, 3), name='Object 1'
+        id="object_1", position=DumpablePoint(1, 2, 3), name="Object 1"
     )
     assert object_1.location is room_1
     assert room_1.objects[object_1.id] is object_1
-    object_2: RoomObject = room_2.create_object(id='object_2')
+    object_2: RoomObject = room_2.create_object(id="object_2")
     assert object_2.location is room_2
     assert room_2.objects[object_2.id] is object_2
-    room_1.ambiances.append(WorldAmbiance('sound.wav'))
-    object_1.ambiances.append(WorldAmbiance('move.wav'))
+    room_1.ambiances.append(WorldAmbiance("sound.wav"))
+    object_1.ambiances.append(WorldAmbiance("move.wav"))
     object_1.actions.extend(
         [
             WorldAction(
-                name='First Action', message='You test something.',
-                sound='sound.wav'
-            ), WorldAction(
-                name='Second Action', message='Something else to test.',
-                sound='move.wav'
-            )
+                name="First Action",
+                message="You test something.",
+                sound="sound.wav",
+            ),
+            WorldAction(
+                name="Second Action",
+                message="Something else to test.",
+                sound="move.wav",
+            ),
         ]
     )
     data: Dict[str, Any] = w.dump()

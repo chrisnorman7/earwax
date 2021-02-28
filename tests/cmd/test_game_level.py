@@ -2,8 +2,13 @@
 
 from typing import Any, Dict
 
-from earwax.cmd.game_level import (BoxLevelData, GameLevel, GameLevelScript,
-                                   LevelData, Trigger)
+from earwax.cmd.game_level import (
+    BoxLevelData,
+    GameLevel,
+    GameLevelScript,
+    LevelData,
+    Trigger,
+)
 
 
 def test_init() -> None:
@@ -20,10 +25,10 @@ def test_game_level_script() -> None:
     """Test the GameLevelScript class."""
     t: Trigger = Trigger()
     code: str = 'def _():\n    print("works.")\n'
-    s: GameLevelScript = GameLevelScript('Test Script', t)
-    assert s.name == 'Test Script'
+    s: GameLevelScript = GameLevelScript("Test Script", t)
+    assert s.name == "Test Script"
     assert s.trigger is t
-    assert s.code == ''
+    assert s.code == ""
     try:
         s.code = code
         assert s.script_path.is_file()
@@ -41,16 +46,14 @@ def test_box_level_data() -> None:
 
 def test_game_level() -> None:
     """Test the GameLevel class."""
-    t1: Trigger = Trigger(symbol='_1')
-    t2: Trigger = Trigger(symbol='_2')
-    s1: GameLevelScript = GameLevelScript('Test Script 1', t1, 'First code')
-    s2: GameLevelScript = GameLevelScript('Test Script 2', t2, 'Second code')
+    t1: Trigger = Trigger(symbol="_1")
+    t2: Trigger = Trigger(symbol="_2")
+    s1: GameLevelScript = GameLevelScript("Test Script 1", t1, "First code")
+    s2: GameLevelScript = GameLevelScript("Test Script 2", t2, "Second code")
     d: BoxLevelData = BoxLevelData(bearing=90)
-    gl: GameLevel = GameLevel(
-        'Test BoxLevel', d, scripts=[s1, s2]
-    )
+    gl: GameLevel = GameLevel("Test BoxLevel", d, scripts=[s1, s2])
     assert gl.scripts == [s1, s2]
-    assert gl.name == 'Test BoxLevel'
+    assert gl.name == "Test BoxLevel"
     assert gl.data is d
     gl2: GameLevel = GameLevel.load(gl.dump())
     assert gl2 == gl

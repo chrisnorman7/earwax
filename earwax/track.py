@@ -60,7 +60,7 @@ class Track:
     )
 
     @classmethod
-    def from_path(cls, path: Path, type: TrackTypes) -> 'Track':
+    def from_path(cls, path: Path, type: TrackTypes) -> "Track":
         """Return a new instance from a path.
 
         :param path: The path to build the track from.
@@ -70,7 +70,7 @@ class Track:
         :param type: The type of the new track.
         """
         path = random_file(path)
-        return cls('file', str(path), type)
+        return cls("file", str(path), type)
 
     def play(self, manager: SoundManager, **kwargs) -> None:
         """Play this track on a loop.
@@ -80,7 +80,7 @@ class Track:
         :param kwargs: The extra keyword arguments to send to the given
             manager's :meth:`~earwax.SoundManager.play_stream` method.
         """
-        kwargs.setdefault('looping', True)
+        kwargs.setdefault("looping", True)
         self.sound = manager.play_stream(self.protocol, self.path, **kwargs)
 
     def stop(self) -> None:

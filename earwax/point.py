@@ -7,7 +7,7 @@ from typing import Any, Generic, Tuple, Type, TypeVar, Union, cast
 from attr import attrs
 from movement_2d import angle_between, coordinates_in_direction
 
-T = TypeVar('T', float, int)
+T = TypeVar("T", float, int)
 
 
 class PointDirections(Enum):
@@ -40,7 +40,7 @@ class Point(Generic[T]):
     z: T
 
     @classmethod
-    def origin(cls) -> 'Point[int]':
+    def origin(cls) -> "Point[int]":
         """Return ``Point(0, 0, 0)``."""
         return cast(Type[Point[int]], cls)(0, 0, 0)
 
@@ -49,7 +49,7 @@ class Point(Generic[T]):
         """Return ``self.x``, ``self.y``, and ``self.z`` as a tuple."""
         return self.x, self.y, self.z
 
-    def directions_to(self, other: 'Point') -> PointDirections:
+    def directions_to(self, other: "Point") -> PointDirections:
         """Return the direction between this point and ``other``.
 
         :param other: The point to get directions to.
@@ -75,14 +75,14 @@ class Point(Generic[T]):
         else:
             return PointDirections.here
 
-    def distance_between(self, other: 'Point') -> float:
+    def distance_between(self, other: "Point") -> float:
         """Return the distance between two points.
 
         :param other: The point to measure the distance to.
         """
         return dist(self.coordinates, other.coordinates)
 
-    def angle_between(self, other: 'Point') -> float:
+    def angle_between(self, other: "Point") -> float:
         """Return the angle between two points.
 
         :param other: The other point to get the angle to.
@@ -99,7 +99,7 @@ class Point(Generic[T]):
 
     def in_direction(
         self, angle: float, distance: float = 1.0
-    ) -> 'Point[float]':
+    ) -> "Point[float]":
         """Return the coordinates in the given direction.
 
         :param angle: The direction of travel.
@@ -113,7 +113,7 @@ class Point(Generic[T]):
         )
         return Point(x, y, float(self.z))
 
-    def copy(self) -> 'Point[T]':
+    def copy(self) -> "Point[T]":
         """Copy this instance.
 
         Returns a ``Point`` instance with duplicate ``x`` and ``y``
@@ -121,13 +121,13 @@ class Point(Generic[T]):
         """
         return type(self)(self.x, self.y, self.z)
 
-    def floor(self) -> 'Point[int]':
+    def floor(self) -> "Point[int]":
         """Return a version of this object with both coordinates floored."""
         return cast(Type[Point[int]], type(self))(
             floor(self.x), floor(self.y), floor(self.z)
         )
 
-    def __add__(self, offset: Union[int, 'Point']) -> 'Point':
+    def __add__(self, offset: Union[int, "Point"]) -> "Point":
         """Add two points together."""
         if isinstance(offset, int):
             return Point(self.x + offset, self.y + offset, self.z + offset)
@@ -137,11 +137,11 @@ class Point(Generic[T]):
             )
         else:
             raise TypeError(
-                'Invalid type for offset: Expected an int or a Point '
-                f'instance. Got {type(offset)} instead.'
+                "Invalid type for offset: Expected an int or a Point "
+                f"instance. Got {type(offset)} instead."
             )
 
-    def __sub__(self, offset: Union[int, 'Point']) -> 'Point':
+    def __sub__(self, offset: Union[int, "Point"]) -> "Point":
         """Subtract two points."""
         if isinstance(offset, int):
             return Point(self.x - offset, self.y - offset, self.z - offset)
@@ -151,11 +151,11 @@ class Point(Generic[T]):
             )
         else:
             raise TypeError(
-                'Invalid type for offset: Expected an int or a Point '
-                f'instance. Got {type(offset)} instead.'
+                "Invalid type for offset: Expected an int or a Point "
+                f"instance. Got {type(offset)} instead."
             )
 
-    def __mul__(self, offset: Union[int, 'Point']) -> 'Point':
+    def __mul__(self, offset: Union[int, "Point"]) -> "Point":
         """Multiply two points."""
         if isinstance(offset, int):
             return Point(self.x * offset, self.y * offset, self.z * offset)
@@ -165,11 +165,11 @@ class Point(Generic[T]):
             )
         else:
             raise TypeError(
-                'Invalid type for offset: Expected an int or a Point '
-                f'instance. Got {type(offset)} instead.'
+                "Invalid type for offset: Expected an int or a Point "
+                f"instance. Got {type(offset)} instead."
             )
 
-    def __neg__(self) -> 'Point':
+    def __neg__(self) -> "Point":
         """Return a negative version of this instance.
 
         Returns a copy of this instance with all its coordinates multiplied

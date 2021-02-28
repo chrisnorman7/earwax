@@ -16,6 +16,7 @@ class Works(Exception):
 
 def test_staggered_promise() -> None:
     """Test the decorate function."""
+
     @StaggeredPromise.decorate
     def promise() -> StaggeredPromiseGeneratorType:
         yield 1.0
@@ -28,6 +29,7 @@ def test_staggered_promise() -> None:
 
 def test_init() -> None:
     """Test initialization."""
+
     @StaggeredPromise.decorate
     def promise() -> StaggeredPromiseGeneratorType:
         yield 3.0
@@ -39,6 +41,7 @@ def test_init() -> None:
 
 def test_run_no_args(game: Game, window: Window) -> None:
     """Test running with no arguments."""
+
     @StaggeredPromise.decorate
     def promise() -> StaggeredPromiseGeneratorType:
         started: float = time()
@@ -58,6 +61,7 @@ def test_run_no_args(game: Game, window: Window) -> None:
 
 def test_run_args(game: Game, window: Window) -> None:
     """Test running with arguments."""
+
     @StaggeredPromise.decorate
     def promise(a, b, c=1) -> StaggeredPromiseGeneratorType:
         started = time()
@@ -79,6 +83,7 @@ def test_run_args(game: Game, window: Window) -> None:
 
 def test_on_done(game: Game, window: Window) -> None:
     """Test the on_done event."""
+
     @StaggeredPromise.decorate
     def promise() -> StaggeredPromiseGeneratorType:
         yield 0.1
@@ -99,6 +104,7 @@ def test_on_done(game: Game, window: Window) -> None:
 
 def test_on_error(game: Game, window: Window) -> None:
     """Test the on_error event."""
+
     @StaggeredPromise.decorate
     def promise() -> StaggeredPromiseGeneratorType:
         yield 0.1
@@ -112,7 +118,7 @@ def test_on_error(game: Game, window: Window) -> None:
 
     @promise.event
     def on_done(value: Any) -> None:
-        raise RuntimeError('This event should not have fired.')
+        raise RuntimeError("This event should not have fired.")
 
     @game.event
     def before_run() -> None:
@@ -132,7 +138,7 @@ def test_on_finally(game: Game, window: Window) -> None:
     def promise() -> StaggeredPromiseGeneratorType:
         yield 0.0
         if should_raise:
-            raise RuntimeError('Raising...')
+            raise RuntimeError("Raising...")
         return 5
 
     @promise.event
@@ -160,7 +166,7 @@ def test_on_finally(game: Game, window: Window) -> None:
     assert promise.state is PromiseStates.error
     should_raise = False
     game.levels.clear()
-    game.run(Window(caption='Test'))
+    game.run(Window(caption="Test"))
     assert game.levels == [return_level]
     assert promise.state is PromiseStates.done
 
@@ -173,7 +179,7 @@ def test_on_cancel(game: Game, window: Window) -> None:
     @StaggeredPromise.decorate
     def promise() -> StaggeredPromiseGeneratorType:
         yield 5.0
-        raise RuntimeError('Should never have gotten to this point.')
+        raise RuntimeError("Should never have gotten to this point.")
 
     @promise.event
     def on_done(value: Any) -> None:

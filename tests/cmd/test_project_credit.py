@@ -8,9 +8,9 @@ from earwax.cmd.project_credit import ProjectCredit
 
 def test_init() -> None:
     """Test initialisation."""
-    c: ProjectCredit = ProjectCredit('Test', 'test.com', None, True)
-    assert c.name == 'Test'
-    assert c.url == 'test.com'
+    c: ProjectCredit = ProjectCredit("Test", "test.com", None, True)
+    assert c.name == "Test"
+    assert c.url == "test.com"
     assert c.sound is None
     assert c.loop is True
 
@@ -18,7 +18,7 @@ def test_init() -> None:
 def test_path(project_credit: ProjectCredit) -> None:
     """Test the path property."""
     assert isinstance(project_credit, ProjectCredit)
-    assert project_credit.path == Path('sound.wav')
+    assert project_credit.path == Path("sound.wav")
     project_credit.sound = None
     assert project_credit.path is None
 
@@ -28,9 +28,11 @@ def test_dump(project_credit: ProjectCredit) -> None:
     assert project_credit.dump() == {
         ProjectCredit.__type_key__: ProjectCredit.__name__,
         ProjectCredit.__value_key__: {
-            'name': project_credit.name, 'url': project_credit.url, 'sound':
-            project_credit.sound, 'loop': project_credit.loop
-        }
+            "name": project_credit.name,
+            "url": project_credit.url,
+            "sound": project_credit.sound,
+            "loop": project_credit.loop,
+        },
     }
 
 

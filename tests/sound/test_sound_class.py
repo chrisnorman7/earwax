@@ -4,19 +4,26 @@ from pathlib import Path
 from time import sleep
 
 from pytest import raises
-from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
-                       Generator, GlobalFdnReverb, PannedSource,
-                       PannerStrategy, Source3D, StreamingGenerator)
+from synthizer import (
+    Buffer,
+    BufferGenerator,
+    Context,
+    DirectSource,
+    Generator,
+    GlobalFdnReverb,
+    PannedSource,
+    PannerStrategy,
+    Source3D,
+    StreamingGenerator,
+)
 
 from earwax import AlreadyDestroyed, BufferCache, Point, Sound, SoundManager
 
 
-def test_init(
-    buffer_cache: BufferCache, context: Context
-) -> None:
+def test_init(buffer_cache: BufferCache, context: Context) -> None:
     """Test initialisation."""
     generator: Generator = BufferGenerator(context)
-    buffer: Buffer = buffer_cache.get_buffer('file', 'sound.wav')
+    buffer: Buffer = buffer_cache.get_buffer("file", "sound.wav")
     sound: Sound = Sound(context, generator, buffer)
     sleep(0.1)
     assert sound.context is context
@@ -32,10 +39,14 @@ def test_init(
     assert sound.generator.looping is False
     assert sound.is_stream is False
     sound.destroy()
-    generator = StreamingGenerator(context, 'file', 'sound.wav')
+    generator = StreamingGenerator(context, "file", "sound.wav")
     sound = Sound(
-        context, generator, None, looping=True, gain=0.5,
-        position=Point(1, 2, 3)
+        context,
+        generator,
+        None,
+        looping=True,
+        gain=0.5,
+        position=Point(1, 2, 3),
     )
     sleep(0.1)
     assert sound.buffer is None
@@ -49,9 +60,12 @@ def test_init(
     assert sound.source.gain == 0.5
     assert sound.source.panner_strategy is PannerStrategy.STEREO
     sound.destroy()
-    generator = StreamingGenerator(context, 'file', 'sound.wav')
+    generator = StreamingGenerator(context, "file", "sound.wav")
     sound = Sound(
-        context, generator, buffer, position=0.5,
+        context,
+        generator,
+        buffer,
+        position=0.5,
     )
     sleep(0.1)
     assert isinstance(sound.source, PannedSource)
@@ -62,7 +76,7 @@ def test_init(
 def test_from_stream(context: Context) -> None:
     """Test the Sound.from_stream method."""
     sound: Sound = Sound.from_stream(
-        context, 'file', 'sound.wav', position=-1.0
+        context, "file", "sound.wav", position=-1.0
     )
     assert isinstance(sound, Sound)
     sleep(0.1)
@@ -76,9 +90,7 @@ def test_from_stream(context: Context) -> None:
 
 def test_from_path(buffer_cache: BufferCache, context: Context) -> None:
     """Test the Sound.from_path method."""
-    sound: Sound = Sound.from_path(
-        context, buffer_cache, Path('sound.wav')
-    )
+    sound: Sound = Sound.from_path(context, buffer_cache, Path("sound.wav"))
     assert isinstance(sound, Sound)
     assert sound.context is context
     assert isinstance(sound.generator, BufferGenerator)
@@ -92,9 +104,7 @@ def test_destroy_sound_from_path(
     buffer_cache: BufferCache, context: Context
 ) -> None:
     """Make sure we can destroy sounds."""
-    sound: Sound = Sound.from_path(
-        context, buffer_cache, Path('sound.wav')
-    )
+    sound: Sound = Sound.from_path(context, buffer_cache, Path("sound.wav"))
     sound.destroy()
     assert sound._destroyed is True
     assert sound.context is context
@@ -110,7 +120,7 @@ def test_destroy_sound_from_path(
 
 def test_destroy_from_stream(context: Context) -> None:
     """Make sure we can destroy a streamed sound."""
-    sound: Sound = Sound.from_stream(context, 'file', 'sound.wav')
+    sound: Sound = Sound.from_stream(context, "file", "sound.wav")
     sound.destroy()
     assert sound._destroyed is True
     assert sound.context is context
@@ -129,7 +139,7 @@ def test_connect_reverb() -> None:
     context: Context = Context()
     reverb: GlobalFdnReverb = GlobalFdnReverb(context)
     buffer_cache: BufferCache = BufferCache(1024 ** 3)
-    sound: Sound = Sound.from_path(context, buffer_cache, Path('sound.wav'))
+    sound: Sound = Sound.from_path(context, buffer_cache, Path("sound.wav"))
     # First make sure we've not messed up the fixtures.
     assert isinstance(sound, Sound)
     assert isinstance(reverb, GlobalFdnReverb)
@@ -251,7 +261,7 @@ def test_set_position(sound: Sound) -> None:
 def test_set_loopng(sound_manager: SoundManager) -> None:
     """Test the set_looping method."""
     sound: Sound = sound_manager.play_path(
-        Path('sound.wav'), keep_around=False
+        Path("sound.wav"), keep_around=False
     )
     assert sound.keep_around is False
     assert sound.looping is False

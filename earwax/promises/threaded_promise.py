@@ -140,7 +140,7 @@ class ThreadedPromise(Promise):
         :param kwargs: The extra keyword arguments to pass along to ``submit``.
         """
         if self.func is None:
-            raise RuntimeError('%r has no function registered.' % self)
+            raise RuntimeError("%r has no function registered." % self)
         self.future = self.thread_pool.submit(self.func, *args, **kwargs)
         super().run(*args, **kwargs)
         schedule(self.check)
@@ -151,7 +151,7 @@ class ThreadedPromise(Promise):
         If There is no future, ``RuntimeError`` will be raised.
         """
         if self.future is None:
-            raise RuntimeError('%s has no future yet.' % self)
+            raise RuntimeError("%s has no future yet." % self)
         self.future.cancel()
         unschedule(self.check)
         super().cancel()

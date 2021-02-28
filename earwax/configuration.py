@@ -42,23 +42,21 @@ class MenuConfig(Config):
         the activated menu item.
     """
 
-    __section_name__ = 'Menus'
+    __section_name__ = "Menus"
     default_item_select_sound: ConfigValue[Optional[Path]] = ConfigValue(
-        None, type_=Optional[Path],
-        name='The default sound that plays when moving through menus',
-        value_converters={
-            type(None): lambda o: '<Unset>'
-        }
+        None,
+        type_=Optional[Path],
+        name="The default sound that plays when moving through menus",
+        value_converters={type(None): lambda o: "<Unset>"},
     )
     default_item_select_sound.dump(dump_path)
     default_item_select_sound.load(load_path)
 
     default_item_activate_sound: ConfigValue[Optional[Path]] = ConfigValue(
-        None, type_=Optional[Path],
-        name='The default sound that plays when activating items in menus',
-        value_converters={
-            type(None): lambda o: '<Unset>'
-        }
+        None,
+        type_=Optional[Path],
+        name="The default sound that plays when activating items in menus",
+        value_converters={type(None): lambda o: "<Unset>"},
     )
     default_item_activate_sound.dump(dump_path)
     default_item_activate_sound.load(load_path)
@@ -74,9 +72,9 @@ class SpeechConfig(Config):
         :meth:`~earwax.Game.output` will produce braille.
     """
 
-    __section_name__ = 'Speech and Braille'
-    speak: ConfigValue[bool] = ConfigValue(True, name='Speech')
-    braille: ConfigValue[bool] = ConfigValue(True, name='Braille')
+    __section_name__ = "Speech and Braille"
+    speak: ConfigValue[bool] = ConfigValue(True, name="Speech")
+    braille: ConfigValue[bool] = ConfigValue(True, name="Braille")
 
 
 class SoundConfig(Config):
@@ -110,16 +108,16 @@ class SoundConfig(Config):
         for the default :attr:`~earwax.Game.buffer_cache` object.
     """
 
-    __section_name__ = 'Sound'
-    master_volume: ConfigValue[float] = ConfigValue(1.0, name='Master volume')
-    max_volume: ConfigValue[float] = ConfigValue(1.0, name='Maximum volume')
-    sound_volume: ConfigValue[float] = ConfigValue(0.5, name='Sound volume')
-    music_volume: ConfigValue[float] = ConfigValue(0.4, name='Music volume')
+    __section_name__ = "Sound"
+    master_volume: ConfigValue[float] = ConfigValue(1.0, name="Master volume")
+    max_volume: ConfigValue[float] = ConfigValue(1.0, name="Maximum volume")
+    sound_volume: ConfigValue[float] = ConfigValue(0.5, name="Sound volume")
+    music_volume: ConfigValue[float] = ConfigValue(0.4, name="Music volume")
     ambiance_volume: ConfigValue[float] = ConfigValue(
-        0.4, name='Ambiance volume'
+        0.4, name="Ambiance volume"
     )
     default_cache_size: ConfigValue[int] = ConfigValue(
-        1024 ** 2 * 500, name='The size of the default sound cache in bytes'
+        1024 ** 2 * 500, name="The size of the default sound cache in bytes"
     )
 
 
@@ -130,10 +128,11 @@ class EditorConfig(Config):
         by a controller's hat.
     """
 
-    __section_name__ = 'Editors'
+    __section_name__ = "Editors"
     hat_alphabet: ConfigValue = ConfigValue(
-        ' abcdefghijklmnopqrstuvwxyz.,1234567890@ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        '-#[]{}', name='Hat alphabet'
+        " abcdefghijklmnopqrstuvwxyz.,1234567890@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "-#[]{}",
+        name="Hat alphabet",
     )
 
 
@@ -145,7 +144,7 @@ class EarwaxConfig(Config):
     It is advised to configure the game before calling :meth:`earwax.Game.run`.
     """
 
-    __section_name__ = 'Earwax Configuration'
+    __section_name__ = "Earwax Configuration"
     menus: MenuConfig = MenuConfig()
     speech: SpeechConfig = SpeechConfig()
     sound: SoundConfig = SoundConfig()

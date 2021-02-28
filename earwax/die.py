@@ -36,5 +36,5 @@ class Die(RegisterEventMixin):
         <earwax.Die.size>`.
         """
         value: int = randint(1, self.sides)
-        self.dispatch_event('on_roll', value)
+        self.dispatch_event("on_roll", value)
         return value

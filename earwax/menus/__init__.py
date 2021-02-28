@@ -23,6 +23,12 @@ from .menu_item import MenuItem
 from .reverb_editor import ReverbEditor
 
 __all__ = [
-    'Menu', 'MenuItem', 'ActionMenu', 'FileMenu', 'ConfigMenu', 'TypeHandler',
-    'UnknownTypeError', 'ReverbEditor'
+    "Menu",
+    "MenuItem",
+    "ActionMenu",
+    "FileMenu",
+    "ConfigMenu",
+    "TypeHandler",
+    "UnknownTypeError",
+    "ReverbEditor",
 ]

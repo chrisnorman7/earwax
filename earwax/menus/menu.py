@@ -99,18 +99,18 @@ class Menu(Level, TitleMixin, DismissibleMixin):
     def __attrs_post_init__(self) -> None:
         """Initialise the menu."""
         self.action(
-            'Activate item', symbol=key.RETURN, hat_direction=RIGHT,
-            joystick_button=0
+            "Activate item",
+            symbol=key.RETURN,
+            hat_direction=RIGHT,
+            joystick_button=0,
         )(self.activate)
-        self.action('Dismiss', symbol=key.ESCAPE, hat_direction=LEFT)(
+        self.action("Dismiss", symbol=key.ESCAPE, hat_direction=LEFT)(
             self.dismiss
         )
-        self.action('Move down', symbol=key.DOWN, hat_direction=DOWN)(
+        self.action("Move down", symbol=key.DOWN, hat_direction=DOWN)(
             self.move_down
         )
-        self.action('Move up', symbol=key.UP, hat_direction=UP)(
-            self.move_up
-        )
+        self.action("Move up", symbol=key.UP, hat_direction=UP)(self.move_up)
         self.motion(key.MOTION_BEGINNING_OF_LINE)(self.home)
         self.motion(key.MOTION_END_OF_LINE)(self.end)
         self.register_event(self.on_text)
@@ -118,8 +118,8 @@ class Menu(Level, TitleMixin, DismissibleMixin):
 
     @classmethod
     def from_credits(
-        cls, game: 'Game', credits: List[Credit], title: str = 'Game Credits'
-    ) -> 'Menu':
+        cls, game: "Game", credits: List[Credit], title: str = "Game Credits"
+    ) -> "Menu":
         """Return a menu for showing credits.
 
         :param game: The game to use.
@@ -137,18 +137,24 @@ class Menu(Level, TitleMixin, DismissibleMixin):
                 webbrowser.open(url)
 
             m.add_item(
-                func, title=credit.name, select_sound_path=credit.sound,
-                loop_select_sound=credit.loop
+                func,
+                title=credit.name,
+                select_sound_path=credit.sound,
+                loop_select_sound=credit.loop,
             )
         return m
 
     @classmethod
     def yes_no(
-        cls, game: 'Game', yes_action: YesNoFunction, no_action: YesNoFunction,
-        title: str = 'Are you sure?',
-        yes_label: str = 'Yes', no_label: str = 'No',
+        cls,
+        game: "Game",
+        yes_action: YesNoFunction,
+        no_action: YesNoFunction,
+        title: str = "Are you sure?",
+        yes_label: str = "Yes",
+        no_label: str = "No",
         **kwargs
-    ) -> 'Menu':
+    ) -> "Menu":
         """Create and return a yes no menu.
 
         :param game: The game to bind the new menu to.
@@ -209,7 +215,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
 
         return inner
 
-    def add_item(self, func: 'ActionFunctionType', **kwargs) -> MenuItem:
+    def add_item(self, func: "ActionFunctionType", **kwargs) -> MenuItem:
         """Add an item to this menu.
 
         For example::
@@ -269,7 +275,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
             title: Optional[str] = item.get_title()
             if title is not None:
                 self.game.output(title)
-            item.dispatch_event('on_selected')
+            item.dispatch_event("on_selected")
             sound_path: Optional[Path] = (
                 item.select_sound_path
                 or self.item_select_sound_path
@@ -305,13 +311,13 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         item: Optional[MenuItem] = self.current_item
         if item is not None:
             sound_path: Optional[Path] = (
-                item.activate_sound_path or
-                self.item_activate_sound_path or
-                self.game.config.menus.default_item_activate_sound.value
+                item.activate_sound_path
+                or self.item_activate_sound_path
+                or self.game.config.menus.default_item_activate_sound.value
             )
             if (
-                sound_path is not None and
-                self.game.interface_sound_manager is not None
+                sound_path is not None
+                and self.game.interface_sound_manager is not None
             ):
                 self.game.interface_sound_manager.play_path(sound_path)
             res: OptionalGenerator = item.func()
@@ -386,7 +392,7 @@ class Menu(Level, TitleMixin, DismissibleMixin):
         self.show_selection()
         return super().on_reveal()
 
-    def add_submenu(self, menu: 'Menu', replace: bool, **kwargs) -> MenuItem:
+    def add_submenu(self, menu: "Menu", replace: bool, **kwargs) -> MenuItem:
         """Add a submenu to this menu.
 
         :param menu: The menu to show when the resulting item is activated.

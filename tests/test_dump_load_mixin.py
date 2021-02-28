@@ -41,7 +41,7 @@ class Employment(DumpLoadMixin):
     """Employee is employed."""
 
     since: datetime = Factory(datetime.utcnow)
-    previous_company: Optional['Company'] = None
+    previous_company: Optional["Company"] = None
 
 
 @attrs(auto_attribs=True)
@@ -88,20 +88,21 @@ def test_dump() -> None:
         people: List[PretendPerson] = Factory(list)
 
     p1: PretendPerson = PretendPerson(
-        name='John Smith', age=35,
-        addresses={'Home': 'Homeless', 'Work': 'Here'}
+        name="John Smith",
+        age=35,
+        addresses={"Home": "Homeless", "Work": "Here"},
     )
     p2: PretendPerson = PretendPerson(
-        name='Sally Smith', age=36, addresses={'Home': "John's place"}
+        name="Sally Smith", age=36, addresses={"Home": "John's place"}
     )
-    c: PretendCompany = PretendCompany(name='', people=[p1, p2])
+    c: PretendCompany = PretendCompany(name="", people=[p1, p2])
     d: AnyDict = c.dump()
     assert isinstance(d, dict)
     assert d[PretendCompany.__type_key__] == PretendCompany.__name__
     d = d[PretendCompany.__value_key__]
     assert isinstance(d, dict)
-    assert d['name'] == c.name
-    people: List[AnyDict] = d['people']
+    assert d["name"] == c.name
+    people: List[AnyDict] = d["people"]
     assert isinstance(people, list)
     assert len(people) == 2
     d1: AnyDict
@@ -110,33 +111,34 @@ def test_dump() -> None:
     assert d1[PretendPerson.__type_key__] == PretendPerson.__name__
     d1 = d1[PretendPerson.__value_key__]
     assert isinstance(d1, dict)
-    assert d1['name'] == p1.name
-    assert d1['age'] == p1.age
-    assert d1['addresses'] == p1.addresses
+    assert d1["name"] == p1.name
+    assert d1["age"] == p1.age
+    assert d1["addresses"] == p1.addresses
     assert d2[PretendPerson.__type_key__] == PretendPerson.__name__
     d2 = d2[PretendPerson.__value_key__]
     assert isinstance(d2, dict)
-    assert d2['name'] == p2.name
-    assert d2['age'] == p2.age
-    assert d2['addresses'] == p2.addresses
+    assert d2["name"] == p2.name
+    assert d2["age"] == p2.age
+    assert d2["addresses"] == p2.addresses
 
 
 def test_load() -> None:
     """Test the load constructor."""
-    h: Address = Address(AddressTypes.home, '1 Test Passed', 'Test Heap')
-    w: Address = Address(AddressTypes.work, '3600 Mount Crash', 'Fail Gardens')
+    h: Address = Address(AddressTypes.home, "1 Test Passed", "Test Heap")
+    w: Address = Address(AddressTypes.work, "3600 Mount Crash", "Fail Gardens")
     p1: Person = Person(
-        'Chris Norman', datetime(1989, 6, 14), 1.8, addresses=[h, w], emails=[
-            'chris.norman2@googlemail.com', 'earwax-tests@example.com'
-        ], state=Naughty('Bad employee.')
+        "Chris Norman",
+        datetime(1989, 6, 14),
+        1.8,
+        addresses=[h, w],
+        emails=["chris.norman2@googlemail.com", "earwax-tests@example.com"],
+        state=Naughty("Bad employee."),
     )
     p2: Person = Person(
-        'John Smith', datetime(1964, 8, 12), 1.7, state=Employment()
+        "John Smith", datetime(1964, 8, 12), 1.7, state=Employment()
     )
-    d: Department = Department('Coders', secret=True, employees=[p1, p2])
-    c: Company = Company(
-        'My Test Company', departments={'cod01': d}
-    )
+    d: Department = Department("Coders", secret=True, employees=[p1, p2])
+    c: Company = Company("My Test Company", departments={"cod01": d})
     data: Dict[str, Any] = c.dump()
     c2: Company = Company.load(data)
     assert c2 == c
@@ -149,14 +151,14 @@ def test_excluded_attribute_names() -> None:
     class Thing(DumpLoadMixin):
         """Test thing."""
 
-        name: str = 'Whatever'
-        gender: str = 'No idea'
-        __excluded_attribute_names__ = ['gender']
+        name: str = "Whatever"
+        gender: str = "No idea"
+        __excluded_attribute_names__ = ["gender"]
 
-    t: Thing = Thing(name='Chris Norman', gender='Male')
+    t: Thing = Thing(name="Chris Norman", gender="Male")
     data: Dict[str, Any] = t.dump()
-    assert data[Thing.__value_key__] == {'name': t.name}
-    data[Thing.__value_key__]['gender'] = 'Female'
+    assert data[Thing.__value_key__] == {"name": t.name}
+    data[Thing.__value_key__]["gender"] = "Female"
     t = Thing.load(data)
-    assert t.name == 'Chris Norman'
-    assert t.gender == 'No idea'
+    assert t.name == "Chris Norman"
+    assert t.gender == "No idea"
