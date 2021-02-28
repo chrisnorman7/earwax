@@ -44,7 +44,8 @@ game: Game = Game(
 @game.event
 def before_run() -> None:
     """Create rooms and level."""
-    game.audio_context.panner_strategy = PannerStrategy.HRTF
+    if game.audio_context is not None:
+        game.audio_context.panner_strategy = PannerStrategy.HRTF
     boxes: List[Box] = []
     ambiances: List[Ambiance] = []
 
