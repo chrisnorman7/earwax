@@ -3,9 +3,6 @@
 from math import dist
 from typing import Callable, List, Optional
 
-from pytest import raises
-from synthizer import GlobalFdnReverb
-
 from earwax import (
     Box,
     BoxBounds,
@@ -18,6 +15,8 @@ from earwax import (
     Point,
     Portal,
 )
+from pytest import raises
+from synthizer import GlobalFdnReverb
 
 
 class CollideWorks(Exception):
@@ -487,3 +486,29 @@ def test_nearest_by_type(box_level: BoxLevel, game: Game) -> None:
     assert isinstance(nb, NearestBox)
     assert nb.box is third
     assert nb.coordinates == third.start
+
+
+def test_walls_between(game: Game) -> None:
+    """Test the walls_between method."""
+    b1: Box = Box(game, Point(0, 0, 0), Point(3, 3, 3), type=BoxTypes.solid)
+    b2: Box = Box(
+        game,
+        b1.bounds.bottom_back_right + Point(1, 0, 0),
+        b1.end + Point(1, 0, 0),
+    )
+    b3: Box = Box(
+        game,
+        b2.bounds.bottom_back_right + Point(1, 0, 0),
+        b2.end + Point(1, 0, 0),
+    )
+    level: BoxLevel = BoxLevel(game, boxes=[b1, b2, b3])
+    assert level.walls_between(b3.end, start=b1.start) == 1
+    b3.type = BoxTypes.solid
+    assert level.walls_between(b3.end, start=b1.start) == 2
+    b4: Box = Box(
+        game,
+        b3.bounds.bottom_back_right + Point(1, 0, 0),
+        b3.end + Point(5, 0, 0),
+    )
+    assert level.walls_between(b4.end, start=b1.start) == 2
+    assert level.walls_between(b4.end) == 2

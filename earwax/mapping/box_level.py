@@ -1,15 +1,24 @@
 """Provides the BoxLevel class."""
 
 from math import cos, floor, sin
-from typing import (Any, Callable, Dict, Iterable, List, Optional, Tuple, Type,
-                    cast)
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    cast,
+)
 
 from attr import Factory, attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle
 
 from ..hat_directions import DOWN, LEFT, RIGHT, UP
 from ..types import EventType
-from .box import BoxBounds
+from .box import BoxBounds, BoxTypes
 
 try:
     from synthizer import Context, GlobalFdnReverb
@@ -677,3 +686,35 @@ class BoxLevel(Level):
         :param t: The type of the boxes.
         """
         return self.boxes_by_type.get(t, [])
+
+    def walls_between(self, end: Point, start: Optional[Point] = None) -> int:
+        """Return the number of walls between two points.
+
+        :param end: The target coordinates.
+
+        :param start: The coordinates to start at.
+
+            If this value is ``None``, then the current
+            :attr:`~earwax.BoxLevel.coordinates` will be used.
+        """
+        if start is None:
+            start = self.coordinates
+        start_x: int = min(start.x, end.x)
+        start_y: int = min(start.y, end.y)
+        start_z: int = min(start.z, end.z)
+        end_x: int = max(start.x, end.x)
+        end_y: int = max(start.y, end.y)
+        end_z: int = max(start.z, end.z)
+        b: Box
+        boxes: List[Box] = [
+            b
+            for b in self.boxes
+            if b.start.x >= start_x
+            and b.start.y >= start_y
+            and b.start.z >= start_z
+            and b.end.x <= end_x
+            and b.end.y <= end_y
+            and b.end.z <= end_z
+            and b.type is not BoxTypes.empty
+        ]
+        return len(boxes)
