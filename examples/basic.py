@@ -11,15 +11,8 @@ from typing import Generator, Optional
 from pyglet.window import Window, key, mouse
 from synthizer import SynthizerError
 
-from earwax import (
-    Config,
-    ConfigMenu,
-    ConfigValue,
-    Editor,
-    FileMenu,
-    Game,
-    Level,
-)
+from earwax import (Config, ConfigMenu, ConfigValue, Editor, FileMenu, Game,
+                    Level)
 from earwax.types import NoneGenerator, OptionalGenerator
 
 

@@ -7,17 +7,8 @@ from typing import List
 from pyglet.window import key
 from pytest import raises
 
-from earwax import (
-    ActionMenu,
-    AlreadyDestroyed,
-    Credit,
-    Editor,
-    Game,
-    Level,
-    Menu,
-    MenuItem,
-    Sound,
-)
+from earwax import (ActionMenu, AlreadyDestroyed, Credit, Editor, Game, Level,
+                    Menu, MenuItem, Sound)
 from earwax.types import OptionalGenerator
 
 

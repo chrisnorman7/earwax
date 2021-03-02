@@ -13,28 +13,13 @@ from ..editor import Editor
 from ..game import Game
 from ..level import Level
 from ..menus import ActionMenu, Menu, ReverbEditor
-from ..types import (
-    ActionFunctionType,
-    NoneGenerator,
-    OptionalGenerator,
-    TitleFunction,
-)
+from ..types import (ActionFunctionType, NoneGenerator, OptionalGenerator,
+                     TitleFunction)
 from ..utils import english_list
 from .play_level import PlayLevel
-from .world import (
-    DumpablePoint,
-    DumpableReverb,
-    ObjectTypes,
-    RoomExit,
-    RoomObject,
-    RoomObjectClass,
-    RoomObjectTypes,
-    StoryWorld,
-    WorldAction,
-    WorldAmbiance,
-    WorldMessages,
-    WorldRoom,
-)
+from .world import (DumpablePoint, DumpableReverb, ObjectTypes, RoomExit,
+                    RoomObject, RoomObjectClass, RoomObjectTypes, StoryWorld,
+                    WorldAction, WorldAmbiance, WorldMessages, WorldRoom)
 
 message_descriptions: Dict[str, str] = {
     "no_objects": "The message shown when focusing an empty object list",

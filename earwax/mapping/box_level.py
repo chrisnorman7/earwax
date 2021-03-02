@@ -2,16 +2,7 @@
 
 from math import cos, floor, sin
 from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    cast,
-)
+    Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, cast)
 
 from attr import Factory, attrib, attrs
 from movement_2d import angle2rad, coordinates_in_direction, normalise_angle

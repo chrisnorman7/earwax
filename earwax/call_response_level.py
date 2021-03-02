@@ -1,7 +1,8 @@
 """Provides the CallResponseLevel class, and various supporting classes."""
 
+import os.path
 from pathlib import Path
-from typing import Dict, List, Optional, Type, Union
+from typing import Dict, List, Optional, Tuple, Type, Union
 
 from attr import Factory, attrib, attrs
 from pyglet.window import key
@@ -11,10 +12,12 @@ from .config import Config, ConfigValue
 from .editor import Editor
 from .hat_directions import DOWN, LEFT, RIGHT, UP
 from .level import Level
+from .menus.menu import Menu
 from .mixins import DumpLoadMixin
-from .types import NoneGenerator
+from .types import NoneGenerator, OptionalGenerator
 
 BookmarkDict = Dict[int, Optional[str]]
+WaitType = Optional[Union[float, Tuple[float, float]]]
 
 
 @attrs(auto_attribs=True)
@@ -40,9 +43,8 @@ class CallResponseBase(DumpLoadMixin):
 class Call(CallResponseBase):
     """A call from an NPC."""
 
-    before_wait: Optional[float] = None
-    after_wait: Optional[float] = None
-    responses: List[str] = Factory(list)
+    before_wait: WaitType = None
+    response_ids: List[str] = Factory(list)
 
 
 @attrs(auto_attribs=True)
@@ -54,23 +56,26 @@ class Finisher(CallResponseBase):
 class Response(CallResponseBase):
     """A response to a call."""
 
-    call_id: Optional[str] = None
-    finishers: List[str] = Factory(list)
+    call_ids: List[str] = Factory(list)
+    finisher_ids: List[str] = Factory(list)
 
 
-EntryType = Union[Call, Response, Finisher]
+ItemType = Union[Call, Response, Finisher]
 CallDict = Dict[str, Call]
+CallList = List[Call]
 ResponseDict = Dict[str, Response]
+ResponseList = List[Response]
 FinisherDict = Dict[str, Finisher]
+FinisherList = List[Finisher]
 
 
 @attrs(auto_attribs=True)
 class CallResponseTree(DumpLoadMixin):
     """A structure for holding calls and responses."""
 
-    calls: Dict[str, Call] = Factory(dict)
-    responses: Dict[str, Response] = Factory(dict)
-    finishers: Dict[str, Finisher] = Factory(dict)
+    calls: CallDict = Factory(dict)
+    responses: ResponseDict = Factory(dict)
+    finishers: FinisherDict = Factory(dict)
     initial_call_id: Optional[str] = None
 
 
@@ -144,13 +149,17 @@ class CallResponseEditor(Level):
             self.next_page
         )
         self.action("Set item text", symbol=key.T)(self.set_text)
+        self.action("Set item sound", symbol=key.S)(self.set_sound)
         self.action(
             "Save", symbol=key.S, modifiers=key.MOD_CTRL, joystick_button=0
         )(self.save)
         self.action("New item", symbol=key.N, joystick_button=1)(self.new)
-        self.action("Help", symbol=key.SLASH, modifiers=key.MOD_SHIFT)(
-            self.game.push_action_menu
-        )
+        self.action(
+            "Help",
+            symbol=key.SLASH,
+            modifiers=key.MOD_SHIFT,
+            joystick_button=3,
+        )(self.game.push_action_menu)
         return super().__attrs_post_init__()
 
     @property
@@ -174,12 +183,17 @@ class CallResponseEditor(Level):
             return self.tree.finishers
 
     @property
-    def items(self) -> List[EntryType]:
+    def items(self) -> Union[CallList, ResponseList, FinisherList]:
         """Return a list of items on the current page."""
-        return list(self.items_dict.values())
+        if self.page == self.CALLS:
+            return list(self.tree.calls.values())
+        elif self.page == self.RESPONSES:
+            return list(self.tree.responses.values())
+        else:
+            return list(self.tree.finishers.values())
 
     @property
-    def current_item(self) -> EntryType:
+    def current_item(self) -> ItemType:
         """Get the currently focused entry."""
         return self.items[self.current_position]
 
@@ -192,7 +206,11 @@ class CallResponseEditor(Level):
             self.current_position = 0
         elif self.current_position < 0:
             self.current_position += len(self.items)
-        item: EntryType = self.current_item
+        self.output_item()
+
+    def output_item(self) -> None:
+        """Output the current item."""
+        item: ItemType = self.current_item
         if item.text is not None:
             self.game.output(item.text)
         if item.sound is not None:
@@ -226,13 +244,13 @@ class CallResponseEditor(Level):
         """Go to the next page."""
         self.switch_page(1)
 
-    def set_text(self) -> NoneGenerator:
+    def set_text(self) -> OptionalGenerator:
         """Set the text for the currently focused item."""
         if not self.items:
             return self.game.output(
                 "There is nothing for you to set the text on."
             )
-        item: EntryType = self.current_item
+        item: ItemType = self.current_item
         e: Editor = Editor(self.game, text=item.text or "")
 
         @e.event
@@ -249,6 +267,32 @@ class CallResponseEditor(Level):
         yield
         self.game.push_level(e)
 
+    def set_sound(self) -> OptionalGenerator:
+        """Set the sound for the current item."""
+        if not self.items:
+            return self.game.output(
+                "There is nothing for you to set the sound for."
+            )
+        item: ItemType = self.current_item
+        e: Editor = Editor(self.game, text=item.sound or "")
+
+        @e.event
+        def on_submit(text: str) -> None:
+            if text:
+                if os.path.exists(text):
+                    item.sound = text
+                    self.game.output("Sound set.")
+                else:
+                    self.game.output(f"Path does not exist: {text}.")
+            else:
+                item.sound = None
+                self.game.output("Sound cleared.")
+            self.game.pop_level()
+
+        self.game.output(f"Enter sound: {item.sound}")
+        yield
+        self.game.push_level(e)
+
     def save(self) -> None:
         """Save this tree."""
         self.tree.save(self.filename)
@@ -257,7 +301,30 @@ class CallResponseEditor(Level):
     def new(self) -> None:
         """Create a new entry."""
         cls = self.page_classes[self.page]
-        item: EntryType = cls(uuid(), text=f"Untitled {cls.__name__}")
+        item: ItemType = cls(uuid(), text=f"Untitled {cls.__name__}")
         self.items_dict[item.id] = item  # type:ignore[assignment]
         self.current_position = 0
         self.previous_item()
+
+    def response_menu(self) -> OptionalGenerator:
+        """Show a response menu for the current item."""
+        item: ItemType = self.current_item
+        if isinstance(item, Finisher):
+            return self.game.output(
+                "Finishers cannot have calls or responses."
+            )
+        title: str
+        ids: List[str]
+        d: Union[CallDict, ResponseDict]
+        if isinstance(item, Call):
+            title = "Responses"
+            ids = item.response_ids
+            d = self.tree.responses
+        else:
+            title = "Calls"
+            ids = item.call_ids
+            d = self.tree.calls
+        m: Menu = Menu(self.game, title)
+        i: str
+        for i in ids:
+            print(i)

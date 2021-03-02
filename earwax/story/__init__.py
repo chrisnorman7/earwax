@@ -31,22 +31,10 @@ from typing import List
 from .context import StoryContext
 from .edit_level import EditLevel, ObjectPositionLevel
 from .play_level import PlayLevel
-from .world import (
-    DumpablePoint,
-    DumpableReverb,
-    ObjectTypes,
-    RoomExit,
-    RoomObject,
-    RoomObjectClass,
-    RoomObjectTypes,
-    StoryWorld,
-    WorldAction,
-    WorldAmbiance,
-    WorldMessages,
-    WorldRoom,
-    WorldState,
-    WorldStateCategories,
-)
+from .world import (DumpablePoint, DumpableReverb, ObjectTypes, RoomExit,
+                    RoomObject, RoomObjectClass, RoomObjectTypes, StoryWorld,
+                    WorldAction, WorldAmbiance, WorldMessages, WorldRoom,
+                    WorldState, WorldStateCategories)
 
 __all__: List[str] = ["ObjectTypes"]
 __all__.extend(

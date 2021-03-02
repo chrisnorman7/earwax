@@ -3,18 +3,8 @@
 from enum import Enum
 from pathlib import Path
 from random import uniform
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Generic,
-    List,
-    Optional,
-    Tuple,
-    TypeVar,
-    cast,
-)
+from typing import (TYPE_CHECKING, Any, Callable, Dict, Generic, List,
+                    Optional, Tuple, TypeVar, cast)
 
 from attr import Factory, attrib, attrs
 from pyglet.clock import schedule_once, unschedule

@@ -4,16 +4,8 @@ from inspect import isgenerator
 from typing import Any, Dict, Iterator, List
 
 from earwax import Game
-from earwax.story import (
-    DumpablePoint,
-    RoomExit,
-    RoomObject,
-    StoryWorld,
-    WorldAction,
-    WorldAmbiance,
-    WorldMessages,
-    WorldRoom,
-)
+from earwax.story import (DumpablePoint, RoomExit, RoomObject, StoryWorld,
+                          WorldAction, WorldAmbiance, WorldMessages, WorldRoom)
 
 
 def test_init(game: Game) -> None:

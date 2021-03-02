@@ -10,13 +10,8 @@ from warnings import warn
 from pyglet.input import Joystick
 from pyglet.window import Window, key
 
-from earwax import (
-    Game,
-    Level,
-    RumbleEffect,
-    RumbleSequence,
-    RumbleSequenceLine,
-)
+from earwax import (Game, Level, RumbleEffect, RumbleSequence,
+                    RumbleSequenceLine)
 from earwax.sdl import SdlError
 
 game: Game = Game(name="Rumble Example")

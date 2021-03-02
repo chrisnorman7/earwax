@@ -9,38 +9,14 @@ from _pytest.fixtures import FixtureRequest
 from cryptography.fernet import Fernet
 from pyglet.window import Window
 from pytest import fixture
-from synthizer import (
-    Context,
-    GlobalFdnReverb,
-    LoggingBackend,
-    LogLevel,
-    StreamingGenerator,
-    configure_logging_backend,
-    initialized,
-    set_log_level,
-)
+from synthizer import (Context, GlobalFdnReverb, LoggingBackend, LogLevel,
+                       StreamingGenerator, configure_logging_backend,
+                       initialized, set_log_level)
 
-from earwax import (
-    ActionMap,
-    Box,
-    BoxLevel,
-    BufferCache,
-    DialogueTree,
-    Door,
-    Editor,
-    Game,
-    GameBoard,
-    Level,
-    MapEditor,
-    MapEditorContext,
-    Menu,
-    NetworkConnection,
-    Point,
-    Sound,
-    SoundManager,
-    Track,
-    TrackTypes,
-)
+from earwax import (ActionMap, Box, BoxLevel, BufferCache, DialogueTree, Door,
+                    Editor, Game, GameBoard, Level, MapEditor,
+                    MapEditorContext, Menu, NetworkConnection, Point, Sound,
+                    SoundManager, Track, TrackTypes)
 from earwax.cmd.constants import scripts_directory
 from earwax.cmd.project_credit import ProjectCredit
 

@@ -4,12 +4,8 @@ from argparse import Namespace
 from pathlib import Path
 
 from ...configuration import EarwaxConfig
-from ..constants import (
-    maps_directory,
-    options_path,
-    project_filename,
-    scripts_directory,
-)
+from ..constants import (maps_directory, options_path, project_filename,
+                         scripts_directory)
 from ..project import Project
 
 

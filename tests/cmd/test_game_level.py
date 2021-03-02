@@ -2,13 +2,8 @@
 
 from typing import Any, Dict
 
-from earwax.cmd.game_level import (
-    BoxLevelData,
-    GameLevel,
-    GameLevelScript,
-    LevelData,
-    Trigger,
-)
+from earwax.cmd.game_level import (BoxLevelData, GameLevel, GameLevelScript,
+                                   LevelData, Trigger)
 
 
 def test_init() -> None:

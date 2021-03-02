@@ -3,12 +3,8 @@
 from datetime import timedelta
 from typing import List
 
-from earwax.utils import (
-    english_list,
-    format_timedelta,
-    nearest_square,
-    pluralise,
-)
+from earwax.utils import (english_list, format_timedelta, nearest_square,
+                          pluralise)
 
 
 def test_nearest_square() -> None:

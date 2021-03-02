@@ -6,13 +6,8 @@ from time import sleep
 from pyglet.clock import schedule_once
 from pyglet.window import Window
 from pytest import raises
-from synthizer import (
-    Buffer,
-    BufferGenerator,
-    Context,
-    DirectSource,
-    StreamingGenerator,
-)
+from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
+                       StreamingGenerator)
 
 from earwax import AlreadyDestroyed, BufferCache, NoCache, Sound, SoundManager
 

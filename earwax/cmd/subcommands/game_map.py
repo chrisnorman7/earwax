@@ -3,8 +3,9 @@
 from argparse import Namespace
 from pathlib import Path
 
-from earwax import Game, MapEditor
 from pyglet.window import Window
+
+from earwax import Game, MapEditor
 
 from ...mapping.map_editor import LevelMap
 

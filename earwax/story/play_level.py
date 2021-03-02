@@ -16,18 +16,9 @@ from ..sound import AlreadyDestroyed, Sound
 from ..track import Track, TrackTypes
 from ..types import NoneGenerator
 from ..yaml import CDumper, dump
-from .world import (
-    DumpablePoint,
-    ObjectTypes,
-    RoomExit,
-    RoomObject,
-    StoryWorld,
-    WorldAction,
-    WorldAmbiance,
-    WorldRoom,
-    WorldState,
-    WorldStateCategories,
-)
+from .world import (DumpablePoint, ObjectTypes, RoomExit, RoomObject,
+                    StoryWorld, WorldAction, WorldAmbiance, WorldRoom,
+                    WorldState, WorldStateCategories)
 
 if TYPE_CHECKING:
     from synthizer import GlobalFdnReverb

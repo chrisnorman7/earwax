@@ -12,16 +12,8 @@ from pyglet.window import Window
 from yaml.error import YAMLError
 
 from ...game import Game
-from ...story import (
-    EditLevel,
-    RoomExit,
-    RoomObject,
-    StoryContext,
-    StoryWorld,
-    WorldAction,
-    WorldAmbiance,
-    WorldRoom,
-)
+from ...story import (EditLevel, RoomExit, RoomObject, StoryContext,
+                      StoryWorld, WorldAction, WorldAmbiance, WorldRoom)
 
 code: str = '''"""{{ world.name }}.
 

@@ -5,16 +5,7 @@ from enum import Enum
 from inspect import isclass
 from pathlib import Path
 from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    TextIO,
-    Type,
-    Union,
-)
+    TYPE_CHECKING, Any, Dict, Iterable, List, Optional, TextIO, Type, Union)
 
 from attr import Attribute, attrs
 from pyglet.event import EventDispatcher

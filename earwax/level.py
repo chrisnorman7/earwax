@@ -5,9 +5,9 @@ from typing import (TYPE_CHECKING, Any, Callable, Dict, Generator, List,
                     Optional, cast)
 
 from attr import Factory, attrib, attrs
+from pyglet.clock import schedule_once
 
 from .action_map import ActionMap
-from pyglet.clock import schedule_once
 from .sound import AlreadyDestroyed, Sound, SoundManager
 from .types import EventType
 

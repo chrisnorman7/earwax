@@ -3,16 +3,8 @@
 from concurrent.futures import Executor
 from pathlib import Path
 from random import choice
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    Iterator,
-    List,
-    Optional,
-    Union,
-)
+from typing import (Any, Callable, Dict, Generator, Iterator, List, Optional,
+                    Union)
 
 from attr import Factory, attrib, attrs
 
@@ -21,15 +13,9 @@ from .utils import random_file as _random_file
 try:
     from synthizer import Buffer, BufferGenerator, Context, DirectSource
     from synthizer import Generator as SynthizerGenerator
-    from synthizer import (
-        GlobalFdnReverb,
-        PannedSource,
-        PannerStrategy,
-        Source,
-        Source3D,
-        StreamingGenerator,
-        SynthizerError,
-    )
+    from synthizer import (GlobalFdnReverb, PannedSource, PannerStrategy,
+                           Source, Source3D, StreamingGenerator,
+                           SynthizerError)
 except ModuleNotFoundError:
     (
         Buffer,

@@ -12,22 +12,8 @@ from typing import List
 from pyglet.window import Window, key
 from synthizer import PannerStrategy
 
-from earwax import (
-    ActionMenu,
-    Ambiance,
-    Box,
-    BoxLevel,
-    BoxTypes,
-    Credit,
-    Door,
-    Game,
-    Level,
-    Menu,
-    Point,
-    Reverb,
-    Track,
-    TrackTypes,
-)
+from earwax import (ActionMenu, Ambiance, Box, BoxLevel, BoxTypes, Credit,
+                    Door, Game, Level, Menu, Point, Reverb, Track, TrackTypes)
 
 sounds_directory: Path = Path("sounds")
 wall_sound: Path = sounds_directory / "collide.wav"

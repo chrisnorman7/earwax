@@ -5,19 +5,8 @@ from inspect import isgenerator
 from logging import Logger, getLogger
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    Iterable,
-    Iterator,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    cast,
-)
+from typing import (Any, Callable, Dict, Generator, Iterable, Iterator, List,
+                    Optional, Tuple, Type, cast)
 from warnings import warn
 
 from attr import Factory, attrib, attrs
@@ -41,13 +30,8 @@ except ModuleNotFoundError:
     detect_screen_reader, load, unload = (None, None, None)
 
 try:
-    from synthizer import (
-        Context,
-        Event,
-        FinishedEvent,
-        LoopedEvent,
-        initialized,
-    )
+    from synthizer import (Context, Event, FinishedEvent, LoopedEvent,
+                           initialized)
 except ModuleNotFoundError:
     Context, Event, FinishedEvent, LoopedEvent, initialized = (
         object,
@@ -65,11 +49,8 @@ from .level import Level
 from .mixins import RegisterEventMixin
 from .sound import SoundManager
 from .speech import tts
-from .types import (
-    ActionListType,
-    JoyButtonReleaseGeneratorDictType,
-    ReleaseGeneratorDictType,
-)
+from .types import (ActionListType, JoyButtonReleaseGeneratorDictType,
+                    ReleaseGeneratorDictType)
 
 NoneType: Type[None] = type(None)
 

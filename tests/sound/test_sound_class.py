@@ -4,18 +4,9 @@ from pathlib import Path
 from time import sleep
 
 from pytest import raises
-from synthizer import (
-    Buffer,
-    BufferGenerator,
-    Context,
-    DirectSource,
-    Generator,
-    GlobalFdnReverb,
-    PannedSource,
-    PannerStrategy,
-    Source3D,
-    StreamingGenerator,
-)
+from synthizer import (Buffer, BufferGenerator, Context, DirectSource,
+                       Generator, GlobalFdnReverb, PannedSource,
+                       PannerStrategy, Source3D, StreamingGenerator)
 
 from earwax import AlreadyDestroyed, BufferCache, Point, Sound, SoundManager
 

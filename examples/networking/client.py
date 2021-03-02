@@ -2,14 +2,8 @@
 
 from pyglet.window import Window, key
 
-from earwax import (
-    AlreadyConnected,
-    AlreadyConnecting,
-    ConnectionStates,
-    Game,
-    Level,
-    NetworkConnection,
-)
+from earwax import (AlreadyConnected, AlreadyConnecting, ConnectionStates,
+                    Game, Level, NetworkConnection)
 
 game: Game = Game(name="Networking Test")
 window: Window = Window(caption="Networking Test")

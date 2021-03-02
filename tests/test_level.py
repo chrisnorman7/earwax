@@ -8,19 +8,8 @@ from pyglet.window import Window, key
 from pytest import raises
 from synthizer import Context, DirectSource, Source3D, StreamingGenerator
 
-from earwax import (
-    Action,
-    AlreadyDestroyed,
-    Ambiance,
-    Game,
-    IntroLevel,
-    Level,
-    Point,
-    Sound,
-    SoundManager,
-    Track,
-    TrackTypes,
-)
+from earwax import (Action, AlreadyDestroyed, Ambiance, Game, IntroLevel,
+                    Level, Point, Sound, SoundManager, Track, TrackTypes)
 
 
 class OnCoverWorks(Exception):

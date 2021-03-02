@@ -10,16 +10,8 @@ from pyglet.window import Window, key
 from pytest import raises
 from synthizer import Context
 
-from earwax import (
-    ActionMenu,
-    Credit,
-    Game,
-    GameNotRunning,
-    InputModes,
-    Level,
-    Menu,
-    SoundManager,
-)
+from earwax import (ActionMenu, Credit, Game, GameNotRunning, InputModes,
+                    Level, Menu, SoundManager)
 
 
 class PretendDevice:

@@ -7,16 +7,9 @@ from pyglet.window import Window, key
 from pytest import raises
 
 from earwax import BoxTypes, Editor, Game, MapEditor, Point
-from earwax.mapping.map_editor import (
-    AnchorPoints,
-    BoxPoint,
-    BoxTemplate,
-    InvalidLabel,
-    LevelMap,
-    MapEditorBox,
-    MapEditorContext,
-    valid_label,
-)
+from earwax.mapping.map_editor import (AnchorPoints, BoxPoint, BoxTemplate,
+                                       InvalidLabel, LevelMap, MapEditorBox,
+                                       MapEditorContext, valid_label)
 
 
 def test_valid_label() -> None:

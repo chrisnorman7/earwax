@@ -3,20 +3,12 @@
 from math import dist
 from typing import Callable, List, Optional
 
-from earwax import (
-    Box,
-    BoxBounds,
-    BoxLevel,
-    BoxTypes,
-    CurrentBox,
-    Door,
-    Game,
-    NearestBox,
-    Point,
-    Portal,
-)
 from pytest import raises
 from synthizer import GlobalFdnReverb
+
+from earwax import (
+    Box, BoxBounds, BoxLevel, BoxTypes, CurrentBox, Door, Game, NearestBox,
+    Point, Portal)
 
 
 class CollideWorks(Exception):
