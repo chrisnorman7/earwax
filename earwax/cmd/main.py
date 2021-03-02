@@ -29,6 +29,7 @@ from logging import _nameToLevel, basicConfig
 from pathlib import Path
 from typing import Callable, Type
 
+from .subcommands.call_response_tree import edit_crt, new_crt
 from .subcommands.configure_earwax import configure_earwax
 from .subcommands.game import new_game
 from .subcommands.game_map import edit_map, new_map
@@ -252,6 +253,34 @@ edit_map_parser: ArgumentParser = subcommand(
 
 edit_map_parser.add_argument(
     "filename", type=Path, help="The map file to edit"
+)
+
+crt_parser: ArgumentParser = commands.add_parser(
+    "crt", description="Create or edit call response trees."
+)
+
+crt_subcommands: _SubParsersAction = add_subcommands(crt_parser)
+
+new_crt_parser: ArgumentParser = subcommand(
+    "new",
+    new_crt,
+    crt_subcommands,
+    description="Create a new call response tree.",
+)
+
+new_crt_parser.add_argument(
+    "filename", help="The file where the new call response tree will be saved"
+)
+
+edit_crt_parser: ArgumentParser = subcommand(
+    "edit",
+    edit_crt,
+    crt_subcommands,
+    description="Edit an existing call response tree.",
+)
+
+edit_crt_parser.add_argument(
+    "filename", type=Path, help="The call response tree file to edit"
 )
 
 
