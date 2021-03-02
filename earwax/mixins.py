@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Iterable,
     List,
     Optional,
     TextIO,
@@ -15,7 +16,7 @@ from typing import (
     Union,
 )
 
-from attr import attrs
+from attr import Attribute, attrs
 from pyglet.event import EventDispatcher
 from typing_inspect import get_args, get_origin, is_union_type
 
@@ -200,7 +201,20 @@ class DumpLoadMixin:
         """Dump this instance as a dictionary."""
         cls: Type[DumpLoadMixin] = type(self)
         dump_value: Dict[str, Any] = {}
-        for name, type_ in cls.__annotations__.items():
+        name: Union[Attribute, str]
+        items: Iterable[Union[Attribute, str]] = getattr(
+            self, "__attrs_attrs__", self.__annotations__.keys()
+        )
+        for name in items:
+            type_: Type
+            if isinstance(name, Attribute):
+                if name.type is not None:
+                    type_ = name.type
+                else:
+                    type_ = self.__annotations__[name.name]
+                name = name.name
+            else:
+                type_ = self.__annotations__[name]
             if name.startswith("_"):
                 continue
             if (
@@ -292,9 +306,9 @@ class DumpLoadMixin:
         """Load and return an instance from the provided data.
 
         It is worth noting that only keys that are also found in the
-        ``__annotations__`` dictionary, and not found in the
-        ``__excluded_attribute_names__`` list will be loaded. All others are
-        ignored.
+        ``__attrs_attrs__`` list, or ``__annotations__`` dictionary, and not
+        found in the ``__excluded_attribute_names__`` list will be loaded. All
+        others are ignored.
 
         :param data: The data to load from.
 
@@ -308,7 +322,20 @@ class DumpLoadMixin:
             )
         data = data.get(cls.__value_key__, {})
         kwargs: Dict[str, Any] = {}
-        for name, type_ in cls.__annotations__.items():
+        name: Union[Attribute, str]
+        items: Iterable[Union[Attribute, str]] = getattr(
+            cls, "__attrs_attrs__", cls.__annotations__.keys()
+        )
+        for name in items:
+            type_: Type
+            if isinstance(name, Attribute):
+                if name.type is not None:
+                    type_ = name.type
+                else:
+                    type_ = cls.__annotations__[name.name]
+                name = name.name
+            else:
+                type_ = cls.__annotations__[name]
             if name in data:
                 if (
                     cls.__excluded_attribute_names__ is not None
