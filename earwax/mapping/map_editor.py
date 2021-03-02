@@ -6,13 +6,13 @@ from pathlib import Path
 from typing import Callable, Dict, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
+from pyglet.window import key
 from shortuuid import uuid
 
 from ..editor import Editor
 from ..menus import Menu
 from ..mixins import DumpLoadMixin
 from ..point import Point
-from ..pyglet import key
 from .box import Box, BoxBounds, BoxTypes
 from .box_level import BoxLevel
 

@@ -3,15 +3,10 @@
 from typing import Optional
 
 from attr import attrs
+from pyglet.window import key
+from pyperclip import copy, paste
 
 from .hat_directions import DOWN, LEFT, RIGHT, UP
-from .pyglet import key
-
-try:
-    from pyperclip import copy, paste
-except ModuleNotFoundError:
-    copy, paste = (None, None)
-
 from .level import Level
 from .mixins import DismissibleMixin
 
@@ -75,16 +70,12 @@ class Editor(Level, DismissibleMixin):
     def cut(self) -> None:
         """Cut the contents of this editor to the clipboard."""
         self.copy()
-        if copy is not None:
-            self.text = ""
-            self.beginning_of_line()
+        self.text = ""
+        self.beginning_of_line()
 
     def copy(self) -> None:
         """Copy the contents of this editor to the clipboard."""
-        if copy is None:
-            self.game.output("Pyperclip is not installed.")
-        else:
-            copy(self.text)
+        copy(self.text)
 
     def paste(self) -> None:
         """Paste the contents of the clipboard into this editor."""

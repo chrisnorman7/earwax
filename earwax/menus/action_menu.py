@@ -3,11 +3,11 @@
 from typing import List, Optional, Tuple
 
 from attr import attrib, attrs
+from pyglet.window import key, mouse
 
 from ..action import Action
 from ..hat_directions import DEFAULT, DOWN, LEFT, RIGHT, UP
 from ..input_modes import InputModes
-from ..pyglet import key, mouse
 from ..types import ActionFunctionType, OptionalGenerator
 from ..utils import english_list
 from .menu import Menu

@@ -6,9 +6,9 @@ from socket import socket as _socket
 from typing import List, Optional
 
 from attr import Factory, attrib, attrs
+from pyglet.clock import schedule, unschedule
 
 from .mixins import RegisterEventMixin
-from .pyglet import schedule, unschedule
 
 
 class NetworkingConnectionError(Exception):

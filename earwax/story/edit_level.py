@@ -6,13 +6,13 @@ from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 from attr import Attribute, Factory, attrib, attrs
+from pyglet.window import key
 
 from ..action import Action
 from ..editor import Editor
 from ..game import Game
 from ..level import Level
 from ..menus import ActionMenu, Menu, ReverbEditor
-from ..pyglet import key
 from ..types import (
     ActionFunctionType,
     NoneGenerator,

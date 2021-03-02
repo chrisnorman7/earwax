@@ -17,8 +17,7 @@ from typing import (
 )
 
 from attr import Factory, attrib, attrs
-
-from ..pyglet import schedule_once, unschedule
+from pyglet.clock import schedule_once, unschedule
 
 try:
     from synthizer import GlobalFdnReverb

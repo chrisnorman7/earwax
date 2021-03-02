@@ -3,8 +3,7 @@
 from typing import Callable
 
 from attr import Factory, attrib, attrs
-
-from .pyglet import schedule_once, unschedule
+from pyglet.clock import schedule_once, unschedule
 
 IntervalFunction = Callable[[], float]
 TaskFunction = Callable[[float], None]

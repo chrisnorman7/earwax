@@ -25,9 +25,10 @@ try:
 except ModuleNotFoundError:
     Context, GlobalFdnReverb = (object, object)
 
+from pyglet.window import key
+
 from ..level import Level
 from ..point import Point, PointDirections
-from ..pyglet import key
 from ..walking_directions import walking_directions
 from .box import Box
 from .door import Door

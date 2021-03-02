@@ -4,9 +4,9 @@ from enum import Enum
 from typing import Callable, Generator, List, Optional
 
 from attr import Factory, attrib, attrs
+from pyglet.window import key
 
 from ..editor import Editor
-from ..pyglet import key
 from ..reverb import Reverb
 from .menu import Menu, MenuItem
 

@@ -7,13 +7,13 @@ from time import time
 from typing import TYPE_CHECKING, Callable, List, Optional
 
 from attr import Factory, attrib, attrs
+from pyglet.window import key
 
 from ..action import ActionFunctionType, OptionalGenerator
 from ..credit import Credit
 from ..hat_directions import DOWN, LEFT, RIGHT, UP
 from ..level import Level
 from ..mixins import DismissibleMixin, TitleMixin
-from ..pyglet import key
 from ..sound import Sound
 from ..types import NoneGenerator
 from .menu_item import MenuItem

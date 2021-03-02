@@ -21,21 +21,16 @@ from typing import (
 from warnings import warn
 
 from attr import Factory, attrib, attrs
+from pyglet import app
+from pyglet.clock import schedule_interval, unschedule
+from pyglet.event import EVENT_HANDLED, EVENT_UNHANDLED
+from pyglet.input import Joystick, get_joysticks
+from pyglet.resource import get_settings_path
+from pyglet.window import Window
 
 from .credit import Credit
 from .input_modes import InputModes
 from .menus import ActionMenu, Menu
-from .pyglet import (
-    EVENT_HANDLED,
-    EVENT_UNHANDLED,
-    Joystick,
-    Window,
-    app,
-    get_joysticks,
-    get_settings_path,
-    schedule_interval,
-    unschedule,
-)
 from .sound import AlreadyDestroyed, BufferCache, Sound
 from .task import IntervalFunction, Task, TaskFunction
 from .types import EventType, NoneGenerator

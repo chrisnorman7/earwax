@@ -8,10 +8,10 @@ from shutil import copy
 from typing import List, Optional, Union
 
 from jinja2 import Environment, Template
+from pyglet.window import Window
 from yaml.error import YAMLError
 
 from ...game import Game
-from ...pyglet import Window
 from ...story import (
     EditLevel,
     RoomExit,

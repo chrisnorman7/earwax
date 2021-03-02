@@ -16,9 +16,9 @@ from typing import (
 )
 
 from attr import attrs
+from pyglet.event import EventDispatcher
 from typing_inspect import get_args, get_origin, is_union_type
 
-from .pyglet import EventDispatcher
 from .yaml import CDumper, CLoader, dump, load
 
 if TYPE_CHECKING:

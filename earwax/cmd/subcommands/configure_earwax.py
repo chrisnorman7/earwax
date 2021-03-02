@@ -3,8 +3,9 @@
 from argparse import Namespace
 from pathlib import Path
 
+from pyglet.window import Window
+
 from ... import ConfigMenu, Game
-from ...pyglet import Window
 from ..constants import options_path
 
 

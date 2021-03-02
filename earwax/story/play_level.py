@@ -4,13 +4,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from attr import Factory, attrib, attrs
+from pyglet.input import Joystick
+from pyglet.window import key
 
 from .. import hat_directions
 from ..ambiance import Ambiance
 from ..level import Level
 from ..menus import Menu
 from ..point import Point
-from ..pyglet import Joystick, key
 from ..sound import AlreadyDestroyed, Sound
 from ..track import Track, TrackTypes
 from ..types import NoneGenerator

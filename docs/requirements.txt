@@ -8,3 +8,4 @@ shortuuid
 cryptography
 msgpack
 pyglet
+pyperclip

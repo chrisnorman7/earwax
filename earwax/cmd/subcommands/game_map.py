@@ -4,9 +4,9 @@ from argparse import Namespace
 from pathlib import Path
 
 from earwax import Game, MapEditor
+from pyglet.window import Window
 
 from ...mapping.map_editor import LevelMap
-from ...pyglet import Window
 
 
 def new_map(args: Namespace) -> None:

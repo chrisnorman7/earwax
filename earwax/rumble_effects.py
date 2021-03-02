@@ -12,9 +12,9 @@ from math import floor
 from typing import TYPE_CHECKING, Generator, List, Optional
 
 from attr import attrs
+from pyglet.input import Joystick
 
 from .promises.staggered_promise import StaggeredPromise
-from .pyglet import Joystick
 
 if TYPE_CHECKING:
     from .game import Game
