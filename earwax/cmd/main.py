@@ -17,19 +17,29 @@ If you want to create more subcommands, add them in the subcommands directory,
 then register them with the :meth:`subcommand` method.
 """
 
-from argparse import (ArgumentDefaultsHelpFormatter, ArgumentParser, FileType,
-                      HelpFormatter, Namespace, _SubParsersAction)
+from argparse import (
+    ArgumentDefaultsHelpFormatter,
+    ArgumentParser,
+    FileType,
+    HelpFormatter,
+    Namespace,
+    _SubParsersAction,
+)
 from logging import _nameToLevel, basicConfig
 from pathlib import Path
 from typing import Callable, Type
 
-from .subcommands.call_response_tree import edit_crt, new_crt
 from .subcommands.configure_earwax import configure_earwax
+from .subcommands.conversation_tree import edit_convo, new_convo
 from .subcommands.game import new_game
 from .subcommands.game_map import edit_map, new_map
 from .subcommands.init_project import init_project
-from .subcommands.story import (build_story, create_story, edit_story,
-                                play_story)
+from .subcommands.story import (
+    build_story,
+    create_story,
+    edit_story,
+    play_story,
+)
 from .subcommands.vault import compile_vault, new_vault
 
 SubcommandFunction = Callable[[Namespace], None]
@@ -245,32 +255,32 @@ edit_map_parser.add_argument(
     "filename", type=Path, help="The map file to edit"
 )
 
-crt_parser: ArgumentParser = commands.add_parser(
-    "crt", description="Create or edit call response trees."
+convo_parser: ArgumentParser = commands.add_parser(
+    "convo", description="Create or edit conversation trees."
 )
 
-crt_subcommands: _SubParsersAction = add_subcommands(crt_parser)
+convo_subcommands: _SubParsersAction = add_subcommands(convo_parser)
 
-new_crt_parser: ArgumentParser = subcommand(
+new_convo_parser: ArgumentParser = subcommand(
     "new",
-    new_crt,
-    crt_subcommands,
-    description="Create a new call response tree.",
+    new_convo,
+    convo_subcommands,
+    description="Create a new conversation tree.",
 )
 
-new_crt_parser.add_argument(
-    "filename", help="The file where the new call response tree will be saved"
+new_convo_parser.add_argument(
+    "filename", help="The file where the new conversation tree will be saved"
 )
 
-edit_crt_parser: ArgumentParser = subcommand(
+edit_convo_parser: ArgumentParser = subcommand(
     "edit",
-    edit_crt,
-    crt_subcommands,
-    description="Edit an existing call response tree.",
+    edit_convo,
+    convo_subcommands,
+    description="Edit an existing conversation tree.",
 )
 
-edit_crt_parser.add_argument(
-    "filename", type=Path, help="The call response tree file to edit"
+edit_convo_parser.add_argument(
+    "filename", type=Path, help="The conversation tree file to edit"
 )
 
 

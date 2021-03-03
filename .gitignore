@@ -131,4 +131,4 @@ AUTHORS
 ChangeLog
 docs/source/api/
 *.yaml
-*.crt
+*.convo
