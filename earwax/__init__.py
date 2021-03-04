@@ -52,7 +52,7 @@ from .configuration import EarwaxConfig
 from .credit import Credit
 from .dialogue_tree import DialogueLine, DialogueTree
 from .die import Die
-from .editor import Editor
+from .editor import Editor, TextValidator
 from .event_matcher import EventMatcher
 from .game import Game, GameNotRunning
 from .game_board import GameBoard, NoSuchTile

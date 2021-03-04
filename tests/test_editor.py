@@ -1,10 +1,12 @@
 """Test editors."""
 
+import re
+from typing import Optional
+
+from earwax import Editor, Game, TextValidator
 from pyglet.clock import schedule_once
 from pyglet.window import Window, key
 from pytest import raises
-
-from earwax import Editor, Game
 
 
 class Works(Exception):
@@ -107,3 +109,64 @@ def test_hat_submits(editor: Editor) -> None:
     assert editor.vertical_position == -1
     with raises(Works):
         editor.hat_up()
+
+
+def test_validator_class() -> None:
+    """Test the EditorValidtor class initialises properly."""
+
+    def f(text: str) -> Optional[str]:
+        return None
+
+    v: TextValidator = TextValidator(f)
+    assert v.func is f
+
+
+def test_validate(game: Game, window: Window) -> None:
+    """Ensure that text is validated properly."""
+    e: Editor = Editor(game, validator=TextValidator.not_empty())
+
+    @e.event
+    def on_submit(text: str) -> None:
+        e.text = "Worked."
+        window.close()
+
+    def f(dt: float) -> None:
+        e.submit()
+        assert e.text == ""
+        e.text = "Testing"
+        e.submit()
+
+    @game.event
+    def before_run() -> None:
+        schedule_once(f, 0.2)
+
+    game.run(window, initial_level=e)
+    assert e.text == "Worked."
+
+
+def test_regexp() -> None:
+    """Test the regexp constructor."""
+    v: TextValidator = TextValidator.regexp(re.compile("1234"))
+    assert v.func("1234") is None
+    assert v.func("5678") == "Invalid value: 5678."
+
+
+def test_not_empty() -> None:
+    """Test the not_empty constructor."""
+    v: TextValidator = TextValidator.not_empty()
+    assert v.func("") == "You must supply a value."
+    assert v.func("Hello world.") is None
+
+
+def test_float() -> None:
+    """Test the float constructor."""
+    v: TextValidator = TextValidator.float()
+    assert v.func("0.5") is None
+    assert v.func("test") == "Invalid decimal: test."
+
+
+def test_int() -> None:
+    """Test the int constructor."""
+    v: TextValidator = TextValidator.int()
+    assert v.func("1234") is None
+    assert v.func("test") == "Invalid number: test."

@@ -1,6 +1,7 @@
 """Provides the Editor class."""
 
-from typing import Optional
+from re import Pattern
+from typing import Callable, Optional, Type, TypeVar
 
 from attr import attrs
 from pyglet.window import key
@@ -9,6 +10,99 @@ from pyperclip import copy, paste
 from .hat_directions import DOWN, LEFT, RIGHT, UP
 from .level import Level
 from .mixins import DismissibleMixin
+
+T = TypeVar("T", bound="EditorValidator")
+
+
+@attrs(auto_attribs=True)
+class TextValidator:
+    """A class to validate the text entered into editors.
+
+    This class takes a function which must either return ``None`` to indicate
+    success, or a message which will be output to the player.
+
+    :param ~earwax.EditorValidator.func: The function to validate the text
+        with.
+    """
+
+    func: Callable[[str], Optional[str]]
+
+    @classmethod
+    def regexp(
+        cls: Type[T], pattern: Pattern, message: str = "Invalid value: {}."
+    ) -> T:
+        """Make a regexp validator.
+
+        :param pattern: The regular expression which the text in the editor
+            must match.
+
+        :param message: The message which will be returned if no match is
+            found.
+        """
+
+        def inner(text: str) -> Optional[str]:
+            """Check the given text against a regular expression."""
+            if pattern.match(text) is None:
+                return message.format(text)
+            return None
+
+        return cls(inner)
+
+    @classmethod
+    def not_empty(
+        cls: Type[T], message: str = "You must supply a value."
+    ) -> T:
+        """Make a validator that does not except an empty string.
+
+        :param message: The message which will be shown if an empty string is
+            provided.
+        """
+
+        def inner(text: str) -> Optional[str]:
+            if not text:
+                return message.format(text)
+            return None
+
+        return cls(inner)
+
+    @classmethod
+    def float(cls: Type[T], message: str = "Invalid decimal: {}.") -> T:
+        """Return a validator which ensures text can be cast to a float.
+
+        :param message: The message which will be shown if an invalid float is
+            given.
+        """
+
+        def inner(text: str) -> Optional[str]:
+            """Ensure the given text can be cast to a float."""
+            try:
+                float(text)
+                return None
+            except ValueError:
+                return message.format(text)
+
+        return cls(inner)
+
+    @classmethod
+    def int(
+        cls: Type[T], message: str = "Invalid number: {}.", base: int = 10
+    ) -> T:
+        """Return a validator which ensures text can be cast to an integer.
+
+        :param message: The message which will be returned if the cast fails.
+
+        :param base: The base for to use when casting the text.
+        """
+
+        def inner(text: str) -> Optional[str]:
+            """Ensure the given text can be cast to an int."""
+            try:
+                int(text, base=base)
+                return None
+            except ValueError:
+                return message.format(text)
+
+        return cls(inner)
 
 
 @attrs(auto_attribs=True)
@@ -28,20 +122,23 @@ class Editor(Level, DismissibleMixin):
 
         game.push_level(e)
 
-    :ivar ~earwax.editor.EditorBase.func: The function which should be called
-        when pressing enter in an edit field.
-
     :ivar ~earwax.Editor.text: The text which can be edited by this object.
 
     :ivar ~earwax.Editor.cursor_position: The position of the cursor.
 
     :ivar ~earwax.Editor.vertical_position: The position in the alphabet of the
         hat.
+
+    :ivar ~earwax.Editor.validator: Used to validate the text.
+
+            The text will be validated before the
+            :meth:`~earwax.Editor.on_submit` event is dispatched.
     """
 
     text: str = ""
     cursor_position: Optional[int] = None
     vertical_position: Optional[int] = None
+    validator: Optional[TextValidator] = None
 
     def __attrs_post_init__(self) -> None:
         """Initialise the editor."""
@@ -88,10 +185,15 @@ class Editor(Level, DismissibleMixin):
         """Submit :attr:`self.text <earwax.Editor.text>`.
 
         Dispatch the :attr:`~earwax.Editor.on_submit` event with the contents
-        of :attr:`self.text <earwax.Editor.text>`.
+        of :attr:`self.text <earwax.Editor.text>` after checking the
+        :attr:`~earwax.Editor.validator` is happy.
 
         By default, this method is called when the enter key is pressed.
         """
+        if self.validator is not None:
+            message: Optional[str] = self.validator.func(self.text)
+            if message is not None:
+                return self.game.output(message)
         self.dispatch_event("on_submit", self.text)
 
     def insert_text(self, text: str) -> None:
