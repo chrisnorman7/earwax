@@ -17,14 +17,8 @@ If you want to create more subcommands, add them in the subcommands directory,
 then register them with the :meth:`subcommand` method.
 """
 
-from argparse import (
-    ArgumentDefaultsHelpFormatter,
-    ArgumentParser,
-    FileType,
-    HelpFormatter,
-    Namespace,
-    _SubParsersAction,
-)
+from argparse import (ArgumentDefaultsHelpFormatter, ArgumentParser, FileType,
+                      HelpFormatter, Namespace, _SubParsersAction)
 from logging import _nameToLevel, basicConfig
 from pathlib import Path
 from typing import Callable, Type
@@ -34,12 +28,8 @@ from .subcommands.conversation_tree import edit_convo, new_convo
 from .subcommands.game import new_game
 from .subcommands.game_map import edit_map, new_map
 from .subcommands.init_project import init_project
-from .subcommands.story import (
-    build_story,
-    create_story,
-    edit_story,
-    play_story,
-)
+from .subcommands.story import (build_story, create_story, edit_story,
+                                play_story)
 from .subcommands.vault import compile_vault, new_vault
 
 SubcommandFunction = Callable[[Namespace], None]

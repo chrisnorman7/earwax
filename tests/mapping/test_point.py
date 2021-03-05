@@ -1,8 +1,9 @@
 """Tests for the Point class."""
 
-from earwax import Point
 from movement_2d import coordinates_in_direction
 from pytest import raises
+
+from earwax import Point
 
 
 def test_init() -> None:

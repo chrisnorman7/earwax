@@ -3,10 +3,11 @@
 import re
 from typing import Optional
 
-from earwax import Editor, Game, TextValidator
 from pyglet.clock import schedule_once
 from pyglet.window import Window, key
 from pytest import raises
+
+from earwax import Editor, Game, TextValidator
 
 
 class Works(Exception):
