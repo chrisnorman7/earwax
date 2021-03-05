@@ -11,7 +11,7 @@ from .hat_directions import DOWN, LEFT, RIGHT, UP
 from .level import Level
 from .mixins import DismissibleMixin
 
-T = TypeVar("T", bound="EditorValidator")
+T = TypeVar("T", bound="TextValidator")
 
 
 @attrs(auto_attribs=True)
