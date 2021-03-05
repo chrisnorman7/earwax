@@ -2,10 +2,19 @@
 
 from typing import List, Optional
 
+from earwax import (
+    Box,
+    BoxBounds,
+    BoxLevel,
+    BoxTypes,
+    Door,
+    Game,
+    NotADoor,
+    Point,
+    Portal,
+    SoundManager,
+)
 from pytest import raises
-
-from earwax import (Box, BoxBounds, BoxLevel, BoxTypes, Door, Game, NotADoor,
-                    Point, Portal, SoundManager)
 
 
 def test_init(box_level: BoxLevel, game: Game, box: Box) -> None:
@@ -132,6 +141,8 @@ def test_create_row(game: Game) -> None:
 
 def test_create_row_named(game: Game) -> None:
     """Test creating a row of named rooms."""
+    first: Box
+    second: Box
     first, second = Box.create_row(
         game,
         Point(0, 0, 0),
