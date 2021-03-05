@@ -2,12 +2,14 @@
 
 from enum import Enum
 from math import dist, floor
+from random import randint
 from typing import Any, Generic, Tuple, Type, TypeVar, Union, cast
 
 from attr import attrs
 from movement_2d import angle_between, coordinates_in_direction
 
 T = TypeVar("T", float, int)
+PointType = TypeVar("PointType", bound="Point")
 
 
 class PointDirections(Enum):
@@ -40,9 +42,25 @@ class Point(Generic[T]):
     z: T
 
     @classmethod
-    def origin(cls) -> "Point[int]":
+    def origin(cls: Type[PointType]) -> "Point[int]":
         """Return ``Point(0, 0, 0)``."""
-        return cast(Type[Point[int]], cls)(0, 0, 0)
+        return cls(0, 0, 0)
+
+    @classmethod
+    def random(
+        cls: Type[PointType], a: "Point[int]", b: "Point[int]"
+    ) -> PointType:
+        """Return a random point between ``a``, and ``b``.
+
+        :param a: The first point.
+
+        :param b: The second point.
+        """
+        return cls(
+            randint(min(a.x, b.x), max(a.x, b.x)),
+            randint(min(a.y, b.y), max(a.y, b.y)),
+            randint(min(a.z, b.z), max(a.z, b.z)),
+        )
 
     @property
     def coordinates(self) -> Tuple[T, T, T]:

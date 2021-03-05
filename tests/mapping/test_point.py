@@ -1,9 +1,8 @@
 """Tests for the Point class."""
 
+from earwax import Point
 from movement_2d import coordinates_in_direction
 from pytest import raises
-
-from earwax import Point
 
 
 def test_init() -> None:
@@ -148,3 +147,14 @@ def test_origin() -> None:
     """Test the origin constructor."""
     p: Point = Point.origin()
     assert p == Point(0, 0, 0)
+
+
+def test_random() -> None:
+    """Test the random constructor."""
+    assert Point.random(Point.origin(), Point.origin()) == Point.origin()
+    a: Point[int] = Point(1, 2, 3)
+    b: Point[int] = Point(4, 5, 6)
+    p: Point[int] = Point.random(a, b)
+    assert p.x <= b.x and p.x >= a.x
+    assert p.y <= b.y and p.y >= a.y
+    assert p.z <= b.z and p.z >= a.z
