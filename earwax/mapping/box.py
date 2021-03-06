@@ -438,7 +438,7 @@ class Box(Generic[T], RegisterEventMixin):
 
     @classmethod
     def maze(
-        cls: Type[BoxType], game: "Game", grid: "ndarray"
+        cls: Type[BoxType], game: "Game", grid: "ndarray", box_height: int = 3
     ) -> Generator["Box", None, None]:
         """Return a generator containing a list of boxes.
 
@@ -450,12 +450,21 @@ class Box(Generic[T], RegisterEventMixin):
         flag: int
         for x, row in enumerate(grid):
             for y, flag in enumerate(row):
-                box_type: BoxTypes
-                if flag:
-                    box_type = BoxTypes.solid
-                else:
-                    box_type = BoxTypes.empty
-                yield Box(game, Point(x, y, 0), Point(x, y, 0), type=box_type)
+                if not flag:
+                    yield Box(
+                        game,
+                        Point(x, y, 0),
+                        Point(x, y, box_height),
+                        type=BoxTypes.empty,
+                    )
+        yield (
+            Box(
+                game,
+                Point(0, 0, 0),
+                Point(x, y, box_height),
+                type=BoxTypes.solid,
+            )
+        )
 
     @property
     def is_door(self) -> bool:

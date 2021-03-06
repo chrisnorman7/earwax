@@ -8,7 +8,7 @@ extended.
 """
 from pathlib import Path
 
-from earwax import Box, BoxLevel, BoxTypes, Game
+from earwax import Box, BoxLevel, Game
 from mazelib import Maze
 from mazelib.generate.Prims import Prims
 from pyglet.window import Window
@@ -18,18 +18,17 @@ surface_sound: Path = Path("map_demo/sounds/footsteps/corridor")
 
 if __name__ == "__main__":
     maze: Maze = Maze()
-    maze.generator = Prims(10, 10)
+    maze.generator = Prims(100, 100)
     maze.generate()
     game: Game = Game()
     level: BoxLevel = BoxLevel(game)
     box: Box
-    coordinates_set: bool = False
     for box in Box.maze(game, maze.grid):
+        box.name = "Corridor"
         level.add_box(box)
-        if box.type is BoxTypes.empty and not coordinates_set:
-            level.set_coordinates(box.start)
         box.surface_sound = surface_sound
         box.wall_sound = wall_sound
+    level.set_coordinates(level.boxes[0].start.floor())
     level.add_default_actions()
     window: Window = Window(caption="Maze")
     game.run(window, initial_level=level)
