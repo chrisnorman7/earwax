@@ -1,5 +1,5 @@
 pyglet >= 1.5.15
-synthizer >= 0.8.9
+synthizer >= 0.8.17
 cytolk >= 0.1.6
 attrs >= 20.3.0
 pyyaml >= 5.4.1
